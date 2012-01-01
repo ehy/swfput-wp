@@ -10,8 +10,13 @@ SRCS = ${PRJNAME}.php \
 
 SDIRI = mingtest
 SDIRO = mingput
-SSRCS = $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
-SBINS = $(SDIRI)/mingput.swf
+SSRCS = $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php $(SDIRI)/obj.css
+SBINS = $(SDIRI)/mingput.swf \
+	$(SDIRI)/mingput44.swf \
+	$(SDIRI)/mingput36.swf \
+	$(SDIRI)/mingput32.swf \
+	$(SDIRI)/mingput28.swf \
+	$(SDIRI)/mingput24.swf
 
 ALSO = Makefile README
 ZALL = ${SRCS} ${ALSO}
@@ -21,7 +26,7 @@ PRJSDIR = ${PRJNAME}/${SDIRO}
 PRJZIP = ${PRJNAME}.zip
 
 ZIP = zip -r -9 -v -T -X
-PHPCLI = php
+PHPCLI = php -f
 
 all: ${PRJZIP}
 
@@ -35,5 +40,26 @@ ${PRJZIP}: ${SBINS} ${ZALL}
 $(SDIRI)/mingput.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
 	$(PHPCLI) $(SDIRI)/mingput.php > $(SDIRI)/mingput.swf
 
-clean:
+$(SDIRI)/mingput44.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
+	$(PHPCLI) $(SDIRI)/mingput.php -- BH=44 > $(SDIRI)/mingput44.swf
+
+$(SDIRI)/mingput36.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
+	$(PHPCLI) $(SDIRI)/mingput.php -- BH=36 > $(SDIRI)/mingput36.swf
+
+$(SDIRI)/mingput32.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
+	$(PHPCLI) $(SDIRI)/mingput.php -- BH=32 > $(SDIRI)/mingput32.swf
+
+$(SDIRI)/mingput28.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
+	$(PHPCLI) $(SDIRI)/mingput.php -- BH=28 > $(SDIRI)/mingput28.swf
+
+$(SDIRI)/mingput24.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
+	$(PHPCLI) $(SDIRI)/mingput.php -- BH=24 > $(SDIRI)/mingput24.swf
+
+README: docs/README.gro
+	(cd docs && make) && cp -f docs/README.txt README
+
+clean-docs:
+	cd docs && make clean
+
+clean: clean-docs
 	rm -f ${PRJZIP}

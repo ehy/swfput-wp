@@ -1,1 +1,132 @@
-Real soon now.
+
+
+
+
+
+
+
+
+
+                         README for Iforge
+                  Mandelbrot Set Generator in Java
+
+
+                  Ed Hynan <freecode@verizon.net>
+
+
+
+    What is it?
+
+         Iforge  is  a Java program demonstrating the generation
+    of  Mandelbrot  set  and  Julia  set  images.   Iforge  also
+    includes  an  adaptation  of  the  program  ppmforge by John
+    Walker.  The fractal planet image generator is a  Java  port
+    of the ppmforge code.  The C program ppmforge is included in
+    the pbmplus and netpbm raster image processing utility pack-
+    ages.   For  the  netpbm  package  see http://netpbm.source-
+    forge.net/.
+
+    Building From the Source
+
+         The source directories  contain  simple  Makefiles  for
+    building the .class files.  Makefile.unix is written for GNU
+    gmake but is probably usable with no  or  few  changes  with
+    most  Unix  make  utilities.   Makefile.dos  is  written for
+    Symantec's smake, and might be a better starting  point  for
+    other DOS make utilities.
+
+         The  makefiles have a target named "zip" for generating
+    a jar archive.
+
+    Running
+
+         Iforge will run as an application or applet.  The  same
+    set  of classes are used except for the class containing the
+    entry point, which differs for  each.   The  application  is
+    invoked  via  FractalForge.class and the applet via FractAp-
+    plet.class. (The application uses one additional  class  not
+    used  by  the  application.)   The  file FractApplet.html is
+    included to help run the applet  with  Java's  appletviewer.
+    FractalForge.bat  is  a simple DOS batch file that DOS users
+    can run the application with, and FractalForge is  a  simple
+    /bin/sh  script.  Both of these scripts expect to be invoked
+    from the directory containing the class files. If the  class
+    files  are  installed in a library directory, then edit your
+    script as necessary.
+
+         The application version can save  images  in  the  .PPM
+    format.   When  run as an applet image saving menu items are
+    disabled.
+
+
+
+
+
+
+
+
+
+
+                                 -2-
+
+
+    License
+
+         This program and all files included in the distribution
+    archive  are under the GNU GPL.  See the included file COPY-
+    ING.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

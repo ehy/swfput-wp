@@ -1,16 +1,16 @@
 <?php
 /*
-Plugin Name: fortune-2.php
-Plugin URI: http://wpblog.example.org/dl/wp-plugin-fortune-2/
-Description: print `fortune` at footer (Unix hosts only)
-Version: 0.0.2
+Plugin Name: SWFlash Put
+Plugin URI: http://lucy.example.org/dl/wp-plugin-swfput-1/
+Description: add Flash player to Wordpress pages
+Version: 0.1.0
 Author: Ed Hynan
 Author URI: http://wpblog.example.org/
 License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
 */
 
 /*
- *      fortune-2.php
+ *      swfput-1.php
  *      
  *      Copyright 2011 Ed Hynan <freecode@verizon.net>
  *      
@@ -38,59 +38,50 @@ License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
 \**********************************************************************/
 
 
-// No, cannot define __autoload in a plugin; too rude (pity).
-if ( false ) {
-	function __autoload($class_name) {
-		// only try to load certain classes
-		$re = '/^Opt(Field|Section|Page|ions)_[0-9_]*$/';
-		if ( preg_match($re, $class_name) ) {
-			$f = plugin_dir_path(__FILE__).'/'.$class_name;
-			include_once $f;
+// supporting classes found in files named __CLASS__.inc.php
+// each class must define static method id_token() which returns
+// the correct int, to help avoid name clashes
+function swfput_paranoid_require_class ($cl, $rfunc = 'require_once') {
+	$id = 0xED00AA33;
+	$meth = 'id_token';
+	if ( ! class_exists($cl) ) {
+		$d = plugin_dir_path(__FILE__).'/'.$cl.'.inc.php';
+		switch ( $rfunc ) {
+			case 'require_once':
+				require_once $d;
+				break;
+			case 'require':
+				require $d;
+				break;
+			case 'include_once':
+				include_once $d;
+				break;
+			case 'include':
+				include $d;
+				break;
+			default:
+				$s = '' . $rfunc;
+				$s = sprintf('%s: what is %s?', __FUNCTION__, $s);
+				wp_die($s);
+				break;
 		}
 	}
-} else {
-	$d = plugin_dir_path(__FILE__);
-	// check if classes are declared; if they are it had better
-	// be because another plugin is using the same classes!
-	// these tests fail in a loop, or they'd be in one
-	$c1 = 'OptField_0_0_2';
-	$c2 = 'OptSection_0_0_2';
-	$c3 = 'OptPage_0_0_2';
-	$c4 = 'Options_0_0_2';
-	$evh_opt_id = 0xED00AA33;
-	if ( class_exists($c1) ) {
-		$f = $c1 . '::id_token';
-		if ( $f() !== $evh_opt_id ) {
-			wp_die('class name conflict: ' . $c1);
+	if ( method_exists($cl, $meth) ) {
+		$t = call_user_func(array($cl, $meth));
+		if ( $t !== $id ) {
+			wp_die('class name conflict: ' . $cl . ' !== ' . $id);
 		}
 	} else {
-		include_once $d.'/'.$c1.'.inc.php';
-	}
-	if ( class_exists($c2) ) {
-		$f = $c2 . '::id_token';
-		if ( $f() !== $evh_opt_id ) {
-			wp_die('class name conflict: ' . $c2);
-		}
-	} else {
-		include_once $d.'/'.$c2.'.inc.php';
-	}
-	if ( class_exists($c3) ) {
-		$f = $c3 . '::id_token';
-		if ( $f() !== $evh_opt_id ) {
-			wp_die('class name conflict: ' . $c3);
-		}
-	} else {
-		include_once $d.'/'.$c3.'.inc.php';
-	}
-	if ( class_exists($c4) ) {
-		$f = $c4 . '::id_token';
-		if ( $f() !== $evh_opt_id ) {
-			wp_die('class name conflict: ' . $c4);
-		}
-	} else {
-		include_once $d.'/'.$c4.'.inc.php';
+		wp_die('class name conflict: ' . $cl);
 	}
 }
+
+// these support classes are in separate files as they are
+// not specific to this plugin, and may be used in others
+swfput_paranoid_require_class('OptField_0_0_2');
+swfput_paranoid_require_class('OptSection_0_0_2');
+swfput_paranoid_require_class('OptPage_0_0_2');
+swfput_paranoid_require_class('Options_0_0_2');
 
 
 /**********************************************************************\
@@ -98,7 +89,7 @@ if ( false ) {
 \**********************************************************************/
 
 /**
- * for translations; stub example
+ * for translations; stub
  */
 if ( ! function_exists( '__' ) ) :
 function __ ( $text )
@@ -109,89 +100,98 @@ endif;
 
 
 /**********************************************************************\
- *  Class defs                                                        *
+ *  Class defs: main plugin. widget, and support classes              *
 \**********************************************************************/
 
 
 /**
- * class handling 'fortunes'
+ * class providing flash video for WP pages
  */
-if ( ! class_exists('Fortune2_evh') ) :
-class Fortune2_evh {
-	// most of these statics could be const in php 5.3
+if ( ! class_exists('SWF_put_evh') ) :
+class SWF_put_evh {
+	// most of these static properties would be const in php 5.3, but
+	// this is written for 5.2 -- the earliest ver. available here
+
 	// the widget class name
-	public static $fortune_widget = 'Fortune2_widget_evh';
-	// constant defaults for fortune program
-	//public static $deffortune = '/usr/games/fortune';
-	public static $deffortune = 'fortune';
-	public static $deffortarg = ' -s ';
+	public static $swfput_widget = 'SWF_put_widget_evh';
+	// parameter helper class name
+	public static $swfput_params = 'SWF_params_evh';
 	
+	// identifier for settings page
+	public static $settings_page_id = 'swfput1_settings_page';
+	
+	// option group name in the WP opt db
+	public static $opt_group  = '_evh_swfput1_opt_grp';
+	// verbose (helpful?) section descriptions?
+	public static $optverbose = '_evh_swfput1_verbose';
+	// WP option names/keys -- note prefix '_evh_'
+	public static $optdispmsg = '_evh_swfput1_dmsg';
+	public static $optdispwdg = '_evh_swfput1_dwdg';
+	public static $optdisphdr = '_evh_swfput1_dhdr';
+	// delete options on uninstall
+	public static $optdelopts = '_evh_swfput1_delopts';
+	// use php+ming script if available?
+	public static $optuseming = '_evh_swfput1_useming';
+
+	// verbose (helpful?) section descriptions?
+	public static $defverbose = 'true';
 	// display opts, widget, inline or both
-	public static $defdisplay = 3; // 1==inline | 2==widget
-	public static $disp_inline = 1;
+	 // 1==message | 2==widget | 4==header
+	public static $defdisplay  = 7;
+	public static $disp_msg    = 1;
 	public static $disp_widget = 2;
-	// fortune program output text position
-	public static $deftextpos = 'bot';  // either 'top' || 'bot'
+	public static $disp_hdr    = 4;
 	// delete options on uninstall
 	public static $defdelopts = 'true';
+	// use php+ming script if available?
+	public static $defuseming = 'false';
 	
 	// object of class to handle options under WordPress
 	protected $opt;
 
-	// WP option group -- note prefix '_evh_'
-	// to guard against name clashes
-	public static $opt_group  = '_evh_fortune2_opt_grp';
-	// WP option names/keys -- note prefix '_evh_'
-	public static $optfortune = '_evh_fortune2_path';
-	public static $optfortarg = '_evh_fortune2_args';
-	public static $optdisplay = '_evh_fortune2_disp';
-	public static $opttextpos = '_evh_fortune2_tpos';
-	// delete options on uninstall
-	public static $optdelopts = '_evh_fortune2_delopts';
 	// autoload class version suffix
 	public static $aclv = '0_0_2';
 
-	// current received fortune text
-	protected $cur;
-	// fortune program path from option if available
-	protected $fortune;
-	// fortune program args from option if available
-	protected $fortarg;
-	// fortune program output text position
-	protected $textpos;
+	// swfput program directory
+	protected static $swfputdir = 'mingput';
+	// swfput program binary name
+	protected static $swfputbinname = 'mingput.swf';
+	// swfput program php+ming script name
+	protected static $swfputphpname = 'mingput.php';
+	// swfput program css name
+	protected static $swfputcssname = 'obj.css';
+	// swfput program binary path
+	protected $swfputbin;
+	// swfput program php+ming script path
+	protected $swfputphp;
+	// swfput program css path
+	protected $swfputcss;
 	
 	// hold an instance
 	private static $instance;
 
+	// correct file path (possibly needed due to symlinks)
+	public static $pluginfile = null;
+
 	public function __construct($init = true) {
 		// if arg $init is false then this instance is just
-		// meant to provide a fortune; don't do the whole-
-		// shebang
+		// meant to provide options and such
+		$pf = self::mk_pluginfile();
+		// URL setup
+		$t = self::$swfputdir . '/' . self::$swfputbinname;
+		$this->swfputbin = plugins_url($t, $pf);
+		$t = self::$swfputdir . '/' . self::$swfputphpname;
+		$this->swfputphp = plugins_url($t, $pf);
+		$t = self::$swfputdir . '/' . self::$swfputcssname;
+		$this->swfputcss = plugins_url($t, $pf);
+
 		if ( ! $init ) {
-			$this->get_options();
+			// must do this
+			$this->init_opts();
 			return;
 		}
 		
 		$this->init();
-		$this->get_options();
-		$this->mk_new();
-
-		// paranoid redundancy
-		$pf = __FILE__;
-		if ( defined('WP_PLUGIN_DIR') ) {
-			// using WP_PLUGIN_DIR due to symlink problems in
-			// some installations; after much grief found fix at
-			// https://wordpress.org/support/topic/register_activation_hook-does-not-work
-			// in a post by member 'silviapfeiffer1' -- she nailed
-			// it, and noone even replied to her!
-			$ad = explode('/', rtrim(plugin_dir_path($pf), '/'));
-			$pd = $ad[count($ad) - 1];
-			$pf = WP_PLUGIN_DIR . '/' . $pd . '/' . basename($pf);
-		} else {
-			// this is similar to common methods w/  __FILE__; but
-			// can cause regi* failures due to symlinks in path
-			$pf = rtrim(plugin_dir_path($pf), '/').'/' . basename($pf);
-		}
 
 		// keep it clean: {de,}activation
 		$cl = __CLASS__;
@@ -199,79 +199,35 @@ class Fortune2_evh {
 		register_activation_hook($pf,   array($cl,   'on_activate'));
 		register_uninstall_hook($pf,    array($cl,  'on_uninstall'));
 
+		// some things are to be done in init hook
+		add_action('init', array($this, 'init_hook_func'));
+
+		// add 'Settings' link on the plugins page entry
+		// cannot be in activate hook
+		$name = plugin_basename($pf);
+		add_filter("plugin_action_links_$name",
+			array($cl, 'plugin_page_addlink'));
+
 		// it's not enough to add this action in the activation hook;
 		// that alone does not work.  IAC administrative
 		// {de,}activate also controls the widget
 		add_action('widgets_init', array($cl, 'regi_widget'));//, 1);
 
-		add_action('admin_head', array($this, 'mk_css'));
-		//add_action('wp_head', array($this, 'mk_css'));
-		add_action('wp_head', array($this, 'mk_scripts_css'));
-		add_action('admin_footer', array($this, 'put_text_html'));
-		//add_action('admin_footer', array($this, 'put_text_html'));
-		add_action('wp_footer', array($this, 'put_text_js'));
-
-		// testing one two three
-		//add_action('the_content', array($this, 'test_func'), 20);//low
-		add_action('the_editor_content', array($this, 'test_func'), 20);//low
 	}
 
-	public function test_func ($dat) {
-		global $post, $wp_locale;
-		// interesting $post properties (->)
-		// post_author, post_content, post_title,
-		// post_status(==publish), post_content_filtered
-		// post_parent, post_type(==post), post_mime_type, filter
-		// custom meta e.g. $v = get_post_meta($post-ID, 'key_1', true);
-		$out = '';
-		//if ( current_user_can('upload_files')
-		//if ( user_can_richedit() )
-		// e.g. https://wpblog.example.org/?attachment_id=28
-		//if ( true && is_single() ) {
-		$pat = '/(\r\n|\r|\n)/';
-		$la = preg_split($pat, $dat, null, PREG_SPLIT_DELIM_CAPTURE);
-		$pat = '/^(.*)([\?\&])(attachment_id=)([0-9]+)\b(.*)$/';
-		for ( $n = 0; $n < count($la); ) {
-			$line = $la[$n]; $n++;
-			$sep = isset($la[$n]) ? $la[$n] : ''; $n++;
-			$m = null;
-			if ( preg_match($pat, $line, $m, PREG_OFFSET_CAPTURE) ) {
-				// want 2, 4
-				$tok = $m[2][0];
-				$id = $m[4][0];
-				$meta = wp_get_attachment_metadata($id);
-				if ( !is_wp_error($meta) ) {
-					$out .= '<br />'.self::ht('attach id: ') . $id;
-					$out .= '<br />'.self::ht('post id: ') . $post->ID;
-					foreach($meta as $k => $v) {
-						$s = 'attachmeta key == '.$k.' -- value == '.$v;
-						$out .= '<br />'.self::ht($s);
-					}
-				} else {
-					$out .= '<br />'.self::ht('FAILED metadata');
-				}
-				$url = wp_get_attachment_url($id);
-				if ( !is_wp_error($url) ) {
-					$s = 'attachment url == '.$url;
-					$out .= '<br />'.self::ht($s);
-				} else {
-					$out .= '<br />'.self::ht('FAILED url');
-				}
- 				$out .= '<h3>TEST H3 EVH</h3>';
-				$out .= $line . $sep;
-			} else {
-				$out .= $line . $sep;
-			}
-		}
-		return $out;
-	}
-	
 	public function __destruct() {
 		$this->opt = null;
 	}
 	
 	public static function on_deactivate() {
+		$wreg = __CLASS__;
+		$name = plugin_basename(self::mk_pluginfile());
+		$arf = array($wreg, 'plugin_page_addlink');
+		remove_filter("plugin_action_links_$name", $arf);
 		self::unregi_widget();
+		unregister_setting(self::$opt_group, // option group
+			self::$opt_group, // opt name; using group passes all to cb
+			array($wreg, 'validate_opts'));
 	}
 
 	public static function on_activate() {
@@ -288,13 +244,23 @@ class Fortune2_evh {
 		}
 	}
 
+	public static function plugin_page_addlink($links) {
+		$opturl = '<a href="' . get_option('siteurl');
+		$opturl .= '/wp-admin/options-general.php?page=';
+		$opturl .= self::$settings_page_id;
+		$opturl .= '">' . __('Settings') . '</a>';
+		// Add a link to this plugin's settings page
+		array_unshift($links, $opturl); 
+		return $links; 
+	}
+
 	public static function regi_widget ($fargs = array()) {
 		global $wp_widget_factory;
 		if ( ! isset($wp_widget_factory) ) {
 			return;
 		}
 		if ( function_exists(register_widget) ) {
-			$cl = self::$fortune_widget;
+			$cl = self::$swfput_widget;
 			register_widget($cl);
 		}
 	}
@@ -305,54 +271,48 @@ class Fortune2_evh {
 			return;
 		}
 		if ( function_exists(unregister_widget) ) {
-			$cl = self::$fortune_widget;
+			$cl = self::$swfput_widget;
 			unregister_widget($cl);
 		}
 	}
 
 	protected function init_opts() {
-		$items = array();
+		$items = array(
+			self::$optverbose => self::$defverbose,
+			self::$optdispmsg =>
+				(self::$defdisplay & self::$disp_msg) ? 'true' : 'false',
+			self::$optdispwdg =>
+				(self::$defdisplay & self::$disp_widget) ? 'true' : 'false',
+			self::$optdisphdr =>
+				(self::$defdisplay & self::$disp_hdr) ? 'true' : 'false',
+			self::$optdelopts => self::$defdelopts,
+			self::$optuseming => self::$defuseming
+		);
 		$opts = get_option(self::$opt_group); // WP get_option()
+		// note values converted to string
 		if ( $opts ) {
-			if ( array_key_exists(self::$optfortune, $opts) &&
-				 $opts[self::$optfortune] != '') {
-				$items[self::$optfortune] = $opts[self::$optfortune];
-			} else {
-				$items[self::$optfortune] = self::$deffortune;
+			$mod = false;
+			foreach ($items as $k => $v) {
+				if ( ! array_key_exists($k, $opts) ) {
+					$opts[$k] = '' . $v;
+					$mod = true;
+				}
+				if ( $opts[$k] == '' && $v !== '' ) {
+					$opts[$k] = '' . $v;
+					$mod = true;
+				}
 			}
-			if ( array_key_exists(self::$optfortarg, $opts) &&
-				 $opts[self::$optfortarg] != '') {
-				$items[self::$optfortarg] = $opts[self::$optfortarg];
-			} else {
-				$items[self::$optfortarg] = self::$deffortarg;
-			}
-			if ( array_key_exists(self::$optdisplay, $opts) &&
-				 $opts[self::$optdisplay] != '') {
-				$items[self::$optdisplay] = $opts[self::$optdisplay];
-			} else {
-				$items[self::$optdisplay] = self::$defdisplay;
-			}
-			if ( array_key_exists(self::$opttextpos, $opts) &&
-				 $opts[self::$opttextpos] != '') {
-				$items[self::$opttextpos] = $opts[self::$opttextpos];
-			} else {
-				$items[self::$opttextpos] = self::$deftextpos;
-			}
-			if ( array_key_exists(self::$optdelopts, $opts) &&
-				 $opts[self::$optdelopts] != '') {
-				$items[self::$optdelopts] = $opts[self::$optdelopts];
-			} else {
-				$items[self::$optdelopts] = self::$defdelopts;
+			if ( $mod === true ) {
+				update_option(self::$opt_group, $opts);
 			}
 		} else {
-			$items[self::$optfortune] = self::$deffortune;
-			$items[self::$optfortarg] = self::$deffortarg;
-			$items[self::$optdisplay] = self::$defdisplay;
-			$items[self::$opttextpos] = self::$deftextpos;
-			$items[self::$optdelopts] = self::$defdelopts;
-			add_option(self::$opt_group, $items);
+			$opts = array();
+			foreach ($items as $k => $v) {
+				$opts[$k] = '' . $v;
+			}
+			add_option(self::$opt_group, $opts);
 		}
-		return $items;
+		return $opts;
 	}
 
 	protected function init() {
@@ -361,57 +321,101 @@ class Fortune2_evh {
 			
 			// set up Options_evh with its page, sections, and fields
 			
+			// mk_aclv adds a suffix to class names
+			$Cf = self::mk_aclv('OptField');
+			$Cs = self::mk_aclv('OptSection');
 			// prepare fields to appear under various sections
 			// of admin page
-			$Cf = self::mk_aclv('OptField');
-			$fields0 = array(
-				0 => new $Cf(self::$optfortune,
-					self::ht(__('Fortune program path:')),
-					self::$optfortune,
-					$items[self::$optfortune] /*, $fcallback = '' */),
-				1 => new $Cf(self::$optfortarg,
-					self::ht(__('Fortune program arguments:')),
-					self::$optfortarg,
-					$items[self::$optfortarg] /*, $fcallback = '' */)
-				);
+			$ns = 0;
+			$sections = array();
+
+			// placement section: (posts, sidebar, header)
+			$nf = 0;
+			$fields = array();
+			$fields[$nf++] = new $Cf(self::$optverbose,
+					self::ht(__('Show verbose descriptions:')),
+					self::$optverbose,
+					$items[self::$optverbose],
+					array($this, 'put_verbose_opt'));
+			// this field is not printed if ming is n.a.
+			if ( self::can_use_ming() )
+			$fields[$nf++] = new $Cf(self::$optuseming,
+					self::ht(__('Dynamic SWF generation:')),
+					self::$optuseming,
+					$items[self::$optuseming],
+					array($this, 'put_useming_opt'));
+			// section object includes description callback
+			$sections[$ns++] = new $Cs($fields,
+					'swfput1_general_section',
+					'<a name="general">' .
+						self::ht(__('SWF General Option Settings'))
+						. '</a>',
+					array($this, 'put_general_desc'));
+
+			// placement section: (posts, sidebar, header)
+			$nf = 0;
+			$fields = array();
+			$fields[$nf++] = new $Cf(self::$optdispmsg,
+					self::ht(__('Place in posts:')),
+					self::$optdispmsg,
+					$items[self::$optdispmsg],
+					array($this, 'put_inposts_opt'));
+			$fields[$nf++] = new $Cf(self::$optdispwdg,
+					self::ht(__('Place in sidebar:')),
+					self::$optdispwdg,
+					$items[self::$optdispwdg],
+					array($this, 'put_widget_opt'));
+			$fields[$nf++] = new $Cf(self::$optdisphdr,
+					self::ht(__('Place in head:')),
+					self::$optdisphdr,
+					$items[self::$optdisphdr],
+					array($this, 'put_inhead_opt'));
+			// section object includes description callback
+			$sections[$ns++] = new $Cs($fields,
+					'swfput1_placement_section',
+					'<a name="placement">' .
+						self::ht(__('SWF Video Placement Settings'))
+						. '</a>',
+					array($this, 'put_place_desc'));
 			
-			$fields1 = array(
-				0 => new $Cf(self::$optdisplay,
-					self::ht(__('Fortune display type:')),
+/*
+			// prepare fields to appear under various sections
+			// of admin page
+			$nf = 0;
+			$fields = array();
+			$fields[$nf++] =	new $Cf(self::$optdisplay,
+					self::ht(__('Fortune display type:'));
 					self::$optdisplay,
 					$items[self::$optdisplay],
 					array($this, 'put_disp_opt')),
-				1 => new $Cf(self::$opttextpos,
-					self::ht(__('Fortune inline placement:')),
+			$fields[$nf++] = new $Cf(self::$opttextpos,
+					self::ht(__('Fortune inline placement:'));
 					self::$opttextpos,
 					$items[self::$opttextpos],
-					array($this, 'put_text_pos'))
-				);
+					array($this, 'put_text_pos'));
+			// prepare sections to appear under admin page
+			$sections[$ns++] = new $Cs($fields,
+					'swfput1_text_section',
+					self::ht(__('Fortune Display Settings')),
+					array($this, 'put_text_desc'));
+*/
 			
-			$fields2 = array(
-				0 => new $Cf(self::$optdelopts,
-					self::ht(__('When Fortune is uninstalled:')),
+			// install opts section:
+			// field: delete opts on uninstall?
+			$nf = 0;
+			$fields = array();
+			$fields[$nf++] = new $Cf(self::$optdelopts,
+					self::ht(__('When the plugin is uninstalled:')),
 					self::$optdelopts,
 					$items[self::$optdelopts],
-					array($this, 'put_del_opts'))
-				);
-			
+					array($this, 'put_del_opts'));
 			// prepare sections to appear under admin page
-			$Cs = self::mk_aclv('OptSection');
-			$sections = array(
-				0 => new $Cs($fields0,
-					'fortune2_program_section',
-					self::ht(__('Fortune Path Settings'))
-					/*, $callback = '' */),
-				1 => new $Cs($fields1,
-					'fortune2_text_section',
-					self::ht(__('Fortune Display Settings')),
-					array($this, 'put_text_desc')),
-				2 => new $Cs($fields2,
-					'fortune2_inst_section',
-					self::ht(__('Plugin Install Settings')),
-					array($this, 'put_inst_desc'))
-				);
+			$sections[$ns++] = new $Cs($fields,
+					'swfput1_inst_section',
+					'<a name="install">' .
+						self::ht(__('Plugin Install Settings'))
+						. '</a>',
+					array($this, 'put_inst_desc'));
 
 			// prepare admin page specific hooks per page. e.g.:
 			if ( false ) {
@@ -429,197 +433,88 @@ class Fortune2_evh {
 			// necessitating a big switch on option keys
 			$Cp = self::mk_aclv('OptPage');
 			$page = new $Cp(self::$opt_group, $sections,
-				'Fortune2_settings',
-				self::ht(__('Fortune Plugin')),
-				self::ht(__('Fortune Plugin Configuration')),
-				array($this, 'validate_opts'),
+				self::$settings_page_id,
+				self::ht(__('SWFPut Plugin')),
+				self::ht(__('SWFPut Configuration')),
+				array(__CLASS__, 'validate_opts'),
 				/* pagetype = 'options' */ '',
 				/* capability = 'manage_options' */ '',
 				/* callback */ '',
 				/* 'hook_suffix' callback array */ $suffix_hooks,
-				self::ht(__('Configuration of Fortune Plugin')),
-				self::ht(__('Path, options, and text output.')),
-				self::ht(__('Save Settings'))
-				);
+				self::ht(__('Configuration of SWFPut Plugin')),
+				self::ht(__('Display and Runtime Settings.')),
+				self::ht(__('Save Settings')));
 			
 			$Co = self::mk_aclv('Options');
 			$this->opt = new $Co($page);
 		}
 	}
 	
-	protected function get_options () {
-		$items = $this->init_opts();
-		$this->fortune = $items[self::$optfortune];
-		$this->fortarg = $items[self::$optfortarg];
-		$this->textpos = $items[self::$opttextpos];
-/*
-		$this->fortune = $this->opt->get_option(self::$optfortune);
-		if ( ! $this->fortune ) {
-			$this->fortune = self::$deffortune;
-		}
-		$this->fortarg = $this->opt->get_option(self::$optfortarg);
-		if ( $this->fortarg !== '' && ! $this->fortarg ) {
-			$this->fortarg = self::$deffortarg;
-		}
-		$this->textpos = $this->opt->get_option(self::$opttextpos);
-		if ( ! $this->textpos ) {
-			$this->textpos = self::$deftextpos;
-		}
-*/
-	}
-	
-	protected function mk_new () {
-		$cmd = $this->fortune . ' ' . $this->fortarg;
-		$ret = 0;
-		$out = array();
-		$this->cur = exec($cmd, $out, $ret);
-		if ( $ret == 0 ) {
-			$this->cur = implode("\n", $out);
+	public function init_hook_func () {
+		// add here to be sure option is ready
+		if ( $this->get_message_option() === 'true' ) {
+			$scf = array($this, 'post_shortcode');
+			add_shortcode('putswf_video', $scf);
+			$scf = array($this, 'post_sed');
+			add_action('the_content', $scf, 20);
 		} else {
-			$this->cur .= "\n" . $ret . " status from " . $cmd;
-			$this->cur .= ': ' . implode("\n", $out);
+			remove_shortcode('putswf_video');
+			remove_action('the_content', array($this, 'post_sed'));
 		}
 	}
 	
-	public function get_fortune () {
-		if ( !$this->cur ) {
-			$this->mk_new();
-		}
-		return $this->cur;
-	}
-	
-	public function get_fortune_once () {
-		$t = $this->get_fortune();
-		$this->cur = '';
-		return $t;
-	}
-	
-	public function get_fortune_html () {
-		$t = $this->get_fortune();
-		return self::ht($t);
-	}
-	
-	public function get_fortune_once_html () {
-		$t = $this->get_fortune_html();
-		$this->cur = '';
-		return $t;
-	}
-	
-	public static function static_get_fortune_html () {
-		$cl = __CLASS__;
-		$fc = new $cl(false);
-		$ft = $fc->get_fortune_html();
-		$fc = null;
-		return $ft;
-	}
+	/**
+	 * Settings page callback functions:
+	 * validators, sections, fields, and page
+	 */
 
-	// callback: validate options
-	public function validate_opts($opts) {	
+	// static callback: validate options main
+	public static function validate_opts($opts) {	
 		$a_out = array();
+		$a_orig = get_option(self::$opt_group);
 		$nerr = 0;
 		$nupd = 0;
-		
-		// checkboxes |= ugly hack
-		$a_out[self::$optdisplay] = 0;
-		$odisp = 0 + $this->opt->get_option(self::$optdisplay);
-		// another checkbox
-		$odelopt = $this->opt->get_option(self::$optdelopts);
-		$a_out[self::$optdelopts] = 'false';
 
+		// empty happens if all fields are checkboxes and none checked
+		if ( empty($opts) ) {
+			$opts = array();
+		}
+		// checkboxes need value set - nonexistant means false
+		$ta = array(self::$optverbose,
+			self::$optdispmsg, self::$optdispwdg,
+			self::$optdisphdr, self::$optdelopts,
+			self::$optuseming);
+		foreach ( $ta as $k ) {
+			if ( array_key_exists($k, $opts) ) {
+				continue;
+			}
+			$opts[$k] = 'false';
+		}
+	
 		foreach ( $opts as $k => $v ) {
 			$ot = trim($v);
-			$oo = trim($this->opt->get_option($k));
+			$oo = trim($a_orig[$k]);
 
 			switch ( $k ) {
-				case self::$optfortune:
-					// limited chars for filesys path
-					$re =
-					'/^(\/[a-z0-9\/_-]*\/)?fortune[a-z0-9\._-]*$/i';
-					if ( preg_match($re, $ot) == 1 ) {
-						$a_out[$k] = $ot;
-						$nupd += ($ot === $oo) ? 0 : 1;
-					} else {
-						$e = __('bad fortune program path:');
-						$e .= ' "' . $ot . '"';
-						self::errlog($e);
-						add_settings_error('fortune program path',
-							sprintf('%s[%s]', self::$opt_group, $k),
-							self::ht($e),
-							'error');
-						$a_out[$k] = $oo;
-						$nerr++;
-					}
-					break;
-				case self::$optfortarg:
-					// limited chars for program options
-					$re = '/^[A-Za-z0-9\/\. _-]*$/';
-					if ( preg_match($re, $ot) ) {
-						$a_out[$k] = $ot;
-						$nupd += ($ot === $oo) ? 0 : 1;
-					} else {
-						$e = __('bad fortune program options:');
-						$e .= ' "' . $ot . '"';
-						self::errlog($e);
-						add_settings_error('fortune program options',
-							sprintf('%s[%s]', self::$opt_group, $k),
-							self::ht($e),
-							'error');
-						$a_out[$k] = $oo;
-						$nerr++;
-					}
-					break;
-				case self::$optdisplay.'1':
-				case self::$optdisplay.'2':
-				// the integer suffix is a checkbox hack
-				// this case is not called if all boxes are unchecked
-					$t = 0 + $ot;
-					if ( $t < 0 || $t > 3 ) {
-						$e = 'bad check option: "' . $ot . '", crack?';
-						self::errlog($e);
-						add_settings_error('fortune text display',
-							sprintf('%s[%s]', self::$opt_group,
-								self::$optdisplay),
-							self::ht($e),
-							'error');
-						$a_out[self::$optdisplay] = $odisp;
-						$nerr++;
-					} else {
-						$a_out[self::$optdisplay] |= $t;
-						$nupd += ($t & (0+$odisp)) ? 0 : 1;
-					}
-					break;
-				case self::$opttextpos:
-					if ( $ot !== 'top' && $ot !== 'bot' ) {
-						$e = 'bad radio option: "' . $ot . '", crack?';
-						self::errlog($e);
-						add_settings_error('fortune text placement',
-							sprintf('%s[%s]', self::$opt_group, $k),
-							self::ht($e),
-							'error');
-						$a_out[$k] = $oo;
-						$nerr++;
-					} else {
-						$a_out[$k] = $ot;
-						$nupd += ($ot === $oo) ? 0 : 1;
-					}
-					break;
+				case self::$optverbose:
+				case self::$optdispmsg:
+				case self::$optdispwdg:
+				case self::$optdisphdr:
 				case self::$optdelopts:
-					if ( $ot != 'true' ) {
-						$e = 'bad check option: "' . $ot . '", crack?';
+				case self::$optuseming:
+					if ( $ot != 'true' && $ot != 'false' ) {
+						$e = sprintf('bad option: %s[%s]', $k, $v);
 						self::errlog($e);
-						add_settings_error('fortune delete opts',
-							sprintf('%s[%s]', self::$opt_group,
-								self::$optdelopts),
+						add_settings_error('SWFPut checkbox option',
+							sprintf('%s[%s]', self::$opt_group, $k),
 							self::ht($e),
 							'error');
-						$a_out[self::$optdelopts] = $odelopt;
+						$a_out[$k] = $oo;
 						$nerr++;
 					} else {
-						$a_out[self::$optdelopts] = $ot;
+						$a_out[$k] = $ot;
+						$nupd += ($oo === $ot) ? 0 : 1;
 					}
-					break;
-				case 'activestate':
-					// this is a debugging key; do nothing
 					break;
 				default:
 					$e = "funny key in validate opts: '" . $k . "'";
@@ -632,255 +527,291 @@ class Fortune2_evh {
 			}
 		}
 
-		// checkboxes
-		if ( $a_out[self::$optdisplay] == 0 && $odisp > 0 ) {
-			$nupd++;
-		}
-		// must coerce integer > text; int 0 makes trouble in if($foo)
-		$a_out[self::$optdisplay] = "" . $a_out[self::$optdisplay];
-		// more checkboxes
-		if ( $a_out[self::$optdelopts] != $odelopt ) {
-			$nupd++;
-		}
-
-		if ( $nerr == 0 && $nupd > 0 ) {
-			add_settings_error(self::$opt_group,
-				sprintf('%s[%s]', self::$opt_group, $k),
-				self::ht(__('Settings updated correctly')),
-				'updated');
-		} else  if ( $nerr > 0 && $nupd > 0 ) {
-			add_settings_error(self::$opt_group,
-				sprintf('%s[%s]', self::$opt_group, $k),
-				self::ht(
-					sprintf(__('Some settings (%d) updated'), $nupd)
-					),
-				'updated');
+		// now register updates
+		if ( $nupd > 0 ) {
+			$str = $nerr == 0 ? __('Settings updated correctly') :
+				sprintf(__('Some settings (%d) updated'), $nupd);
+			add_settings_error(self::$opt_group, self::$opt_group,
+				self::ht($str), 'updated');
 		}
 		
 		return $a_out;
 	}
 
-	// callback: put html for text position field description
-	public function put_text_desc() {
-		$t = self::ht(__('Set display options:'));
+	//
+	// section callbacks
+	//
+	
+	// callback: put html for placement field description
+	public function put_general_desc() {
+		$t = self::ht(__('General SWF plugin options:'));
 		printf('<p>%s</p>%s', $t, "\n");
+		if ( self::get_verbose_option() !== 'true' ) {
+			return;
+		}
+
+		$t = self::ht(__('The verbose option selects whether
+			long and hopefully helpful descriptions
+			should be displayed with the various settings
+			sections. This paragraph is an example, and
+			will not be shown if the option is not
+			selected.'));
+		printf('<p>%s</p>%s', $t, "\n");
+
+		if ( self::can_use_ming() ) {
+			$t = self::ht(__('The PHP+Ming option selects whether
+				the Flash player program is generated with PHP
+				and the Ming extension for each request, or
+				precompiled binary Flash players are used.
+				This option is only displayed if the Ming
+				PHP extension is installed and loaded; if you
+				are reading this then Ming has been found to
+				be loaded. Generation the player on the fly
+				has the advantage of making options available
+				even if they require compilation changes. The binaries
+				might save a (very small) bit of server load, but
+				they are less flexible (that is the reason that
+				there is more than one binary player: each has
+				small differences selected when compiled).'));
+			printf('<p>%s</p>%s', $t, "\n");
+		}
 	}
 
-	// callback: put html for text position field description
+	// callback: put html for placement field description
+	public function put_place_desc() {
+		$t = self::ht(__('SWF placement options:'));
+		printf('<p>%s</p>%s', $t, "\n");
+		if ( self::get_verbose_option() !== 'true' ) {
+			return;
+		}
+
+		$t = self::ht(__('This section includes options to select 
+			where the Flash player may be embedded. By various
+			means video may be placed near the head of the page,
+			in sidebar widgets, or in certain posts.'));
+		printf('<p>%s</p>%s', $t, "\n");
+		$t = self::ht(__('Go back to top (General section).'));
+		printf('<p><a href="#general">%s</a></p>%s', $t, "\n");
+	}
+
+	// callback: put html install field description
 	public function put_inst_desc() {
-		$t = self::ht(__('Set install options'));
-		printf('<p>%s', $t);
-
-		$opts = get_option(self::$opt_group); // WP get_option()
-		if ( $opts && array_key_exists('activestate', $opts) ) {
-			$as = $opts['activestate'];
-			$t = self::ht(__('active state: '));
-			printf(' (%s%s):</p>%s', $t, $as, "\n");
-		} else {
-			printf(':</p>%s', "\n");
-		}
-	}
-
-	// callback: put html for form field for text position
-	public function put_disp_opt($a) {
-		$k = self::$optdisplay;
-		if ( ! array_key_exists($k, $a) ) {
-			self::errlog('display option key not found');
+		$t = self::ht(__('Install options:'));
+		printf('<p>%s</p>%s', $t, "\n");
+		if ( self::get_verbose_option() !== 'true' ) {
 			return;
 		}
+
+		$t = self::ht(__('This section includes optional
+			features for plugin install or uninstall. Presently
+			the only option is whether to remove the plugin\'s
+			set of options from the database when it is deleted.
+			There is probably no reason to leave the options in
+			place; you may simply deactivate the plugin if
+			you want it off temporarily. This option is useful
+			for development, but you might think of another reason
+			to use it.'));
+		printf('<p>%s</p>%s', $t, "\n");
+		$t = self::ht(__('Go back to top (General section).'));
+		printf('<p><a href="#general">%s</a></p>%s', $t, "\n");
+	}
+	
+	//
+	// fields callbacks
+	//
+	
+	// callback helper, put single checkbox
+	public function put_single_checkbox($a, $opt, $label) {
 		$group = self::$opt_group;
-		$ti = self::ht(__('Display inline (near top or bottom)'));
-		$tw = self::ht(__('Display sidebar widget'));
+		$c = $a[$opt] == 'true' ? "checked='CHECKED' " : "";
 
-		$di = self::$disp_inline;
-		$dw = self::$disp_widget;
-		$v = $a[$k];
-		$cs0 = $v & $di ? "checked='CHECKED'" : "";
-		$cs1 = $v & $dw ? "checked='CHECKED'" : "";
+		//echo "\n		<!-- {$opt} checkbox-->\n";
 
-		$s = "		<!-- Fortune plugin: display checkboxes -->\n";
-		$s = "\n" . $s;
-		echo $s;
-
-		$s = "		<label><input type='checkbox' id='{$k}' ";
-		$s = $s . "name='" . $group . "[".$k.'1'."]' ";
-		$s = $s . "value='".$di."' " . $cs0 . " /> ";
-		$s = $s . $ti . "</label><br/>\n";
-		echo $s;
-		$s = "		<label><input type='checkbox' id='{$k}' ";
-		$s = $s . "name='" . $group . "[".$k.'2'."]' ";
-		$s = $s . "value='".$dw."' " . $cs1 . " /> ";
-		$s = $s . $tw . "</label><br/>\n";
-		echo $s;
+		echo "		<label><input type='checkbox' id='{$opt}' ";
+		echo "name='{$group}[{$opt}]' value='true' {$c}/> ";
+		echo "{$label}</label><br />\n";
 	}
 
-	// callback: put html for form field for text position
-	public function put_text_pos($a) {
-		$group = self::$opt_group;
-		$tt = self::ht(__('Place Near Top'));
-		$bt = self::ht(__('Place Near Bottom'));
-
-		// loop over opts; put input field for each
-		// this loop is wrong; don't use it in new code
-		// it is left in place as a bad example
-		foreach ( $a as $k => $v ) {
-			$cs0 = $v == "top" ? "checked='CHECKED'" : "";
-			$cs1 = $v == "bot" ? "checked='CHECKED'" : "";
-
-			$s = "		<!-- Fortune plugin: radios for text pos -->\n";
-			$s = "\n" . $s;
-			echo $s;
-
-			$s = "		<label><input type='radio' id='{$k}' ";
-			$s = $s . "name='" . $group . "[$k]' ";
-			$s = $s . "value='top' " . $cs0 . " /> ";
-			$s = $s . $tt . "</label><br/>\n";
-			echo $s;
-			$s = "		<label><input type='radio' id='{$k}' ";
-			$s = $s . "name='" . $group . "[$k]' ";
-			$s = $s . "value='bot' " . $cs1 . " /> ";
-			$s = $s . $bt . "</label><br/>\n";
-			echo $s;
-		}
+	// callback, put verbose section descriptions?
+	public function put_verbose_opt($a) {
+		$tt = self::ht(__('Show verbose descriptions'));
+		$k = self::$optverbose;
+		$this->put_single_checkbox($a, $k, $tt);
 	}
 
-	// callback: put html for form field for opt delete
+	// callback, put SWF in head?
+	public function put_useming_opt($a) {
+		$tt = self::ht(__('Use SWF script if PHP+Ming is available'));
+		$k = self::$optuseming;
+		$this->put_single_checkbox($a, $k, $tt);
+	}
+
+	// callback, put SWF in head?
+	public function put_inhead_opt($a) {
+		$tt = self::ht(__('Enable SWF in head'));
+		$k = self::$optdisphdr;
+		$this->put_single_checkbox($a, $k, $tt);
+	}
+
+	// callback, put SWF in sidebar (widget)?
+	public function put_widget_opt($a) {
+		$tt = self::ht(__('Enable SWF in sidebar'));
+		$k = self::$optdispwdg;
+		$this->put_single_checkbox($a, $k, $tt);
+	}
+
+	// callback, put SWF in posts?
+	public function put_inposts_opt($a) {
+		$tt = self::ht(__('Enable SWF in posts'));
+		$k = self::$optdispmsg;
+		$this->put_single_checkbox($a, $k, $tt);
+	}
+
+	// callback, install section field: opt delete
 	public function put_del_opts($a) {
-		$group = self::$opt_group;
 		$tt = self::ht(__('Permanently delete settings (clean db)'));
-
 		$k = self::$optdelopts;
-		$v = $a[$k];
-		$c = $v == 'true' ? "checked='CHECKED'" : "";
-
-		$s = "		<!-- Fortune plugin: del opts checkbox-->\n";
-		$s = "\n" . $s;
-		echo $s;
-
-		$s = "		<label><input type='checkbox' id='{$k}' ";
-		$s = $s . "name='" . $group . "[".$k."]' ";
-		$s = $s . "value='true' " . $c . " /> ";
-		$s = $s . $tt . "</label><br/>\n";
-		echo $s;
+		$this->put_single_checkbox($a, $k, $tt);
 	}
 
 	/**
-	 *	print a fortune using Fortune2_evh; the string is processed
-	 *  for HTML special chars, and is placed in <p/> with 'id' to match
-	 *  a CSS block
+	 * procedures to place and/or edit pages and content
 	 */
-	public function put_text_html() {
-		$bits = 0;
-		$opts = get_option(self::$opt_group); // WP get_option()
-		if ( $opts && array_key_exists(self::$optdisplay, $opts) ) {
-			$bits |= $opts[self::$optdisplay];
-		}
-		if ( ! ($bits & self::$disp_inline) ) {
-			return;
-		}
-		$ts = $this->get_fortune_html();
-		printf('<p id="fortune2_message">%s</p>%s', $ts, "\n");
-	}
-	
-	public function put_text_js() {
-		$bits = 0;
-		$opts = get_option(self::$opt_group); // WP get_option()
-		if ( $opts && array_key_exists(self::$optdisplay, $opts) ) {
-			$bits |= $opts[self::$optdisplay];
-		}
-		if ( ! ($bits & self::$disp_inline) ) {
-			return;
-		}
-		?>
 
-		<p id="fortune2_message">
-		<script type='text/javascript'>
-		/* <![CDATA[ */
-			document.writeln(""+fortune2_get_fortune());
-		/* ]]> */
-		</script>
-		</p>
-
-		<?php
-	}
-	
-	/**
-	 *	print a CSS block for our output
-	 */
-	public function mk_css() {
-		global $text_direction;
-		// right-to-left language?
-		if ( function_exists('is_rtl') ) {
-			$x = is_rtl() ? 'left' : 'right';
-		} else if ( isset($text_direction) ) {
-			$x = ($text_direction  == 'ltr' ) ? 'right' : 'left';
-		} else {
-			$x = 'right';
-		}
+	// handler for 'shortcode' tags that will be
+	// replaced with SWF video
+	// subject to option $optdispmsg
+	public function post_shortcode($atts, $content = null, $code = "") {
+		$pr = self::$swfput_params;
+		$pr = new $pr();
+		$pa = shortcode_atts($pr->getparams(), $atts);
+		$w = $pa['width']; $h = $pa['height'];
 		
-		// this static called before init, so get option
-		$opts = get_option(self::$opt_group); // WP get_option()
-		if ( $opts && array_key_exists(self::$opttextpos, $opts) ) {
-			$this->textpos = $opts[self::$opttextpos];
+		if ( $code === "" ) {
+			$code = $atts[0];
 		}
-		$pos = $this->textpos == 'top' ? 'top: 4.5em;' : '';
-		$off = $this->textpos == 'top' ? '220px;' : '12px;';
-	
-		echo <<<OMM
-	<style type='text/css'>
-	/* <![CDATA[ */
-	#fortune2_message {
-		position: absolute;
-		$pos
-		margin: 0;
-		padding: 4px;
-		$x: $off
-		font-size: 11px;
-		color: #0C5273;
-	}
-	/* ]]> */
-	</style>
-	
-OMM;
-	}
-	
-	/**
-	 *	print head scripts and a CSS block for our output
-	 */
-	public function mk_scripts_css() {
-		// css 1st
-		$this->mk_css();
-		
-		// now js at head level
-		$bits = 0;
-		$opts = get_option(self::$opt_group); // WP get_option()
-		if ( $opts && array_key_exists(self::$optdisplay, $opts) ) {
-			$bits |= $opts[self::$optdisplay];
+		$swf = $this->get_swf_url('post', $w, $h);
+		$dw = $w + 0;
+		$dv = '<div id="'.$code.'" class="wp-caption aligncenter"';
+		$dv .= ' style="width: '.$dw.'px">';
+		$em = $this->get_swf_tags($swf, $pr->setarray($pa));
+		$c = '';
+		if ( $content !== null ) {
+			$c = '<p class="wp-caption-text">' .
+				do_shortcode($content) . '</p>';
 		}
-		if ( $bits & self::$disp_inline ) {
-			// encode the fortune; js has unescape()
-			$fesc = rawurlencode($this->get_fortune_html());
-			?>
+		return sprintf('%s%s%s</div>', $dv, $em, $c);
+	}
 
-			<script type='text/javascript'>
-			/* <![CDATA[ */
-			function fortune2_get_fortune() {
-				var fesc = '<?php echo $fesc; ?>';
-				return unescape(fesc);
+	// filter the blogger's posts for attachments that can be
+	// replaced with SWF video
+	// subject to option $optdispmsg
+	public function post_sed($dat) {
+		global $post, $wp_locale;
+		$w = 400; $h = 300; // TODO: from option
+		$pr = self::$swfput_params;
+		$pr = new $pr();
+		$pr->setvalue('width', $w);
+		$pr->setvalue('height', $h);
+		
+		// accumulate in $out
+		$out = '';
+		// split into lines, saving line end chars
+		$pat = '/(\r\n|\r|\n)/';
+		$la = preg_split($pat, $dat, null, PREG_SPLIT_DELIM_CAPTURE);
+		// loop through lines checking for string to
+		// replace with swf tags
+		$pat = '/^(.*)\b(https?:\/\/[^\?\&]+)([\?\&])(attachment_id=)([0-9]+)\b(.*)$/';
+		for ( $n = 0; $n < count($la); ) {
+			$line = $la[$n]; $n++;
+			$sep = isset($la[$n]) ? $la[$n] : ''; $n++;
+			$m = null;
+			if ( preg_match($pat, $line, $m, PREG_OFFSET_CAPTURE) ) {
+				$tok = $m[3][0];
+				$id = $m[5][0];
+				//$meta = wp_get_attachment_metadata($id);
+				$url = wp_get_attachment_url($id);
+				if ( is_wp_error($url) ) {
+					$out .= $line . $sep;
+					self::errlog('failed URL of attachment ' . $id);
+				} else {
+					$pr->setvalue('url', $url);
+					$sw = $this->get_swf_url('post_sed', $w, $h);
+					$s = $this->get_swf_tags($sw, $pr);
+					$out .= '<br />' . $s . '<br />' . $sep;
+					//$out .= $s;
+					if ( false /*elide attach url -- needs work*/ ) {
+						$s = '' . $m[1][0] . $m[6][0];
+						if ( strlen($s) > 0	) {
+							$out .= $s . $sep;
+						}
+					} else {
+						$out .= $line . $sep;
+					}
+				}
+			} else {
+				$out .= $line . $sep;
 			}
-			/* ]]> */
-			</script>
-
-			<?php
 		}
+		return $out;
 	}
+	
+	/**
+	 * Utility and misc. helper procs
+	 */
 
-	// utility
+	// append version suffix for Options classes names
 	protected static function mk_aclv($pfx) {
 		$s = $pfx . '_' . self::$aclv;
 		return $s;
 	}
 	
+	// help for plugin file path/name; __FILE__ alone
+	// is not good enough -- see comment in body
+	public static function mk_pluginfile() {
+		if ( self::$pluginfile !== null ) {
+			return self::$pluginfile;
+		}
+	
+		$pf = __FILE__;
+		// using WP_PLUGIN_DIR due to symlink problems in
+		// some installations; after much grief found fix at
+		// https://wordpress.org/support/topic/register_activation_hook-does-not-work
+		// in a post by member 'silviapfeiffer1' -- she nailed
+		// it, and noone even replied to her!
+		if ( defined('WP_PLUGIN_DIR') ) {
+			$ad = explode('/', rtrim(plugin_dir_path($pf), '/'));
+			$pd = $ad[count($ad) - 1];
+			$pf = WP_PLUGIN_DIR . '/' . $pd . '/' . basename($pf);
+		} else {
+			// this is similar to common methods w/  __FILE__; but
+			// can cause regi* failures due to symlinks in path
+			$pf = rtrim(plugin_dir_path($pf), '/').'/' . basename($pf);
+		}
+		
+		// store and return corrected file path
+		return self::$pluginfile = $pf;
+	}
+
+	// can php+ming be used?
+	public static function can_use_ming() {
+		if ( extension_loaded('ming') ) {
+			return true;
+		}
+		return false;
+	}
+
+	// should php+ming be used?
+	public static function should_use_ming() {
+		if ( self::can_use_ming() === true ) {
+			if ( self::opt_by_name(self::$optuseming) === 'true' ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	// 'html-ize' a text string
 	public static function ht($text) {
 		if ( function_exists('wptexturize') ) {
 			return wptexturize($text);
@@ -889,8 +820,9 @@ OMM;
 		return htmlentities($text, ENT_QUOTES, 'UTF-8');
 	}
 	
+	// error messages; where {wp_}die is not suitable
 	public static function errlog($err) {
-		$e = sprintf('Fortune2 WP plugin: %s', $err);
+		$e = sprintf('SWF Put WP plugin: %s', $err);
 		error_log($e, 0);
 	}
 	
@@ -900,52 +832,424 @@ OMM;
 		self::$instance = new $cl($init);
 		return self::$instance;
 	}
-} // End class Fortune2_evh
-endif; // if ( ! class_exists('Fortune2_evh') ) :
-
-/**
- * class handling 'fortunes' as widget; uses Fortune2_evh
- */
-if ( ! class_exists('Fortune2_widget_evh') ) :
-class Fortune2_widget_evh extends WP_Widget {
-	public static $fortune_plugin = 'Fortune2_evh';
-
-	public function Fortune2_widget_evh () {
-		$desc = __( 'Unix fortunes for your visitors (and you)');
-		$ops = array('classname' => '' . __CLASS__,
-			'description' => $desc);
-		$this->WP_Widget('fortune2', __('Fortune'), $ops);
+	
+	// get an option value by name/key
+	public static function opt_by_name($name) {
+		$opts = get_option(self::$opt_group); // WP get_option()
+		if ( $opts && array_key_exists($name, $opts) ) {
+			return $opts[$name];
+		}
+		return null;
 	}
 
-	public function widget ($args, $instance) {
-		$ftn = ':-(';
-		$cl = self::$fortune_plugin;
-		eval("\$d = ${cl}::\$disp_widget;");
-		eval("\$g = ${cl}::\$opt_group;");
-		eval("\$o = ${cl}::\$optdisplay;");
-		$opt = null;
-		$g = get_option($g);
-		if ( $g && array_key_exists($o, $g) ) {
-			$opt = $g[$o];
+	// for settings section descriptions
+	public static function get_verbose_option() {
+		return self::opt_by_name(self::$optverbose);
+	}
+
+	// for the sidebar widget, to get its option
+	public static function get_widget_option() {
+		return self::opt_by_name(self::$optdispwdg);
+	}
+
+	// get the do messages (place in posts) option
+	public static function get_message_option() {
+		return self::opt_by_name(self::$optdispmsg);
+	}
+
+	// get the place at head option
+	public static function get_head_option() {
+		return self::opt_by_name(self::$optdisphdr);
+	}
+
+	/**
+	 * check that URL passed in query is OK; re{encode,escape}
+	 * $args is array of booleans, plus two regex pats -- all optional
+	 * requirehost, requirepath, rejuser, rejport, rejquery, rejfrag +
+	 * rxproto, rxpath (regex search patterns); true requirehost
+	 * implies proto is required
+	 * $fesc is escaping function for path, if wanted; e.g. urlencode()
+	 */
+	public static function check_url($url, $args = array(), $fesc = '') {
+		extract($args);
+		// gnash does not encode URLs, and so fails on
+		// chars that need encoding: do it for gnash
+		// (note gnash doesn't do https)
+		// the Adobe plugin handles encoded or not
+		$p = '/';
+		$ua = parse_url(urldecode($url));
+		$vurl = '';
+		if ( array_key_exists('path', $ua) ) {
+			$t = ltrim($ua['path'], '/');
+			if ( isset($rxpath) ) {
+				if ( ! preg_match($rxpath, $t) ) {
+					return false;
+				}
+			}
+			$p .= $fesc === '' ? $t : $fesc($t);
+		} else if ( isset($requirepath) && $requirepath ) {
+			return false;
 		}
-		$bits = 0;
-		if ( $opt ) {
-			$bits |= $opt;
+		if ( array_key_exists('host', $ua) ) {
+			if ( array_key_exists('scheme', $ua) ) {
+				$t = $ua['scheme'];
+				if ( isset($rxproto) ) {
+					if ( ! preg_match($rxproto, $t) ) {
+						return false;
+					}
+				}
+				$vurl = $t . '://';
+			} else if ( isset($requirehost) && $requirehost ) {
+				return false;
+			}
+			if ( array_key_exists('user', $ua) ) {
+				if ( isset($rejuser) && $rejuser ) {
+					return false;
+				}
+				$vurl .= $ua['user'];
+				// user not rejected; pass OK
+				if ( array_key_exists('pass', $ua) ) {
+					$vurl .= ':' . $ua['pass'];
+				}
+				$vurl .= '@';
+			}
+			$vurl .= $ua['host'];
+			if ( array_key_exists('port', $ua) ) {
+				if ( isset($rejport) && $rejport ) {
+					return false;
+				}
+				$vurl .= ':' . $ua['port'];
+			}
+		} else if ( isset($requirehost) && $requirehost ) {
+			return false;
 		}
-		if ( $bits & $d ) {
-			$f = new $cl(false);
-			$ftn = $f->get_fortune_html();
-			$f = null;
+	
+		$vurl .= $p;
+		// A query with the media URL? It can happen
+		// for stream servers.
+		// this works, e.g. w/ ffserver ?date=...
+		if ( array_key_exists('query', $ua) ) {
+			if ( isset($rejquery) && $rejquery ) {
+				return false;
+			}
+			$vurl .= '?' . $ua['query'];
+		}
+		if ( array_key_exists('fragment', $ua) ) {
+			if ( isset($rejfrag) && $rejfrag ) {
+				return false;
+			}
+			$vurl .= '#' . $ua['fragment'];
+		}
+		
+		return $vurl;
+	}
+
+	// helper for selecting swf type (bin||script)) url
+	// arg $sel should be caller tag: 'widget',
+	// 'post' (shortcodes in posts), 'post_sed' (attachment_id filter),
+	// 'head' -- it might be used in future
+	public function get_swf_url($sel, $wi = 640, $hi = 480) {
+		$useming = false;
+		if ( self::should_use_ming() ) {
+			$useming = true;
+		}
+
+		if ( $useming === true ) {
+			$t = $this->swfputphp;
 		} else {
+			$t = $this->swfputbin;
+		}
+
+		return $t;
+	}
+
+	// helper for getting swf css (internal use)) url
+	// arg $sel should be caller tag: 'widget',
+	// 'post' (shortcodes in posts), 'post_sed' (attachment_id filter),
+	// 'head' -- it might be used in future
+	public function get_swf_css_url($sel = '') {
+		return $this->swfputcss;
+	}
+
+	// print suitable SWF object/embed tags
+	public function put_swf_tags($uswf, $par, $esc = true) {
+		$s = $this->get_swf_tags($uswf, $par, $esc);
+		echo $s;
+	}
+
+	// return a string with suitable SWF object/embed tags
+	public function get_swf_tags($uswf, $par, $esc = true) {
+		extract($par->getparams());
+		$ming = self::should_use_ming();
+
+		$fesc = 'rawurlencode';
+		if ( isset($esc_t) && $esc_t === 'plus' ) {
+			$fesc = 'urlencode';
+		}
+
+		if ( $url === '' ) {
+			$url = $defaulturl;
+		}
+
+		$achk = array(
+			'requirehost' => true,
+			'requirepath' => true,
+			'rejfrag' => true,
+			// no, don't try to match extension; who knows?
+			//'rxpath' => '/.*\.(flv|f4v|mp4|m4v|mp3)$/i',
+			'rxproto' => '/^(https?|rtmp[a-z]{0,2})$/'
+			);
+		$ut = self::check_url($url, $achk);
+		if ( ! $ut ) {
+			self::errlog('rejected URL: "' . $url . '"');
+			return '<!-- SWF embedding declined:  URL displeasing -->';
+		}
+		// escaping: note url used here is itself a query arg
+		$url = ($esc == true) ? $fesc($ut) : $ut;
+		$w = $width; $h = $height;
+		if ( $cssurl === '' )
+			$cssurl = $this->get_swf_css_url();
+		$achk = array(
+			'requirehost' => true,
+			'requirepath' => true,
+			'rejuser' => true,
+			'rejquery' => true,
+			'rejfrag' => true,
+			'rxpath' => '/.*\.css$/i',
+			'rxproto' => '/^https?$/'
+			);
+		$ut = self::check_url($cssurl, $achk);
+		if ( ! $ut ) {
+			self::errlog('rejected css URL: "' . $cssurl . '"');
+			$ut = '';
+		}
+		$cssurl = ($esc == true) ? $fesc($ut) : $ut;
+		$playpath = ($esc == true) ? $fesc($playpath) : $playpath;
+		
+		// query vars
+		$qv = sprintf('ST=%s&WI=%u&HI=%u&IDV=%s&FN=%s',
+			$cssurl, $w, $h, $playpath, $url);
+		$qv .= sprintf('&PL=%s&HB=%s&VL=%u&LP=%s&DB=%s',
+			$play, $hidebar, $volume, $loop, $disablebar);
+		$qv .= sprintf('&AU=%s&AA=%s&DA=%s&PA=%s',
+			$audio, $aspectautoadj, $displayaspect, $pixelaspect);
+		$qv .= sprintf('&BH=%s',
+			$barheight);
+
+		// if using the precompiled player the query vars should be
+		// written to 'flashvars' so that the player can access them;
+		// but if using the php+ming script generated player the vars
+		// should be written to the script query, and they get better
+		// processing there, and then initialize the player's vars
+		// in actionscript; moreover, in this case they should not
+		// be passed in 'flashvars' so that the player does not see
+		// them and uses the initial values instead
+		if ( $ming ) {
+			$pv = &$qv;
+			$fv = '';
+		} else {
+			$pv = 'fpo=php+ming';
+			$fv = &$qv;
+		}
+
+		return ''
+		. sprintf('
+		<object classid="%s" codebase="%s" width="%u" height="%u">
+		<param name="data" value="%s?%s">
+		', $classid, $codebase, $w, $h, $uswf, $pv)
+		. sprintf('<param name="play" value="%s">
+		<param name="loop" value="%s">
+		<param name="quality" value="%s">
+		<param name="allowFullScreen" value="%s">
+		<param name="allowScriptAccess" value="sameDomain">
+		<param name="flashvars" value="%s">
+		<param name="src" value="%s?%s">
+		<param name="name" value="mingput">
+		<param name="bgcolor" value="#000000">
+		<param name="align" value="middle">
+		', $play, $loop, $quality, $allowfull, $fv, $uswf, $pv)
+		. sprintf('<embed type="%s" src="%s?%s" bgcolor="#000000" '
+		. 'name="mingput" flashvars="%s" allowscriptaccess="sameDomain"'
+		. ' quality="%s" loop="%s" play="%s" ',
+		$mtype, $uswf, $pv, $fv, $quality, $loop, $play)
+		. sprintf('data="%s?%s" allowfullscreen="%s" align="middle"'
+		. ' width="%u" height="%u" />
+		</object>
+		', $uswf, $pv, $allowfull, $w, $h);
+	}
+	
+} // End class SWF_put_evh
+
+// global instance of plugin class
+global $swfput1_evh_instance_1;
+if ( ! isset($swfput1_evh_instance_1) ) :
+	$swfput1_evh_instance_1 = null;
+endif; // global instance of plugin class
+
+else :
+	wp_die('class name conflict: SWF_put_evh in ' . __FILE__);
+endif; // if ( ! class_exists('SWF_put_evh') ) :
+
+/**
+ * class providing embed and player parameters, built around array --
+ * uncommented, but it's simple and obvious
+ * values are all strings, even if empty or numeric etc.
+ */
+if ( ! class_exists('SWF_params_evh') ) :
+class SWF_params_evh {
+	protected static $defs = array(
+		'url' => '',
+		'defaulturl' => 'rtmp://cp82347.live.edgefcs.net/live', //akamai
+		'cssurl' => '',
+		'width' => '240',
+		'height' => '180',
+		'audio' => 'false',        // source is audio; (mp3 is detected)
+		'aspectautoadj' => 'true', // adj. common sizes, e.g. 720x480
+		'displayaspect' => '0',    // needed if pixels are not square
+		'pixelaspect' => '0',      // use if display aspect unknown
+		'volume' => '50',          // if host has no saved setting
+		'play' => 'false',         // play (or pause) on load
+		'hidebar' => 'false',      // initially hide control bar
+		'disablebar' => 'false',   // disable and hide control bar
+		'barheight' => 'default',
+		'quality' => 'high',
+		'allowfull' => 'true',
+		'allowxdom' => 'false',
+		'loop' => 'false',
+		'mtype' => 'application/x-shockwave-flash',
+		// rtmp
+		'playpath' => 'CSPAN2@14846',
+		// <object>
+		'classid' => 'clsid:d27cdb6e-ae6d-11cf-96b8-444553540000',
+		'codebase' => 'http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,40,0'
+	);
+
+	protected $inst = null; // modifiable copy per instance
+	
+	public function __construct($copy = null) {
+		$this->inst = self::$defs;
+		if ( is_array($copy) )
+			$this->setarray($copy);
+	}
+	
+	public static function getdefs() { return self::$defs; }
+	public function getparams() { return $this->inst; }
+	public function getkeys() { return array_keys($this->inst); }
+	public function getvalues() { return array_values($this->inst); }
+	public function getvalue($key) {
+		if ( array_key_exists($key, $this->inst) ) {
+			return $this->inst[$key];
+		}
+		return null;
+	}
+	public function setvalue($key, $val) {
+		if ( array_key_exists($key, $this->inst) ) {
+			$t = $this->inst[$key];
+			$this->inst[$key] = $val;
+			return $t;
+		}
+		return null;
+	}
+	public function setnewvalue($key, $val) {
+		if ( array_key_exists($key, $this->inst) ) {
+			$t = $this->inst[$key];
+		} else {
+			$t = $val;
+		}
+		$this->inst[$key] = $val;
+		return $t;
+	}
+	public function setdefault($key) {
+		if ( array_key_exists($key, self::$defs) ) {
+			$t = $this->inst[$key];
+			$this->inst[$key] = self::$defs[$key];
+			return $t;
+		}
+		return null;
+	}
+	public function setarray($ar) {
+		// array_replace is new w/ 5.3; want 5.2 here
+		//$this->inst = array_replace($this->inst, $ar);
+		// so . . .
+		foreach ( $ar as $k => $v ) {
+			$this->inst[$k] = $v;
+		}
+		return $this;
+	}
+	public function cmpval($key) {
+		return (self::$defs[$key] === $this->inst[$key]);
+	}
+} // End class SWF_params_evh
+else :
+	wp_die('class name conflict: SWF_params_evh in ' . __FILE__);
+endif; // if ( ! class_exists('SWF_params_evh') ) :
+
+/**
+ * class handling swf video as widget; uses SWF_put_evh
+ */
+if ( ! class_exists('SWF_put_widget_evh') ) :
+class SWF_put_widget_evh extends WP_Widget {
+	// main plugin class name
+	protected static $swfput_plugin = 'SWF_put_evh';
+	// params helper class name
+	protected static $swfput_params = 'SWF_params_evh';
+	// an instance of the main plugun class
+	protected $plinst;
+	
+	// defaults == width should not be wider than sidebar, but
+	// widgets may be placed elsewhere, e.g. near bottom
+	protected static $defwidth  = 216; // 216x162 is
+	protected static $defheight = 162; // 4:3 aspect
+
+	public function __construct() {
+		global $swfput1_evh_instance_1;
+		if ( ! isset($swfput1_evh_instance_1) ) {
+			$cl = self::$swfput_plugin;
+			$this->plinst = new $cl(false);
+		} else {
+			$this->plinst = &$swfput1_evh_instance_1;
+		}
+	
+		$cl = __CLASS__;
+		$desc = __('Flash video for your widget areas');
+		$opts = array('classname' => $cl, 'description' => $desc);
+		$copts = array('width' => self::$defwidth,
+					'height' => self::$defheight);
+		parent::__construct($cl, __('Flash Video'), $opts, $copts);
+	}
+
+	// surely this code cannot run under PHP4, but anyway . . .
+	public function SWF_put_widget_evh() {
+		$this->__construct();
+	}
+
+	public function widget($args, $instance) {
+		$opt = $this->plinst->get_widget_option();
+		if ( $opt != 'true' ) {
+			return;
+		}
+		
+		$w = self::$defwidth;
+		$h = self::$defheight;
+		$uswf = $this->plinst->get_swf_url('widget', $w, $h);
+
+		$url = $instance['vurl'];
+		$pr = self::$swfput_params;
+		$pr = new $pr();
+		$pr->setvalue('width', $w);
+		$pr->setvalue('height', $h);
+		$pr->setvalue('url', $url);
+		if ( false && empty($url) ) { // allow default url
 			return;
 		}
 
 		extract($args);
 
+		// note *no default* for title; allow empty title so that
+		// user may place this below another widget with
+		// apparent continuity (subject to filters)
 		$title = apply_filters('widget_title',
-			empty($instance['title']) ?
-				__('Your Fortune:') :
-				$instance['title'],
+			empty($instance['title']) ? '' : $instance['title'],
 			$instance, $this->id_base);
 
 		echo $before_widget;
@@ -954,15 +1258,14 @@ class Fortune2_widget_evh extends WP_Widget {
 			echo $before_title . $title . $after_title;
 		}
 
-		printf("<p>%s</p>\n", $ftn);
+		$this->plinst->put_swf_tags($uswf, $pr);
 
 		echo $after_widget;
 	}
 
-	public function update ($new_instance, $old_instance) {
+	public function update($new_instance, $old_instance) {
 		$instance = $new_instance;
 		
-		// sample/test diddle w/ array
 		foreach ( $old_instance as $k => $v ) {
 			if ( ! array_key_exists($k, $instance) ) {
 				$instance[$k] = $v;
@@ -970,23 +1273,24 @@ class Fortune2_widget_evh extends WP_Widget {
 		}
 		if ( ! array_key_exists('title', $instance) ) {
 			$instance['title'] = '';
-		} else {
-			// just testing . . .
-			$instance['title'] = str_replace('Mizz', 'Miss',
-				$instance['title']);
+		}
+		if ( ! array_key_exists('vurl', $instance) ) {
+			$instance['vurl'] = '';
 		}
 
 		return $instance;
 	}
 
-	public function form ($instance) {
+	public function form($instance) {
 		$ht = 'wptexturize';
 		$instance = wp_parse_args((array)$instance,
-			array('title' => ''));
+			array('title' => '', 'vurl' => ''));
 		$title = $ht($instance['title']);
+		$vurl = $ht($instance['vurl']);
+
 		$id = $this->get_field_id('title');
 		$nm = $this->get_field_name('title');
-		$tl = $ht(__('Fortune Title:'));
+		$tl = $ht(__('Instance Title:'));
 		?>
 
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
@@ -995,16 +1299,21 @@ class Fortune2_widget_evh extends WP_Widget {
 			type="text" value="<?php echo $title; ?>" /></p>
 
 		<?php
+		$id = $this->get_field_id('vurl');
+		$nm = $this->get_field_name('vurl');
+		$tl = $ht(__('URL (.flv|.mp4|.m4v):'));
+		?>
+		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
+		<input class="widefat" id="<?php echo $id; ?>"
+			name="<?php echo $nm; ?>"
+			type="text" value="<?php echo $vurl; ?>" /></p>
+
+		<?php
 	}
-} // End class Fortune2_widget_evh
-endif; // if ( ! class_exists('Fortune2_widget_evh') ) :
-
-
-/**********************************************************************\
- *  standalone functions                                              *
-\**********************************************************************/
-
-// not just now
+} // End class SWF_put_widget_evh
+else :
+	wp_die('class name conflict: SWF_put_widget_evh in ' . __FILE__);
+endif; // if ( ! class_exists('SWF_put_widget_evh') ) :
 
 
 /**********************************************************************\
@@ -1014,9 +1323,8 @@ endif; // if ( ! class_exists('Fortune2_widget_evh') ) :
 /**
  * 'main()' here
  */
-$fortune2_evh_instance_1 = null;
-if ( ! defined('WP_UNINSTALL_PLUGIN') ) {
-	$fortune2_evh_instance_1 = Fortune2_evh::instantiate();
+if (!defined('WP_UNINSTALL_PLUGIN')&&$swfput1_evh_instance_1 === null) {
+	$swfput1_evh_instance_1 = SWF_put_evh::instantiate();
 }
 
 // End PHP script:
