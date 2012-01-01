@@ -1,0 +1,72 @@
+.TL
+README for Iforge
+.br
+Mandelbrot Set Generator in Java
+.AU
+Ed Hynan <freecode@verizon.net>
+<<CMAC>>
+.SH
+What is it?
+.PP
+\fBIforge\fP is a Java program demonstrating the
+generation of Mandelbrot set and Julia set images.
+\fBIforge\fP also includes an adaptation of
+the program \fBppmforge\fP by John Walker.
+The fractal planet image generator
+is a Java port of
+the \fBppmforge\fP code.
+The C program \fBppmforge\fP is included
+in the \fIpbmplus\fP and \fInetpbm\fP raster
+image processing utility packages.
+For the netpbm package see
+\f(CRhttp://netpbm.sourceforge.net/\fR.
+.SH
+Building From the Source
+.PP
+The source directories contain simple
+Makefiles for building the \fB.class\fP
+files.
+\fIMakefile.unix\fP is written for
+\fIGNU\fP \fBgmake\fP but is probably usable
+with no or few changes
+with most \fIUnix\fP make utilities.
+\fIMakefile.dos\fP is written for
+\fISymantec\fP's \fBsmake\fP,
+and might be a better starting point for
+other \fIDOS\fP make utilities.
+.PP
+The makefiles have a target named \(lqzip\(rq
+for generating a \fBjar\fP archive.
+.SH
+Running
+.PP
+\fBIforge\fP will run as an application or applet.
+The same set of classes are used except for the
+class containing the entry point, which differs
+for each.  The application is invoked via 
+\fBFractalForge.class\fP and the applet via
+\fBFractApplet.class\fP. (The application uses
+one additional class not used by the application.)
+The file \fIFractApplet.html\fP is included to
+help run the applet with \fIJava\fP's \fBappletviewer\fP.
+\fIFractalForge.bat\fP is a simple \fIDOS\fP
+batch file that \fIDOS\fP users can run the
+application with, and \fIFractalForge\fP is
+a simple \fI/bin/sh\fP script.
+Both of these scripts expect to be invoked from
+the directory containing the class files. If the
+class files are installed in a library directory,
+then edit your script as necessary.
+.PP
+The application version can save
+images in the \fB.PPM\fP format.
+When run as an applet image saving menu
+items are disabled.
+.SH
+License
+.PP
+This program and all files included in
+the distribution archive are under the
+\f(BIGNU GPL\fP.
+See the included file \fBCOPYING\fP.
+
