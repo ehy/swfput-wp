@@ -213,7 +213,6 @@ function null_proc () {}
 // regarding URLs and paths, but GNash requires encoding as necessary.
 // the builtin escape() does not handle path elements.
 function pathesc(path) {
-	//var p = unescape(path);
 	var p = path;
 	var pa = p.split('/');
 
@@ -264,11 +263,9 @@ function urlesc(url) {
 	i = host.indexOf('/', 1);
 	if ( i >= 1 ) {
 		path = pathesc(host.substr(i));
-		//host = unescape(host.substr(0, i));
 		host = host.substr(0, i);
 	} else {
 		path = "";
-		//host = unescape(host);
 	}
 
 	//prot = unescape(ta[0]) + '://';
@@ -1821,8 +1818,7 @@ adddbgtext(" vurl: '" + vurl + "'\n");
 
 // is there a stream id (rtmp playpath)?
 if ( v_id == null && _level0.IDV != undefined && _level0.IDV != '' ) {
-	v_id = unescape(_level0.IDV);
-	audb = false;
+	v_id = _level0.IDV;
 }
 
 // boolean rtmp: by protocol
