@@ -111,7 +111,7 @@ function check_url_arg($url, $args = array())
 	// (note gnash doesn't do https)
 	// the Adobe plugin handles encoded or not
 	$p = '/';
-	$ua = parse_url(urldecode($url));
+	$ua = parse_url($url);
 	$vurl = '';
 	if ( array_key_exists('path', $ua) ) {
 		$t = ltrim($ua['path'], '/');

@@ -213,7 +213,8 @@ function null_proc () {}
 // regarding URLs and paths, but GNash requires encoding as necessary.
 // the builtin escape() does not handle path elements.
 function pathesc(path) {
-	var p = unescape(path);
+	//var p = unescape(path);
+	var p = path;
 	var pa = p.split('/');
 
 	for ( var i = 0; i < pa.length; i++ ) {
@@ -263,13 +264,15 @@ function urlesc(url) {
 	i = host.indexOf('/', 1);
 	if ( i >= 1 ) {
 		path = pathesc(host.substr(i));
-		host = unescape(host.substr(0, i));
+		//host = unescape(host.substr(0, i));
+		host = host.substr(0, i);
 	} else {
 		path = "";
-		host = unescape(host);
+		//host = unescape(host);
 	}
 
-	prot = unescape(ta[0]) + '://';
+	//prot = unescape(ta[0]) + '://';
+	prot = ta[0] + '://';
 	return prot + host + path;
 }
 
@@ -823,6 +826,10 @@ connection_onStatus = function(stat) {
 		break;
 	case 'NetConnection.Connect.Closed':
 		adddbgtext('Got "NetConnection.Connect.Closed"\n');
+		stopWait();
+		if ( ! doloop ) {
+			stopVideo();
+		}
 		break;
 	case 'NetConnection.Connect.Success':
 		adddbgtext('Got "NetConnection.Connect.Success"\n');
@@ -991,10 +998,15 @@ stream_onTextData = function(dat) {
 
 // callback for sound objects when played out
 sound_onComplete = function() {
-	isrunning = false;
 	stopWait();
-	if ( volclient != undefined && volclient != null ) {
-		volclient.flush();
+	if ( ! doloop ) {
+		isrunning = false;
+		if ( volclient != undefined && volclient != null ) {
+			volclient.flush();
+		}
+	} else {
+		sound.stop();
+		sound.start(0);
 	}
 };
 
