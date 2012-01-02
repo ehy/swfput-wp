@@ -1229,8 +1229,8 @@ class SWF_put_widget_evh extends WP_Widget {
 			return;
 		}
 		
-		$w = self::$defwidth;
-		$h = self::$defheight;
+		$w = $instance['width'];
+		$h = $instance['height'];
 		$uswf = $this->plinst->get_swf_url('widget', $w, $h);
 
 		$url = $instance['vurl'];
@@ -1264,30 +1264,35 @@ class SWF_put_widget_evh extends WP_Widget {
 	}
 
 	public function update($new_instance, $old_instance) {
-		$instance = $new_instance;
+		$i = $new_instance;
 		
 		foreach ( $old_instance as $k => $v ) {
-			if ( ! array_key_exists($k, $instance) ) {
-				$instance[$k] = $v;
+			if ( ! array_key_exists($k, $i) ) {
+				$i[$k] = $v;
 			}
 		}
-		if ( ! array_key_exists('title', $instance) ) {
-			$instance['title'] = '';
+		if ( ! array_key_exists('title', $i) ) {
+			$i['title'] = '';
 		}
-		if ( ! array_key_exists('vurl', $instance) ) {
-			$instance['vurl'] = '';
+		if ( ! array_key_exists('vurl', $i) ) {
+			$i['vurl'] = '';
+		}
+		if ( ! array_key_exists('width', $i) || $i['width'] == '' ) {
+			$i['width'] = self::$defwidth;
+		}
+		if ( ! array_key_exists('height', $i) || $i['height'] == '' ) {
+			$i['height'] = self::$defheight;
 		}
 
-		return $instance;
+		return $i;
 	}
 
 	public function form($instance) {
 		$ht = 'wptexturize';
 		$instance = wp_parse_args((array)$instance,
 			array('title' => '', 'vurl' => ''));
-		$title = $ht($instance['title']);
-		$vurl = $ht($instance['vurl']);
 
+		$title = $ht($instance['title']);
 		$id = $this->get_field_id('title');
 		$nm = $this->get_field_name('title');
 		$tl = $ht(__('Instance Title:'));
@@ -1299,6 +1304,7 @@ class SWF_put_widget_evh extends WP_Widget {
 			type="text" value="<?php echo $title; ?>" /></p>
 
 		<?php
+		$vurl = $ht($instance['vurl']);
 		$id = $this->get_field_id('vurl');
 		$nm = $this->get_field_name('vurl');
 		$tl = $ht(__('URL (.flv|.mp4|.m4v):'));
@@ -1307,6 +1313,28 @@ class SWF_put_widget_evh extends WP_Widget {
 		<input class="widefat" id="<?php echo $id; ?>"
 			name="<?php echo $nm; ?>"
 			type="text" value="<?php echo $vurl; ?>" /></p>
+
+		<?php
+		$width = $ht($instance['width']);
+		$id = $this->get_field_id('width');
+		$nm = $this->get_field_name('width');
+		$tl = $ht(__('Width (default ').self::$defwidth.__('):'));
+		?>
+		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
+		<input class="widefat" id="<?php echo $id; ?>"
+			name="<?php echo $nm; ?>"
+			type="text" value="<?php echo $width; ?>" /></p>
+
+		<?php
+		$height = $ht($instance['height']);
+		$id = $this->get_field_id('height');
+		$nm = $this->get_field_name('height');
+		$tl = $ht(__('Height (default ').self::$defheight.__('):'));
+		?>
+		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
+		<input class="widefat" id="<?php echo $id; ?>"
+			name="<?php echo $nm; ?>"
+			type="text" value="<?php echo $height; ?>" /></p>
 
 		<?php
 	}

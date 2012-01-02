@@ -163,7 +163,8 @@ var stream_displayWidth = null;
 var stream_frameHeight = null;
 var stream_displayHeight = null;
 // aspect factors, calculated from metadate if available
-var afactW = System.capabilities.pixelAspectRatio;
+var upixaspect = System.capabilities.pixelAspectRatio;
+var afactW = 1;
 var afactH = 1;
 var stream_unknownkey = null;
 var stream_unknownvar = null;
@@ -444,6 +445,17 @@ if ( guardinit == undefined ) {
 				doFullscreen();
 			} else if ( curkey == 71 || curkey == 103 ) {
 				// G,g
+				if ( b_release == undefined || b_release == false ) {
+					bbar.dbg._visible = ! bbar.dbg._visible;
+					if ( bbar.dbg._visible ) {
+						adddbgtext("isrunning=="+isrunning+"\n");
+					}
+				}
+			} else if ( curkey == 65 || curkey == 97 ) {
+				// A,a
+				// debugging broken gnash 0.8.10 aspect 0.561...
+				upixaspect = upixaspect == 1 ?
+					System.capabilities.pixelAspectRatio : 1;
 				if ( b_release == undefined || b_release == false ) {
 					bbar.dbg._visible = ! bbar.dbg._visible;
 					if ( bbar.dbg._visible ) {
@@ -773,7 +785,7 @@ stream_onMetaData = function(info) {
 		var va = stream_width / stream_height;
 		var da = stream_displayWidth / stream_displayHeight;
 
-		afactW = System.capabilities.pixelAspectRatio;
+		afactW = upixaspect; // System.capabilities.pixelAspectRatio;
 		afactH = 1;
 		if ( Math.abs(da - va) > 0.001 ) {
 			afactW *= da * stream_height / stream_width;
@@ -1805,6 +1817,9 @@ bbar.dltxt.tabEnabled = false;
 bbar.dltxt._visible = false;
 bbar.dltxt.wordWrap = false;
 bbar.dltxt.autoSize = true;
+
+adddbgtext("upixaspect " + upixaspect + "\n");
+adddbgtext("pixelAspectRatio " + System.capabilities.pixelAspectRatio + "\n");
 
 // without builtin video URL, get one -- this is the case
 // with pre-built .swf, not on the fly PHP CGI
