@@ -454,14 +454,8 @@ if ( guardinit == undefined ) {
 			} else if ( curkey == 65 || curkey == 97 ) {
 				// A,a
 				// debugging broken gnash 0.8.10 aspect 0.561...
-				upixaspect = upixaspect == 1 ?
+				afactW = upixaspect = upixaspect == 1 ?
 					System.capabilities.pixelAspectRatio : 1;
-				if ( b_release == undefined || b_release == false ) {
-					bbar.dbg._visible = ! bbar.dbg._visible;
-					if ( bbar.dbg._visible ) {
-						adddbgtext("isrunning=="+isrunning+"\n");
-					}
-				}
 			} else if ( curkey == 86 || curkey == 118 ) {
 				// V,v
 				volgadget._visible = ! volgadget._visible;
