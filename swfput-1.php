@@ -173,6 +173,9 @@ class SWF_put_evh {
 	// correct file path (possibly needed due to symlinks)
 	public static $pluginfile = null;
 
+	// string used for (default) shortcode tag
+	public static $shortcode = 'putswf_video';
+
 	public function __construct($init = true) {
 		// if arg $init is false then this instance is just
 		// meant to provide options and such
@@ -454,11 +457,11 @@ class SWF_put_evh {
 		// add here to be sure option is ready
 		if ( $this->get_message_option() === 'true' ) {
 			$scf = array($this, 'post_shortcode');
-			add_shortcode('putswf_video', $scf);
+			add_shortcode(self::$shortcode, $scf);
 			$scf = array($this, 'post_sed');
 			add_action('the_content', $scf, 20);
 		} else {
-			remove_shortcode('putswf_video');
+			remove_shortcode(self::$shortcode);
 			remove_action('the_content', array($this, 'post_sed'));
 		}
 	}

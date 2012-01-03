@@ -8,6 +8,8 @@ SRCS = ${PRJNAME}.php \
 	OptSection_0_0_2.inc.php \
 	OptPage_0_0_2.inc.php
 
+JSDIR = js
+JSSRC = $(JSDIR)/formxed.js
 SDIRI = mingtest
 SDIRO = mingput
 SSRCS = $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php $(SDIRI)/obj.css
@@ -30,9 +32,9 @@ PHPCLI = php -f
 
 all: ${PRJZIP}
 
-${PRJZIP}: ${SBINS} ${ZALL}
+${PRJZIP}: ${SBINS} ${JSSRC} ${ZALL}
 	test -e ttd && rm -rf ttd; test -e ${PRJDIR} && mv ${PRJDIR} ttd; \
-	mkdir ${PRJDIR} ${PRJSDIR} && cp -r -p ${ZALL} ${PRJDIR} && \
+	mkdir ${PRJDIR} ${PRJSDIR} && cp -r -p ${ZALL} ${JSDIR} ${PRJDIR} && \
 	cp -r -p ${ZSALL} ${PRJSDIR} && rm -f ${PRJZIP} && \
 	$(ZIP) ${PRJZIP} ${PRJDIR} && rm -rf ${PRJDIR} && \
 	(test -e ttd && mv ttd ${PRJDIR}; ls -l ${PRJZIP})
