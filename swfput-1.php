@@ -872,13 +872,9 @@ class SWF_put_evh {
 	 */
 	public static function check_url($url, $args = array(), $fesc = '') {
 		extract($args);
-		// gnash does not encode URLs, and so fails on
-		// chars that need encoding: do it for gnash
-		// (note gnash doesn't do https)
-		// the Adobe plugin handles encoded or not
+		$ourl = '';
 		$p = '/';
 		$ua = parse_url($url);
-		$vurl = '';
 		if ( array_key_exists('path', $ua) ) {
 			$t = ltrim($ua['path'], '/');
 			if ( isset($rxpath) ) {
@@ -898,7 +894,7 @@ class SWF_put_evh {
 						return false;
 					}
 				}
-				$vurl = $t . '://';
+				$ourl = $t . '://';
 			} else if ( isset($requirehost) && $requirehost ) {
 				return false;
 			}
@@ -906,25 +902,25 @@ class SWF_put_evh {
 				if ( isset($rejuser) && $rejuser ) {
 					return false;
 				}
-				$vurl .= $ua['user'];
+				$ourl .= $ua['user'];
 				// user not rejected; pass OK
 				if ( array_key_exists('pass', $ua) ) {
-					$vurl .= ':' . $ua['pass'];
+					$ourl .= ':' . $ua['pass'];
 				}
-				$vurl .= '@';
+				$ourl .= '@';
 			}
-			$vurl .= $ua['host'];
+			$ourl .= $ua['host'];
 			if ( array_key_exists('port', $ua) ) {
 				if ( isset($rejport) && $rejport ) {
 					return false;
 				}
-				$vurl .= ':' . $ua['port'];
+				$ourl .= ':' . $ua['port'];
 			}
 		} else if ( isset($requirehost) && $requirehost ) {
 			return false;
 		}
 	
-		$vurl .= $p;
+		$ourl .= $p;
 		// A query with the media URL? It can happen
 		// for stream servers.
 		// this works, e.g. w/ ffserver ?date=...
@@ -932,16 +928,16 @@ class SWF_put_evh {
 			if ( isset($rejquery) && $rejquery ) {
 				return false;
 			}
-			$vurl .= '?' . $ua['query'];
+			$ourl .= '?' . $ua['query'];
 		}
 		if ( array_key_exists('fragment', $ua) ) {
 			if ( isset($rejfrag) && $rejfrag ) {
 				return false;
 			}
-			$vurl .= '#' . $ua['fragment'];
+			$ourl .= '#' . $ua['fragment'];
 		}
 		
-		return $vurl;
+		return $ourl;
 	}
 
 	// helper for selecting swf type (bin||script)) url
@@ -949,10 +945,7 @@ class SWF_put_evh {
 	// 'post' (shortcodes in posts), 'post_sed' (attachment_id filter),
 	// 'head' -- it might be used in future
 	public function get_swf_url($sel, $wi = 640, $hi = 480) {
-		$useming = false;
-		if ( self::should_use_ming() ) {
-			$useming = true;
-		}
+		$useming = self::should_use_ming();
 
 		if ( $useming === true ) {
 			$t = $this->swfputphp;
@@ -992,7 +985,7 @@ class SWF_put_evh {
 		}
 
 		$achk = array(
-			'requirehost' => true,
+			'requirehost' => false, // can use orig host
 			'requirepath' => true,
 			'rejfrag' => true,
 			// no, don't try to match extension; who knows?
@@ -1010,7 +1003,7 @@ class SWF_put_evh {
 		if ( $cssurl === '' )
 			$cssurl = $this->get_swf_css_url();
 		$achk = array(
-			'requirehost' => true,
+			'requirehost' => false, // can use orig host
 			'requirepath' => true,
 			'rejuser' => true,
 			'rejquery' => true,
@@ -1230,7 +1223,13 @@ class SWF_put_widget_evh extends WP_Widget {
 		}
 		
 		$w = $instance['width'];
+		if ( ! $w ) {
+			$w = self::$defwidth;
+		}
 		$h = $instance['height'];
+		if ( ! $h ) {
+			$h = self::$defheight;
+		}
 		$uswf = $this->plinst->get_swf_url('widget', $w, $h);
 
 		$url = $instance['vurl'];
@@ -1239,9 +1238,6 @@ class SWF_put_widget_evh extends WP_Widget {
 		$pr->setvalue('width', $w);
 		$pr->setvalue('height', $h);
 		$pr->setvalue('url', $url);
-		if ( false && empty($url) ) { // allow default url
-			return;
-		}
 
 		extract($args);
 
@@ -1307,7 +1303,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$vurl = $ht($instance['vurl']);
 		$id = $this->get_field_id('vurl');
 		$nm = $this->get_field_name('vurl');
-		$tl = $ht(__('URL (.flv|.mp4|.m4v):'));
+		$tl = $ht(__('Video|Audio Url:'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"

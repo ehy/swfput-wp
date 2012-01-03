@@ -106,13 +106,9 @@ if ( ! function_exists('check_url_arg') ) :
 function check_url_arg($url, $args = array())
 {
 	extract($args);
-	// gnash does not encode URLs, and so fails on
-	// chars that need encoding: do it for gnash
-	// (note gnash doesn't do https)
-	// the Adobe plugin handles encoded or not
+	$vurl = '';
 	$p = '/';
 	$ua = parse_url($url);
-	$vurl = '';
 	if ( array_key_exists('path', $ua) ) {
 		$t = ltrim($ua['path'], '/');
 		if ( isset($rxpath) ) {
@@ -529,7 +525,7 @@ foreach ( $av as $k => $v ) {
 		case 'FN': // media url
 			if ( $v ) {
 				$a = array(
-					'requirehost' => true,
+					'requirehost' => false, // can use orig host
 					'requirepath' => true,
 					'rejfrag' => true,
 					// no, don't try to match extension; who knows?
@@ -547,7 +543,7 @@ foreach ( $av as $k => $v ) {
 		case 'ST': // player css
 			if ( $v ) {
 				$a = array(
-					'requirehost' => true,
+					'requirehost' => false, // can use orig host
 					'requirepath' => true,
 					'rejuser' => true,
 					'rejquery' => true,
