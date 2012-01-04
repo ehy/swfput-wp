@@ -18,44 +18,47 @@
 /**
  * For Wordpress shortcode tags in the post editor; js to link
  * html form with shortcode attributes
+ * 
+ * based on example at:
+ * 	http://bluedogwebservices.com/wordpress-25-shortcodes/
+ * 
  */
 
 var SWFPut_putswf_video_xed = function () {}
 
 SWFPut_putswf_video_xed.prototype = {
-    options           : {},
-    mk_shortcode : function() {
-        var caption = this['options']['caption'];
-        delete this['options']['caption'];
+    map : {},
+    put_shortcode : function(cs, sc) {
+        var c = this['map'][cs];
+        delete this['map'][cs];
 
-        var attrs = '';
-        jQuery.each(this['options'], function(name, value){
+        var atts = '';
+        jQuery.each(this['map'], function(name, value){
             if (value != '') {
-                attrs += ' ' + name + '="' + value + '"';
+                atts += ' ' + name + '="' + value + '"';
             }
         });
 
-        var sc = 'putswf_video';
-        var ret = '[' + sc + attrs + ']';
-        if ( caption.length > 0 ) {
-			ret += caption + '[/' + sc + ']';
+        var ret = '[' + sc + atts + ']';
+        if ( c.length > 0 ) {
+			ret += c + '[/' + sc + ']';
 		}
         return ret;
     },
-    send_xed      : function(f) {
-		var len = "SWFPut_putswf_video_".length;
-		var pat = "input[id^=SWFPut_putswf_video]:not(input:checkbox)";
-		pat += ",input[id^=SWFPut_putswf_video]:checkbox:checked";
+    send_xed : function(f, id, cs, sc) {
+		var len = id.length + 1;
+		var pat = "input[id^=" + id + "]:not(input:checkbox)";
+		pat += ",input[id^=" + id + "]:checkbox:checked";
         var all = jQuery(f).find(pat);
         var $this = this;
         all.each(function () {
-            var name = this.name.substring(len, this.name.length - 1);
-            $this['options'][name] = this.value;
+            var k = this.name.substring(len, this.name.length - 1);
+            $this['map'][k] = this.value;
         });
-        send_to_editor(this.mk_shortcode());
+        send_to_editor(this.put_shortcode(cs, sc));
         return false;
     }
 }
 
-var SWFPut_putswf_video_var = new SWFPut_putswf_video_xed();
+var SWFPut_putswf_video_inst = new SWFPut_putswf_video_xed();
 

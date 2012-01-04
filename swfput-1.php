@@ -715,16 +715,16 @@ class SWF_put_evh {
 	// the WP post editor: following example at:
 	// http://bluedogwebservices.com/wordpress-25-shortcodes/
 	public static function put_xed_form() {
-/*
-		$sc = self::$shortcode;
 		$pr = self::$swfput_params;
 		$pr = new $pr();
-*/
+		extract($pr->getparams());
+
+		$sc = self::$shortcode;
 		$id = 'SWFPut_putswf_video';
 		$thfmt = '<th scope="row"><label for="%s_%s">%s</label></th>';
-		$infmt = '<input type="text" size="40" style="width:95%%;" name="%s[%s]" id="%s_%s" />';
-		$job = 'SWFPut_putswf_video_var';
-		$jfu = 'send_xed(this.form)';
+		$infmt = '<input type="text" size="40" style="width:95%%;" name="%s[%s]" id="%s_%s" value="%s" />';
+		$job = $id . '_inst';
+		$jfu = "send_xed(this.form,'{$id}','caption','{$sc}')";
 		$bjfmt = '<input type="button" onclick="return %s.%s;" value="%s" />';
 		?>
 		<table class="form-table">
@@ -732,35 +732,49 @@ class SWF_put_evh {
 				<?php $k = 'caption'; $l = __('Media Caption:');
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
-					<?php printf($infmt, $id, $k, $id, $k); ?>
+					<?php printf($infmt, $id, $k, $id, $k, ''); ?>
 				</td>
 			</tr>
 			<tr valign="top">
 				<?php $k = 'url'; $l = __('Media URL:');
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
-					<?php printf($infmt, $id, $k, $id, $k); ?>
+					<?php printf($infmt, $id, $k, $id, $k, ''); ?>
 				</td>
 			</tr>
 			<tr valign="top">
 				<?php $k = 'playpath'; $l = __('Playpath (rtmp):');
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
-					<?php printf($infmt, $id, $k, $id, $k); ?>
+					<?php printf($infmt, $id, $k, $id, $k, ''); ?>
 				</td>
 			</tr>
 			<tr valign="top">
 				<?php $k = 'width'; $l = __('Width:');
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
-					<?php printf($infmt, $id, $k, $id, $k); ?>
+					<?php printf($infmt, $id, $k, $id, $k, $$k); ?>
 				</td>
 			</tr>
 			<tr valign="top">
 				<?php $k = 'height'; $l = __('Height:');
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
-					<?php printf($infmt, $id, $k, $id, $k); ?>
+					<?php printf($infmt, $id, $k, $id, $k, $$k); ?>
+				</td>
+			</tr>
+			<tr valign="top">
+				<?php $k = 'displayaspect'; $l = __('Display Aspect:');
+					printf($thfmt, $id, $k, $l); ?>
+				<td>
+					<?php printf($infmt, $id, $k, $id, $k, $$k); ?>
+				</td>
+			</tr>
+			<tr valign="top">
+				<?php $k = 'pixelaspect'; $l = __('Pixel Aspect:');
+					printf($thfmt, $id, $k, $l); ?>
+				<td>
+					<?php printf($infmt, $id, $k, $id, $k, $$k); ?>
 				</td>
 			</tr>
 		</table>
