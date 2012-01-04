@@ -24,9 +24,9 @@ var SWFPut_putswf_video_xed = function () {}
 
 SWFPut_putswf_video_xed.prototype = {
     options           : {},
-    generateShortCode : function() {
-        var content = this['options']['content'];
-        delete this['options']['content'];
+    mk_shortcode : function() {
+        var caption = this['options']['caption'];
+        delete this['options']['caption'];
 
         var attrs = '';
         jQuery.each(this['options'], function(name, value){
@@ -34,16 +34,25 @@ SWFPut_putswf_video_xed.prototype = {
                 attrs += ' ' + name + '="' + value + '"';
             }
         });
-        return '[googleMap' + attrs + ']' + content + '[/googleMap]'
+
+        var sc = 'putswf_video';
+        var ret = '[' + sc + attrs + ']';
+        if ( caption.length > 0 ) {
+			ret += caption + '[/' + sc + ']';
+		}
+        return ret;
     },
-    sendToEditor      : function(f) {
-        var collection = jQuery(f).find("input[id^=wpYourPluginName]:not(input:checkbox),input[id^=wpYourPluginName]:checkbox:checked");
+    send_xed      : function(f) {
+		var len = "SWFPut_putswf_video_".length;
+		var pat = "input[id^=SWFPut_putswf_video]:not(input:checkbox)";
+		pat += ",input[id^=SWFPut_putswf_video]:checkbox:checked";
+        var all = jQuery(f).find(pat);
         var $this = this;
-        collection.each(function () {
-            var name = this.name.substring(13, this.name.length-1);
+        all.each(function () {
+            var name = this.name.substring(len, this.name.length - 1);
             $this['options'][name] = this.value;
         });
-        send_to_editor(this.generateShortCode());
+        send_to_editor(this.mk_shortcode());
         return false;
     }
 }

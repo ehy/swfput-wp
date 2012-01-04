@@ -166,6 +166,11 @@ class SWF_put_evh {
 	protected $swfputphp;
 	// swfput program css path
 	protected $swfputcss;
+
+	// swfput js subdirectory
+	protected static $swfjsdir = 'js';
+	// swfput js shortcode editor helper name
+	protected static $swfxedjsname = 'formxed.js';
 	
 	// hold an instance
 	private static $instance;
@@ -216,18 +221,43 @@ class SWF_put_evh {
 		// {de,}activate also controls the widget
 		add_action('widgets_init', array($cl, 'regi_widget'));//, 1);
 
+		// hook&filter to make shortcode form for editor
+		add_action('admin_menu', array($cl, 'hook_admin_menu'));
+		add_filter('admin_print_scripts',
+			array($cl, 'filter_admin_print_scripts'));
 	}
 
 	public function __destruct() {
 		$this->opt = null;
 	}
 	
+	public static function hook_admin_menu() {
+		$cl = __CLASS__;
+		$id = 'SWFPut_putswf_video';
+		$tl = __('Add SWF Shortcode');
+		$fn = 'put_xed_form';
+	    add_meta_box($id, $tl, array($cl, $fn), 'post', 'normal');
+	    add_meta_box($id, $tl, array($cl, $fn), 'page', 'normal');
+	}
+
+	public static function filter_admin_print_scripts() {
+	    if ($GLOBALS['editing']) {
+			$jsfn = 'SWFPut_putswf_video_xed';
+			$pf = self::mk_pluginfile();
+			$t = self::$swfjsdir . '/' . self::$swfxedjsname;
+			$jsfile = plugins_url($t, $pf);
+	        wp_enqueue_script($jsfn, $jsfile, array('jquery'), '1.0.0');
+	    }
+	}
+
 	public static function on_deactivate() {
 		$wreg = __CLASS__;
 		$name = plugin_basename(self::mk_pluginfile());
 		$arf = array($wreg, 'plugin_page_addlink');
 		remove_filter("plugin_action_links_$name", $arf);
+
 		self::unregi_widget();
+
 		unregister_setting(self::$opt_group, // option group
 			self::$opt_group, // opt name; using group passes all to cb
 			array($wreg, 'validate_opts'));
@@ -240,8 +270,8 @@ class SWF_put_evh {
 
 	public static function on_uninstall() {
 		self::unregi_widget();
-		$opts = get_option(self::$opt_group); // WP get_option()
 		
+		$opts = get_option(self::$opt_group); // WP get_option()
 		if ( $opts && $opts[self::$optdelopts] != 'false' ) {
 			delete_option(self::$opt_group);
 		}
@@ -681,6 +711,66 @@ class SWF_put_evh {
 	 * procedures to place and/or edit pages and content
 	 */
 
+	// put form that with some js will help with shortcodes in
+	// the WP post editor: following example at:
+	// http://bluedogwebservices.com/wordpress-25-shortcodes/
+	public static function put_xed_form() {
+/*
+		$sc = self::$shortcode;
+		$pr = self::$swfput_params;
+		$pr = new $pr();
+*/
+		$id = 'SWFPut_putswf_video';
+		$thfmt = '<th scope="row"><label for="%s_%s">%s</label></th>';
+		$infmt = '<input type="text" size="40" style="width:95%%;" name="%s[%s]" id="%s_%s" />';
+		$job = 'SWFPut_putswf_video_var';
+		$jfu = 'send_xed(this.form)';
+		$bjfmt = '<input type="button" onclick="return %s.%s;" value="%s" />';
+		?>
+		<table class="form-table">
+			<tr valign="top">
+				<?php $k = 'caption'; $l = __('Media Caption:');
+					printf($thfmt, $id, $k, $l); ?>
+				<td>
+					<?php printf($infmt, $id, $k, $id, $k); ?>
+				</td>
+			</tr>
+			<tr valign="top">
+				<?php $k = 'url'; $l = __('Media URL:');
+					printf($thfmt, $id, $k, $l); ?>
+				<td>
+					<?php printf($infmt, $id, $k, $id, $k); ?>
+				</td>
+			</tr>
+			<tr valign="top">
+				<?php $k = 'playpath'; $l = __('Playpath (rtmp):');
+					printf($thfmt, $id, $k, $l); ?>
+				<td>
+					<?php printf($infmt, $id, $k, $id, $k); ?>
+				</td>
+			</tr>
+			<tr valign="top">
+				<?php $k = 'width'; $l = __('Width:');
+					printf($thfmt, $id, $k, $l); ?>
+				<td>
+					<?php printf($infmt, $id, $k, $id, $k); ?>
+				</td>
+			</tr>
+			<tr valign="top">
+				<?php $k = 'height'; $l = __('Height:');
+					printf($thfmt, $id, $k, $l); ?>
+				<td>
+					<?php printf($infmt, $id, $k, $id, $k); ?>
+				</td>
+			</tr>
+		</table>
+		<p class="submit">
+			<?php $jtt = __('Place shortcode in editor');
+				printf($bjfmt, $job, $jfu, $jtt); ?>
+		</p>
+		<?php
+	}
+
 	// handler for 'shortcode' tags that will be
 	// replaced with SWF video
 	// subject to option $optdispmsg
@@ -688,7 +778,8 @@ class SWF_put_evh {
 		$pr = self::$swfput_params;
 		$pr = new $pr();
 		$pa = shortcode_atts($pr->getparams(), $atts);
-		$w = $pa['width']; $h = $pa['height'];
+		$w = '' . absint($pa['width']);
+		$h = '' . absint($pa['height']);
 		
 		if ( $code === "" ) {
 			$code = $atts[0];
@@ -700,8 +791,8 @@ class SWF_put_evh {
 		$em = $this->get_swf_tags($swf, $pr->setarray($pa));
 		$c = '';
 		if ( $content !== null ) {
-			$c = '<p class="wp-caption-text">' .
-				do_shortcode($content) . '</p>';
+			$c = do_shortcode($content);
+			$c = '<p class="wp-caption-text">' . $c . '</p>';
 		}
 		return sprintf('%s%s%s</div>', $dv, $em, $c);
 	}
@@ -711,6 +802,7 @@ class SWF_put_evh {
 	// subject to option $optdispmsg
 	public function post_sed($dat) {
 		global $post, $wp_locale;
+		$mpat = '/.+\.(mp4|flv|f4v|mp3)$/';
 		$w = 400; $h = 300; // TODO: from option
 		$pr = self::$swfput_params;
 		$pr = new $pr();
@@ -737,6 +829,8 @@ class SWF_put_evh {
 				if ( is_wp_error($url) ) {
 					$out .= $line . $sep;
 					self::errlog('failed URL of attachment ' . $id);
+				} else if ( ! preg_match($mpat, $url) ) {
+					$out .= $line . $sep;
 				} else {
 					$pr->setvalue('url', $url);
 					$sw = $this->get_swf_url('post_sed', $w, $h);
