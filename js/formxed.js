@@ -27,37 +27,88 @@
 var SWFPut_putswf_video_xed = function () {}
 
 SWFPut_putswf_video_xed.prototype = {
-    map : {},
-    put_shortcode : function(cs, sc) {
-        var c = this['map'][cs];
-        delete this['map'][cs];
-
-        var atts = '';
-        jQuery.each(this['map'], function(name, value){
-            if (value != '') {
-                atts += ' ' + name + '="' + value + '"';
-            }
-        });
-
-        var ret = '[' + sc + atts + ']';
-        if ( c.length > 0 ) {
+	defs : {
+		url: "",
+		cssurl: "",
+		width: "240",
+		height: "180",
+		audio: "false",       
+		aspectautoadj: "true",
+		displayaspect: "0",   
+		pixelaspect: "0",     
+		volume: "50",         
+		play: "false",        
+		hidebar: "false",     
+		disablebar: "false",  
+		barheight: "36",
+		quality: "high",
+		allowfull: "true",
+		allowxdom: "false",
+		loop: "false",
+		mtype: "application/x-shockwave-flash",
+		playpath: "",
+		classid: "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000",
+		codebase: "http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,115,0"
+	},
+	map : {},
+	put_shortcode : function(cs, sc) {
+		var c = this['map'][cs];
+		delete this['map'][cs];
+		
+		var atts = '';
+		jQuery.each(this['map'], function(name, value){
+			if (value != '') {
+				atts += ' ' + name + '="' + value + '"';
+			}
+		});
+		
+		var ret = '[' + sc + atts + ']';
+		if ( c.length > 0 ) {
 			ret += c + '[/' + sc + ']';
 		}
-        return ret;
-    },
-    send_xed : function(f, id, cs, sc) {
+		return ret;
+	},
+	send_xed : function(f, id, cs, sc) {
 		var len = id.length + 1;
-		var pat = "input[id^=" + id + "]:not(input:checkbox)";
-		pat += ",input[id^=" + id + "]:checkbox:checked";
-        var all = jQuery(f).find(pat);
-        var $this = this;
-        all.each(function () {
-            var k = this.name.substring(len, this.name.length - 1);
-            $this['map'][k] = this.value;
-        });
-        send_to_editor(this.put_shortcode(cs, sc));
-        return false;
-    }
+		var pat = "input[id^=" + id + "]";
+		var all = jQuery(f).find(pat);
+		var $this = this;
+		all.each(function () {
+			var v;
+			var k = this.name.substring(len, this.name.length - 1);
+			if ( this.type == "checkbox" ) {
+				v = this.checked == undefined ? '' : this.checked;
+				v = v == '' ? 'false' : 'true';
+				if ( $this['defs'][k] == undefined ) {
+					$this['map'][k] = v;
+				} else {
+					$this['map'][k] = v == $this['defs'][k] ? '' : v;
+				}
+			} else if ( this.type == "text" ) {
+				$this['map'][k] = this.value;
+			}
+		});
+		send_to_editor(this.put_shortcode(cs, sc));
+		return false;
+	},
+	reset_fm : function(f, id) {
+		var len = id.length + 1;
+		var pat = "input[id^=" + id + "]";
+		var $this = this;
+		var all = jQuery(f).find(pat);
+		all.each(function () {
+			var v;
+			var k = this.name.substring(len, this.name.length - 1);
+			if ( (v = $this['defs'][k]) != undefined ) {
+				if ( this.type == "checkbox" ) {
+					this.checked = v == 'true' ? 'checked' : '';
+				} else if ( this.type == "text" ) {
+					this.value = v;
+				}
+			}
+		});
+		return false;
+	}
 }
 
 var SWFPut_putswf_video_inst = new SWFPut_putswf_video_xed();

@@ -720,12 +720,24 @@ class SWF_put_evh {
 		extract($pr->getparams());
 
 		$sc = self::$shortcode;
+		// id base for form and js
 		$id = 'SWFPut_putswf_video';
+		// table <th> format string
 		$thfmt = '<th scope="row"><label for="%s_%s">%s</label></th>';
+		// table <input type="text"> format string
 		$infmt = '<input type="text" size="40" style="width:95%%;" name="%s[%s]" id="%s_%s" value="%s" />';
+		// table <input type="checkbox"> format string
+		$ckfmt = '<input type="checkbox" name="%s[%s]" id="%s_%s" value="%s" %s/>';
+		// js function object
 		$job = $id . '_inst';
-		$jfu = "send_xed(this.form,'{$id}','caption','{$sc}')";
+		// form buttons format string
 		$bjfmt = '<input type="button" onclick="return %s.%s;" value="%s" />';
+		// js send form values to editor method
+		$jfu = "send_xed(this.form,'{$id}','caption','{$sc}')";
+		// js reset form to defaults method
+		$jfur = "reset_fm(this.form,'{$id}')";
+		
+		// begin form
 		?>
 		<table class="form-table">
 			<tr valign="top">
@@ -764,14 +776,84 @@ class SWF_put_evh {
 				</td>
 			</tr>
 			<tr valign="top">
-				<?php $k = 'displayaspect'; $l = __('Display Aspect:');
+				<?php $k = 'audio'; $l = __('Audio (assert if not *.mp3):');
+					printf($thfmt, $id, $k, $l); ?>
+				<td>
+					<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
+						printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
+				</td>
+			</tr>
+			<tr valign="top">
+				<?php $k = 'aspectautoadj'; $l = __('Auto Aspect (e.g. 720x480 to 4:3):');
+					printf($thfmt, $id, $k, $l); ?>
+				<td>
+					<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
+						printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
+				</td>
+			</tr>
+			<tr valign="top">
+				<?php $k = 'displayaspect'; $l = __('Display Aspect (e.g 4:3, precludes Auto):');
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
 					<?php printf($infmt, $id, $k, $id, $k, $$k); ?>
 				</td>
 			</tr>
 			<tr valign="top">
-				<?php $k = 'pixelaspect'; $l = __('Pixel Aspect:');
+				<?php $k = 'pixelaspect'; $l = __('Pixel Aspect (e.g 8:9, precluded by Display):');
+					printf($thfmt, $id, $k, $l); ?>
+				<td>
+					<?php printf($infmt, $id, $k, $id, $k, $$k); ?>
+				</td>
+			</tr>
+			<tr valign="top">
+				<?php $k = 'volume'; $l = __('Initial Volume (0-100):');
+					printf($thfmt, $id, $k, $l); ?>
+				<td>
+					<?php printf($infmt, $id, $k, $id, $k, $$k); ?>
+				</td>
+			</tr>
+			<tr valign="top">
+				<?php $k = 'play'; $l = __('Play on load (else waits for play button):');
+					printf($thfmt, $id, $k, $l); ?>
+				<td>
+					<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
+						printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
+				</td>
+			</tr>
+			<tr valign="top">
+				<?php $k = 'loop'; $l = __('Loop play the media:');
+					printf($thfmt, $id, $k, $l); ?>
+				<td>
+					<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
+						printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
+				</td>
+			</tr>
+			<tr valign="top">
+				<?php $k = 'hidebar'; $l = __('Hide control bar initially:');
+					printf($thfmt, $id, $k, $l); ?>
+				<td>
+					<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
+						printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
+				</td>
+			</tr>
+			<tr valign="top">
+				<?php $k = 'disablebar'; $l = __('Hide and disable control bar:');
+					printf($thfmt, $id, $k, $l); ?>
+				<td>
+					<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
+						printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
+				</td>
+			</tr>
+			<tr valign="top">
+				<?php $k = 'allowfull'; $l = __('Allow switch to full screen:');
+					printf($thfmt, $id, $k, $l); ?>
+				<td>
+					<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
+						printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
+				</td>
+			</tr>
+			<tr valign="top">
+				<?php $k = 'barheight'; $l = __('Control Bar Height (20-80):');
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
 					<?php printf($infmt, $id, $k, $id, $k, $$k); ?>
@@ -779,7 +861,9 @@ class SWF_put_evh {
 			</tr>
 		</table>
 		<p class="submit">
-			<?php $jtt = __('Place shortcode in editor');
+			<?php $jtt = __('Reset form to default values');
+				printf($bjfmt, $job, $jfur, $jtt);
+				$jtt = __('Place shortcode in editor');
 				printf($bjfmt, $job, $jfu, $jtt); ?>
 		</p>
 		<?php
@@ -1215,7 +1299,7 @@ class SWF_params_evh {
 		'play' => 'false',         // play (or pause) on load
 		'hidebar' => 'false',      // initially hide control bar
 		'disablebar' => 'false',   // disable and hide control bar
-		'barheight' => 'default',
+		'barheight' => '36',
 		'quality' => 'high',
 		'allowfull' => 'true',
 		'allowxdom' => 'false',

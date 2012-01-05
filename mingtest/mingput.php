@@ -559,12 +559,12 @@ foreach ( $av as $k => $v ) {
 			break;
 		case 'PL':
 			if ( $v == 'true' ) {
-				$initpause = false;
+				$initpause = 'false';
 			}
 			break;
 		case 'HB':
 			if ( $v == 'true' ) {
-				$$initshowbar = false;
+				$initshowbar = 'false';
 			}
 			break;
 		case 'VL':
@@ -585,12 +585,12 @@ foreach ( $av as $k => $v ) {
 			break;
 		case 'AU':
 			if ( $v == 'true' ) {
-				$audb = true;
+				$audb = 'true';
 			}
 			break;
 		case 'AA':
 			if ( $v == 'false' ) {
-				$autoaspect = "false";
+				$autoaspect = 'false';
 			}
 			break;
 		case 'DA':

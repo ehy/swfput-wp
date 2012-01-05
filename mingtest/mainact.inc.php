@@ -114,7 +114,7 @@ var vurl = tf(null, "$vurl", "$vurl");
 // v_id -- if RTMP, stream id, 'playpath'
 var v_id = "" == "$v_id" ? null : "$v_id";
 // boolean, is true if media at URL is *known* audio, false if known not
-var audb = false == "$audb" ? false : (true == "$audb" ? true : null);
+var audb = "false" == "$audb" ? false : ("true" == "$audb" ? true:null);
 // lose the temp func:
 tf = null;
 // temp literal: vid to show with audio only files
