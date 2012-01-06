@@ -16,8 +16,8 @@
 //
 
 /**
- * For Wordpress shortcode tags in the post editor; js to link
- * html form with shortcode attributes
+ * For Wordpress shortcode tags in the post editor; js to put
+ * html form with shortcode attributes in editor as shortcode
  * 
  * based on example at:
  * 	http://bluedogwebservices.com/wordpress-25-shortcodes/
@@ -57,7 +57,7 @@ SWFPut_putswf_video_xed.prototype = {
 		
 		var atts = '';
 		jQuery.each(this['map'], function(name, value){
-			if (value != '') {
+			if ( value != '' ) {
 				atts += ' ' + name + '="' + value + '"';
 			}
 		});
@@ -85,7 +85,14 @@ SWFPut_putswf_video_xed.prototype = {
 					$this['map'][k] = v == $this['defs'][k] ? '' : v;
 				}
 			} else if ( this.type == "text" ) {
-				$this['map'][k] = this.value;
+				v = this.value;
+				if ( $this['defs'][k] != undefined ) {
+					if ( $this['defs'][k] == v ) {
+						// if it's a default, don't add it
+						v = '';
+					}
+				}
+				$this['map'][k] = v;
 			}
 		});
 		send_to_editor(this.put_shortcode(cs, sc));
@@ -103,7 +110,9 @@ SWFPut_putswf_video_xed.prototype = {
 				if ( this.type == "checkbox" ) {
 					this.checked = v == 'true' ? 'checked' : '';
 				} else if ( this.type == "text" ) {
-					this.value = v;
+					if ( v != '' ) {
+						this.value = v;
+					}
 				}
 			}
 		});
