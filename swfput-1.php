@@ -189,8 +189,11 @@ class SWF_put_evh {
 	// hold an instance
 	private static $instance;
 
-	// true while wrapping WP do_shortcode()
+	// int, incr while wrapping WP do_shortcode(), decr when done
 	private $in_wdg_do_shortcode;
+
+	// this instance is fully initialized? (__construct($init == true))
+	private $full_init;
 
 	// correct file path (possibly needed due to symlinks)
 	public static $pluginfile = null;
@@ -210,9 +213,9 @@ class SWF_put_evh {
 		$t = self::$swfputdir . '/' . self::$swfputcssname;
 		$this->swfputcss = plugins_url($t, $pf);
 
-		$this->in_wdg_do_shortcode = false;
+		$this->in_wdg_do_shortcode = 0;
 		
-		if ( ! $init ) {
+		if ( ($this->full_init = $init) !== true ) {
 			// must do this
 			$this->init_opts();
 			return;
@@ -292,7 +295,7 @@ class SWF_put_evh {
 	public static function on_uninstall() {
 		self::unregi_widget();
 		
-		$opts = get_option(self::$opt_group); // WP get_option()
+		$opts = self::get_opt_group();
 		if ( $opts && $opts[self::$optdelopts] != 'false' ) {
 			delete_option(self::$opt_group);
 		}
@@ -346,7 +349,7 @@ class SWF_put_evh {
 			self::$optdelopts => self::$defdelopts,
 			self::$optuseming => self::$defuseming
 		);
-		$opts = get_option(self::$opt_group); // WP get_option()
+		$opts = self::get_opt_group();
 		// note values converted to string
 		if ( $opts ) {
 			$mod = false;
@@ -583,7 +586,7 @@ class SWF_put_evh {
 	// static callback: validate options main
 	public static function validate_opts($opts) {	
 		$a_out = array();
-		$a_orig = get_option(self::$opt_group);
+		$a_orig = self::get_opt_group();
 		$nerr = 0;
 		$nupd = 0;
 
@@ -914,7 +917,7 @@ class SWF_put_evh {
 				</td>
 			</tr>
 			<tr valign="top">
-				<?php $k = 'url'; $l = __('Media URL:');
+				<?php $k = 'url'; $l = __('Video|Audio Url:');
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
 					<?php printf($infmt, $id, $k, $id, $k, ''); ?>
@@ -1037,10 +1040,9 @@ class SWF_put_evh {
 
 	// wrap do_shortcode() to set a flag for the callback
 	public function wdg_do_shortcode($cont) {
-		$t = $this->in_wdg_do_shortcode;
-		$this->in_wdg_do_shortcode = true;
+		$this->in_wdg_do_shortcode++;
 		$r = do_shortcode($cont);
-		$this->in_wdg_do_shortcode = $t;
+		$this->in_wdg_do_shortcode--;
 		return $r;
 	}
 	
@@ -1048,7 +1050,7 @@ class SWF_put_evh {
 	// replaced with SWF video
 	// subject to option $optcodewdg
 	public function wdg_shortcode($atts, $content = null, $code = "") {
-		if ( $this->in_wdg_do_shortcode !== true ) {
+		if ( $this->in_wdg_do_shortcode < 1 ) {
 			return $this->post_shortcode($atts, $content, $code);
 		}
 		$pr = self::$swfput_params;
@@ -1079,7 +1081,7 @@ class SWF_put_evh {
 	// replaced with SWF video
 	// subject to option $optdispmsg && $optcodemsg
 	public function post_shortcode($atts, $content = null, $code = "") {
-		if ( $this->in_wdg_do_shortcode === true ) {
+		if ( $this->in_wdg_do_shortcode > 0 ) {
 			return $this->wdg_shortcode($atts, $content, $code);
 		}
 		$pr = self::$swfput_params;
@@ -1228,7 +1230,7 @@ class SWF_put_evh {
 	
 	// error messages; where {wp_}die is not suitable
 	public static function errlog($err) {
-		$e = sprintf('SWF Put WP plugin: %s', $err);
+		$e = sprintf('SWFPut WP plugin: %s', $err);
 		error_log($e, 0);
 	}
 	
@@ -1239,9 +1241,14 @@ class SWF_put_evh {
 		return self::$instance;
 	}
 	
+	// get the plugins main option group
+	public static function get_opt_group() {
+		return get_option(self::$opt_group); /* WP get_option() */
+	}
+	
 	// get an option value by name/key
 	public static function opt_by_name($name) {
-		$opts = get_option(self::$opt_group); // WP get_option()
+		$opts = self::get_opt_group();
 		if ( $opts && array_key_exists($name, $opts) ) {
 			return $opts[$name];
 		}
@@ -1493,13 +1500,13 @@ class SWF_put_evh {
 		<param name="src" value="%s?%s">
 		<param name="name" value="mingput">
 		<param name="bgcolor" value="#000000">
-		<param name="align" value="middle">
+		<param name="align" value="center">
 		', $play, $loop, $quality, $allowfull, $fv, $uswf, $pv)
 		. sprintf('<embed type="%s" src="%s?%s" bgcolor="#000000" '
 		. 'name="mingput" flashvars="%s" allowscriptaccess="sameDomain"'
 		. ' quality="%s" loop="%s" play="%s" ',
 		$mtype, $uswf, $pv, $fv, $quality, $loop, $play)
-		. sprintf('data="%s?%s" allowfullscreen="%s" align="middle"'
+		. sprintf('data="%s?%s" allowfullscreen="%s" align="center"'
 		. ' width="%u" height="%u" />
 		</object>
 		', $uswf, $pv, $allowfull, $w, $h);
@@ -1599,6 +1606,17 @@ class SWF_params_evh {
 		//$this->inst = array_replace($this->inst, $ar);
 		// so . . .
 		foreach ( $ar as $k => $v ) {
+			if ( array_key_exists($k, self::$defs) ) {
+				$this->inst[$k] = $v;
+			}
+		}
+		return $this;
+	}
+	public function setnewarray($ar) {
+		// array_replace is new w/ 5.3; want 5.2 here
+		//$this->inst = array_replace($this->inst, $ar);
+		// so . . .
+		foreach ( $ar as $k => $v ) {
 			$this->inst[$k] = $v;
 		}
 		return $this;
@@ -1606,7 +1624,7 @@ class SWF_params_evh {
 	public function cmpval($key) {
 		return (self::$defs[$key] === $this->inst[$key]);
 	}
-	public function sanitize($fuzz = false) {
+	public function sanitize($fuzz = true) {
 		$i = &$this->inst;
 		// check against default keys; if instance map has
 		// other keys, leave them
@@ -1644,10 +1662,20 @@ class SWF_params_evh {
 			case 'loop':
 				$t = strtolower(trim('' . $i[$k]));
 				if ( $t !== 'true' && $t !== 'false' ) {
-					if ( $fuzz !== true ) {
+					if ( $fuzz === true ) {
+						$xt = __('/^(sc?h[yi]te?)?y(e((s|ah)!?)?)?$/i');
+						$xf = __('/^((he(ck|ll))?n(o!?)?)?$/i');
+						if ( is_numeric($t) ) {
+							$t = $t == 0 ? 'false' : 'true';
+						} else if ( preg_match($xf, $t) ) {
+							$t = 'false';
+						} else if ( preg_match($xt, $t) ) {
+							$t = 'true';
+						} else {
+							$t = $v;
+						}
+					} else {
 						$t = $v;
-					} else if ( is_numeric($t) ) {
-						$t = $t == 0 ? 'false' : 'true';
 					}
 				}
 				$i[$k] = $t;
@@ -1662,10 +1690,15 @@ class SWF_params_evh {
 					$i[$k] = $t;
 					break;
 				}
+				if ( $fuzz === true ) {
+					$sep = '[Xx[:punct:][:space:]]+';
+				} else {
+					$sep = '[Xx:]';
+				}
 				// exception: allow FLOAT or FLOATsep1
-				$px = '/^\+?([0-9]+\.[0-9]+)([Xx:]1)?$/';
-				// wanted: INTsepINT; sep == [:Xx]
-				$pw  = '/^([0-9]+)[Xx:]([0-9]+)$/';
+				$px = '/^\+?([0-9]+\.[0-9]+)(' . $sep . '1)?$/';
+				// wanted: INTsepINT;
+				$pw  = '/^([0-9]+)' . $sep . '([0-9]+)$/';
 				$m = array();
 				if ( preg_match($px, $t, $m) ) {
 					$i[$k] = $m[1] . ':1';
@@ -1675,7 +1708,7 @@ class SWF_params_evh {
 					$i[$k] = $v;
 				}
 				break;
-			// arbitrary complex strings; not sanitized here
+			// varied complex strings; not sanitized here
 			case 'url':
 			case 'cssurl':
 			case 'mtype':
@@ -1708,8 +1741,14 @@ class SWF_put_widget_evh extends WP_Widget {
 	// an instance of the main plugun class
 	protected $plinst;
 	
-	// defaults == width should not be wider than sidebar, but
+	// default width should not be wider than sidebar, but
 	// widgets may be placed elsewhere, e.g. near bottom
+	// 216x138 is suggest minimum size in Adobe docs,
+	// because flash user settings dialog is clipped if 
+	// window is smaller; AFAIK recent plugins refuse to map
+	// the context menu rather than let it be clipped.
+	// 216 is a bit wide for a sidebar (in some themes),
+	// consider 200x150
 	protected static $defwidth  = 216; // 216x162 is
 	protected static $defheight = 162; // 4:3 aspect
 
@@ -1741,22 +1780,28 @@ class SWF_put_widget_evh extends WP_Widget {
 			return;
 		}
 		
-		$w = $instance['width'];
-		if ( ! $w ) {
-			$w = self::$defwidth;
-		}
-		$h = $instance['height'];
-		if ( ! $h ) {
-			$h = self::$defheight;
-		}
-		$uswf = $this->plinst->get_swf_url('widget', $w, $h);
-
-		$url = $instance['vurl'];
 		$pr = self::$swfput_params;
 		$pr = new $pr();
-		$pr->setvalue('width', $w);
-		$pr->setvalue('height', $h);
-		$pr->setvalue('url', $url);
+		$pr->setnewarray($instance);
+
+		if ( ! $pr->getvalue('width') ) {
+			$pr->setvalue('width', self::$defwidth);
+		}
+		if ( ! $pr->getvalue('height') ) {
+			$pr->setvalue('height', self::$defheight);
+		}
+		$pr->sanitize();
+		$w = $pr->getvalue('width');
+		$h = $pr->getvalue('height');
+		$url = $pr->getvalue('url');
+		$cap = $this->plinst->ht($pr->getvalue('caption'));
+		$uswf = $this->plinst->get_swf_url('widget', $w, $h);
+
+		$code = 'widget-div';
+		$dw = $w + 3;
+		// use no class, but do use deprecated align
+		$dv = '<p><div id="'.$code.'" align="center"';
+		$dv .= ' style="width: '.$dw.'px">';
 
 		extract($args);
 
@@ -1773,29 +1818,48 @@ class SWF_put_widget_evh extends WP_Widget {
 			echo $before_title . $title . $after_title;
 		}
 
+		echo $dv;
 		$this->plinst->put_swf_tags($uswf, $pr);
+		if ( $cap ) {
+			echo '</p><p><span align="center">' .$cap. '</span></p><p>';
+		}
+		echo '</div></p>';
 
 		echo $after_widget;
 	}
 
 	public function update($new_instance, $old_instance) {
-		$i = $new_instance;
+		$pr = self::$swfput_params;
+		$pr = new $pr();
 		
-		foreach ( $old_instance as $k => $v ) {
-			if ( ! array_key_exists($k, $i) ) {
-				$i[$k] = $v;
+		if ( is_array($old_instance) ) {
+			$pr->setnewarray($old_instance);
+		}
+		if ( is_array($new_instance) ) {
+			$pr->setnewarray($new_instance);
+		}
+		
+		$pr->sanitize();
+		$i = $pr->getparams();
+		if ( is_array($new_instance) ) {
+			// for pesky checkboxes
+			foreach ( $i as $k => $v ) {
+				if ( ! array_key_exists($k, $new_instance) ) {
+					$i[$k] = 'false';
+				}
 			}
+		}
+
+		if ( ! array_key_exists('caption', $i) ) {
+			$i['caption'] = '';
 		}
 		if ( ! array_key_exists('title', $i) ) {
 			$i['title'] = '';
 		}
-		if ( ! array_key_exists('vurl', $i) ) {
-			$i['vurl'] = '';
-		}
-		if ( ! array_key_exists('width', $i) || $i['width'] == '' ) {
+		if ( ! $i['width'] ) {
 			$i['width'] = self::$defwidth;
 		}
-		if ( ! array_key_exists('height', $i) || $i['height'] == '' ) {
+		if ( ! $i['height'] ) {
 			$i['height'] = self::$defheight;
 		}
 
@@ -1804,10 +1868,11 @@ class SWF_put_widget_evh extends WP_Widget {
 
 	public function form($instance) {
 		$ht = 'wptexturize';
-		$instance = wp_parse_args((array)$instance,
-			array('title' => '', 'vurl' => ''));
+		$pr = self::$swfput_params;
+		$pr = new $pr();
+		$instance = wp_parse_args((array)$instance, $pr->getparams());
 
-		$title = $ht($instance['title']);
+		$val = $ht($instance['title']);
 		$id = $this->get_field_id('title');
 		$nm = $this->get_field_name('title');
 		$tl = $ht(__('Instance Title:'));
@@ -1816,21 +1881,43 @@ class SWF_put_widget_evh extends WP_Widget {
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
 			name="<?php echo $nm; ?>"
-			type="text" value="<?php echo $title; ?>" /></p>
+			type="text" value="<?php echo $val; ?>" /></p>
 
 		<?php
-		$vurl = $ht($instance['vurl']);
-		$id = $this->get_field_id('vurl');
-		$nm = $this->get_field_name('vurl');
+		$val = $ht($instance['caption']);
+		$id = $this->get_field_id('caption');
+		$nm = $this->get_field_name('caption');
+		$tl = $ht(__('Media Caption:'));
+		?>
+		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
+		<input class="widefat" id="<?php echo $id; ?>"
+			name="<?php echo $nm; ?>"
+			type="text" value="<?php echo $val; ?>" /></p>
+
+		<?php
+		$val = $instance['url'];
+		$id = $this->get_field_id('url');
+		$nm = $this->get_field_name('url');
 		$tl = $ht(__('Video|Audio Url:'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
 			name="<?php echo $nm; ?>"
-			type="text" value="<?php echo $vurl; ?>" /></p>
+			type="text" value="<?php echo $val; ?>" /></p>
 
 		<?php
-		$width = $ht($instance['width']);
+		$val = $instance['playpath'];
+		$id = $this->get_field_id('playpath');
+		$nm = $this->get_field_name('playpath');
+		$tl = $ht(__('Playpath (rtmp):'));
+		?>
+		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
+		<input class="widefat" id="<?php echo $id; ?>"
+			name="<?php echo $nm; ?>"
+			type="text" value="<?php echo $val; ?>" /></p>
+
+		<?php
+		$val = $ht($instance['width']);
 		$id = $this->get_field_id('width');
 		$nm = $this->get_field_name('width');
 		$tl = $ht(__('Width (default ').self::$defwidth.__('):'));
@@ -1838,10 +1925,10 @@ class SWF_put_widget_evh extends WP_Widget {
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
 			name="<?php echo $nm; ?>"
-			type="text" value="<?php echo $width; ?>" /></p>
+			type="text" value="<?php echo $val; ?>" /></p>
 
 		<?php
-		$height = $ht($instance['height']);
+		$val = $ht($instance['height']);
 		$id = $this->get_field_id('height');
 		$nm = $this->get_field_name('height');
 		$tl = $ht(__('Height (default ').self::$defheight.__('):'));
@@ -1849,7 +1936,135 @@ class SWF_put_widget_evh extends WP_Widget {
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
 			name="<?php echo $nm; ?>"
-			type="text" value="<?php echo $height; ?>" /></p>
+			type="text" value="<?php echo $val; ?>" /></p>
+
+		<?php
+		$val = $instance['audio'];
+		$id = $this->get_field_id('audio');
+		$nm = $this->get_field_name('audio');
+		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
+		$tl = $ht(__('Audio (assert if not *.mp3):'));
+		?>
+		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
+		<input class="widefat" id="<?php echo $id; ?>"
+			name="<?php echo $nm; ?>" type="checkbox"
+			value="<?php echo $val; ?>"<?php echo $ck; ?> /></p>
+
+		<?php
+		$val = $instance['aspectautoadj'];
+		$id = $this->get_field_id('aspectautoadj');
+		$nm = $this->get_field_name('aspectautoadj');
+		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
+		$tl = $ht(__('Auto Aspect (e.g. 360x240 to 4:3):'));
+		?>
+		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
+		<input class="widefat" id="<?php echo $id; ?>"
+			name="<?php echo $nm; ?>" type="checkbox"
+			value="<?php echo $val; ?>"<?php echo $ck; ?> /></p>
+
+		<?php
+		$val = $instance['displayaspect'];
+		$id = $this->get_field_id('displayaspect');
+		$nm = $this->get_field_name('displayaspect');
+		$tl = $ht(__('Display Aspect (e.g 4:3, precludes Auto):'));
+		?>
+		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
+		<input class="widefat" id="<?php echo $id; ?>"
+			name="<?php echo $nm; ?>"
+			type="text" value="<?php echo $val; ?>" /></p>
+
+		<?php
+		$val = $instance['pixelaspect'];
+		$id = $this->get_field_id('pixelaspect');
+		$nm = $this->get_field_name('pixelaspect');
+		$tl = $ht(__('Pixel Aspect (e.g 8:9, precluded by Display):'));
+		?>
+		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
+		<input class="widefat" id="<?php echo $id; ?>"
+			name="<?php echo $nm; ?>"
+			type="text" value="<?php echo $val; ?>" /></p>
+
+		<?php
+		$val = $ht($instance['volume']);
+		$id = $this->get_field_id('volume');
+		$nm = $this->get_field_name('volume');
+		$tl = $ht(__('Initial Volume (0-100):'));
+		?>
+		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
+		<input class="widefat" id="<?php echo $id; ?>"
+			name="<?php echo $nm; ?>"
+			type="text" value="<?php echo $val; ?>" /></p>
+
+		<?php
+		$val = $instance['play'];
+		$id = $this->get_field_id('play');
+		$nm = $this->get_field_name('play');
+		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
+		$tl = $ht(__('Play on load (else waits for play button):'));
+		?>
+		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
+		<input class="widefat" id="<?php echo $id; ?>"
+			name="<?php echo $nm; ?>" type="checkbox"
+			value="<?php echo $val; ?>"<?php echo $ck; ?> /></p>
+
+		<?php
+		$val = $instance['loop'];
+		$id = $this->get_field_id('loop');
+		$nm = $this->get_field_name('loop');
+		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
+		$tl = $ht(__('Loop play the media:'));
+		?>
+		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
+		<input class="widefat" id="<?php echo $id; ?>"
+			name="<?php echo $nm; ?>" type="checkbox"
+			value="<?php echo $val; ?>"<?php echo $ck; ?> /></p>
+
+		<?php
+		$val = $instance['hidebar'];
+		$id = $this->get_field_id('hidebar');
+		$nm = $this->get_field_name('hidebar');
+		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
+		$tl = $ht(__('Hide control bar initially:'));
+		?>
+		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
+		<input class="widefat" id="<?php echo $id; ?>"
+			name="<?php echo $nm; ?>" type="checkbox"
+			value="<?php echo $val; ?>"<?php echo $ck; ?> /></p>
+
+		<?php
+		$val = $instance['disablebar'];
+		$id = $this->get_field_id('disablebar');
+		$nm = $this->get_field_name('disablebar');
+		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
+		$tl = $ht(__('Hide and disable control bar:'));
+		?>
+		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
+		<input class="widefat" id="<?php echo $id; ?>"
+			name="<?php echo $nm; ?>" type="checkbox"
+			value="<?php echo $val; ?>"<?php echo $ck; ?> /></p>
+
+		<?php
+		$val = $instance['allowfull'];
+		$id = $this->get_field_id('allowfull');
+		$nm = $this->get_field_name('allowfull');
+		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
+		$tl = $ht(__('Allow switch to full screen:'));
+		?>
+		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
+		<input class="widefat" id="<?php echo $id; ?>"
+			name="<?php echo $nm; ?>" type="checkbox"
+			value="<?php echo $val; ?>"<?php echo $ck; ?> /></p>
+
+		<?php
+		$val = $ht($instance['barheight']);
+		$id = $this->get_field_id('barheight');
+		$nm = $this->get_field_name('barheight');
+		$tl = $ht(__('Control Bar Height (20-80):'));
+		?>
+		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
+		<input class="widefat" id="<?php echo $id; ?>"
+			name="<?php echo $nm; ?>"
+			type="text" value="<?php echo $val; ?>" /></p>
 
 		<?php
 	}
