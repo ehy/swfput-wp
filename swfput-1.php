@@ -1576,6 +1576,12 @@ class SWF_params_evh {
 		}
 		return null;
 	}
+	public function getdefault($key) {
+		if ( array_key_exists($key, self::$defs) ) {
+			return self::$defs[$key];
+		}
+		return null;
+	}
 	public function setvalue($key, $val) {
 		if ( array_key_exists($key, $this->inst) ) {
 			$t = $this->inst[$key];
@@ -1749,8 +1755,8 @@ class SWF_put_widget_evh extends WP_Widget {
 	// the context menu rather than let it be clipped.
 	// 216 is a bit wide for a sidebar (in some themes),
 	// consider 200x150
-	protected static $defwidth  = 216; // 216x162 is
-	protected static $defheight = 162; // 4:3 aspect
+	protected static $defwidth  = 200; // is 4:3 aspect
+	protected static $defheight = 150; //
 
 	public function __construct() {
 		global $swfput1_evh_instance_1;
@@ -1842,10 +1848,15 @@ class SWF_put_widget_evh extends WP_Widget {
 		$pr->sanitize();
 		$i = $pr->getparams();
 		if ( is_array($new_instance) ) {
-			// for pesky checkboxes
+			// for pesky checkboxes; not present if unchecked, but
+			// present 'false' is wanted
 			foreach ( $i as $k => $v ) {
 				if ( ! array_key_exists($k, $new_instance) ) {
-					$i[$k] = 'false';
+					$t = $pr->getdefault($k);
+					// booleans == checkboxes
+					if ( $t == 'true' || $t == 'false' ) {
+						$i[$k] = 'false';
+					}
 				}
 			}
 		}
@@ -1869,13 +1880,14 @@ class SWF_put_widget_evh extends WP_Widget {
 	public function form($instance) {
 		$ht = 'wptexturize';
 		$pr = self::$swfput_params;
-		$pr = new $pr();
+		$pr = new $pr(array('width' => self::$defwidth,
+			'height' => self::$defheight));
 		$instance = wp_parse_args((array)$instance, $pr->getparams());
 
 		$val = $ht($instance['title']);
 		$id = $this->get_field_id('title');
 		$nm = $this->get_field_name('title');
-		$tl = $ht(__('Instance Title:'));
+		$tl = $ht(__('Title:'));
 		?>
 
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
