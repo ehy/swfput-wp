@@ -51,6 +51,7 @@ SWFPut_putswf_video_xed.prototype = {
 		codebase: "http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,115,0"
 	},
 	map : {},
+	last_from : 65535,
 	put_shortcode : function(cs, sc) {
 		var c = this['map'][cs];
 		delete this['map'][cs];
@@ -68,11 +69,84 @@ SWFPut_putswf_video_xed.prototype = {
 		}
 		return ret;
 	},
+	sc_from_line : function(l, sc) {
+		var cb = "[" + sc;
+		var ce = "[/" + sc + "]";
+		var p = l.indexOf(cb, 0);
+		if ( p < 0 ) {
+			return false;
+		}
+		l = l.substring(p + cb.length);
+		p = l.indexOf(ce, 0);
+		if ( p > 0 ) {
+			l = l.slice(0, p);
+			p = l.indexOf("]", 0);
+			// must be found
+			if ( p < 0 ) {
+				return false;
+			}
+			this['map']["caption"] = l.substring(p + 1);
+		}
+		p = l.indexOf("]", 0);
+		if ( p < 0 ) {
+			return false;
+		}
+		l = l.slice(0, p);
+		while ( (p = l.indexOf("=", 0)) > 0 ) {
+			var k = l.slice(0, p);
+			while ( k.charAt(0) == " " ) k = k.substring(1);
+			if ( k.length < 1 ) {
+				return false;
+			}
+			l = l.substring(p + 1);
+			if ( l.charAt(0) != '"' ) {
+				return false;
+			}
+			l = l.substring(1);
+			p = l.indexOf('"', 0);
+			if ( p < 0 ) {
+				return false;
+			}
+			this['map'][k] = l.slice(0, p);
+			l = l.substring(p + 1);
+		}
+		return true;
+	},
+	from_xed : function(f, id, sc) {
+		var v = jQuery(edCanvas).val();
+		if ( v == null ) {
+			return;
+		}
+		this.set_fm('defs', f, id);
+		var va = v.split("\r\n");
+		if ( va.length < 2 ) va = v.split("\n");
+		if ( va.length < 2 ) va = v.split("\r");
+		if ( this.last_from >= va.length ) {
+			this.last_from = 0;
+		}
+		var i = this.last_from;
+		var iinit = i;
+		for ( ; i < va.length; i++ ) {
+			var l = va[i];
+			this['map'] = {};
+			if ( this.sc_from_line(l, sc) == true ) {
+				break;
+			}
+		}
+		this.last_from = i + 1;
+		if ( i < va.length ) {
+			this.set_fm('map', f, id);
+		} else if ( iinit > 0 ) {
+			// start again from 0
+			this.from_xed(f, id, sc);
+		}
+	},
 	send_xed : function(f, id, cs, sc) {
 		var len = id.length + 1;
 		var pat = "input[id^=" + id + "]";
 		var all = jQuery(f).find(pat);
 		var $this = this;
+		this['map'] = {};
 		all.each(function () {
 			var v;
 			var k = this.name.substring(len, this.name.length - 1);
@@ -98,7 +172,7 @@ SWFPut_putswf_video_xed.prototype = {
 		send_to_editor(this.put_shortcode(cs, sc));
 		return false;
 	},
-	reset_fm : function(f, id) {
+	set_fm : function(mapname, f, id) {
 		var len = id.length + 1;
 		var pat = "input[id^=" + id + "]";
 		var $this = this;
@@ -106,7 +180,7 @@ SWFPut_putswf_video_xed.prototype = {
 		all.each(function () {
 			var v;
 			var k = this.name.substring(len, this.name.length - 1);
-			if ( (v = $this['defs'][k]) != undefined ) {
+			if ( (v = $this[mapname][k]) != undefined ) {
 				if ( this.type == "checkbox" ) {
 					this.checked = v == 'true' ? 'checked' : '';
 				} else if ( this.type == "text" ) {
@@ -117,6 +191,9 @@ SWFPut_putswf_video_xed.prototype = {
 			}
 		});
 		return false;
+	},
+	reset_fm : function(f, id) {
+		this.set_fm('defs', f, id);
 	}
 }
 

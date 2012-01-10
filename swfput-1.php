@@ -109,62 +109,62 @@ endif;
  */
 if ( ! class_exists('SWF_put_evh') ) :
 class SWF_put_evh {
-	// most of these static properties would be const in php 5.3, but
-	// this is written for 5.2 -- the earliest ver. available here
-
 	// the widget class name
-	public static $swfput_widget = 'SWF_put_widget_evh';
+	const swfput_widget = 'SWF_put_widget_evh';
 	// parameter helper class name
-	public static $swfput_params = 'SWF_params_evh';
+	const swfput_params = 'SWF_params_evh';
 	
 	// identifier for settings page
-	public static $settings_page_id = 'swfput1_settings_page';
+	const settings_page_id = 'swfput1_settings_page';
 	
 	// option group name in the WP opt db
-	public static $opt_group  = '_evh_swfput1_opt_grp';
+	const opt_group  = '_evh_swfput1_opt_grp';
 	// verbose (helpful?) section descriptions?
-	public static $optverbose = '_evh_swfput1_verbose';
-	// WP option names/keys -- note prefix '_evh_'
+	const optverbose = '_evh_swfput1_verbose';
+	// WP option names/keys
 	// optdisp... -- display areas
-	public static $optdispmsg = '_evh_swfput1_dmsg'; // posts
-	public static $optdispwdg = '_evh_swfput1_dwdg'; // widgets no-admin
-	public static $optdisphdr = '_evh_swfput1_dhdr'; // header area
+	const optdispmsg = '_evh_swfput1_dmsg'; // posts
+	const optdispwdg = '_evh_swfput1_dwdg'; // widgets no-admin
+	const optdisphdr = '_evh_swfput1_dhdr'; // header area
 	// optcode... -- shortcode processing
-	public static $optcodemsg = '_evh_swfput1_scms'; // posts
-	public static $optcodewdg = '_evh_swfput1_scwi'; // widgets no-admin
+	const optcodemsg = '_evh_swfput1_scms'; // posts
+	const optcodewdg = '_evh_swfput1_scwi'; // widgets no-admin
 	// optpreg... -- grepping for attachment id to resolve
-	public static $optpregmsg = '_evh_swfput1_sedm'; // posts sed
+	const optpregmsg = '_evh_swfput1_sedm'; // posts sed
 	// optplugwdg -- use plugin's widget
-	public static $optplugwdg = '_evh_swfput1_pwdg'; // plugin widget
+	const optplugwdg = '_evh_swfput1_pwdg'; // plugin widget
 	// delete options on uninstall
-	public static $optdelopts = '_evh_swfput1_delopts';
+	const optdelopts = '_evh_swfput1_delopts';
 	// use php+ming script if available?
-	public static $optuseming = '_evh_swfput1_useming';
+	const optuseming = '_evh_swfput1_useming';
 
 	// verbose (helpful?) section descriptions?
-	public static $defverbose = 'true';
+	const defverbose = 'true';
 	// display opts, widget, inline or both
 	 // 1==message | 2==widget | 4==header
-	public static $defdisplay  = 7;
-	public static $disp_msg    = 1;
-	public static $disp_widget = 2;
-	public static $disp_hdr    = 4;
+	const defdisplay  = 7;
+	const disp_msg    = 1;
+	const disp_widget = 2;
+	const disp_hdr    = 4;
 	// more
-	public static $defcodemsg = 'true';  // posts
-	public static $defcodewdg = 'false'; // widgets no-admin
-	public static $defpregmsg = 'false'; // posts sed
+	const defcodemsg = 'true';  // posts
+	const defcodewdg = 'false'; // widgets no-admin
+	const defpregmsg = 'false'; // posts sed
 	// optplugwdg -- use plugin's widget
-	public static $defplugwdg = 'true';  // plugin widget
+	const defplugwdg = 'true';  // plugin widget
 	// delete options on uninstall
-	public static $defdelopts = 'true';
+	const defdelopts = 'true';
 	// use php+ming script if available?
-	public static $defuseming = 'false';
+	const defuseming = 'false';
 	
+	// autoload class version suffix
+	const aclv = '0_0_2';
+
+	// string used for (default) shortcode tag
+	const shortcode = 'putswf_video';
+
 	// object of class to handle options under WordPress
 	protected $opt;
-
-	// autoload class version suffix
-	public static $aclv = '0_0_2';
 
 	// swfput program directory
 	protected static $swfputdir = 'mingput';
@@ -197,9 +197,6 @@ class SWF_put_evh {
 
 	// correct file path (possibly needed due to symlinks)
 	public static $pluginfile = null;
-
-	// string used for (default) shortcode tag
-	public static $shortcode = 'putswf_video';
 
 	public function __construct($init = true) {
 		// if arg $init is false then this instance is just
@@ -282,8 +279,8 @@ class SWF_put_evh {
 
 		self::unregi_widget();
 
-		unregister_setting(self::$opt_group, // option group
-			self::$opt_group, // opt name; using group passes all to cb
+		unregister_setting(self::opt_group, // option group
+			self::opt_group, // opt name; using group passes all to cb
 			array($wreg, 'validate_opts'));
 	}
 
@@ -296,15 +293,15 @@ class SWF_put_evh {
 		self::unregi_widget();
 		
 		$opts = self::get_opt_group();
-		if ( $opts && $opts[self::$optdelopts] != 'false' ) {
-			delete_option(self::$opt_group);
+		if ( $opts && $opts[self::optdelopts] != 'false' ) {
+			delete_option(self::opt_group);
 		}
 	}
 
 	public static function plugin_page_addlink($links) {
 		$opturl = '<a href="' . get_option('siteurl');
 		$opturl .= '/wp-admin/options-general.php?page=';
-		$opturl .= self::$settings_page_id;
+		$opturl .= self::settings_page_id;
 		$opturl .= '">' . __('Settings') . '</a>';
 		// Add a link to this plugin's settings page
 		array_unshift($links, $opturl); 
@@ -317,7 +314,7 @@ class SWF_put_evh {
 			return;
 		}
 		if ( function_exists(register_widget) ) {
-			$cl = self::$swfput_widget;
+			$cl = self::swfput_widget;
 			register_widget($cl);
 		}
 	}
@@ -328,26 +325,26 @@ class SWF_put_evh {
 			return;
 		}
 		if ( function_exists(unregister_widget) ) {
-			$cl = self::$swfput_widget;
+			$cl = self::swfput_widget;
 			unregister_widget($cl);
 		}
 	}
 
 	protected function init_opts() {
 		$items = array(
-			self::$optverbose => self::$defverbose,
-			self::$optdispmsg =>
-				(self::$defdisplay & self::$disp_msg) ? 'true' : 'false',
-			self::$optdispwdg =>
-				(self::$defdisplay & self::$disp_widget) ? 'true' : 'false',
-			self::$optdisphdr =>
-				(self::$defdisplay & self::$disp_hdr) ? 'true' : 'false',
-			self::$optcodemsg => self::$defcodemsg,
-			self::$optcodewdg => self::$defcodewdg,
-			self::$optpregmsg => self::$defpregmsg,
-			self::$optplugwdg => self::$defplugwdg,
-			self::$optdelopts => self::$defdelopts,
-			self::$optuseming => self::$defuseming
+			self::optverbose => self::defverbose,
+			self::optdispmsg =>
+				(self::defdisplay & self::disp_msg) ? 'true' : 'false',
+			self::optdispwdg =>
+				(self::defdisplay & self::disp_widget) ? 'true' : 'false',
+			self::optdisphdr =>
+				(self::defdisplay & self::disp_hdr) ? 'true' : 'false',
+			self::optcodemsg => self::defcodemsg,
+			self::optcodewdg => self::defcodewdg,
+			self::optpregmsg => self::defpregmsg,
+			self::optplugwdg => self::defplugwdg,
+			self::optdelopts => self::defdelopts,
+			self::optuseming => self::defuseming
 		);
 		$opts = self::get_opt_group();
 		// note values converted to string
@@ -364,14 +361,14 @@ class SWF_put_evh {
 				}
 			}
 			if ( $mod === true ) {
-				update_option(self::$opt_group, $opts);
+				update_option(self::opt_group, $opts);
 			}
 		} else {
 			$opts = array();
 			foreach ($items as $k => $v) {
 				$opts[$k] = '' . $v;
 			}
-			add_option(self::$opt_group, $opts);
+			add_option(self::opt_group, $opts);
 		}
 		return $opts;
 	}
@@ -393,17 +390,17 @@ class SWF_put_evh {
 			// General options section
 			$nf = 0;
 			$fields = array();
-			$fields[$nf++] = new $Cf(self::$optverbose,
+			$fields[$nf++] = new $Cf(self::optverbose,
 					self::ht(__('Show verbose descriptions:')),
-					self::$optverbose,
-					$items[self::$optverbose],
+					self::optverbose,
+					$items[self::optverbose],
 					array($this, 'put_verbose_opt'));
 			// this field is not printed if ming is n.a.
 			if ( self::can_use_ming() )
-			$fields[$nf++] = new $Cf(self::$optuseming,
+			$fields[$nf++] = new $Cf(self::optuseming,
 					self::ht(__('Dynamic SWF generation:')),
-					self::$optuseming,
-					$items[self::$optuseming],
+					self::optuseming,
+					$items[self::optuseming],
 					array($this, 'put_useming_opt'));
 			// section object includes description callback
 			$sections[$ns++] = new $Cs($fields,
@@ -416,20 +413,20 @@ class SWF_put_evh {
 			// placement section: (posts, sidebar, header)
 			$nf = 0;
 			$fields = array();
-			$fields[$nf++] = new $Cf(self::$optdispmsg,
+			$fields[$nf++] = new $Cf(self::optdispmsg,
 					self::ht(__('Place in posts:')),
-					self::$optdispmsg,
-					$items[self::$optdispmsg],
+					self::optdispmsg,
+					$items[self::optdispmsg],
 					array($this, 'put_inposts_opt'));
-			$fields[$nf++] = new $Cf(self::$optdispwdg,
+			$fields[$nf++] = new $Cf(self::optdispwdg,
 					self::ht(__('Place in widget areas:')),
-					self::$optdispwdg,
-					$items[self::$optdispwdg],
+					self::optdispwdg,
+					$items[self::optdispwdg],
 					array($this, 'put_widget_opt'));
-			$fields[$nf++] = new $Cf(self::$optdisphdr,
+			$fields[$nf++] = new $Cf(self::optdisphdr,
 					self::ht(__('Place in header area:')),
-					self::$optdisphdr,
-					$items[self::$optdisphdr],
+					self::optdisphdr,
+					$items[self::optdisphdr],
 					array($this, 'put_inhead_opt'));
 			// section object includes description callback
 			$sections[$ns++] = new $Cs($fields,
@@ -442,15 +439,15 @@ class SWF_put_evh {
 			// options for posts
 			$nf = 0;
 			$fields = array();
-			$fields[$nf++] = new $Cf(self::$optcodemsg,
+			$fields[$nf++] = new $Cf(self::optcodemsg,
 					self::ht(__('Use shortcodes in posts:')),
-					self::$optcodemsg,
-					$items[self::$optcodemsg],
+					self::optcodemsg,
+					$items[self::optcodemsg],
 					array($this, 'put_scposts_opt'));
-			$fields[$nf++] = new $Cf(self::$optpregmsg,
+			$fields[$nf++] = new $Cf(self::optpregmsg,
 					self::ht(__('Search attachment links in posts:')),
-					self::$optpregmsg,
-					$items[self::$optpregmsg],
+					self::optpregmsg,
+					$items[self::optpregmsg],
 					array($this, 'put_rxposts_opt'));
 			// section object includes description callback
 			$sections[$ns++] = new $Cs($fields,
@@ -463,15 +460,15 @@ class SWF_put_evh {
 			// options for widget areas
 			$nf = 0;
 			$fields = array();
-			$fields[$nf++] = new $Cf(self::$optplugwdg,
+			$fields[$nf++] = new $Cf(self::optplugwdg,
 					self::ht(__('Use the included widget:')),
-					self::$optplugwdg,
-					$items[self::$optplugwdg],
+					self::optplugwdg,
+					$items[self::optplugwdg],
 					array($this, 'put_plwdg_opt'));
-			$fields[$nf++] = new $Cf(self::$optcodewdg,
+			$fields[$nf++] = new $Cf(self::optcodewdg,
 					self::ht(__('Use shortcodes in widgets:')),
-					self::$optcodewdg,
-					$items[self::$optcodewdg],
+					self::optcodewdg,
+					$items[self::optcodewdg],
 					array($this, 'put_scwdg_opt'));
 			// section object includes description callback
 			$sections[$ns++] = new $Cs($fields,
@@ -486,15 +483,15 @@ class SWF_put_evh {
 			// of admin page
 			$nf = 0;
 			$fields = array();
-			$fields[$nf++] =	new $Cf(self::$optdisplay,
+			$fields[$nf++] =	new $Cf(self::optdisplay,
 					self::ht(__('Fortune display type:'));
-					self::$optdisplay,
-					$items[self::$optdisplay],
+					self::optdisplay,
+					$items[self::optdisplay],
 					array($this, 'put_disp_opt')),
-			$fields[$nf++] = new $Cf(self::$opttextpos,
+			$fields[$nf++] = new $Cf(self::opttextpos,
 					self::ht(__('Fortune inline placement:'));
-					self::$opttextpos,
-					$items[self::$opttextpos],
+					self::opttextpos,
+					$items[self::opttextpos],
 					array($this, 'put_text_pos'));
 			// prepare sections to appear under admin page
 			$sections[$ns++] = new $Cs($fields,
@@ -507,10 +504,10 @@ class SWF_put_evh {
 			// field: delete opts on uninstall?
 			$nf = 0;
 			$fields = array();
-			$fields[$nf++] = new $Cf(self::$optdelopts,
+			$fields[$nf++] = new $Cf(self::optdelopts,
 					self::ht(__('When the plugin is uninstalled:')),
-					self::$optdelopts,
-					$items[self::$optdelopts],
+					self::optdelopts,
+					$items[self::optdelopts],
 					array($this, 'put_del_opts'));
 			// prepare sections to appear under admin page
 			$sections[$ns++] = new $Cs($fields,
@@ -535,8 +532,8 @@ class SWF_put_evh {
 			// Note that validator applies to all options,
 			// necessitating a big switch on option keys
 			$Cp = self::mk_aclv('OptPage');
-			$page = new $Cp(self::$opt_group, $sections,
-				self::$settings_page_id,
+			$page = new $Cp(self::opt_group, $sections,
+				self::settings_page_id,
 				self::ht(__('SWFPut Plugin')),
 				self::ht(__('SWFPut Configuration')),
 				array(__CLASS__, 'validate_opts'),
@@ -557,9 +554,9 @@ class SWF_put_evh {
 		// add here to be sure option is ready
 		if ( self::get_posts_code_option() === 'true' ) {
 			$scf = array($this, 'post_shortcode');
-			add_shortcode(self::$shortcode, $scf);
+			add_shortcode(self::shortcode, $scf);
 		} else {
-			remove_shortcode(self::$shortcode);
+			remove_shortcode(self::shortcode);
 		}
 
 		if ( self::get_widget_code_option() === 'true' ) {
@@ -595,12 +592,12 @@ class SWF_put_evh {
 			$opts = array();
 		}
 		// checkboxes need value set - nonexistant means false
-		$ta = array(self::$optverbose,
-			self::$optdispmsg, self::$optdispwdg,
-			self::$optdisphdr, self::$optdelopts,
-			self::$optcodemsg, self::$optcodewdg,
-			self::$optpregmsg, self::$optplugwdg,
-			self::$optuseming);
+		$ta = array(self::optverbose,
+			self::optdispmsg, self::optdispwdg,
+			self::optdisphdr, self::optdelopts,
+			self::optcodemsg, self::optcodewdg,
+			self::optpregmsg, self::optplugwdg,
+			self::optuseming);
 		foreach ( $ta as $k ) {
 			if ( array_key_exists($k, $opts) ) {
 				continue;
@@ -613,21 +610,21 @@ class SWF_put_evh {
 			$oo = trim($a_orig[$k]);
 
 			switch ( $k ) {
-				case self::$optverbose:
-				case self::$optdispmsg:
-				case self::$optdispwdg:
-				case self::$optdisphdr:
-				case self::$optcodemsg:
-				case self::$optcodewdg:
-				case self::$optpregmsg:
-				case self::$optplugwdg:
-				case self::$optdelopts:
-				case self::$optuseming:
+				case self::optverbose:
+				case self::optdispmsg:
+				case self::optdispwdg:
+				case self::optdisphdr:
+				case self::optcodemsg:
+				case self::optcodewdg:
+				case self::optpregmsg:
+				case self::optplugwdg:
+				case self::optdelopts:
+				case self::optuseming:
 					if ( $ot != 'true' && $ot != 'false' ) {
 						$e = sprintf('bad option: %s[%s]', $k, $v);
 						self::errlog($e);
 						add_settings_error('SWFPut checkbox option',
-							sprintf('%s[%s]', self::$opt_group, $k),
+							sprintf('%s[%s]', self::opt_group, $k),
 							self::ht($e),
 							'error');
 						$a_out[$k] = $oo;
@@ -641,7 +638,7 @@ class SWF_put_evh {
 					$e = "funny key in validate opts: '" . $k . "'";
 					self::errlog($e);
 					add_settings_error('internal error, WP broken?',
-						sprintf('%s[%s]', self::$opt_group, ''),
+						sprintf('%s[%s]', self::opt_group, ''),
 						self::ht($e),
 						'error');
 					$nerr++;
@@ -652,7 +649,7 @@ class SWF_put_evh {
 		if ( $nupd > 0 ) {
 			$str = $nerr == 0 ? __('Settings updated correctly') :
 				sprintf(__('Some settings (%d) updated'), $nupd);
-			add_settings_error(self::$opt_group, self::$opt_group,
+			add_settings_error(self::opt_group, self::opt_group,
 				self::ht($str), 'updated');
 		}
 		
@@ -796,7 +793,7 @@ class SWF_put_evh {
 	
 	// callback helper, put single checkbox
 	public function put_single_checkbox($a, $opt, $label) {
-		$group = self::$opt_group;
+		$group = self::opt_group;
 		$c = $a[$opt] == 'true' ? "checked='CHECKED' " : "";
 
 		//echo "\n		<!-- {$opt} checkbox-->\n";
@@ -809,70 +806,70 @@ class SWF_put_evh {
 	// callback, put verbose section descriptions?
 	public function put_verbose_opt($a) {
 		$tt = self::ht(__('Show verbose descriptions'));
-		$k = self::$optverbose;
+		$k = self::optverbose;
 		$this->put_single_checkbox($a, $k, $tt);
 	}
 
 	// callback, put SWF in head?
 	public function put_useming_opt($a) {
 		$tt = self::ht(__('Use SWF script if PHP+Ming is available'));
-		$k = self::$optuseming;
+		$k = self::optuseming;
 		$this->put_single_checkbox($a, $k, $tt);
 	}
 
 	// callback, put SWF in head?
 	public function put_inhead_opt($a) {
 		$tt = self::ht(__('Enable SWF in head'));
-		$k = self::$optdisphdr;
+		$k = self::optdisphdr;
 		$this->put_single_checkbox($a, $k, $tt);
 	}
 
 	// callback, put SWF in sidebar (widget)?
 	public function put_widget_opt($a) {
 		$tt = self::ht(__('Enable widget or shortcode'));
-		$k = self::$optdispwdg;
+		$k = self::optdispwdg;
 		$this->put_single_checkbox($a, $k, $tt);
 	}
 
 	// callback, put SWF in posts?
 	public function put_inposts_opt($a) {
 		$tt = self::ht(__('Enable regex search or shortcode'));
-		$k = self::$optdispmsg;
+		$k = self::optdispmsg;
 		$this->put_single_checkbox($a, $k, $tt);
 	}
 
 	// callback, use shortcodes in posts?
 	public function put_rxposts_opt($a) {
 		$tt = self::ht(__('Search attachments in posts'));
-		$k = self::$optpregmsg;
+		$k = self::optpregmsg;
 		$this->put_single_checkbox($a, $k, $tt);
 	}
 
 	// callback, use plugin's widget?
 	public function put_plwdg_opt($a) {
 		$tt = self::ht(__('Enable the included widget'));
-		$k = self::$optplugwdg;
+		$k = self::optplugwdg;
 		$this->put_single_checkbox($a, $k, $tt);
 	}
 
 	// callback, use plugin's widget?
 	public function put_scwdg_opt($a) {
 		$tt = self::ht(__('Enable shortcodes in widgets'));
-		$k = self::$optcodewdg;
+		$k = self::optcodewdg;
 		$this->put_single_checkbox($a, $k, $tt);
 	}
 
 	// callback, sed attachments in posts?
 	public function put_scposts_opt($a) {
 		$tt = self::ht(__('Enable shortcode in posts'));
-		$k = self::$optcodemsg;
+		$k = self::optcodemsg;
 		$this->put_single_checkbox($a, $k, $tt);
 	}
 
 	// callback, install section field: opt delete
 	public function put_del_opts($a) {
 		$tt = self::ht(__('Permanently delete settings (clean db)'));
-		$k = self::$optdelopts;
+		$k = self::optdelopts;
 		$this->put_single_checkbox($a, $k, $tt);
 	}
 
@@ -884,17 +881,17 @@ class SWF_put_evh {
 	// the WP post editor: following example at:
 	// http://bluedogwebservices.com/wordpress-25-shortcodes/
 	public static function put_xed_form() {
-		$pr = self::$swfput_params;
+		$pr = self::swfput_params;
 		$pr = new $pr();
 		extract($pr->getparams());
 
-		$sc = self::$shortcode;
+		$sc = self::shortcode;
 		// id base for form and js
 		$id = 'SWFPut_putswf_video';
 		// table <th> format string
 		$thfmt = '<th scope="row"><label for="%s_%s">%s</label></th>';
 		// table <input type="text"> format string
-		$infmt = '<input type="text" size="40" style="width:95%%;" name="%s[%s]" id="%s_%s" value="%s" />';
+		$infmt = '<input type="text" size="40" style="width:%u%%;" name="%s[%s]" id="%s_%s" value="%s" />';
 		// table <input type="checkbox"> format string
 		$ckfmt = '<input type="checkbox" name="%s[%s]" id="%s_%s" value="%s" %s/>';
 		// js function object
@@ -905,6 +902,10 @@ class SWF_put_evh {
 		$jfu = "send_xed(this.form,'{$id}','caption','{$sc}')";
 		// js reset form to defaults method
 		$jfur = "reset_fm(this.form,'{$id}')";
+		// js fill form from editor if possible
+		$jfuf = "from_xed(this.form,'{$id}','{$sc}')";
+		// input text widths, wide, narrow
+		$iw = 95; $in = 16;
 		
 		// begin form
 		?>
@@ -913,35 +914,35 @@ class SWF_put_evh {
 				<?php $k = 'caption'; $l = __('Media Caption:');
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
-					<?php printf($infmt, $id, $k, $id, $k, ''); ?>
+					<?php printf($infmt, $iw, $id, $k, $id, $k, ''); ?>
 				</td>
 			</tr>
 			<tr valign="top">
 				<?php $k = 'url'; $l = __('Video|Audio Url:');
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
-					<?php printf($infmt, $id, $k, $id, $k, ''); ?>
+					<?php printf($infmt, $iw, $id, $k, $id, $k, ''); ?>
 				</td>
 			</tr>
 			<tr valign="top">
 				<?php $k = 'playpath'; $l = __('Playpath (rtmp):');
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
-					<?php printf($infmt, $id, $k, $id, $k, ''); ?>
+					<?php printf($infmt, $iw, $id, $k, $id, $k, ''); ?>
 				</td>
 			</tr>
 			<tr valign="top">
 				<?php $k = 'width'; $l = __('Width:');
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
-					<?php printf($infmt, $id, $k, $id, $k, $$k); ?>
+					<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
 				</td>
 			</tr>
 			<tr valign="top">
 				<?php $k = 'height'; $l = __('Height:');
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
-					<?php printf($infmt, $id, $k, $id, $k, $$k); ?>
+					<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
 				</td>
 			</tr>
 			<tr valign="top">
@@ -961,24 +962,24 @@ class SWF_put_evh {
 				</td>
 			</tr>
 			<tr valign="top">
-				<?php $k = 'displayaspect'; $l = __('Display Aspect (e.g 4:3, precludes Auto):');
+				<?php $k = 'displayaspect'; $l = __('Display Aspect (e.g. 4:3, precludes Auto):');
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
-					<?php printf($infmt, $id, $k, $id, $k, $$k); ?>
+					<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
 				</td>
 			</tr>
 			<tr valign="top">
-				<?php $k = 'pixelaspect'; $l = __('Pixel Aspect (e.g 8:9, precluded by Display):');
+				<?php $k = 'pixelaspect'; $l = __('Pixel Aspect (e.g. 8:9, precluded by Display):');
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
-					<?php printf($infmt, $id, $k, $id, $k, $$k); ?>
+					<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
 				</td>
 			</tr>
 			<tr valign="top">
 				<?php $k = 'volume'; $l = __('Initial Volume (0-100):');
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
-					<?php printf($infmt, $id, $k, $id, $k, $$k); ?>
+					<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
 				</td>
 			</tr>
 			<tr valign="top">
@@ -1025,13 +1026,15 @@ class SWF_put_evh {
 				<?php $k = 'barheight'; $l = __('Control Bar Height (20-80):');
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
-					<?php printf($infmt, $id, $k, $id, $k, $$k); ?>
+					<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
 				</td>
 			</tr>
 		</table>
 		<p class="submit">
 			<?php $jtt = __('Reset form to default values');
 				printf($bjfmt, $job, $jfur, $jtt);
+				$jtt = __('Fill form from editor');
+				printf($bjfmt, $job, $jfuf, $jtt);
 				$jtt = __('Place shortcode in editor');
 				printf($bjfmt, $job, $jfu, $jtt); ?>
 		</p>
@@ -1053,7 +1056,7 @@ class SWF_put_evh {
 		if ( $this->in_wdg_do_shortcode < 1 ) {
 			return $this->post_shortcode($atts, $content, $code);
 		}
-		$pr = self::$swfput_params;
+		$pr = self::swfput_params;
 		$pr = new $pr();
 		$pr->setarray(shortcode_atts($pr->getparams(), $atts));
 		$pr->sanitize();
@@ -1063,7 +1066,12 @@ class SWF_put_evh {
 		if ( $code === "" ) {
 			$code = $atts[0];
 		}
-		$swf = $this->get_swf_url('post', $w, $h);
+		if ( $this->should_use_ming() ) {
+			$swf = $this->get_swf_url('widget', $w, $h);
+		} else {
+			$bh = $pr->getvalue('barheight');
+			$swf = $this->get_swf_binurl($bh);
+		}
 		$dw = $w + 3;
 		// use no class, but do use deprecated align
 		$dv = '<p><div id="'.$code.'" align="center"';
@@ -1084,7 +1092,7 @@ class SWF_put_evh {
 		if ( $this->in_wdg_do_shortcode > 0 ) {
 			return $this->wdg_shortcode($atts, $content, $code);
 		}
-		$pr = self::$swfput_params;
+		$pr = self::swfput_params;
 		$pr = new $pr();
 		$pr->setarray(shortcode_atts($pr->getparams(), $atts));
 		$pr->sanitize();
@@ -1094,7 +1102,12 @@ class SWF_put_evh {
 		if ( $code === "" ) {
 			$code = $atts[0];
 		}
-		$swf = $this->get_swf_url('post', $w, $h);
+		if ( $this->should_use_ming() ) {
+			$swf = $this->get_swf_url('post', $w, $h);
+		} else {
+			$bh = $pr->getvalue('barheight');
+			$swf = $this->get_swf_binurl($bh);
+		}
 		$dw = $w + 0;
 		// use class that WP uses for e.g. images
 		$dv = '<div id="'.$code.'" class="wp-caption aligncenter"';
@@ -1115,10 +1128,16 @@ class SWF_put_evh {
 		global $post, $wp_locale;
 		$mpat = '/.+\.(mp4|flv|f4v|mp3)$/';
 		$w = 400; $h = 300; // TODO: from option
-		$pr = self::$swfput_params;
+		$pr = self::swfput_params;
 		$pr = new $pr();
 		$pr->setvalue('width', $w);
 		$pr->setvalue('height', $h);
+		if ( $this->should_use_ming() ) {
+			$swf = $this->get_swf_url('post_sed', $w, $h);
+		} else {
+			$bh = $pr->getvalue('barheight');
+			$swf = $this->get_swf_binurl($bh);
+		}
 		
 		// accumulate in $out
 		$out = '';
@@ -1144,10 +1163,8 @@ class SWF_put_evh {
 					$out .= $line . $sep;
 				} else {
 					$pr->setvalue('url', $url);
-					$sw = $this->get_swf_url('post_sed', $w, $h);
-					$s = $this->get_swf_tags($sw, $pr);
+					$s = $this->get_swf_tags($swf, $pr);
 					$out .= '<br />' . $s . '<br />' . $sep;
-					//$out .= $s;
 					if ( false /*elide attach url -- needs work*/ ) {
 						$s = '' . $m[1][0] . $m[6][0];
 						if ( strlen($s) > 0	) {
@@ -1170,7 +1187,7 @@ class SWF_put_evh {
 
 	// append version suffix for Options classes names
 	protected static function mk_aclv($pfx) {
-		$s = $pfx . '_' . self::$aclv;
+		$s = $pfx . '_' . self::aclv;
 		return $s;
 	}
 	
@@ -1212,7 +1229,7 @@ class SWF_put_evh {
 	// should php+ming be used?
 	public static function should_use_ming() {
 		if ( self::can_use_ming() === true ) {
-			if ( self::opt_by_name(self::$optuseming) === 'true' ) {
+			if ( self::opt_by_name(self::optuseming) === 'true' ) {
 				return true;
 			}
 		}
@@ -1243,7 +1260,7 @@ class SWF_put_evh {
 	
 	// get the plugins main option group
 	public static function get_opt_group() {
-		return get_option(self::$opt_group); /* WP get_option() */
+		return get_option(self::opt_group); /* WP get_option() */
 	}
 	
 	// get an option value by name/key
@@ -1257,50 +1274,50 @@ class SWF_put_evh {
 
 	// for settings section descriptions
 	public static function get_verbose_option() {
-		return self::opt_by_name(self::$optverbose);
+		return self::opt_by_name(self::optverbose);
 	}
 
 	// option for widget areas
 	public static function get_widget_option() {
-		return self::opt_by_name(self::$optdispwdg);
+		return self::opt_by_name(self::optdispwdg);
 	}
 
 	// for the sidebar widget
 	public static function get_widget_plugin_option() {
 		if ( self::get_widget_option() !== 'true' )
 			return 'false';
-		return self::opt_by_name(self::$optplugwdg);
+		return self::opt_by_name(self::optplugwdg);
 	}
 
 	// for the widget shortcodes
 	public static function get_widget_code_option() {
 		if ( self::get_widget_option() !== 'true' )
 			return 'false';
-		return self::opt_by_name(self::$optcodewdg);
+		return self::opt_by_name(self::optcodewdg);
 	}
 
 	// get the do messages (place in posts) option
 	public static function get_message_option() {
-		return self::opt_by_name(self::$optdispmsg);
+		return self::opt_by_name(self::optdispmsg);
 	}
 
 	// do message shortcodes
 	public static function get_posts_code_option() {
 		if ( self::get_message_option() !== 'true' )
 			return 'false';
-		return self::opt_by_name(self::$optcodemsg);
+		return self::opt_by_name(self::optcodemsg);
 	}
 
 	// do message attachment sed
 	public static function get_posts_preg_option() {
 		if ( self::get_message_option() !== 'true' )
 			return 'false';
-		return self::opt_by_name(self::$optpregmsg);
+		return self::opt_by_name(self::optpregmsg);
 	}
 
 	// get the place at head option
 	public static function get_head_option() {
-		return self::opt_by_name(self::$optdisphdr);
+		return self::opt_by_name(self::optdisphdr);
 	}
 
 	/**
@@ -1391,10 +1408,44 @@ class SWF_put_evh {
 		if ( $useming === true ) {
 			$t = $this->swfputphp;
 		} else {
-			$t = $this->swfputbin;
+			$n = floor((int)$hi / 10);
+			if ( $sel === 'widget' ) {
+				$n = 24;
+			}
+			$t = $this->get_swf_binurl($n);
 		}
 
 		return $t;
+	}
+
+	// helper for selecting swf bin near desired bar height
+	public function get_swf_binurl($bh = 48) {
+		$f = 'mingput.swf';
+		$t = dirname($this->swfputbin);
+		$bins = array(
+			24 => 'mingput24.swf',
+			28 => 'mingput28.swf',
+			32 => 'mingput32.swf',
+			36 => 'mingput36.swf',
+			40 => 'mingput40.swf',
+			44 => 'mingput44.swf'
+		);
+		$bh = abs((int)$bh);
+		if ( (int)$bh <= 24 ) {
+			$f = $bins[24];
+		} else if ( (int)$bh <= 28 ) {
+			$f = $bins[28];
+		} else if ( (int)$bh <= 32 ) {
+			$f = $bins[32];
+		} else if ( (int)$bh <= 36 ) {
+			$f = $bins[36];
+		} else if ( (int)$bh <= 40 ) {
+			$f = $bins[40];
+		} else {
+			$f = $bins[44];
+		}
+
+		return $t . '/' . $f;
 	}
 
 	// helper for getting swf css (internal use)) url
@@ -1741,9 +1792,9 @@ endif; // if ( ! class_exists('SWF_params_evh') ) :
 if ( ! class_exists('SWF_put_widget_evh') ) :
 class SWF_put_widget_evh extends WP_Widget {
 	// main plugin class name
-	protected static $swfput_plugin = 'SWF_put_evh';
+	const swfput_plugin = 'SWF_put_evh';
 	// params helper class name
-	protected static $swfput_params = 'SWF_params_evh';
+	const swfput_params = 'SWF_params_evh';
 	// an instance of the main plugun class
 	protected $plinst;
 	
@@ -1755,13 +1806,13 @@ class SWF_put_widget_evh extends WP_Widget {
 	// the context menu rather than let it be clipped.
 	// 216 is a bit wide for a sidebar (in some themes),
 	// consider 200x150
-	protected static $defwidth  = 200; // is 4:3 aspect
-	protected static $defheight = 150; //
+	const defwidth  = 200; // is 4:3 aspect
+	const defheight = 150; //
 
 	public function __construct() {
 		global $swfput1_evh_instance_1;
 		if ( ! isset($swfput1_evh_instance_1) ) {
-			$cl = self::$swfput_plugin;
+			$cl = self::swfput_plugin;
 			$this->plinst = new $cl(false);
 		} else {
 			$this->plinst = &$swfput1_evh_instance_1;
@@ -1770,8 +1821,11 @@ class SWF_put_widget_evh extends WP_Widget {
 		$cl = __CLASS__;
 		$desc = __('Flash video for your widget areas');
 		$opts = array('classname' => $cl, 'description' => $desc);
-		$copts = array('width' => self::$defwidth,
-					'height' => self::$defheight);
+
+		// control opts width affects the parameters form,
+		// height is ignored.  Width 400 allows long text fields
+		// (not as log as most URL's), and informative (long) labels
+		$copts = array('width' => 400, 'height' => 500);
 		parent::__construct($cl, __('Flash Video'), $opts, $copts);
 	}
 
@@ -1786,22 +1840,27 @@ class SWF_put_widget_evh extends WP_Widget {
 			return;
 		}
 		
-		$pr = self::$swfput_params;
+		$pr = self::swfput_params;
 		$pr = new $pr();
 		$pr->setnewarray($instance);
 
 		if ( ! $pr->getvalue('width') ) {
-			$pr->setvalue('width', self::$defwidth);
+			$pr->setvalue('width', self::defwidth);
 		}
 		if ( ! $pr->getvalue('height') ) {
-			$pr->setvalue('height', self::$defheight);
+			$pr->setvalue('height', self::defheight);
 		}
 		$pr->sanitize();
 		$w = $pr->getvalue('width');
 		$h = $pr->getvalue('height');
+		$bh = $pr->getvalue('barheight');
 		$url = $pr->getvalue('url');
 		$cap = $this->plinst->ht($pr->getvalue('caption'));
-		$uswf = $this->plinst->get_swf_url('widget', $w, $h);
+		if ( $this->plinst->should_use_ming() ) {
+			$uswf = $this->plinst->get_swf_url('widget', $w, $h);
+		} else {
+			$uswf = $this->plinst->get_swf_binurl($bh);
+		}
 
 		$code = 'widget-div';
 		$dw = $w + 3;
@@ -1835,7 +1894,7 @@ class SWF_put_widget_evh extends WP_Widget {
 	}
 
 	public function update($new_instance, $old_instance) {
-		$pr = self::$swfput_params;
+		$pr = self::swfput_params;
 		$pr = new $pr();
 		
 		if ( is_array($old_instance) ) {
@@ -1868,10 +1927,10 @@ class SWF_put_widget_evh extends WP_Widget {
 			$i['title'] = '';
 		}
 		if ( ! $i['width'] ) {
-			$i['width'] = self::$defwidth;
+			$i['width'] = self::defwidth;
 		}
 		if ( ! $i['height'] ) {
-			$i['height'] = self::$defheight;
+			$i['height'] = self::defheight;
 		}
 
 		return $i;
@@ -1879,9 +1938,9 @@ class SWF_put_widget_evh extends WP_Widget {
 
 	public function form($instance) {
 		$ht = 'wptexturize';
-		$pr = self::$swfput_params;
-		$pr = new $pr(array('width' => self::$defwidth,
-			'height' => self::$defheight));
+		$pr = self::swfput_params;
+		$pr = new $pr(array('width' => self::defwidth,
+			'height' => self::defheight));
 		$instance = wp_parse_args((array)$instance, $pr->getparams());
 
 		$val = $ht($instance['title']);
@@ -1932,22 +1991,22 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $ht($instance['width']);
 		$id = $this->get_field_id('width');
 		$nm = $this->get_field_name('width');
-		$tl = $ht(__('Width (default ').self::$defwidth.__('):'));
+		$tl = $ht(__('Width (default ').self::defwidth.__('):'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>"
+			name="<?php echo $nm; ?>" style="width:16%;"
 			type="text" value="<?php echo $val; ?>" /></p>
 
 		<?php
 		$val = $ht($instance['height']);
 		$id = $this->get_field_id('height');
 		$nm = $this->get_field_name('height');
-		$tl = $ht(__('Height (default ').self::$defheight.__('):'));
+		$tl = $ht(__('Height (default ').self::defheight.__('):'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>"
+			name="<?php echo $nm; ?>" style="width:16%;"
 			type="text" value="<?php echo $val; ?>" /></p>
 
 		<?php
@@ -1978,22 +2037,22 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $instance['displayaspect'];
 		$id = $this->get_field_id('displayaspect');
 		$nm = $this->get_field_name('displayaspect');
-		$tl = $ht(__('Display Aspect (e.g 4:3, precludes Auto):'));
+		$tl = $ht(__('Display Aspect (e.g. 4:3, precludes Auto):'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>"
+			name="<?php echo $nm; ?>" style="width:16%;"
 			type="text" value="<?php echo $val; ?>" /></p>
 
 		<?php
 		$val = $instance['pixelaspect'];
 		$id = $this->get_field_id('pixelaspect');
 		$nm = $this->get_field_name('pixelaspect');
-		$tl = $ht(__('Pixel Aspect (e.g 8:9, precluded by Display):'));
+		$tl = $ht(__('Pixel Aspect (e.g. 8:9, precluded by Display):'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>"
+			name="<?php echo $nm; ?>" style="width:16%;"
 			type="text" value="<?php echo $val; ?>" /></p>
 
 		<?php
@@ -2004,7 +2063,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>"
+			name="<?php echo $nm; ?>" style="width:16%;"
 			type="text" value="<?php echo $val; ?>" /></p>
 
 		<?php
@@ -2075,7 +2134,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>"
+			name="<?php echo $nm; ?>" style="width:16%;"
 			type="text" value="<?php echo $val; ?>" /></p>
 
 		<?php

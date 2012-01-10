@@ -403,7 +403,6 @@ mingshape_drawrect(&$obj, $originX, $originY, $wi, $hi, $angle = 0)
 \**********************************************************************/
 
 // set flash version
-//$swfvs = 9;
 // only v. 4-9 presently
 $swfvs = 8;
 // compiled output compression level integer 0-9 as for zlib

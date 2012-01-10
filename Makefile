@@ -15,6 +15,7 @@ SDIRO = mingput
 SSRCS = $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php $(SDIRI)/obj.css
 SBINS = $(SDIRI)/mingput.swf \
 	$(SDIRI)/mingput44.swf \
+	$(SDIRI)/mingput40.swf \
 	$(SDIRI)/mingput36.swf \
 	$(SDIRI)/mingput32.swf \
 	$(SDIRI)/mingput28.swf \
@@ -44,6 +45,9 @@ $(SDIRI)/mingput.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
 
 $(SDIRI)/mingput44.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
 	$(PHPCLI) $(SDIRI)/mingput.php -- BH=44 > $(SDIRI)/mingput44.swf
+
+$(SDIRI)/mingput40.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
+	$(PHPCLI) $(SDIRI)/mingput.php -- BH=40 > $(SDIRI)/mingput40.swf
 
 $(SDIRI)/mingput36.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
 	$(PHPCLI) $(SDIRI)/mingput.php -- BH=36 > $(SDIRI)/mingput36.swf

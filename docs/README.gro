@@ -1,5 +1,5 @@
 .TL
-README for Iforge
+README for SWFPut
 .br
 Mandelbrot Set Generator in Java
 .AU
@@ -8,9 +8,9 @@ Ed Hynan <freecode@verizon.net>
 .SH
 What is it?
 .PP
-\fBIforge\fP is a Java program demonstrating the
+\fBSWFPut\fP is a Java program demonstrating the
 generation of Mandelbrot set and Julia set images.
-\fBIforge\fP also includes an adaptation of
+\fBSWFPut\fP also includes an adaptation of
 the program \fBppmforge\fP by John Walker.
 The fractal planet image generator
 is a Java port of
@@ -40,7 +40,7 @@ for generating a \fBjar\fP archive.
 .SH
 Running
 .PP
-\fBIforge\fP will run as an application or applet.
+\fBSWFPut\fP will run as an application or applet.
 The same set of classes are used except for the
 class containing the entry point, which differs
 for each.  The application is invoked via 

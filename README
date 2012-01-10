@@ -7,7 +7,7 @@
 
 
 
-                         README for Iforge
+                         README for SWFPut
                   Mandelbrot Set Generator in Java
 
 
@@ -17,8 +17,8 @@
 
     What is it?
 
-         Iforge  is  a Java program demonstrating the generation
-    of  Mandelbrot  set  and  Julia  set  images.   Iforge  also
+         SWFPut  is  a Java program demonstrating the generation
+    of  Mandelbrot  set  and  Julia  set  images.   SWFPut  also
     includes  an  adaptation  of  the  program  ppmforge by John
     Walker.  The fractal planet image generator is a  Java  port
     of the ppmforge code.  The C program ppmforge is included in
@@ -40,7 +40,7 @@
 
     Running
 
-         Iforge will run as an application or applet.  The  same
+         SWFPut will run as an application or applet.  The  same
     set  of classes are used except for the class containing the
     entry point, which differs for  each.   The  application  is
     invoked  via  FractalForge.class and the applet via FractAp-
