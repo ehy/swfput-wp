@@ -774,8 +774,6 @@ $progressbarxoffs =  ($barlength - $progressbarlength) / 2.0;
 \**********************************************************************/
 
 
-// main php ming movie:
-$movie = new SWFMovie($swfvs);
 // libming init
 //ming_useswfversion($swfvs);
 // this (20) is the default in libming:
@@ -792,9 +790,12 @@ ming_setscale(20.0);
 if ( is_int($swfcomp) && $swfcomp >= 0 && $swfcomp <= 9 ) {
 	ming_setswfcompression($swfcomp);
 }
+
+// main php ming movie:
+$movie = new SWFMovie($swfvs);
 $movie->setRate($movierate);
-// Dimensions will not matter in pre-compiled player
-$movie->setDimension($wndlength, $wndheight);
+// Dimensions should be taken from env., e.g. embedding
+//$movie->setDimension($wndlength, $wndheight);
 $movie->setBackground(0, 0, 0);
 
 

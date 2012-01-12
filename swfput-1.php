@@ -903,7 +903,7 @@ class SWF_put_evh {
 		// js reset form to defaults method
 		$jfur = "reset_fm(this.form,'{$id}')";
 		// js fill form from editor if possible
-		$jfuf = "from_xed(this.form,'{$id}','{$sc}')";
+		$jfuf = "from_xed(this.form,'{$id}','caption','{$sc}')";
 		// input text widths, wide, narrow
 		$iw = 95; $in = 16;
 		
@@ -1551,16 +1551,17 @@ class SWF_put_evh {
 		<param name="src" value="%s?%s">
 		<param name="name" value="mingput">
 		<param name="bgcolor" value="#000000">
-		<param name="align" value="center">
+		<param name="align" value="middle">
 		', $play, $loop, $quality, $allowfull, $fv, $uswf, $pv)
-		. sprintf('<embed type="%s" src="%s?%s" bgcolor="#000000" '
+		. sprintf('<embed type="%s" width="%u" height="%u" src="%s?%s" '
 		. 'name="mingput" flashvars="%s" allowscriptaccess="sameDomain"'
 		. ' quality="%s" loop="%s" play="%s" ',
-		$mtype, $uswf, $pv, $fv, $quality, $loop, $play)
-		. sprintf('data="%s?%s" allowfullscreen="%s" align="center"'
-		. ' width="%u" height="%u" />
+		$mtype, $w, $h, $uswf, $pv, $fv, $quality, $loop, $play)
+		. sprintf('data="%s?%s" allowfullscreen="%s" align="middle"'
+		. ' bgcolor="#000000" pluginspage="%s" />
 		</object>
-		', $uswf, $pv, $allowfull, $w, $h);
+		', $uswf, $pv, $allowfull,
+			'http://www.macromedia.com/go/getflashplayer');
 	}
 	
 } // End class SWF_put_evh

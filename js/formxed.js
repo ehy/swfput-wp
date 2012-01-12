@@ -69,7 +69,7 @@ SWFPut_putswf_video_xed.prototype = {
 		}
 		return ret;
 	},
-	sc_from_line : function(l, sc) {
+	sc_from_line : function(l, cs, sc) {
 		var cb = "[" + sc;
 		var ce = "[/" + sc + "]";
 		var p = l.indexOf(cb, 0);
@@ -85,7 +85,7 @@ SWFPut_putswf_video_xed.prototype = {
 			if ( p < 0 ) {
 				return false;
 			}
-			this['map']["caption"] = l.substring(p + 1);
+			this['map'][cs] = l.substring(p + 1);
 		}
 		p = l.indexOf("]", 0);
 		if ( p < 0 ) {
@@ -112,7 +112,7 @@ SWFPut_putswf_video_xed.prototype = {
 		}
 		return true;
 	},
-	from_xed : function(f, id, sc) {
+	from_xed : function(f, id, cs, sc) {
 		var v = jQuery(edCanvas).val();
 		if ( v == null ) {
 			return;
@@ -129,7 +129,7 @@ SWFPut_putswf_video_xed.prototype = {
 		for ( ; i < va.length; i++ ) {
 			var l = va[i];
 			this['map'] = {};
-			if ( this.sc_from_line(l, sc) == true ) {
+			if ( this.sc_from_line(l, cs, sc) == true ) {
 				break;
 			}
 		}
@@ -138,7 +138,7 @@ SWFPut_putswf_video_xed.prototype = {
 			this.set_fm('map', f, id);
 		} else if ( iinit > 0 ) {
 			// start again from 0
-			this.from_xed(f, id, sc);
+			this.from_xed(f, id, cs, sc);
 		}
 	},
 	send_xed : function(f, id, cs, sc) {

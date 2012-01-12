@@ -48,11 +48,13 @@ $mainact = <<<OMM
 Stage.scaleMode = "noScale";
 Stage.align = "TL";
 _focusrect = false; // seems to be default, but just the same . . .
+var flvers = System.capabilities.version;
 var curdate = new Date();
 var obj_css = new TextField.StyleSheet();
 var obj_css_url = "$obj_css_url";
 
-var t; // temp var
+var t;  // temp var
+var tf; // temp func var
 
 //
 // here gather values from encloding PHP
@@ -63,7 +65,7 @@ var b_release = $i_release ? true : false;
 // should NetStream check media server policy file (best set false)
 var bchkpolicyfile = $bchkpolicyfile;
 // temp func to help assignment from enclosing PHP
-var tf = function (def, str, isok) {
+tf = function (def, str, isok) {
 	return str.length > 0 && isok != null ? isok : def;
 };
 var swfvs = tf(8, "$swfvs", $swfvs);
@@ -1825,6 +1827,24 @@ if ( (vurl == null || vurl == "") && _level0.FN != undefined ) {
 }
 adddbgtext(" vurl: '" + vurl + "'\n");
 
+// Gnash 0.8.10 gets confused by dimensions of main 'movie' and
+// sizes the stage wrong: try to correct that (BTW 0.8.8 is OK)
+if ( _level0.WI != undefined && _level0.HI != undefined ) {
+	if ( flvers.indexOf("10,1,999,0") >= 0 ) {
+		adddbgtext("Gnash Stage size bug hacks . . .\n");
+		// this nasty hack actually worked, Ubuntu 11.10 in
+		// kvm virtual machine, display on Vinagre vnc client,
+		// without any visible flashing; effect on fast display
+		// currently unknown -- It MIGHT be possible to find
+		// some arrangement of the embedding html that stops
+		// the problem, since it differs, with the same .swf,
+		// between the Wordpress pages and my other test pages ...
+		// but too much time has been spent on it now
+		toggleFullscreen();
+		toggleFullscreen();
+	}
+}
+
 // is there a stream id (rtmp playpath)?
 if ( v_id == null && _level0.IDV != undefined && _level0.IDV != '' ) {
 	v_id = _level0.IDV;
@@ -1929,7 +1949,7 @@ if ( _level0.PA != undefined && _level0.PA != '' ) {
 	adddbgtext(" PA: '" + _level0.PA + "'\n");
 }
 
-adddbgtext("Flash v. " + System.capabilities.version + "\n");
+adddbgtext("Flash v. " + flvers + "\n");
 
 // start the movie, but . . .
 // initial pause is handled elsewhere except for rtmp which does not
