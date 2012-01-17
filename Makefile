@@ -9,7 +9,8 @@ SRCS = ${PRJNAME}.php \
 	OptPage_0_0_2.inc.php
 
 JSDIR = js
-JSSRC = $(JSDIR)/formxed.js
+JSBIN = $(JSDIR)/formxed.js
+JSSRC = $(JSDIR)/formxed.dev.js
 SDIRI = mingtest
 SDIRO = mingput
 SSRCS = $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php $(SDIRI)/obj.css
@@ -33,7 +34,7 @@ PHPCLI = php -f
 
 all: ${PRJZIP}
 
-${PRJZIP}: ${SBINS} ${JSSRC} ${ZALL}
+${PRJZIP}: ${SBINS} ${JSBIN} ${ZALL}
 	test -e ttd && rm -rf ttd; test -e ${PRJDIR} && mv ${PRJDIR} ttd; \
 	mkdir ${PRJDIR} ${PRJSDIR} && cp -r -p ${ZALL} ${JSDIR} ${PRJDIR} && \
 	cp -r -p ${ZSALL} ${PRJSDIR} && rm -f ${PRJZIP} && \
@@ -60,6 +61,11 @@ $(SDIRI)/mingput28.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
 
 $(SDIRI)/mingput24.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
 	$(PHPCLI) $(SDIRI)/mingput.php -- BH=24 > $(SDIRI)/mingput24.swf
+
+${JSBIN}: ${JSSRC}
+	(P=`which perl` && $$P -e \
+	'use JavaScript::Packer;$$p=JavaScript::Packer->init();$$o=join("",<STDIN>);$$p->minify(\$$o,{"compress"=>"clean"});print STDOUT $$o;' < ${JSSRC} > ${JSBIN}) || \
+	cp -f ${JSSRC} ${JSBIN}
 
 README: docs/README.gro
 	(cd docs && make) && cp -f docs/README.txt README

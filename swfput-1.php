@@ -886,6 +886,13 @@ class SWF_put_evh {
 		extract($pr->getparams());
 
 		$sc = self::shortcode;
+		// file select by ext pattern
+		$mpat = '/.*\.(flv|f4v|m4v|mp4|mp3)$/';
+		// files array from uploads dirs (empty if none)
+		$af = self::r_find_uploads($mpat, true);
+		$au = wp_upload_dir();
+		// url base for upload dirs files
+		$ub = rtrim($au['baseurl'], '/') . '/';
 		// id base for form and js
 		$id = 'SWFPut_putswf_video';
 		// table <th> format string
@@ -898,12 +905,20 @@ class SWF_put_evh {
 		$job = $id . '_inst';
 		// form buttons format string
 		$bjfmt = '<input type="button" onclick="return %s.%s;" value="%s" />';
+		// form <select > format string
+		$slfmt = '<select name="%s[%s]" id="%s_%s" onchange="return %s.%s;">' . "\n";
+		// form <select > <option > format string
+		$sofmt = '<option value="%s">%s</option>' . "\n";
 		// js send form values to editor method
 		$jfu = "send_xed(this.form,'{$id}','caption','{$sc}')";
 		// js reset form to defaults method
 		$jfur = "reset_fm(this.form,'{$id}')";
 		// js fill form from editor if possible
 		$jfuf = "from_xed(this.form,'{$id}','caption','{$sc}')";
+		// js replace last found by $jfuf
+		$jfuc = "repl_xed(this.form,'{$id}','caption','{$sc}')";
+		// js copy select option to url text
+		$jfus = "form_cpval(this.form,'{$id}','files','url')";
 		// input text widths, wide, narrow
 		$iw = 95; $in = 16;
 		
@@ -911,42 +926,71 @@ class SWF_put_evh {
 		?>
 		<table class="form-table">
 			<tr valign="top">
-				<?php $k = 'caption'; $l = __('Media Caption:');
+				<?php $k = 'caption';
+					$l = self::ht(__('Media Caption:'));
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
 					<?php printf($infmt, $iw, $id, $k, $id, $k, ''); ?>
 				</td>
 			</tr>
 			<tr valign="top">
-				<?php $k = 'url'; $l = __('Video|Audio Url:');
+				<?php $k = 'url';
+					$l = self::ht(__('Video|Audio Url:'));
+					printf($thfmt, $id, $k, $l); ?>
+				<td>
+					<?php printf($infmt, $iw, $id, $k, $id, $k, ''); ?>
+				</td>
+			</tr>
+			<?php
+			// if there are upload files, print <select >
+			if ( count($af) > 0 ) {
+				$k = 'files';
+				$l = self::ht(__('Select from uploads:'));
+				printf($thfmt . '<td>', $id, $k, $l);
+				// <select>
+				printf($slfmt, $id, $k, $id, $k, $job, $jfus);
+				// <options>
+				printf($sofmt, '', self::ht(__('none')));
+				foreach ( $af as $fv ) {
+					$ts = $fv[0];
+					$tp = rtrim($fv[1], '/');
+					$tu = $ub . ($tp === '' ? '' : $tp . '/');
+					$tu .= $ts;
+					if ( $tp !== '' )
+						$ts .= " (" . $tp . ")";
+					printf($sofmt, rawurlencode($tu), self::ht($ts));
+				}
+				// end select
+				echo "</select></td></tr>\n";
+			} // end if there are upload files
+			?>
+			<tr valign="top">
+				<?php $k = 'playpath'; 
+					$l = self::ht(__('Playpath (rtmp):'));
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
 					<?php printf($infmt, $iw, $id, $k, $id, $k, ''); ?>
 				</td>
 			</tr>
 			<tr valign="top">
-				<?php $k = 'playpath'; $l = __('Playpath (rtmp):');
-					printf($thfmt, $id, $k, $l); ?>
-				<td>
-					<?php printf($infmt, $iw, $id, $k, $id, $k, ''); ?>
-				</td>
-			</tr>
-			<tr valign="top">
-				<?php $k = 'width'; $l = __('Width:');
+				<?php $k = 'width';
+					$l = self::ht(__('Width:'));
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
 					<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
 				</td>
 			</tr>
 			<tr valign="top">
-				<?php $k = 'height'; $l = __('Height:');
+				<?php $k = 'height';
+					$l = self::ht(__('Height:'));
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
 					<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
 				</td>
 			</tr>
 			<tr valign="top">
-				<?php $k = 'audio'; $l = __('Audio (assert if not *.mp3):');
+				<?php $k = 'audio';
+					$l = self::ht(__('Audio (assert if not *.mp3):'));
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
 					<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
@@ -954,7 +998,8 @@ class SWF_put_evh {
 				</td>
 			</tr>
 			<tr valign="top">
-				<?php $k = 'aspectautoadj'; $l = __('Auto Aspect (e.g. 720x480 to 4:3):');
+				<?php $k = 'aspectautoadj';
+					$l = self::ht(__('Auto Aspect (e.g. 720x480 to 4:3):'));
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
 					<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
@@ -962,28 +1007,32 @@ class SWF_put_evh {
 				</td>
 			</tr>
 			<tr valign="top">
-				<?php $k = 'displayaspect'; $l = __('Display Aspect (e.g. 4:3, precludes Auto):');
+				<?php $k = 'displayaspect';
+					$l = self::ht(__('Display Aspect (e.g. 4:3, precludes Auto):'));
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
 					<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
 				</td>
 			</tr>
 			<tr valign="top">
-				<?php $k = 'pixelaspect'; $l = __('Pixel Aspect (e.g. 8:9, precluded by Display):');
+				<?php $k = 'pixelaspect';
+					$l = self::ht(__('Pixel Aspect (e.g. 8:9, precluded by Display):'));
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
 					<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
 				</td>
 			</tr>
 			<tr valign="top">
-				<?php $k = 'volume'; $l = __('Initial Volume (0-100):');
+				<?php $k = 'volume';
+					$l = self::ht(__('Initial Volume (0-100):'));
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
 					<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
 				</td>
 			</tr>
 			<tr valign="top">
-				<?php $k = 'play'; $l = __('Play on load (else waits for play button):');
+				<?php $k = 'play';
+					$l = self::ht(__('Play on load (else waits for play button):'));
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
 					<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
@@ -991,7 +1040,8 @@ class SWF_put_evh {
 				</td>
 			</tr>
 			<tr valign="top">
-				<?php $k = 'loop'; $l = __('Loop play the media:');
+				<?php $k = 'loop';
+					$l = self::ht(__('Loop play the media:'));
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
 					<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
@@ -999,7 +1049,8 @@ class SWF_put_evh {
 				</td>
 			</tr>
 			<tr valign="top">
-				<?php $k = 'hidebar'; $l = __('Hide control bar initially:');
+				<?php $k = 'hidebar';
+					$l = self::ht(__('Hide control bar initially:'));
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
 					<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
@@ -1007,7 +1058,8 @@ class SWF_put_evh {
 				</td>
 			</tr>
 			<tr valign="top">
-				<?php $k = 'disablebar'; $l = __('Hide and disable control bar:');
+				<?php $k = 'disablebar';
+					$l = self::ht(__('Hide and disable control bar:'));
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
 					<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
@@ -1015,7 +1067,8 @@ class SWF_put_evh {
 				</td>
 			</tr>
 			<tr valign="top">
-				<?php $k = 'allowfull'; $l = __('Allow switch to full screen:');
+				<?php $k = 'allowfull';
+					$l = self::ht(__('Allow switch to full screen:'));
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
 					<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
@@ -1023,21 +1076,27 @@ class SWF_put_evh {
 				</td>
 			</tr>
 			<tr valign="top">
-				<?php $k = 'barheight'; $l = __('Control Bar Height (20-80):');
+				<?php $k = 'barheight';
+					$l = self::ht(__('Control Bar Height (20-80):'));
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
 					<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
 				</td>
+			</tr>
+		<!-- form buttons, css on posts page may place these at top -->
+			<tr valign="middle">
+				<p  class="submit">
+				<?php $l = self::ht(__('Reset default values'));
+					printf($bjfmt, $job, $jfur, $l); ?>
+				<?php $l = self::ht(__('Fill form from editor'));
+					printf($bjfmt, $job, $jfuf, $l); ?>
+				<?php $l = self::ht(__('Replace current in editor'));
+					printf($bjfmt, $job, $jfuc, $l); ?>
+				<?php $l = self::ht(__('Place new in editor'));
+					printf($bjfmt, $job, $jfu, $l); ?>
+				</p>
 			</tr>
 		</table>
-		<p class="submit">
-			<?php $jtt = __('Reset form to default values');
-				printf($bjfmt, $job, $jfur, $jtt);
-				$jtt = __('Fill form from editor');
-				printf($bjfmt, $job, $jfuf, $jtt);
-				$jtt = __('Place shortcode in editor');
-				printf($bjfmt, $job, $jfu, $jtt); ?>
-		</p>
 		<?php
 	}
 
@@ -1257,7 +1316,61 @@ class SWF_put_evh {
 		self::$instance = new $cl($init);
 		return self::$instance;
 	}
-	
+
+	// helper to recursively find files preg_matching $pat,
+	// starting at directory $dir, ignoring symbolic links
+	// if $follow is false -- returns array of array(filename, dirname)
+	public static function r_find_files($dir, $pat, $follow = false) {
+	        $ao = array();
+	        $pr = $dir === '.' ? '' : $dir . '/';
+	        foreach ( scandir($dir) as $e) {
+	                if ( $e === '.' || $e === '..' )
+	                        continue;
+	                $t = $pr . $e;
+	                if ( $follow === false && is_link($t) )
+	                        continue;
+	                if ( ! is_readable($t) )
+	                        continue;
+	                if ( is_dir($t) ) {
+	                        // array_merge should *not* overwrite
+	                        // numeric keys, but rather append
+	                        $at = self::r_find_files($t, $pat, $follow);
+	                        if ( count($at) > 0 ) {
+	                                $ao = array_merge($ao, $at);
+	                        }
+	                        continue;
+	                }
+	                if ( is_file($t) && preg_match($pat, $e) ) {
+	                        $ao[] = array($e, $pr);
+	                }
+	        }
+	        return $ao;
+	}
+
+	// helper to recursively find files preg_matching $pat,
+	// starting at WP uploads base dir, ignoring symbolic links
+	// if $follow is false -- returns as r_find_files() above,
+	// with the dirnames rooted at (i.e. excluding) WP upload base dir
+	// NOTE: not tested on MS, but should work if uploads are on
+	// current drive; else forget it.
+	public static function r_find_uploads($pat, $follow = false) {
+		$ao = array();
+		$au = wp_upload_dir();
+		if ( ! $au )
+			return $ao;
+		$cdir = getcwd();
+		if ( ! chdir($au['basedir']) ) {
+			return $ao;
+		}
+		$ao = self::r_find_files('.', $pat, $follow);
+		chdir($cdir);
+		return $ao;
+	}
+
+	/**
+	 * WP options specific helpers
+	 */
+
 	// get the plugins main option group
 	public static function get_opt_group() {
 		return get_option(self::opt_group); /* WP get_option() */
