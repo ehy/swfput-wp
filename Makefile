@@ -25,6 +25,7 @@ SBINS = $(SDIRI)/mingput.swf \
 ALSO = Makefile README
 ZALL = ${SRCS} ${ALSO}
 ZSALL = ${SSRCS} ${SBINS}
+BINALL = ${SBINS} ${JSBIN}
 PRJDIR = ${PRJNAME}
 PRJSDIR = ${PRJNAME}/${SDIRO}
 PRJZIP = ${PRJNAME}.zip
@@ -74,4 +75,4 @@ clean-docs:
 	cd docs && make clean
 
 clean: clean-docs
-	rm -f ${PRJZIP}
+	rm -f ${PRJZIP} ${BINALL}
