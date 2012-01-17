@@ -65,7 +65,7 @@ $(SDIRI)/mingput24.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
 
 ${JSBIN}: ${JSSRC}
 	(P=`which perl` && $$P -e 'use JavaScript::Minifier qw(minify);minify(input=>*STDIN,outfile=>*STDOUT)' < ${JSSRC} > ${JSBIN} 2>/dev/null) \
-	|| (P=`which perl` $$P -e \
+	|| (P=`which perl` && $$P -e \
 		'use JavaScript::Packer;$$p=JavaScript::Packer->init();$$o=join("",<STDIN>);$$p->minify(\$$o,{"compress"=>"clean"});print STDOUT $$o;' < ${JSSRC} > ${JSBIN}) \
 	|| cp -f ${JSSRC} ${JSBIN}
 
