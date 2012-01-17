@@ -64,7 +64,8 @@ $(SDIRI)/mingput24.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
 	$(PHPCLI) $(SDIRI)/mingput.php -- BH=24 > $(SDIRI)/mingput24.swf
 
 ${JSBIN}: ${JSSRC}
-	(P=`which perl` && $$P -e \
+	(P=`which perl` && $$P -e 'use JavaScript::Minifier;minify(input=>STDIN,outfile=>STDOUT)' \
+	|| $$P -e \
 	'use JavaScript::Packer;$$p=JavaScript::Packer->init();$$o=join("",<STDIN>);$$p->minify(\$$o,{"compress"=>"clean"});print STDOUT $$o;' < ${JSSRC} > ${JSBIN}) || \
 	cp -f ${JSSRC} ${JSBIN}
 
