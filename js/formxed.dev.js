@@ -93,13 +93,7 @@ SWFPut_putswf_video_xed.prototype = {
 		return ret;
 	},
 	sc_from_line : function(l, cs, sc) {
-		var cb = "[" + sc;
 		var ce = "[/" + sc + "]";
-		var p = l.indexOf(cb, 0);
-		if ( p < 0 ) {
-			return false;
-		}
-		l = l.substring(p + cb.length);
 		p = l.indexOf(ce, 0);
 		if ( p > 0 ) {
 			l = l.slice(0, p);
@@ -148,13 +142,8 @@ SWFPut_putswf_video_xed.prototype = {
 		if ( c == null ) {
 			return false;
 		}
-		var sep = "\r\n"; var va = v.split(sep);
-		if ( va.length < 2 ) { sep = "\n"; va = v.split(sep); }
-		if ( va.length < 2 ) { sep = "\r"; va = v.split(sep); }
-		// this is getting messy: html <p> nec. w/ editor of WP 3.3.1,
-		// (visual editor), previously had worked w/o this
-		if ( va.length < 2 ) { sep = "<p>"; va = v.split(sep); }
-		if ( va.length < 2 ) { sep = "<br>"; va = v.split(sep); }
+		var sep = "[" + sc;
+		var va = v.split(sep);
 		var i = 0;
 		var l;
 		for ( ; i < va.length; i++ ) {
@@ -166,20 +155,16 @@ SWFPut_putswf_video_xed.prototype = {
 		if ( i >= va.length ) {
 			return false;
 		}
-		var cb = "[" + sc;
 		var ce = "[/" + sc + "]";
-		va[i] = '';
-		cb = l.indexOf(cb);
-		if ( cb > 0 ) va[i] += l.slice(0, cb);
-		va[i] += c;
-		cb = l.indexOf(ce);
-		if ( cb > 0 ) {
-			cb += ce.length;
-			if ( l.length >= cb )
-				va[i] += l.substring(cb);
-		} else if ( (cb = l.indexOf("]")) > 0 ) {
-			if ( l.length > cb )
-				va[i] += l.substring(cb + 1);
+		va[i] = c.substring(sep.length);
+		var p = l.indexOf(ce);
+		if ( p > 0 ) {
+			p += ce.length;
+			if ( l.length >= p )
+				va[i] += l.substring(p);
+		} else if ( (p = l.indexOf("]")) > 0 ) {
+			if ( l.length > p )
+				va[i] += l.substring(p + 1);
 		}
 		try {
 			l = va[i];
@@ -194,13 +179,7 @@ SWFPut_putswf_video_xed.prototype = {
 			return false;
 		}
 		this.set_fm('defs', f, id);
-		var va = v.split("\r\n");
-		if ( va.length < 2 ) va = v.split("\n");
-		if ( va.length < 2 ) va = v.split("\r");
-		// this is getting messy: html <p> nec. w/ editor of WP 3.3.1,
-		// (visual editor), previously had worked w/o this
-		if ( va.length < 2 ) va = v.split("<p>");
-		if ( va.length < 2 ) va = v.split("<br>");
+		var va = v.split("[" + sc);
 		if ( this.last_from >= va.length ) {
 			this.last_from = 0;
 		}
