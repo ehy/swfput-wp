@@ -255,19 +255,21 @@ class SWF_put_evh {
 	public static function hook_admin_menu() {
 		$cl = __CLASS__;
 		$id = 'SWFPut_putswf_video';
-		$tl = __('Setup Flash Player for Shortcode');
+		$tl = __('SWFPut Flash Video Shortcode');
 		$fn = 'put_xed_form';
 		add_meta_box($id, $tl, array($cl, $fn), 'post', 'normal');
 		add_meta_box($id, $tl, array($cl, $fn), 'page', 'normal');
 	}
 
 	public static function filter_admin_print_scripts() {
-	    if ( $GLOBALS['editing'] ) {
+		// cap check: not sure if this is necessary here,
+		// hope it doesn't cause failures for legit users
+	    if ( $GLOBALS['editing'] && current_user_can('edit_posts') ) {
 			$jsfn = 'SWFPut_putswf_video_xed';
 			$pf = self::mk_pluginfile();
 			$t = self::$swfjsdir . '/' . self::$swfxedjsname;
 			$jsfile = plugins_url($t, $pf);
-	        wp_enqueue_script($jsfn, $jsfile, array('jquery'), '1.0.0');
+	        wp_enqueue_script($jsfn, $jsfile, array('jquery'), 'xed');
 	    }
 	}
 
@@ -881,6 +883,12 @@ class SWF_put_evh {
 	// the WP post editor: following example at:
 	// http://bluedogwebservices.com/wordpress-25-shortcodes/
 	public static function put_xed_form() {
+		// cap check: not sure if this is necessary here,
+		// hope it doesn't cause failures for legit users
+		if ( ! current_user_can('edit_posts') ) {
+			return;
+		}
+		
 		$pr = self::swfput_params;
 		$pr = new $pr();
 		extract($pr->getparams());
@@ -889,10 +897,14 @@ class SWF_put_evh {
 		// file select by ext pattern
 		$mpat = '/.*\.(flv|f4v|m4v|mp4|mp3)$/';
 		// files array from uploads dirs (empty if none)
-		$af = self::r_find_uploads($mpat, true);
-		$au = wp_upload_dir();
+		$rhu = self::r_find_uploads($mpat, true);
+		$af = &$rhu['rf'];
+		$au = &$rhu['wu'];
+		$aa = &$rhu['at'];
 		// url base for upload dirs files
 		$ub = rtrim($au['baseurl'], '/') . '/';
+		// directory base for upload dirs files
+		$up = rtrim($au['basedir'], '/') . '/';
 		// id base for form and js
 		$id = 'SWFPut_putswf_video';
 		// table <th> format string
@@ -915,10 +927,12 @@ class SWF_put_evh {
 		$jfur = "reset_fm(this.form,'{$id}')";
 		// js fill form from editor if possible
 		$jfuf = "from_xed(this.form,'{$id}','caption','{$sc}')";
-		// js replace last found by $jfuf
+		// js replace last found shortcode in editor
 		$jfuc = "repl_xed(this.form,'{$id}','caption','{$sc}')";
-		// js copy select option to url text
+		// js copy upload select option to url textfield
 		$jfus = "form_cpval(this.form,'{$id}','files','url')";
+		// js copy attachment select option to url textfield
+		$jfua = "form_cpval(this.form,'{$id}','atch','url')";
 		// input text widths, wide, narrow
 		$iw = 95; $in = 16;
 		
@@ -959,6 +973,22 @@ class SWF_put_evh {
 					if ( $tp !== '' )
 						$ts .= " (" . $tp . ")";
 					printf($sofmt, rawurlencode($tu), self::ht($ts));
+				}
+				// end select
+				echo "</select></td></tr>\n";
+			} // end if there are upload files
+			if ( ! empty($aa) ) {
+				$k = 'atch';
+				$l = self::ht(__('Select from attachments:'));
+				printf($thfmt . '<td>', $id, $k, $l);
+				// <select>
+				printf($slfmt, $id, $k, $id, $k, $job, $jfua);
+				// <options>
+				printf($sofmt, '', self::ht(__('none')));
+				foreach ( $aa as $fn => $fi ) {
+					$m = basename($fn);
+					$ts = $m . " (" . $fi . ")";
+					printf($sofmt, rawurlencode($fi), self::ht($ts));
 				}
 				// end select
 				echo "</select></td></tr>\n";
@@ -1354,17 +1384,32 @@ class SWF_put_evh {
 	// NOTE: not tested on MS, but should work if uploads are on
 	// current drive; else forget it.
 	public static function r_find_uploads($pat, $follow = false) {
+		global $wpdb;
+		$qsf = "SELECT * FROM $wpdb->posts WHERE post_type = '%s'%s";
+		$qsfa = sprintf(' LIMIT %u, %u', 0, 1024);
+		$qs = sprintf($qsf, 'attachment', $qsfa);
+		$rat = $wpdb->get_results($wpdb->prepare($qs));
+		$aa = array();
+		
+		foreach ( $rat as $att ) {
+			$id = $att->ID;
+			$af = get_attached_file($id, true);
+			if ( ! preg_match($pat, $af) )
+				continue;
+			$aa[$af] = '' . $id;
+		}
+
 		$ao = array();
 		$au = wp_upload_dir();
 		if ( ! $au )
-			return $ao;
+			return array('rf' => $ao, 'wu' => $au, 'at' => $aa);
 		$cdir = getcwd();
 		if ( ! chdir($au['basedir']) ) {
-			return $ao;
+			return array('rf' => $ao, 'wu' => $au, 'at' => $aa);
 		}
 		$ao = self::r_find_files('.', $pat, $follow);
 		chdir($cdir);
-		return $ao;
+		return array('rf' => $ao, 'wu' => $au, 'at' => $aa);
 	}
 
 	/**
@@ -1585,6 +1630,11 @@ class SWF_put_evh {
 			$fesc = 'urlencode';
 		}
 
+		if ( preg_match('/^0*[1-9][0-9]*$/', $url) ) {
+			$url = wp_get_attachment_url(ltrim($url, '0'));
+			if ( ! $url )
+				$url = '';
+		}
 		if ( $url === '' ) {
 			$url = $defaulturl;
 		}
@@ -1933,6 +1983,9 @@ class SWF_put_widget_evh extends WP_Widget {
 		}
 	
 		$cl = __CLASS__;
+		// Label shown on widgets page
+		$lb =  __('SWFPut Flash Video');
+		// Description shown under label shown on widgets page
 		$desc = __('Flash video for your widget areas');
 		$opts = array('classname' => $cl, 'description' => $desc);
 
@@ -1940,7 +1993,8 @@ class SWF_put_widget_evh extends WP_Widget {
 		// height is ignored.  Width 400 allows long text fields
 		// (not as log as most URL's), and informative (long) labels
 		$copts = array('width' => 400, 'height' => 500);
-		parent::__construct($cl, __('Flash Video'), $opts, $copts);
+
+		parent::__construct($cl, $lb, $opts, $copts);
 	}
 
 	// surely this code cannot run under PHP4, but anyway . . .
@@ -1968,7 +2022,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$w = $pr->getvalue('width');
 		$h = $pr->getvalue('height');
 		$bh = $pr->getvalue('barheight');
-		$url = $pr->getvalue('url');
+
 		$cap = $this->plinst->ht($pr->getvalue('caption'));
 		if ( $this->plinst->should_use_ming() ) {
 			$uswf = $this->plinst->get_swf_url('widget', $w, $h);
@@ -2089,6 +2143,67 @@ class SWF_put_widget_evh extends WP_Widget {
 		<input class="widefat" id="<?php echo $id; ?>"
 			name="<?php echo $nm; ?>"
 			type="text" value="<?php echo $val; ?>" /></p>
+
+		<?php // selects for URLs and attachment id's
+		// optional print <select >
+		// escap id for jQuery selector
+		$mpat = '/([!"#$%&\'()*+,.\/:;<=>?@\[\]\^`{|}~-])/';
+		$idu = preg_replace($mpat, '\\\\\\\$1', $id);
+		$js = "jQuery('[id$={$idu}]').val";
+		$js .= '(unescape(this.options[selectedIndex].value))';
+		$js .= '; return false;';
+		// file select by ext pattern
+		$mpat = '/.*\.(flv|f4v|m4v|mp4|mp3)$/';
+		// files array from uploads dirs (empty if none)
+		$rhu = $this->plinst->r_find_uploads($mpat, true);
+		$af = &$rhu['rf'];
+		$au = &$rhu['wu'];
+		$aa = &$rhu['at'];
+		// url base for upload dirs files
+		$ub = rtrim($au['baseurl'], '/') . '/';
+		// directory base for upload dirs files
+		$up = rtrim($au['basedir'], '/') . '/';
+		$slfmt = '<select name="%s" id="%s" onchange="%s">';
+		$sofmt = '<option value="%s">%s</option>' . "\n";
+		if ( count($af) > 0 ) {
+			$id = $this->get_field_id('files');
+			$k = $this->get_field_name('files');
+			$tl = $ht(__('Select from uploads directory:'));
+			printf('<p><label for="%s">%s</label>' . "\n", $id, $tl);
+			// <select>
+			printf($slfmt . "\n", $k, $id, $js);
+			// <options>
+			printf($sofmt, '', $ht(__('none')));
+			foreach ( $af as $fv ) {
+				$ts = $fv[0];
+				$tp = rtrim($fv[1], '/');
+				$tu = $ub . ($tp === '' ? '' : $tp . '/');
+				$tu .= $ts;
+				if ( $tp !== '' )
+					$ts .= " (" . $tp . ")";
+				printf($sofmt, rawurlencode($tu), $ht($ts));
+			}
+			// end select
+			echo "</select></td></tr>\n";
+		} // end if there are upload files
+		if ( ! empty($aa) ) {
+			$id = $this->get_field_id('atch');
+			$k = $this->get_field_name('atch');
+			$tl = $ht(__('Select from media library:'));
+			printf('<p><label for="%s">%s</label>' . "\n", $id, $tl);
+			// <select>
+			printf($slfmt . "\n", $k, $id, $js);
+			// <options>
+			printf($sofmt, '', $ht(__('none')));
+			foreach ( $aa as $fn => $fi ) {
+				$m = basename($fn);
+				$ts = $m . " (" . $fi . ")";
+				printf($sofmt, rawurlencode($fi), $ht($ts));
+			}
+			// end select
+			echo "</select></td></tr>\n";
+		} // end if there are upload files
+		?>
 
 		<?php
 		$val = $instance['playpath'];

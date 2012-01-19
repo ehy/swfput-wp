@@ -55,7 +55,7 @@ SWFPut_putswf_video_xed.prototype = {
 	get_edval : function() {
 		if ( typeof tinyMCE != 'undefined' ) {
 			var ed;
-			if ( (ed = tinyMCE.activeEditor) && !ed.isHidden() ) {
+			if ( (ed = tinyMCE.activeEditor) /*&& !ed.isHidden()*/ ) {
 				return ed.getContent({format : 'raw'});
 			}			
 		}
@@ -64,7 +64,7 @@ SWFPut_putswf_video_xed.prototype = {
 	set_edval : function(setval) {
 		if ( typeof tinyMCE != 'undefined' ) {
 			var ed;
-			if ( (ed = tinyMCE.activeEditor) && !ed.isHidden() ) {
+			if ( (ed = tinyMCE.activeEditor) /*&& !ed.isHidden()*/ ) {
 				return ed.setContent(setval, {format : 'raw'});
 			}			
 		}
