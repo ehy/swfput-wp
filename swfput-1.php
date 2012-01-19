@@ -895,7 +895,7 @@ class SWF_put_evh {
 
 		$sc = self::shortcode;
 		// file select by ext pattern
-		$mpat = '/.*\.(flv|f4v|m4v|mp4|mp3)$/';
+		$mpat = self::get_mfilter_pat();
 		// files array from uploads dirs (empty if none)
 		$rhu = self::r_find_uploads($mpat, true);
 		$af = &$rhu['rf'];
@@ -1215,7 +1215,7 @@ class SWF_put_evh {
 	// subject to option $optdispmsg
 	public function post_sed($dat) {
 		global $post, $wp_locale;
-		$mpat = '/.+\.(mp4|flv|f4v|mp3)$/';
+		$mpat = self::get_mfilter_pat();
 		$w = 400; $h = 300; // TODO: from option
 		$pr = self::swfput_params;
 		$pr = new $pr();
@@ -1323,6 +1323,23 @@ class SWF_put_evh {
 			}
 		}
 		return false;
+	}
+
+	// return preg_match() pattern for media filter by file extension
+	public static function get_mfilter_pat() {
+		// TODO: build from extensions option
+		return '/.*\.(flv|f4v|m4v|mp4|mp3)$/';
+	}
+
+	// escape symbol for use in jQuery selector or similar; see
+	//     http://api.jquery.com/category/selectors/
+	public static function esc_jqsel($sym, $include_dash = false) {
+		$chr = '!"#$%&\'()*+,.\/:;<=>?@\[\]\^`{|}~';
+		if ( $include_dash === true )
+			$chr .= '-';
+		$pat = '/([' . $chr . '])/';
+		$rep = '\\\\\\\$1';
+		return preg_replace($pat, $rep, $sym);
 	}
 
 	// 'html-ize' a text string
@@ -1739,6 +1756,7 @@ else :
 	wp_die('class name conflict: SWF_put_evh in ' . __FILE__);
 endif; // if ( ! class_exists('SWF_put_evh') ) :
 
+
 /**
  * class providing embed and player parameters, built around array --
  * uncommented, but it's simple and obvious
@@ -2146,14 +2164,13 @@ class SWF_put_widget_evh extends WP_Widget {
 
 		<?php // selects for URLs and attachment id's
 		// optional print <select >
-		// escap id for jQuery selector
-		$mpat = '/([!"#$%&\'()*+,.\/:;<=>?@\[\]\^`{|}~-])/';
-		$idu = preg_replace($mpat, '\\\\\\\$1', $id);
-		$js = "jQuery('[id$={$idu}]').val";
+		// escape url field id for jQuery selector
+		$id = $this->plinst->esc_jqsel($id);
+		$js = "jQuery('[id={$id}]').val";
 		$js .= '(unescape(this.options[selectedIndex].value))';
 		$js .= '; return false;';
 		// file select by ext pattern
-		$mpat = '/.*\.(flv|f4v|m4v|mp4|mp3)$/';
+		$mpat = $this->plinst->get_mfilter_pat();
 		// files array from uploads dirs (empty if none)
 		$rhu = $this->plinst->r_find_uploads($mpat, true);
 		$af = &$rhu['rf'];
@@ -2163,7 +2180,8 @@ class SWF_put_widget_evh extends WP_Widget {
 		$ub = rtrim($au['baseurl'], '/') . '/';
 		// directory base for upload dirs files
 		$up = rtrim($au['basedir'], '/') . '/';
-		$slfmt = '<select name="%s" id="%s" onchange="%s">';
+		$slfmt =
+			'<select class="widefat" name="%s" id="%s" onchange="%s">';
 		$sofmt = '<option value="%s">%s</option>' . "\n";
 		if ( count($af) > 0 ) {
 			$id = $this->get_field_id('files');
