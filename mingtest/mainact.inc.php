@@ -1914,6 +1914,9 @@ if ( _level0.AA != undefined && _level0.AA != '' ) {
 
 if ( _level0.DA != undefined && _level0.DA != '' ) {
 	displayaspect = _level0.DA;
+	// sadly, AS2 (or Ming) does not support RegExp(): always false
+	// I read AS3 has support; that's no help here
+	//if ( RegExp('^[1-9][0-9]*[x:][1-9][0-9]*$').exec(_level0.DA) )
 	if ( _level0.DA != 'D' ) {
 		var t = displayaspect.split(":");
 		if ( t.length != 2 ) {

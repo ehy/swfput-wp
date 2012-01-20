@@ -1872,13 +1872,13 @@ class SWF_params_evh {
 				$i[$k] = $v;
 				continue;
 			}
+			$t = trim('' . $i[$k]);
 			switch ( $k ) {
 			// strings that must present positive integers
 			case 'width':
 			case 'height':
 			case 'volume':
 			case 'barheight':
-				$t = trim('' . $i[$k]);
 				if ( $k === 'barheight' && $t === 'default' ) {
 					continue;
 				}
@@ -1899,7 +1899,7 @@ class SWF_params_evh {
 			case 'allowfull':
 			case 'allowxdom':
 			case 'loop':
-				$t = strtolower(trim('' . $i[$k]));
+				$t = strtolower($t);
 				if ( $t !== 'true' && $t !== 'false' ) {
 					if ( $fuzz === true ) {
 						$xt = __('/^(sc?h[yi]te?)?y(e((s|ah)!?)?)?$/i');
@@ -1922,7 +1922,6 @@ class SWF_params_evh {
 			// special format: ratio strings
 			case 'displayaspect':
 			case 'pixelaspect':
-				$t = trim('' . $i[$k]);
 				// exception: these allow one alpha as special flag,
 				// or 0 to disable
 				if ( preg_match('/^[A-Z0]$/i', $t) ) {
@@ -2166,6 +2165,8 @@ class SWF_put_widget_evh extends WP_Widget {
 		// optional print <select >
 		// escape url field id for jQuery selector
 		$id = $this->plinst->esc_jqsel($id);
+		// expect jQuery to be loaded by WP (tried $() invocation
+		// but N.G. w/ MSIE. Sheesh.)
 		$js = "jQuery('[id={$id}]').val";
 		$js .= '(unescape(this.options[selectedIndex].value))';
 		$js .= '; return false;';

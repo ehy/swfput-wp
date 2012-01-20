@@ -52,20 +52,156 @@ SWFPut_putswf_video_xed.prototype = {
 	map : {},
 	last_from : 65535,
 	last_match : '',
+	last_edlen : 0,
+	trim : function(s){
+		var m = s.match(/^[ \t]*([^ \t](.*[^ \t])?)[ \t]*$/);
+		return m === null ? (/^[ \t]+$/.test(s) ? '' : s) : m[1];
+	},
+	sanitize : function(fuzz) {
+		var t;
+		var k;
+		var v;
+		var m;
+		if ( fuzz !== false )
+			fuzz = true;
+		// check against default keys; if instance map has
+		// other keys, leave them
+		for ( k in this['map'] ) {
+			if ( (v = this['defs'][k]) === undefined ) {
+				continue;
+			}
+			if ( (t = this.trim(this['map'][k])) == '' ) {
+				continue;
+			}
+			switch ( k ) {
+			// strings that must present positive integers
+			case 'width':
+			case 'height':
+			case 'volume':
+			case 'barheight':
+				if ( k === 'barheight' && t === 'default' ) {
+					continue;
+				}
+				if ( fuzz && /^\+?[0-9]+/.test(t) ) {
+					t = '' + Math.abs(parseInt(t));
+				}
+				if ( ! /^[0-9]+$/.test(t) ) {
+					t = v;
+				}
+				this['map'][k] = t;
+				break;
+			// strings that must present booleans
+			case 'audio':
+			case 'aspectautoadj':
+			case 'play':
+			case 'hidebar':
+			case 'disablebar':
+			case 'allowfull':
+			case 'allowxdom':
+			case 'loop':
+				t = t.toLowerCase();
+				if ( t !== 'true' && t !== 'false' ) {
+					if ( fuzz ) {
+						var xt = /^(sc?h[yi]te?)?y(e((s|ah)!?)?)?$/;
+						var xf = /^((he(ck|ll))?n(o!?)?)?$/;
+						if ( /^\+?[0-9]+/.test(t) ) {
+							t = parseInt(t) == 0 ? 'false' : 'true';
+						} else if ( xf.test(t) ) {
+							t = 'false';
+						} else if ( xt.test(t) ) {
+							t = 'true';
+						} else {
+							t = v;
+						}
+					} else {
+						t = v;
+					}
+				}
+				this['map'][k] = t;
+				break;
+			// special format: ratio strings
+			case 'displayaspect':
+			case 'pixelaspect':
+				// exception: these allow one alpha as special flag,
+				// or 0 to disable
+				if ( /^[A-Z0]$/i.test(t) ) {
+					this['map'][k] = t;
+					break;
+				}
+				var px; var pw;
+				if ( fuzz ) {
+					// exception: allow FLOAT or FLOATsep1
+					px = /^\+?([0-9]+\.[0-9]+)([Xx: \t\f\v\^\$\\\.\*\+\?\(\)\[\]\{\}\|\/!@#%&_=`~><-]+1)?$/;
+					// wanted: INTsepINT;
+					pw  = /^([0-9]+)[Xx: \t\f\v\^\$\\\.\*\+\?\(\)\[\]\{\}\|\/!@#%&_=`~><-]+([0-9]+)$/;
+				} else {
+					// exception: allow FLOAT or FLOATsep1
+					px = /^\+?([0-9]+\.[0-9]+)([Xx:]1)?$/;
+					// wanted: INTsepINT;
+					pw  = /^([0-9]+)[Xx:]([0-9]+)$/;
+				}
+				if ( (m = px.exec(t)) !== null ) {
+					this['map'][k] = m[1] + ':1';
+				} else if ( (m = pw.exec(t)) !== null ) {
+					this['map'][k] = m[1] + ':' + m[2];
+				} else {
+					this['map'][k] = v;
+				}
+				break;
+			// varied complex strings; not sanitized here
+			case 'url':
+			case 'cssurl':
+			case 'mtype':
+			case 'playpath':
+			case 'classid':
+			case 'codebase':
+				break;
+			// for reference defaults discard any changes,
+			// e.g. 'defaulturl'
+			default:
+				this['map'][k] = v;
+				break;
+			}
+		}
+	},
+	// The next 2 get/set funcs were fine in Konqueror, Chromium, and
+	// Firefox (Unix and MS); but of course MSIE is too lousy to
+	// just work. Hence, the .isIE noise.
 	get_edval : function() {
-		if ( typeof tinyMCE != 'undefined' ) {
+		if ( typeof tinymce != 'undefined' ) {
 			var ed;
-			if ( (ed = tinyMCE.activeEditor) /*&& !ed.isHidden()*/ ) {
-				return ed.getContent({format : 'raw'});
+			if ( (ed = tinyMCE.activeEditor) && !ed.isHidden() ) {
+                var bm;
+				if ( tinymce.isIE ) {
+					ed.focus();
+					bm = ed.selection.getBookmark();
+				}
+				c = ed.getContent({format : 'raw'});
+				if ( tinymce.isIE ) {
+					ed.focus();
+					ed.selection.moveToBookmark(bm);
+				}
+				return c;
 			}			
 		}
 		return jQuery(edCanvas).val();
 	},
 	set_edval : function(setval) {
-		if ( typeof tinyMCE != 'undefined' ) {
+		if ( typeof tinymce != 'undefined' ) {
 			var ed;
-			if ( (ed = tinyMCE.activeEditor) /*&& !ed.isHidden()*/ ) {
-				return ed.setContent(setval, {format : 'raw'});
+			if ( (ed = tinyMCE.activeEditor) && !ed.isHidden() ) {
+                var bm;
+				if ( tinymce.isIE ) {
+					ed.focus();
+					bm = ed.selection.getBookmark();
+					ed.setContent('', {format : 'raw'});
+				}
+				var r = ed.setContent(setval, {format : 'raw'});
+				if ( tinymce.isIE ) {
+					ed.focus();
+					ed.selection.moveToBookmark(bm);
+				}
+				return r;
 			}			
 		}
 		return jQuery(edCanvas).val(setval);
@@ -74,6 +210,7 @@ SWFPut_putswf_video_xed.prototype = {
 		var c = this['map'][cs];
 		delete this['map'][cs];
 		
+		this.sanitize();
 		var atts = '';
 		for ( var k in this['map'] ) {
 			var v = this['map'][k];
@@ -195,6 +332,7 @@ SWFPut_putswf_video_xed.prototype = {
 		}
 		this.last_from = i + 1;
 		if ( i < va.length ) {
+			this.sanitize();
 			this.set_fm('map', f, id);
 		} else if ( iinit > 0 ) {
 			// start again from 0
@@ -231,6 +369,7 @@ SWFPut_putswf_video_xed.prototype = {
 				$this['map'][k] = v;
 			}
 		});
+		this.sanitize();
 	},
 	send_xed : function(f, id, cs, sc) {
 		this.fill_map(f, id);
