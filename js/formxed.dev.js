@@ -50,9 +50,8 @@ SWFPut_putswf_video_xed.prototype = {
 		codebase: "http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,115,0"
 	},
 	map : {},
-	last_from : 65535,
+	last_from : 0,
 	last_match : '',
-	last_edlen : 0,
 	trim : function(s){
 		var m = s.match(/^[ \t]*([^ \t](.*[^ \t])?)[ \t]*$/);
 		return m === null ? (/^[ \t]+$/.test(s) ? '' : s) : m[1];

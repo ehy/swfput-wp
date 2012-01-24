@@ -941,7 +941,7 @@ class SWF_put_evh {
 		<table class="form-table">
 			<tr valign="top">
 				<?php $k = 'caption';
-					$l = self::ht(__('Media Caption:'));
+					$l = self::ht(__('Caption:'));
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
 					<?php printf($infmt, $iw, $id, $k, $id, $k, ''); ?>
@@ -949,7 +949,7 @@ class SWF_put_evh {
 			</tr>
 			<tr valign="top">
 				<?php $k = 'url';
-					$l = self::ht(__('Video|Audio Url:'));
+					$l = self::ht(__('Url:'));
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
 					<?php printf($infmt, $iw, $id, $k, $id, $k, ''); ?>
@@ -959,7 +959,7 @@ class SWF_put_evh {
 			// if there are upload files, print <select >
 			if ( count($af) > 0 ) {
 				$k = 'files';
-				$l = self::ht(__('Select from uploads:'));
+				$l = self::ht(__('Url from uploads directory:'));
 				printf($thfmt . '<td>', $id, $k, $l);
 				// <select>
 				printf($slfmt, $id, $k, $id, $k, $job, $jfus);
@@ -979,7 +979,7 @@ class SWF_put_evh {
 			} // end if there are upload files
 			if ( ! empty($aa) ) {
 				$k = 'atch';
-				$l = self::ht(__('Select from attachments:'));
+				$l = self::ht(__('Url from media library ID:'));
 				printf($thfmt . '<td>', $id, $k, $l);
 				// <select>
 				printf($slfmt, $id, $k, $id, $k, $job, $jfua);
@@ -1020,7 +1020,7 @@ class SWF_put_evh {
 			</tr>
 			<tr valign="top">
 				<?php $k = 'audio';
-					$l = self::ht(__('Audio (assert if not *.mp3):'));
+					$l = self::ht(__('Audio (e.g. *.mp3):'));
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
 					<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
@@ -1071,7 +1071,7 @@ class SWF_put_evh {
 			</tr>
 			<tr valign="top">
 				<?php $k = 'loop';
-					$l = self::ht(__('Loop play the media:'));
+					$l = self::ht(__('Loop play:'));
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
 					<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
@@ -1098,7 +1098,7 @@ class SWF_put_evh {
 			</tr>
 			<tr valign="top">
 				<?php $k = 'allowfull';
-					$l = self::ht(__('Allow switch to full screen:'));
+					$l = self::ht(__('Allow full screen:'));
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
 					<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
@@ -1107,7 +1107,7 @@ class SWF_put_evh {
 			</tr>
 			<tr valign="top">
 				<?php $k = 'barheight';
-					$l = self::ht(__('Control Bar Height (20-80):'));
+					$l = self::ht(__('Control Bar Height (20-50):'));
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
 					<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
@@ -2131,7 +2131,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $ht($instance['title']);
 		$id = $this->get_field_id('title');
 		$nm = $this->get_field_name('title');
-		$tl = $ht(__('Title:'));
+		$tl = $ht(__('Widget Title:'));
 		?>
 
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
@@ -2143,7 +2143,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $ht($instance['caption']);
 		$id = $this->get_field_id('caption');
 		$nm = $this->get_field_name('caption');
-		$tl = $ht(__('Media Caption:'));
+		$tl = $ht(__('Caption:'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -2154,7 +2154,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $instance['url'];
 		$id = $this->get_field_id('url');
 		$nm = $this->get_field_name('url');
-		$tl = $ht(__('Video|Audio Url:'));
+		$tl = $ht(__('Url:'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -2187,7 +2187,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		if ( count($af) > 0 ) {
 			$id = $this->get_field_id('files');
 			$k = $this->get_field_name('files');
-			$tl = $ht(__('Select from uploads directory:'));
+			$tl = $ht(__('Url from uploads directory:'));
 			printf('<p><label for="%s">%s</label>' . "\n", $id, $tl);
 			// <select>
 			printf($slfmt . "\n", $k, $id, $js);
@@ -2208,7 +2208,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		if ( ! empty($aa) ) {
 			$id = $this->get_field_id('atch');
 			$k = $this->get_field_name('atch');
-			$tl = $ht(__('Select from media library:'));
+			$tl = $ht(__('Select from media library ID:'));
 			printf('<p><label for="%s">%s</label>' . "\n", $id, $tl);
 			// <select>
 			printf($slfmt . "\n", $k, $id, $js);
@@ -2262,11 +2262,11 @@ class SWF_put_widget_evh extends WP_Widget {
 		$id = $this->get_field_id('audio');
 		$nm = $this->get_field_name('audio');
 		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
-		$tl = $ht(__('Audio (assert if not *.mp3):'));
+		$tl = $ht(__('Audio (e.g. *.mp3):'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>" type="checkbox"
+			name="<?php echo $nm; ?>" style="width:16%;" type="checkbox"
 			value="<?php echo $val; ?>"<?php echo $ck; ?> /></p>
 
 		<?php
@@ -2278,7 +2278,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>" type="checkbox"
+			name="<?php echo $nm; ?>" style="width:16%;" type="checkbox"
 			value="<?php echo $val; ?>"<?php echo $ck; ?> /></p>
 
 		<?php
@@ -2323,7 +2323,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>" type="checkbox"
+			name="<?php echo $nm; ?>" style="width:16%;" type="checkbox"
 			value="<?php echo $val; ?>"<?php echo $ck; ?> /></p>
 
 		<?php
@@ -2331,11 +2331,11 @@ class SWF_put_widget_evh extends WP_Widget {
 		$id = $this->get_field_id('loop');
 		$nm = $this->get_field_name('loop');
 		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
-		$tl = $ht(__('Loop play the media:'));
+		$tl = $ht(__('Loop play:'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>" type="checkbox"
+			name="<?php echo $nm; ?>" style="width:16%;" type="checkbox"
 			value="<?php echo $val; ?>"<?php echo $ck; ?> /></p>
 
 		<?php
@@ -2347,7 +2347,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>" type="checkbox"
+			name="<?php echo $nm; ?>" style="width:16%;" type="checkbox"
 			value="<?php echo $val; ?>"<?php echo $ck; ?> /></p>
 
 		<?php
@@ -2359,7 +2359,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>" type="checkbox"
+			name="<?php echo $nm; ?>" style="width:16%;" type="checkbox"
 			value="<?php echo $val; ?>"<?php echo $ck; ?> /></p>
 
 		<?php
@@ -2367,18 +2367,18 @@ class SWF_put_widget_evh extends WP_Widget {
 		$id = $this->get_field_id('allowfull');
 		$nm = $this->get_field_name('allowfull');
 		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
-		$tl = $ht(__('Allow switch to full screen:'));
+		$tl = $ht(__('Allow full screen:'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>" type="checkbox"
+			name="<?php echo $nm; ?>" style="width:16%;" type="checkbox"
 			value="<?php echo $val; ?>"<?php echo $ck; ?> /></p>
 
 		<?php
 		$val = $ht($instance['barheight']);
 		$id = $this->get_field_id('barheight');
 		$nm = $this->get_field_name('barheight');
-		$tl = $ht(__('Control Bar Height (20-80):'));
+		$tl = $ht(__('Control Bar Height (20-50):'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
