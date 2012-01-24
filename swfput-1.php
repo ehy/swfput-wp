@@ -949,7 +949,7 @@ class SWF_put_evh {
 			</tr>
 			<tr valign="top">
 				<?php $k = 'url';
-					$l = self::ht(__('Url:'));
+					$l = self::ht(__('Url or media library ID:'));
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
 					<?php printf($infmt, $iw, $id, $k, $id, $k, ''); ?>
@@ -979,7 +979,7 @@ class SWF_put_evh {
 			} // end if there are upload files
 			if ( ! empty($aa) ) {
 				$k = 'atch';
-				$l = self::ht(__('Url from media library ID:'));
+				$l = self::ht(__('Select ID from media library:'));
 				printf($thfmt . '<td>', $id, $k, $l);
 				// <select>
 				printf($slfmt, $id, $k, $id, $k, $job, $jfua);
@@ -1029,7 +1029,7 @@ class SWF_put_evh {
 			</tr>
 			<tr valign="top">
 				<?php $k = 'aspectautoadj';
-					$l = self::ht(__('Auto Aspect (e.g. 720x480 to 4:3):'));
+					$l = self::ht(__('Auto Aspect (e.g. 360x240 to 4:3):'));
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
 					<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
@@ -2154,7 +2154,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $instance['url'];
 		$id = $this->get_field_id('url');
 		$nm = $this->get_field_name('url');
-		$tl = $ht(__('Url:'));
+		$tl = $ht(__('Url or media library ID:'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -2208,7 +2208,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		if ( ! empty($aa) ) {
 			$id = $this->get_field_id('atch');
 			$k = $this->get_field_name('atch');
-			$tl = $ht(__('Select from media library ID:'));
+			$tl = $ht(__('Select ID from media library:'));
 			printf('<p><label for="%s">%s</label>' . "\n", $id, $tl);
 			// <select>
 			printf($slfmt . "\n", $k, $id, $js);
