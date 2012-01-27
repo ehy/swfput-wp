@@ -714,22 +714,27 @@ $scaleicobox = true;
 //
 
 // control bar
-$barR = 20; $barG = 20; $barB = 10; $barA = 170;
+$barR = 20; $barG = 20; $barB = 25; $barA = 140;
+//$barR = 20; $barG = 20; $barB = 10; $barA = 170;
 // buttons
-$butR = 30; $butG = 10; $butB = 15; $butA = 180;
+$butR = 30; $butG = 10; $butB = 15; $butA = 80;
+//$butR = 30; $butG = 10; $butB = 15; $butA = 180;
 // button outline
 $blineW = 1; $blineR = 0; $blineG = 0; $blineB = 0; $blineA = 240;
-// button highlight outline
-$bhighW = 1; $bhighR = 220; $bhighG = 220; $bhighB = 240; $bhighA = 170;
+// button highlight outline -- width < 0 means adjust to bar height
+$bhighW = -1; $bhighR = 220; $bhighG = 220; $bhighB = 240; $bhighA = 170;
+//$bhighW = 1; $bhighR = 220; $bhighG = 220; $bhighB = 240; $bhighA = 170;
 // icons (e.g. on buttons)
 $icoR = 240; $icoG = 240; $icoB = 255; $icoA = 170;
 // icon outlines
 //$ilineW = 1; $ilineR = 240; $ilineG = 240; $ilineB = 240; $ilineA = 180;
 $ilineW = 0; $ilineR = 0; $ilineG = 0; $ilineB = 0; $ilineA = 0;
 // play time progress bar
-$progplR = 200; $progplG = 10; $progplB = 15; $progplA = 180;
+$progplR = 245; $progplG = 210; $progplB = 215; $progplA = 120;
+//$progplR = 200; $progplG = 10; $progplB = 15; $progplA = 180;
 // data transfer progress bar
-$progdlR = 35; $progdlG = 20; $progdlB = 120; $progdlA = 180;
+$progdlR = 215; $progdlG = 210; $progdlB = 245; $progdlA = 120;
+//$progdlR = 35; $progdlG = 20; $progdlB = 120; $progdlA = 180;
 // progress bar backing
 $progpbR =  20; $progpbG =  0; $progpbB =  5; $progpbA = 120;
 
@@ -767,6 +772,11 @@ $progressbarheight = ($barheight - $butheight) * 0.25;
 $progressbaroffs =  (($barheight - $butheight) * 0.20) / 2.0;
 $progressbarlength = $barlength - ($progressbaroffs * 2);
 $progressbarxoffs =  ($barlength - $progressbarlength) / 2.0;
+
+if ( $bhighW < 0 ) {
+	// var $barheight [20,40], $bhighW [1,2]
+	$bhighW = 1.0 + ($barheight - 20.0) / (40.0 - 20.0);
+}
 
 
 /**********************************************************************\

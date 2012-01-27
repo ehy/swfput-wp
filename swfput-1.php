@@ -2,7 +2,9 @@
 /*
 Plugin Name: SWFlash Put
 Plugin URI: http://lucy.example.org/dl/wp-plugin-swfput-1/
-Description: add Flash player to Wordpress pages
+Description: Add Shockwave Flash video to Wordpress posts and widgets,
+from arbitrary URL's or media library ID's or file in your media upload
+directory tree (even if not added by Wordpress and assigned an ID).
 Version: 0.1.0
 Author: Ed Hynan
 Author URI: http://wpblog.example.org/
@@ -218,7 +220,7 @@ class SWF_put_evh {
 			return;
 		}
 		
-		$this->init();
+		$this->init_settings_page();
 
 		// keep it clean: {de,}activation
 		$cl = __CLASS__;
@@ -252,87 +254,10 @@ class SWF_put_evh {
 		$this->opt = null;
 	}
 	
-	public static function hook_admin_menu() {
-		$cl = __CLASS__;
-		$id = 'SWFPut_putswf_video';
-		$tl = __('SWFPut Flash Video Shortcode');
-		$fn = 'put_xed_form';
-		add_meta_box($id, $tl, array($cl, $fn), 'post', 'normal');
-		add_meta_box($id, $tl, array($cl, $fn), 'page', 'normal');
-	}
-
-	public static function filter_admin_print_scripts() {
-		// cap check: not sure if this is necessary here,
-		// hope it doesn't cause failures for legit users
-	    if ( $GLOBALS['editing'] && current_user_can('edit_posts') ) {
-			$jsfn = 'SWFPut_putswf_video_xed';
-			$pf = self::mk_pluginfile();
-			$t = self::$swfjsdir . '/' . self::$swfxedjsname;
-			$jsfile = plugins_url($t, $pf);
-	        wp_enqueue_script($jsfn, $jsfile, array('jquery'), 'xed');
-	    }
-	}
-
-	public static function on_deactivate() {
-		$wreg = __CLASS__;
-		$name = plugin_basename(self::mk_pluginfile());
-		$arf = array($wreg, 'plugin_page_addlink');
-		remove_filter("plugin_action_links_$name", $arf);
-
-		self::unregi_widget();
-
-		unregister_setting(self::opt_group, // option group
-			self::opt_group, // opt name; using group passes all to cb
-			array($wreg, 'validate_opts'));
-	}
-
-	public static function on_activate() {
-		$wreg = __CLASS__;
-		add_action('widgets_init', array($wreg, 'regi_widget'), 1);
-	}
-
-	public static function on_uninstall() {
-		self::unregi_widget();
-		
-		$opts = self::get_opt_group();
-		if ( $opts && $opts[self::optdelopts] != 'false' ) {
-			delete_option(self::opt_group);
-		}
-	}
-
-	public static function plugin_page_addlink($links) {
-		$opturl = '<a href="' . get_option('siteurl');
-		$opturl .= '/wp-admin/options-general.php?page=';
-		$opturl .= self::settings_page_id;
-		$opturl .= '">' . __('Settings') . '</a>';
-		// Add a link to this plugin's settings page
-		array_unshift($links, $opturl); 
-		return $links; 
-	}
-
-	public static function regi_widget ($fargs = array()) {
-		global $wp_widget_factory;
-		if ( ! isset($wp_widget_factory) ) {
-			return;
-		}
-		if ( function_exists(register_widget) ) {
-			$cl = self::swfput_widget;
-			register_widget($cl);
-		}
-	}
-
-	public static function unregi_widget () {
-		global $wp_widget_factory;
-		if ( ! isset($wp_widget_factory) ) {
-			return;
-		}
-		if ( function_exists(unregister_widget) ) {
-			$cl = self::swfput_widget;
-			unregister_widget($cl);
-		}
-	}
-
-	protected function init_opts() {
+	// get array of defaults for the plugin options; if '$chkonly'
+	// is true include only those options associated with a checkbox
+	// on the settings page -- useful for the validate function
+	protected static function get_opts_defaults($chkonly = false) {
 		$items = array(
 			self::optverbose => self::defverbose,
 			self::optdispmsg =>
@@ -348,6 +273,17 @@ class SWF_put_evh {
 			self::optdelopts => self::defdelopts,
 			self::optuseming => self::defuseming
 		);
+		
+		if ( $chkonly !== true ) {
+			// TODO: so far there are only checkboxes
+		}
+		
+		return $items;
+	}
+	
+	// initialize plugin options from defaults of WPDB
+	protected function init_opts() {
+		$items = self::get_opts_defaults();
 		$opts = self::get_opt_group();
 		// note values converted to string
 		if ( $opts ) {
@@ -375,7 +311,9 @@ class SWF_put_evh {
 		return $opts;
 	}
 
-	protected function init() {
+	// initialize options/settings page, only if $this->full_init==true
+	// ($this->full_init set and checked in ctor)
+	protected function init_settings_page() {
 		if ( ! $this->opt ) {
 			$items = $this->init_opts();
 			
@@ -408,7 +346,7 @@ class SWF_put_evh {
 			$sections[$ns++] = new $Cs($fields,
 					'swfput1_general_section',
 					'<a name="general">' .
-						self::ht(__('General Options'))
+						self::ht(__('General Options')) 	
 						. '</a>',
 					array($this, 'put_general_desc'));
 
@@ -552,6 +490,99 @@ class SWF_put_evh {
 		}
 	}
 	
+	/**
+	 * General hook/filter callbacks
+	 */
+	
+	// register shortcode editor forms for posts & pages ("meta boxes")
+	public static function hook_admin_menu() {
+		$cl = __CLASS__;
+		$id = 'SWFPut_putswf_video';
+		$tl = __('SWFPut Flash Video Shortcode');
+		$fn = 'put_xed_form';
+		add_meta_box($id, $tl, array($cl, $fn), 'post', 'normal');
+		add_meta_box($id, $tl, array($cl, $fn), 'page', 'normal');
+	}
+
+	// register shortcode editor forms javascript
+	public static function filter_admin_print_scripts() {
+		// cap check: not sure if this is necessary here,
+		// hope it doesn't cause failures for legit users
+	    if ( $GLOBALS['editing'] && current_user_can('edit_posts') ) {
+			$jsfn = 'SWFPut_putswf_video_xed';
+			$pf = self::mk_pluginfile();
+			$t = self::$swfjsdir . '/' . self::$swfxedjsname;
+			$jsfile = plugins_url($t, $pf);
+	        wp_enqueue_script($jsfn, $jsfile, array('jquery'), 'xed');
+	    }
+	}
+
+	// deactivate cleanup
+	public static function on_deactivate() {
+		$wreg = __CLASS__;
+		$name = plugin_basename(self::mk_pluginfile());
+		$arf = array($wreg, 'plugin_page_addlink');
+		remove_filter("plugin_action_links_$name", $arf);
+
+		self::unregi_widget();
+
+		unregister_setting(self::opt_group, // option group
+			self::opt_group, // opt name; using group passes all to cb
+			array($wreg, 'validate_opts'));
+	}
+
+	// activate setup
+	public static function on_activate() {
+		$wreg = __CLASS__;
+		add_action('widgets_init', array($wreg, 'regi_widget'), 1);
+	}
+
+	// uninstall cleanup
+	public static function on_uninstall() {
+		self::unregi_widget();
+		
+		$opts = self::get_opt_group();
+		if ( $opts && $opts[self::optdelopts] != 'false' ) {
+			delete_option(self::opt_group);
+		}
+	}
+
+	// add link at plugins page entry for the settings page
+	public static function plugin_page_addlink($links) {
+		$opturl = '<a href="' . get_option('siteurl');
+		$opturl .= '/wp-admin/options-general.php?page=';
+		$opturl .= self::settings_page_id;
+		$opturl .= '">' . __('Settings') . '</a>';
+		// Add a link to this plugin's settings page
+		array_unshift($links, $opturl); 
+		return $links; 
+	}
+
+	// register the SWFPut widget
+	public static function regi_widget ($fargs = array()) {
+		global $wp_widget_factory;
+		if ( ! isset($wp_widget_factory) ) {
+			return;
+		}
+		if ( function_exists(register_widget) ) {
+			$cl = self::swfput_widget;
+			register_widget($cl);
+		}
+	}
+
+	// unregister the SWFPut widget
+	public static function unregi_widget () {
+		global $wp_widget_factory;
+		if ( ! isset($wp_widget_factory) ) {
+			return;
+		}
+		if ( function_exists(unregister_widget) ) {
+			$cl = self::swfput_widget;
+			unregister_widget($cl);
+		}
+	}
+
+	// to be done at WP init stage
 	public function init_hook_func () {
 		// add here to be sure option is ready
 		if ( self::get_posts_code_option() === 'true' ) {
@@ -594,13 +625,8 @@ class SWF_put_evh {
 			$opts = array();
 		}
 		// checkboxes need value set - nonexistant means false
-		$ta = array(self::optverbose,
-			self::optdispmsg, self::optdispwdg,
-			self::optdisphdr, self::optdelopts,
-			self::optcodemsg, self::optcodewdg,
-			self::optpregmsg, self::optplugwdg,
-			self::optuseming);
-		foreach ( $ta as $k ) {
+		$ta = self::get_opts_defaults();
+		foreach ( $ta as $k => $v ) {
 			if ( array_key_exists($k, $opts) ) {
 				continue;
 			}
@@ -1252,16 +1278,12 @@ class SWF_put_evh {
 					$out .= $line . $sep;
 				} else {
 					$pr->setvalue('url', $url);
-					$s = $this->get_swf_tags($swf, $pr);
-					$out .= '<br />' . $s . '<br />' . $sep;
-					if ( false /*elide attach url -- needs work*/ ) {
-						$s = '' . $m[1][0] . $m[6][0];
-						if ( strlen($s) > 0	) {
-							$out .= $s . $sep;
-						}
-					} else {
-						$out .= $line . $sep;
-					}
+					$s = '<div style="width: '.($w+0).'px" '
+						. 'class="wp-caption aligncenter">'
+						. $this->get_swf_tags($swf, $pr)
+						. '<p class="wp-caption-text"></p></div>'
+						. $sep;
+					$out .= $s . $line . $sep;
 				}
 			} else {
 				$out .= $line . $sep;
