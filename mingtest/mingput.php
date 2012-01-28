@@ -727,7 +727,7 @@ $bhighW = -1; $bhighR = 220; $bhighG = 220; $bhighB = 240; $bhighA = 170;
 // icons (e.g. on buttons)
 $icoR = 240; $icoG = 240; $icoB = 255; $icoA = 170;
 // icon outlines
-//$ilineW = 1; $ilineR = 240; $ilineG = 240; $ilineB = 240; $ilineA = 180;
+//$ilineW = -1; $ilineR = 240; $ilineG = 240; $ilineB = 240; $ilineA = 180;
 $ilineW = 0; $ilineR = 0; $ilineG = 0; $ilineB = 0; $ilineA = 0;
 // play time progress bar
 $progplR = 245; $progplG = 210; $progplB = 215; $progplA = 120;
@@ -776,6 +776,12 @@ $progressbarxoffs =  ($barlength - $progressbarlength) / 2.0;
 if ( $bhighW < 0 ) {
 	// var $barheight [20,40], $bhighW [1,2]
 	$bhighW = 1.0 + ($barheight - 20.0) / (40.0 - 20.0);
+}
+if ( $ilineW < 0 ) {
+	$ilineW = $barheight < 33 ? 0 : 1;
+	if ( $ilineW === 0 ) {
+		$ilineR = $ilineG = $ilineB = $ilineA = 0;
+	}
 }
 
 
@@ -913,16 +919,8 @@ $butinvisibleshape->drawCircle($butheight / 2);
 
 // shape for play/pause button icon in do play state
 $playshape = new_icon();
-if ( false ) {
-	$t = $trianglebase * treq_mid_y;
-	mingshape_drawtreq($playshape,
-		$butwidth / 2 - $t, ($butheight - $triangleheight) / 2,
-		$triangleheight, deg2rad(90));
-} else {
-	mingshape_drawtreq2($playshape,
-		$butwidth / 2.0, $butheight/ 2.0,
-		$triangleheight, deg2rad(90));
-}
+mingshape_drawtreq2($playshape,
+	$butwidth / 2.0, $butheight/ 2.0, $triangleheight, deg2rad(90));
 
 // shape for play/pause button icon in do pause state
 $barwid = $butwidth / 5;
@@ -945,26 +943,18 @@ $stopshape = new_icon();
 mingshape_drawrect($stopshape, $cx, $cy, $stopheight, $stopheight);
 
 // make 'corner' arrays for scale/fullsreen button icons
-if ( true ) {
-	// offset into button (assumed circular)
-	$t = 0.70710678; // sin||cos 45deg
-	$tx = $cx = $butwidth  / 2.0 - $butwidth  / 2.0 * $t + $blineW/2.0;
-	$ty = $cy = $butheight / 2.0 - $butheight / 2.0 * $t + $blineW/2.0;
-	// side length . . .
-	$cnside = (($butwidth  + $butheight) / 2.0) / 4.0 * 1.00 + 0.0;
-} else {
-	// first thought was corners should coincide w/ stop icon box; N.G.
-	$tx = $cx = ($butwidth  - $stopheight) / 2.0 + $blineW / 2.0;
-	$ty = $cy = ($butheight - $stopheight) / 2.0 + $blineW / 2.0;
-	$cnside = $stopheight / 3.0 * 1.125;
-}
+// offset into button (assumed circular)
+$t = 0.70710678; // sin||cos 45deg
+$tx = $cx = $butwidth  / 2.0 - $butwidth  / 2.0 * $t + $blineW/2.0;
+$ty = $cy = $butheight / 2.0 - $butheight / 2.0 * $t + $blineW/2.0;
+// side length . . .
+$cnside = (($butwidth  + $butheight) / 2.0) / 4.0 * 1.00 + 0.0;
 $cnaout = array(0 => array(0 => 0+$cx, 1 => 0+$cy),
 		1 => array(0 => $cnside+$cx, 1 => 0+$cy),
 		2 => array(0 => 0+$cx, 1 => $cnside+$cy),
 		3 => array(0 => 0+$cx, 1 => 0+$cy));
 // make go full screen icon shape
-$fullscrshape = new_shape_atts(0, 0, 0, 0, 0,
-	$icoR, $icoG, $icoB, $icoA);
+$fullscrshape = new_icon();
 $cna = $cnaout;
 $cx =  $butwidth / 2.0;
 $cy = $butheight / 2.0;
@@ -988,8 +978,7 @@ $cnain = array(0 => array(0 => $cnside+$cx, 1 => 0+$cy),
 		1 => array(0 => $cnside+$cx, 1 => $cnside+$cy),
 		2 => array(0 => 0+$cx, 1 => $cnside+$cy),
 		3 => array(0 => $cnside+$cx, 1 => 0+$cy));
-$xfullscrshape = new_shape_atts(0, 0, 0, 0, 0,
-	$icoR, $icoG, $icoB, $icoA);
+$xfullscrshape = new_icon();
 $ina = $cnain;
 $cx =  $butwidth / 2.0;
 $cy = $butheight / 2.0;
@@ -1004,8 +993,7 @@ mingshape_drawpoly($xfullscrshape, $ina);
 // make do scale screen icon shape, reusing 'corners'
 $cx =  $butwidth / 2.0;
 $cy = $butheight / 2.0;
-$doscaleshape = new_shape_atts(0, 0, 0, 0, 0,
-	$icoR, $icoG, $icoB, $icoA);
+$doscaleshape = new_icon();
 $cna = $cnaout;
 points_rotate($cna, deg2rad(-45), $cx, $cy);
 mingshape_drawpoly($doscaleshape, $cna);
@@ -1020,8 +1008,7 @@ if ( $scaleicobox ) {
 // make no scale screen icon shape
 $cx =  $butwidth / 2.0;
 $cy = $butheight / 2.0;
-$xdoscaleshape = new_shape_atts(0, 0, 0, 0, 0,
-	$icoR, $icoG, $icoB, $icoA);
+$xdoscaleshape = new_icon();
 $ina = $cnain;
 points_rotate($ina, deg2rad(-45), $cx, $cy);
 mingshape_drawpoly($xdoscaleshape, $ina);
@@ -1035,37 +1022,24 @@ if ( $scaleicobox ) {
 }
 
 // make speaker icon for volume button
-$spkrshape = new_shape_atts(0, 0, 0, 0, 0,
-	$icoR, $icoG, $icoB, $icoA);
-$spkrshape2 = new_shape_atts(0, 0, 0, 0, 0,
-	$icoR, $icoG, $icoB, $icoA);
+$spkrshape = new_icon();
+$spkrshape2 = new_icon();
 $t = round($stopheight / 2.0);
 // make odd or even to match $butheight
-$t = round($butheight) & 1 ? ($t | 1) : ($t & ~1);
-$spkrect = $t;
-if ( false ) {
-	$cx = floor(($butwidth  - $spkrect) / 4.0) - 1;
-	$cy = floor(($butheight - $spkrect) / 2.0) + 0;
-	//mingshape_drawrect($spkrshape, $cx, $cy, $spkrect, $spkrect);
-	mingshape_drawrect($spkrshape2, $cx, $cy, $spkrect, $spkrect);
-	$t = $triangleheight;
-	$cx = ($butwidth  - $t) / 2.0;
-	$cy = ($butheight - $t) / 2.0;
-	mingshape_drawtreq($spkrshape , $cx, $cy, $t, deg2rad(-90));
-	mingshape_drawtreq($spkrshape2, $cx, $cy, $t, deg2rad(-90));
-} else {
-	$t = $triangleheight - $trianglebase * treq_mid_y;
-	$cx = $butwidth / 2.0 - $t;
-	$cy = floor(($butheight - $spkrect) / 2.0);
-	$t = $spkrect * 0.65;
-	//mingshape_drawrect($spkrshape, $cx, $cy, $t, $spkrect);
-	mingshape_drawrect($spkrshape2, $cx, $cy, $t, $spkrect);
-	$t = $triangleheight;
-	$cx = $butwidth  / 2.0;
-	$cy = $butheight / 2.0;
-	mingshape_drawtreq2($spkrshape , $cx, $cy, $t, deg2rad(-90));
-	mingshape_drawtreq2($spkrshape2, $cx, $cy, $t, deg2rad(-90));
-}
+//$t = round($butheight) & 1 ? ($t | 1) : ($t & ~1);
+$t = round($butheight) & 1 ? (($t - 1) | 1) : ($t & ~1);
+$spkrect = $t < ($butheight / 5) ? ($t + 2) : $t;
+$t = $triangleheight - $trianglebase * treq_mid_y;
+$cx = $butwidth / 2.0 - $t;
+$cy = floor(($butheight - $spkrect) / 2.0);
+$t = $spkrect * 0.65;
+//mingshape_drawrect($spkrshape, $cx, $cy, $t, $spkrect);
+mingshape_drawrect($spkrshape2, $cx, $cy, $t, $spkrect);
+$t = $triangleheight;
+$cx = $butwidth  / 2.0;
+$cy = $butheight / 2.0;
+mingshape_drawtreq2($spkrshape , $cx, $cy, $t, deg2rad(-90));
+mingshape_drawtreq2($spkrshape2, $cx, $cy, $t, deg2rad(-90));
 
 //
 // make the interface objects with the shapes made above

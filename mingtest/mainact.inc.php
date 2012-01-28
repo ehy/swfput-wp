@@ -124,6 +124,7 @@ var v4aud = "$v4aud";
 
 var dopause = initpause;
 var doshowbar = initshowbar;
+var doshowbartime = true;
 var doscale = true;
 var initshowoffset = 0;
 var curkey = null; // current key press, ASCII
@@ -1248,6 +1249,7 @@ function resizeFace() {
 // click callback for control bar background
 function ctlpanelHit () {
 	volgadget._visible = false;
+	doshowbartime = ! doshowbartime;
 	hideinfohtml();
 }
 
@@ -1605,6 +1607,9 @@ function ticker () {
 
 	if ( ptrtick >= ptrtickmax ) {
 		Mouse.hide();
+		if ( doshowbartime ) {
+			showhideBar(doshowbar = false);
+		}
 		ptrtick = 0;
 	}
 

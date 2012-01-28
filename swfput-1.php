@@ -346,7 +346,7 @@ class SWF_put_evh {
 			$sections[$ns++] = new $Cs($fields,
 					'swfput1_general_section',
 					'<a name="general">' .
-						self::ht(__('General Options')) 	
+						self::ht(__('General Options'))
 						. '</a>',
 					array($this, 'put_general_desc'));
 
