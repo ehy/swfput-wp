@@ -124,7 +124,8 @@ var v4aud = "$v4aud";
 
 var dopause = initpause;
 var doshowbar = initshowbar;
-var doshowbartime = true;
+// Timed bar hiding; has menu item to toggle
+var doshowbartime = ! initshowbar;
 var doscale = true;
 var initshowoffset = 0;
 var curkey = null; // current key press, ASCII
@@ -420,7 +421,6 @@ if ( guardinit == undefined ) {
 		onMouseWheel: function (delta, target) {
 			// this is not getting called in the GNU/Linux plugin
 			// (although mouse wheel works in the debug textfield)
-			adddbgtest(" OMW: " + delta + "\n");
 			if ( target.onMouseWheel != undefined ) {
 				if ( target.onMouseWheel != null ) {
 					target.onMouseWheel(delta);
@@ -548,47 +548,55 @@ if ( guardinit == undefined ) {
 	Stage.addListener(ctl1S);
 
 	//	add context menu items
-	cbctxmenu = function(obj, menu) {
+	var cbctxmenu = function(obj, menu) {
 		for ( var n = 0; n < menu.customItems.length; n++ ) {
 			menu.customItems[n].enabled = true;
 		}
 	};
-	cbmenusmooth = function(obj, item) {
+	var cbmenusmooth = function(obj, item) {
 		video.smoothing = item.val;
 	};
-	cbmenudeblock = function(obj, item) {
+	var cbmenudeblock = function(obj, item) {
 		video.deblocking = item.val;
 	};
+	var cbmenuhidebar = function(obj, item) {
+		doshowbartime = item.val = ! item.val;
+		adddbgtext("HIDE BAR == " + doshowbartime + "\n");
+	};
 
-	menusmoothT = new ContextMenuItem("$menusmoothT", cbmenusmooth, true);
+	var menusmoothT = new ContextMenuItem("$menusmoothT", cbmenusmooth, true);
 	menusmoothT.val = true;
-	menusmoothF = new ContextMenuItem("$menusmoothF", cbmenusmooth);
+	var menusmoothF = new ContextMenuItem("$menusmoothF", cbmenusmooth);
 	menusmoothF.val = false;
-	menufullscr = new ContextMenuItem("$menufullscr", toggleFullscreen, true);
-	ctxmenu = new ContextMenu(cbctxmenu);
+	var menuhidebar = new ContextMenuItem("$menuhidebar", cbmenuhidebar, true);
+	menuhidebar.val = doshowbartime;
+	var menufullscr = new ContextMenuItem("$menufullscr", toggleFullscreen, true);
+	var ctxmenu = new ContextMenu(cbctxmenu);
 	ctxmenu.customItems.push(menufullscr);
-	ctxmenu.customItems.push(menusmoothT, menusmoothF);
+	ctxmenu.customItems.push(menusmoothT, menusmoothF, menuhidebar);
 	if ( showdeblockingitems ) {
-	menudeblock0 = new ContextMenuItem("$menudeblock0", cbmenudeblock,true);
+	var menudeblock0 = new ContextMenuItem("$menudeblock0", cbmenudeblock,true);
 	menudeblock0.val = 0;
-	menudeblock1 = new ContextMenuItem("$menudeblock1", cbmenudeblock);
+	var menudeblock1 = new ContextMenuItem("$menudeblock1", cbmenudeblock);
 	menudeblock1.val = 1;
-	menudeblock2 = new ContextMenuItem("$menudeblock2", cbmenudeblock);
+	var menudeblock2 = new ContextMenuItem("$menudeblock2", cbmenudeblock);
 	menudeblock2.val = 2;
-	menudeblock3 = new ContextMenuItem("$menudeblock3", cbmenudeblock);
+	var menudeblock3 = new ContextMenuItem("$menudeblock3", cbmenudeblock);
 	menudeblock3.val = 3;
-	menudeblock4 = new ContextMenuItem("$menudeblock4", cbmenudeblock);
+	var menudeblock4 = new ContextMenuItem("$menudeblock4", cbmenudeblock);
 	menudeblock4.val = 4;
-	menudeblock5 = new ContextMenuItem("$menudeblock5", cbmenudeblock);
+	var menudeblock5 = new ContextMenuItem("$menudeblock5", cbmenudeblock);
 	menudeblock5.val = 5;
-	menudeblock6 = new ContextMenuItem("$menudeblock6", cbmenudeblock);
+	var menudeblock6 = new ContextMenuItem("$menudeblock6", cbmenudeblock);
 	menudeblock6.val = 6;
-	menudeblock7 = new ContextMenuItem("$menudeblock7", cbmenudeblock);
+	var menudeblock7 = new ContextMenuItem("$menudeblock7", cbmenudeblock);
 	menudeblock7.val = 7;
 	ctxmenu.customItems.push(menudeblock0, menudeblock1, menudeblock2);
 	ctxmenu.customItems.push(menudeblock3, menudeblock4, menudeblock5);
 	ctxmenu.customItems.push(menudeblock6, menudeblock7);
 	} // end if deblocking items
+
+	_level0.menu = ctxmenu;
 
 	guardinit = 1;
 }
@@ -1249,7 +1257,6 @@ function resizeFace() {
 // click callback for control bar background
 function ctlpanelHit () {
 	volgadget._visible = false;
-	doshowbartime = ! doshowbartime;
 	hideinfohtml();
 }
 
@@ -1866,10 +1873,10 @@ adddbgtext(" v_id: '" + v_id + "'\n");
 if ( ! brtmp && audb == null && _level0.AU != undefined ) {
 	audb = _level0.AU == "true" ? true :
 		(_level0.AU == "false" ? false : null);
-	adddbgtext(" AU: '" + _level0.AUF + "'\n");
+	adddbgtext(" AU: '" + _level0.AU + "'\n");
 }
 // as above, and there was no _level0.AU
-if ( audb == null ) {
+if ( audb == null || audb == false ) {
 	audb = check4aud(vurl, false);
 }
 adddbgtext(" audb: '" + audb + "'\n");

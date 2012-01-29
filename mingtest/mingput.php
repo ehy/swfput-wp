@@ -459,6 +459,7 @@ OYV;
 // context menu item labels
 $menusmoothT = __('Set Video Smoothing On');
 $menusmoothF = __('Set Video Smoothing Off');
+$menuhidebar = __('Toggle Hide Control Bar');
 $menudeblock0 = __('Video compressor deblocking as needed');
 $menudeblock1 = __('No deblocking filter');
 $menudeblock2 = __('Sorenson deblocking');
@@ -1026,9 +1027,9 @@ $spkrshape = new_icon();
 $spkrshape2 = new_icon();
 $t = round($stopheight / 2.0);
 // make odd or even to match $butheight
-//$t = round($butheight) & 1 ? ($t | 1) : ($t & ~1);
-$t = round($butheight) & 1 ? (($t - 1) | 1) : ($t & ~1);
-$spkrect = $t < ($butheight / 5) ? ($t + 2) : $t;
+$t = round($butheight) & 1 ? ($t | 1) : ($t & ~1);
+//$t = round($butheight) & 1 ? (($t - 1) | 1) : ($t & ~1);
+$spkrect = $t < round($stopheight / 2.0) ? ($t + 2) : $t;
 $t = $triangleheight - $trianglebase * treq_mid_y;
 $cx = $butwidth / 2.0 - $t;
 $cy = floor(($butheight - $spkrect) / 2.0);

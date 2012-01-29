@@ -1785,7 +1785,7 @@ endif; // if ( ! class_exists('SWF_put_evh') ) :
  * values are all strings, even if empty or numeric etc.
  */
 if ( ! class_exists('SWF_params_evh') ) :
-class SWF_params_evh {
+class  {
 	protected static $defs = array(
 		'url' => '',
 		'defaulturl' => 'rtmp://cp82347.live.edgefcs.net/live', //akamai
