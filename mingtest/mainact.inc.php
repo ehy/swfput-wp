@@ -1902,6 +1902,7 @@ if ( _level0.PL != undefined && _level0.PL != '' ) {
 
 if ( _level0.HB != undefined && _level0.HB != '' ) {
 	doshowbar = initshowbar = _level0.HB == 'true' ? false : true;
+	doshowbartime = ! initshowbar;
 	adddbgtext(" HB: '" + _level0.HB + "'\n");
 }
 

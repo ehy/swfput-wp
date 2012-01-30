@@ -936,15 +936,15 @@ class SWF_put_evh {
 		// table <th> format string
 		$thfmt = '<th scope="row"><label for="%s_%s">%s</label></th>';
 		// table <input type="text"> format string
-		$infmt = '<input type="text" size="40" style="width:%u%%;" name="%s[%s]" id="%s_%s" value="%s" />';
+		$infmt = '<input type="text" size="40" style="width:%u%%;" name="%sX%sX" id="%s_%s" value="%s" />';
 		// table <input type="checkbox"> format string
-		$ckfmt = '<input type="checkbox" name="%s[%s]" id="%s_%s" value="%s" %s/>';
+		$ckfmt = '<input type="checkbox" name="%sX%sX" id="%s_%s" value="%s" %s/>';
 		// js function object
 		$job = $id . '_inst';
 		// form buttons format string
 		$bjfmt = '<input type="button" onclick="return %s.%s;" value="%s" />';
 		// form <select > format string
-		$slfmt = '<select name="%s[%s]" id="%s_%s" onchange="return %s.%s;">' . "\n";
+		$slfmt = '<select name="%sX%sX" id="%s_%s" style="width:%u%%;" onchange="return %s.%s;">' . "\n";
 		// form <select > <option > format string
 		$sofmt = '<option value="%s">%s</option>' . "\n";
 		// js send form values to editor method
@@ -970,7 +970,7 @@ class SWF_put_evh {
 					$l = self::ht(__('Caption:'));
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
-					<?php printf($infmt, $iw, $id, $k, $id, $k, ''); ?>
+					<?php printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
 				</td>
 			</tr>
 			<tr valign="top">
@@ -978,7 +978,7 @@ class SWF_put_evh {
 					$l = self::ht(__('Url or media library ID:'));
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
-					<?php printf($infmt, $iw, $id, $k, $id, $k, ''); ?>
+					<?php printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
 				</td>
 			</tr>
 			<?php
@@ -988,7 +988,7 @@ class SWF_put_evh {
 				$l = self::ht(__('Url from uploads directory:'));
 				printf($thfmt . '<td>', $id, $k, $l);
 				// <select>
-				printf($slfmt, $id, $k, $id, $k, $job, $jfus);
+				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfus);
 				// <options>
 				printf($sofmt, '', self::ht(__('none')));
 				foreach ( $af as $fv ) {
@@ -1008,7 +1008,7 @@ class SWF_put_evh {
 				$l = self::ht(__('Select ID from media library:'));
 				printf($thfmt . '<td>', $id, $k, $l);
 				// <select>
-				printf($slfmt, $id, $k, $id, $k, $job, $jfua);
+				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfua);
 				// <options>
 				printf($sofmt, '', self::ht(__('none')));
 				foreach ( $aa as $fn => $fi ) {
@@ -1025,7 +1025,7 @@ class SWF_put_evh {
 					$l = self::ht(__('Playpath (rtmp):'));
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
-					<?php printf($infmt, $iw, $id, $k, $id, $k, ''); ?>
+					<?php printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
 				</td>
 			</tr>
 			<tr valign="top">
@@ -1676,6 +1676,7 @@ class SWF_put_evh {
 		}
 		if ( $url === '' ) {
 			$url = $defaulturl;
+			$playpath = $defaultplaypath;
 		}
 
 		$achk = array(
@@ -1785,8 +1786,9 @@ endif; // if ( ! class_exists('SWF_put_evh') ) :
  * values are all strings, even if empty or numeric etc.
  */
 if ( ! class_exists('SWF_params_evh') ) :
-class  {
+class SWF_params_evh {
 	protected static $defs = array(
+		'caption' => '',		   // added for forms, not embed object
 		'url' => '',
 		'defaulturl' => 'rtmp://cp82347.live.edgefcs.net/live', //akamai
 		'cssurl' => '',
@@ -1807,7 +1809,8 @@ class  {
 		'loop' => 'false',
 		'mtype' => 'application/x-shockwave-flash',
 		// rtmp
-		'playpath' => 'CSPAN2@14846',
+		'playpath' => '',
+		'defaultplaypath' => 'CSPAN2@14846',
 		// <object>
 		'classid' => 'clsid:d27cdb6e-ae6d-11cf-96b8-444553540000',
 		'codebase' => 'http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,115,0'
@@ -1894,7 +1897,7 @@ class  {
 				$i[$k] = $v;
 				continue;
 			}
-			$t = trim('' . $i[$k]);
+			$t = trim(' ' . $i[$k]);
 			switch ( $k ) {
 			// strings that must present positive integers
 			case 'width':
@@ -1969,6 +1972,7 @@ class  {
 				}
 				break;
 			// varied complex strings; not sanitized here
+			case 'caption':
 			case 'url':
 			case 'cssurl':
 			case 'mtype':
