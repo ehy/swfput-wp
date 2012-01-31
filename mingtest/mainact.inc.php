@@ -1902,7 +1902,7 @@ if ( _level0.PL != undefined && _level0.PL != '' ) {
 
 if ( _level0.HB != undefined && _level0.HB != '' ) {
 	doshowbar = initshowbar = _level0.HB == 'true' ? false : true;
-	doshowbartime = ! initshowbar;
+	menuhidebar.val = doshowbartime = ! initshowbar;
 	adddbgtext(" HB: '" + _level0.HB + "'\n");
 }
 
@@ -1927,7 +1927,7 @@ if ( _level0.AA != undefined && _level0.AA != '' ) {
 
 if ( _level0.DA != undefined && _level0.DA != '' ) {
 	displayaspect = _level0.DA;
-	// sadly, AS2 (or Ming) does not support RegExp(): always false
+	// sadly, AS2 does not support RegExp(): always false
 	// I read AS3 has support; that's no help here
 	//if ( RegExp('^[1-9][0-9]*[x:][1-9][0-9]*$').exec(_level0.DA) )
 	if ( _level0.DA != 'D' ) {
