@@ -790,7 +790,7 @@ stream_onMetaData = function(info) {
 		var va = stream_width / stream_height;
 		var da = stream_displayWidth / stream_displayHeight;
 
-		afactW = upixaspect; // System.capabilities.pixelAspectRatio;
+		afactW = 1.0/upixaspect; //System.capabilities.pixelAspectRatio;
 		afactH = 1;
 		if ( Math.abs(da - va) > 0.001 ) {
 			afactW *= da * stream_height / stream_width;
