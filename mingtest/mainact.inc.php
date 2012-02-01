@@ -167,7 +167,9 @@ var stream_displayWidth = null;
 var stream_frameHeight = null;
 var stream_displayHeight = null;
 // aspect factors, calculated from metadate if available
-var upixaspect = System.capabilities.pixelAspectRatio;
+var upixaspect = parseFloat(System.capabilities.pixelAspectRatio);
+if ( upixaspect === NaN || upixaspect < 0.25 /*arbitrary cmp value*/ )
+	upixaspect = 1.0;
 var afactW = 1;
 var afactH = 1;
 var stream_unknownkey = null;
@@ -456,9 +458,16 @@ if ( guardinit == undefined ) {
 				}
 			} else if ( curkey == 65 || curkey == 97 ) {
 				// A,a
+				if ( b_release != true ) {
 				// debugging broken gnash 0.8.10 aspect 0.561...
-				afactW = upixaspect = upixaspect == 1 ?
-					System.capabilities.pixelAspectRatio : 1;
+				if ( Math.abs(upixaspect - 1.0) < 0.001 ) {
+					upixaspect =
+					   parseFloat(System.capabilities.pixelAspectRatio);
+				} else {
+					upixaspect = 1.0;
+				}
+				afactW = 1.0 / upixaspect;
+				}
 			} else if ( curkey == 86 || curkey == 118 ) {
 				// V,v
 				volgadget._visible = ! volgadget._visible;
@@ -1839,10 +1848,14 @@ if ( (vurl == null || vurl == "") && _level0.FN != undefined ) {
 }
 adddbgtext(" vurl: '" + vurl + "'\n");
 
-// Gnash 0.8.10 gets confused by dimensions of main 'movie' and
-// sizes the stage wrong: try to correct that (BTW 0.8.8 is OK)
-if ( _level0.WI != undefined && _level0.HI != undefined ) {
-	if ( flvers.indexOf("10,1,999,0") >= 0 ) {
+// Misc. Gnash hacks
+if ( flvers.indexOf("10,1,999,0") >= 0 ) {
+	// Gnash pixelaspect ratio is a dummy, and inverted too ( < 1.0 )
+	// and in version 0.8.10 some bug makes it give a value of 0.5....
+	upixaspect = 1.0;
+	// Gnash 0.8.10 gets confused by dimensions of main 'movie' and
+	// sizes the stage wrong: try to correct that (BTW 0.8.8 is OK)
+	if ( false ) {
 		adddbgtext("Gnash Stage size bug hacks . . .\n");
 		// this nasty hack actually worked, Ubuntu 11.10 in
 		// kvm virtual machine, display on Vinagre vnc client,
