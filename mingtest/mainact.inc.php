@@ -1835,9 +1835,6 @@ bbar.dltxt._visible = false;
 bbar.dltxt.wordWrap = false;
 bbar.dltxt.autoSize = true;
 
-adddbgtext("upixaspect " + upixaspect + "\n");
-adddbgtext("pixelAspectRatio " + System.capabilities.pixelAspectRatio + "\n");
-
 // without builtin video URL, get one -- this is the case
 // with pre-built .swf, not on the fly PHP CGI
 if ( (vurl == null || vurl == "") && _level0.FN != undefined ) {
@@ -1850,25 +1847,26 @@ adddbgtext(" vurl: '" + vurl + "'\n");
 
 // Misc. Gnash hacks
 if ( flvers.indexOf("10,1,999,0") >= 0 ) {
+	adddbgtext("Gnash bug hacks . . .\n");
 	// Gnash pixelaspect ratio is a dummy, and inverted too ( < 1.0 )
 	// and in version 0.8.10 some bug makes it give a value of 0.5....
 	upixaspect = 1.0;
 	// Gnash 0.8.10 gets confused by dimensions of main 'movie' and
 	// sizes the stage wrong: try to correct that (BTW 0.8.8 is OK)
-	if ( false ) {
-		adddbgtext("Gnash Stage size bug hacks . . .\n");
+	// (possibly same bug: Gnash 0.8.10 standalone ignores commandline
+	// width and height args)
+	if ( _level0.GNSZH == undefined || _level0.GNSZH == true ) {
 		// this nasty hack actually worked, Ubuntu 11.10 in
 		// kvm virtual machine, display on Vinagre vnc client,
 		// without any visible flashing; effect on fast display
-		// currently unknown -- It MIGHT be possible to find
-		// some arrangement of the embedding html that stops
-		// the problem, since it differs, with the same .swf,
-		// between the Wordpress pages and my other test pages ...
-		// but too much time has been spent on it now
+		// currently unknown.
 		toggleFullscreen();
 		toggleFullscreen();
 	}
 }
+
+adddbgtext("pixelAspectRatio " + System.capabilities.pixelAspectRatio + "\n");
+adddbgtext("upixaspect " + upixaspect + "\n");
 
 // is there a stream id (rtmp playpath)?
 if ( v_id == null && _level0.IDV != undefined && _level0.IDV != '' ) {
