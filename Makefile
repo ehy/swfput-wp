@@ -43,6 +43,9 @@ ${PRJZIP}: ${SBINS} ${JSBIN} ${ZALL}
 	$(ZIP) ${PRJZIP} ${PRJDIR} && rm -rf ${PRJDIR} && \
 	(test -e ttd && mv ttd ${PRJDIR}; ls -l ${PRJZIP})
 
+$(SDIRI)/default.flv: $(SDIRI)/droptest.flv
+	ln $(SDIRI)/droptest.flv $(SDIRI)/default.flv
+
 $(SDIRI)/mingput.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
 	$(PHPCLI) $(SDIRI)/mingput.php > $(SDIRI)/mingput.swf
 

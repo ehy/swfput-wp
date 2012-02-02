@@ -176,12 +176,16 @@ class SWF_put_evh {
 	protected static $swfputphpname = 'mingput.php';
 	// swfput program css name
 	protected static $swfputcssname = 'obj.css';
+	// swfput default video name
+	protected static $swfputdefvid = 'default.flv';
 	// swfput program binary path
 	protected $swfputbin;
 	// swfput program php+ming script path
 	protected $swfputphp;
 	// swfput program css path
 	protected $swfputcss;
+	// swfput program css path
+	protected $swfputvid;
 
 	// swfput js subdirectory
 	protected static $swfjsdir = 'js';
@@ -211,6 +215,8 @@ class SWF_put_evh {
 		$this->swfputphp = plugins_url($t, $pf);
 		$t = self::$swfputdir . '/' . self::$swfputcssname;
 		$this->swfputcss = plugins_url($t, $pf);
+		$t = self::$swfputdir . '/' . self::$swfputdefvid;
+		$this->swfputvid = plugins_url($t, $pf);
 
 		$this->in_wdg_do_shortcode = 0;
 		
@@ -1653,6 +1659,12 @@ class SWF_put_evh {
 		return $this->swfputcss;
 	}
 
+	// The swf player directory should have a small default video file;
+	// if it exists make a url for it.
+	public function get_swf_default_url() {
+		return $this->swfputvid;
+	}
+
 	// print suitable SWF object/embed tags
 	public function put_swf_tags($uswf, $par, $esc = true) {
 		$s = $this->get_swf_tags($uswf, $par, $esc);
@@ -1676,6 +1688,12 @@ class SWF_put_evh {
 		}
 		if ( $url === '' ) {
 			$url = $defaulturl;
+			if ( $url === 'default' ) {
+				$url = $this->get_swf_default_url();
+			}
+		}
+		if ( $url === '' ) {
+			$url = $defrtmpurl;
 			$playpath = $defaultplaypath;
 		}
 
@@ -1790,7 +1808,8 @@ class SWF_params_evh {
 	protected static $defs = array(
 		'caption' => '',		   // added for forms, not embed object
 		'url' => '',
-		'defaulturl' => 'rtmp://cp82347.live.edgefcs.net/live', //akamai
+		'defaulturl' => 'default', // subs. distributed default file
+		'defrtmpurl' => 'rtmp://cp82347.live.edgefcs.net/live', //akamai
 		'cssurl' => '',
 		'width' => '240',
 		'height' => '180',
