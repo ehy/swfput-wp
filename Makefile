@@ -14,7 +14,8 @@ JSSRC = $(JSDIR)/formxed.dev.js
 SDIRI = mingtest
 SDIRO = mingput
 SSRCS = $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php $(SDIRI)/obj.css
-SBINS = $(SDIRI)/mingput.swf \
+SBINS = $(SDIRI)/default.flv \
+	$(SDIRI)/mingput.swf \
 	$(SDIRI)/mingput44.swf \
 	$(SDIRI)/mingput40.swf \
 	$(SDIRI)/mingput36.swf \
