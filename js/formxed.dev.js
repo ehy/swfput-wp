@@ -129,18 +129,18 @@ SWFPut_putswf_video_xed.prototype = {
 				}
 				var px; var pw;
 				if ( fuzz ) {
-					// exception: allow FLOAT or FLOATsep1
-					px = /^\+?([0-9]+\.[0-9]+)([Xx: \t\f\v\^\$\\\.\*\+\?\(\)\[\]\{\}\|\/!@#%&_=`~><-]+1)?$/;
+					// exception: allow INT|FLOAT or INT|FLOATsepINT|FLOAT
+					px = /^\+?([0-9]+(\.[0-9]+)?)([Xx: \t\f\v\^\$\\\.\*\+\?\(\)\[\]\{\}\|\/!@#%&_=`~><-]+([0-9]+(\.[0-9]+)?))?$/;
 					// wanted: INTsepINT;
 					pw  = /^([0-9]+)[Xx: \t\f\v\^\$\\\.\*\+\?\(\)\[\]\{\}\|\/!@#%&_=`~><-]+([0-9]+)$/;
 				} else {
-					// exception: allow FLOAT or FLOATsep1
-					px = /^\+?([0-9]+\.[0-9]+)([Xx:]1)?$/;
+					// exception: allow INT|FLOAT or INT|FLOATsepINT|FLOAT
+					px = /^\+?([0-9]+(\.[0-9]+)?)([Xx:]([0-9]+(\.[0-9]+)?))?$/;
 					// wanted: INTsepINT;
 					pw  = /^([0-9]+)[Xx:]([0-9]+)$/;
 				}
 				if ( (m = px.exec(t)) !== null ) {
-					this['map'][k] = m[1] + ':1';
+					this['map'][k] = m[1] + (m[3] ? m[3] : ':1');
 				} else if ( (m = pw.exec(t)) !== null ) {
 					this['map'][k] = m[1] + ':' + m[2];
 				} else {

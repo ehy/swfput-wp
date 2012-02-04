@@ -1978,12 +1978,12 @@ class SWF_params_evh {
 					$sep = '[Xx:]';
 				}
 				// exception: allow FLOAT or FLOATsep1
-				$px = '/^\+?([0-9]+\.[0-9]+)(' . $sep . '1)?$/';
+				$px = '/^\+?([0-9]+(\.[0-9]+)?)(' . $sep . '([0-9]+(\.[0-9]+)?))?$/';
 				// wanted: INTsepINT;
 				$pw  = '/^([0-9]+)' . $sep . '([0-9]+)$/';
 				$m = array();
 				if ( preg_match($px, $t, $m) ) {
-					$i[$k] = $m[1] . ':1';
+					$i[$k] = $m[1] . ($m[3] ? $m[3] : ':1');
 				} else if ( preg_match($pw, $t, $m) ) {
 					$i[$k] = $m[1] . ':' . $m[2];
 				} else {

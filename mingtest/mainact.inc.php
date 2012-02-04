@@ -440,7 +440,8 @@ if ( guardinit == undefined ) {
 			if ( curkey == 32 ) {
 				// space
 				if ( ! brtmp ) {
-					togglepauseVideo();
+					togglepause();
+					//togglepauseVideo();
 				}
 			} else if ( curkey == 81 || curkey == 113 ) {
 				// Q,q
@@ -1251,6 +1252,9 @@ function resizeFace() {
 	// other item adjustment
 	wait._x = Stage.width / 2;
 	wait._y = Stage.height / 2;
+	inibut._x = Stage.width / 2;
+	inibut._y = Stage.height / 2;
+
 	// hide the playback and download text fields if
 	// width is too narrow for nice display
 	// (rtmbut is set in php to rightmost button)
@@ -1267,6 +1271,20 @@ function resizeFace() {
 function ctlpanelHit () {
 	volgadget._visible = false;
 	hideinfohtml();
+}
+
+// click callback for initial play button
+function initialbutHit () {
+	togglepause();
+
+	if ( inibut._visible === false ) {
+		return;
+	}
+	inibut.gotoAndStop(1);
+	inibut.initialbut.enabled = inibut.initialimg.enabled = false;
+	inibut.initialbut._visible = inibut.initialimg._visible = false;
+	inibut.enabled = false;
+	inibut._visible = false;
 }
 
 // click callback for timeline progress bar
@@ -1978,6 +1996,56 @@ if ( _level0.PA != undefined && _level0.PA != '' ) {
 
 adddbgtext("Flash v. " + flvers + "\n");
 
+var iimgurl = 'initimg3.jpeg';
+//var iimgurl = 'http://lucy.example.org/~evh/mingtest/initimg.jpeg';
+var iiproportion = true;
+if ( brtmp || initpause ) {
+	inibut.initialbut.useHandCursor = true;
+	inibut._x = Stage.width / 2 - inibut.width / 2;
+	inibut._y = Stage.height / 2 - inibut.height / 2;
+	inibut.initialbut._visible = inibut.initialbut.enabled = true;
+	inibut.initialimg._visible = inibut.initialimg.enabled = false;
+	inibut._visible = inibut.enabled = true;
+	if ( iimgurl ) {
+		t = {
+			onLoadInit: function (m) {
+				var ia = m._width / m._height;
+				var sa = Stage.width / Stage.height;
+				
+				m._x = -inibut._x;
+				m._y = -inibut._y;
+
+				if ( ! iiproportion ) {
+					m._xscale = Stage.width / m._width * 100.0;
+					m._yscale = Stage.height / m._height * 100.0;
+				} else if ( sa > ia ) {
+					var sc = Stage.height / m._height * 100.0;
+					var d = Stage.width - m._width * sc / 100.0;
+					m._xscale = sc;
+					m._yscale = sc;
+					m._x += d / 2;
+				} else {
+					var sc = Stage.width / m._width * 100.0;
+					var d = Stage.height - m._height * sc / 100.0;
+					m._xscale = sc;
+					m._yscale = sc;
+					m._y += d / 2;
+				}
+
+				m._visible = m.enabled = true;
+			}
+		};
+		inibut.initialimg.imld = new MovieClipLoader();
+		inibut.initialimg.imld.addListener(t);
+		inibut.initialimg.imld.loadClip(iimgurl, inibut.initialimg);
+	}
+} else {
+	inibut.initialbut.enabled = inibut.initialimg.enabled = false;
+	inibut.initialbut._visible = inibut.initialimg._visible = false;
+	inibut.enabled = false;
+	inibut._visible = false;
+}
+
 // start the movie, but . . .
 // initial pause is handled elsewhere except for rtmp which does not
 // handle pause well, so simulate initial pause here if requested
@@ -1985,7 +2053,6 @@ if ( ! (dopause && brtmp) ) {
 	startVideo();
 } else {
 	stopVideo();
-	
 }
 
 OMM;

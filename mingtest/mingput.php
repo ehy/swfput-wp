@@ -1122,7 +1122,9 @@ $t->addShape($butshape,
 $t->addShape($playshape,
 	SWFBUTTON_UP | SWFBUTTON_DOWN | SWFBUTTON_OVER);
 $t->addShape($buthighlightshape, SWFBUTTON_OVER);
-$t->setAction(makeSWFAction("_root.togglepause();"));
+// make action 'initialbutHit' to dismiss initial button as necessary
+//$t->setAction(makeSWFAction("_root.togglepause();"));
+$t->setAction(makeSWFAction("_root.initialbutHit();"));
 add_panel_obj($t, "playbut", $tx, $ty);
 // pause
 $t = new SWFButton();
@@ -1131,7 +1133,8 @@ $t->addShape($butshape,
 $t->addShape($pauseshape,
 	SWFBUTTON_UP | SWFBUTTON_DOWN | SWFBUTTON_OVER);
 $t->addShape($buthighlightshape, SWFBUTTON_OVER);
-$t->setAction(makeSWFAction("_root.togglepause();"));
+// make action 'initialbutHit' to dismiss initial button as necessary
+$t->setAction(makeSWFAction("_root.initialbutHit();"));
 add_panel_obj($t, "pausebut", $tx, $ty);
 // pause disabled; e.g. rtmp stream with which resume often fails
 $t = new SWFButton();
@@ -1310,7 +1313,7 @@ $t->setBounds($timetxtwid, $barheight / 3);
 $t->setFont($monofont);
 $t->setColor($icoR, $icoG, $icoB, $icoA);
 $t->setHeight(max($barheight / 4, $txtheight));
-$t->addString("00:00:00/99:59:59");
+$t->addString("00:00:00/00:00:00");
 add_panel_obj($t, "tmtxt",
 	$barlength - $timetxtwid, $progressbarheight * 2 - 2);
 
@@ -1320,7 +1323,7 @@ $t->setBounds($timetxtwid, $barheight / 3);
 $t->setFont($monofont);
 $t->setColor($icoR, $icoG, $icoB, $icoA);
 $t->setHeight(max($barheight / 4, $txtheight));
-$t->addString("100%102400000000k");
+$t->addString("100%000000000000k");
 add_panel_obj($t, "dltxt",
 	$barlength - $timetxtwid,
 	$progressbarheight * 2 + $barheight / 3 - 2);
@@ -1335,7 +1338,7 @@ add_panel_obj($t, "dltxt",
     * SWFTEXTFIELD_NOSELECT makes the field non-selectable
     * SWFTEXTFIELD_PASSWORD obscures the data entry
     * SWFTEXTFIELD_WORDWRAP allows text to wrap
-*/
+	*/
 // *VERY* picky about bits at runtime; naming too: must use
 // setName here, and on return-object when added to movie.
 // do not use SWFTEXTFIELD_NOEDIT w/ html field -- prevents
@@ -1417,6 +1420,28 @@ for ( $i = 0; $i < $wnfrms; $i++ ) {
 	$wmovie->remove($wdisp);
 }
 
+// Make an initial start button for when player is first loaded
+// (as is common practice) that displays large on screen; also
+// add a movie clip that will optionally load an image (in AScript)
+$initialmovie = new SWFMovieClip();
+$initialimg = new SWFMovieClip();
+$initialbut = new SWFButton();
+$initialbutA = 220;
+$t = new_shape_atts(9, $icoR, $icoG, $icoB, $initialbutA, 0, 0, 0, 0);
+$t->movePenTo(0, 0);
+$t->drawCircle($wrad);
+$initialbut->addShape($t,
+	SWFBUTTON_HIT | SWFBUTTON_UP | SWFBUTTON_OVER);
+$t = new_shape_atts(0, 0, 0, 0, 0, $icoR, $icoG, $icoB, $initialbutA);
+mingshape_drawtreq2($t, 0, 0, $wrad, deg2rad(90));
+$initialbut->addShape($t,
+	SWFBUTTON_HIT | SWFBUTTON_UP | SWFBUTTON_OVER);
+$initialbut->addAction(makeSWFAction("_root.initialbutHit();"),
+	SWFBUTTON_HIT);
+add_child_obj($initialmovie, $initialimg, "initialimg", 0, 0);
+add_child_obj($initialmovie, $initialbut, "initialbut", 0, 0);
+$initialmovie->nextFrame();
+
 // Control panel 'movie' complete now: set current state as a 'frame'
 // by advancing to next frame; without this nothing will display
 $ctlpanel->nextFrame();
@@ -1424,22 +1449,25 @@ $ctlpanel->nextFrame();
 // ming video stream
 add_movie_obj(new SWFVideoStream(), "video", 0, 0);
 
-// add the control bar to the movie
-add_movie_obj($ctlpanel, "bbar", 0, 0);
-
-// add the wait-a-while movie to the movie
-add_movie_obj($wmovie, "wait", $wndlength / 2, $wndheight / 2);
+// add the initial play button/image movie to the movie
+add_movie_obj($initialmovie, "inibut", $wndlength / 2, $wndheight / 2);
 
 // add the volume gadget to the movie
 add_movie_obj($volbarmovie, "volgadget",
 	$butwidth * 7.5 - $volbarlen / 2,
 	$barY - $barheight - $volbarwid*2);
 
+// add the wait-a-while movie to the movie
+add_movie_obj($wmovie, "wait", $wndlength / 2, $wndheight / 2);
+
 // add info textfield  to the movie
 add_movie_obj($infotxt, "itxt", $wndlength / 4.0, $wndheight / 8.0);
 
 // add debug textfield
 add_movie_obj($txtdbg, "dbg", 5, 5);
+
+// add the control bar to the movie
+add_movie_obj($ctlpanel, "bbar", 0, 0);
 
 /**********************************************************************\
  *  Main Flash Action script, as a PHP here-doc                       *
