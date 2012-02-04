@@ -1983,7 +1983,7 @@ class SWF_params_evh {
 				$pw  = '/^([0-9]+)' . $sep . '([0-9]+)$/';
 				$m = array();
 				if ( preg_match($px, $t, $m) ) {
-					$i[$k] = $m[1] . ($m[3] ? $m[3] : ':1');
+					$i[$k] = $m[1] . ($m[4] ? (':' . $m[4]) : ':1');
 				} else if ( preg_match($pw, $t, $m) ) {
 					$i[$k] = $m[1] . ':' . $m[2];
 				} else {

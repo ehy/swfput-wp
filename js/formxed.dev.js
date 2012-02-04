@@ -140,7 +140,7 @@ SWFPut_putswf_video_xed.prototype = {
 					pw  = /^([0-9]+)[Xx:]([0-9]+)$/;
 				}
 				if ( (m = px.exec(t)) !== null ) {
-					this['map'][k] = m[1] + (m[3] ? m[3] : ':1');
+					this['map'][k] = m[1] + (m[4] ? (':' + m[4]) : ':1');
 				} else if ( (m = pw.exec(t)) !== null ) {
 					this['map'][k] = m[1] + ':' + m[2];
 				} else {
