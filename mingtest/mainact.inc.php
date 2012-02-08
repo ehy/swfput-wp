@@ -1905,6 +1905,7 @@ if ( v_id == null && _level0.IDV != undefined && _level0.IDV != '' ) {
 	// not rtmp? don't want v_id
 	//v_id = null;
 //}
+brtmp = check_rtmp(vurl);
 adddbgtext(" v_id: '" + v_id + "'\n");
 
 // is stream known to be audio only?

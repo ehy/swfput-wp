@@ -1357,7 +1357,7 @@ class SWF_put_evh {
 				if ( is_wp_error($url) ) {
 					$out .= $line . $sep;
 					self::errlog('failed URL of attachment ' . $id);
-				} else if ( ! preg_match($mpat, $url) ) {
+				} else if ( ! preg_match($mpat['av'], $url) ) {
 					$out .= $line . $sep;
 				} else {
 					$pr->setvalue('url', $url);
@@ -2282,6 +2282,27 @@ class SWF_put_widget_evh extends WP_Widget {
 		$id = $this->get_field_id('title');
 		$nm = $this->get_field_name('title');
 		$tl = $ht(__('Widget title:'));
+
+		// file select by ext pattern
+		$mpat = $this->plinst->get_mfilter_pat();
+		// files array from uploads dirs (empty if none)
+		$rhu = $this->plinst->r_find_uploads($mpat['m'], true);
+		$af = &$rhu['rf'];
+		$au = &$rhu['wu'];
+		$aa = &$rhu['at'];
+		// url base for upload dirs files
+		$ub = rtrim($au['baseurl'], '/') . '/';
+		// directory base for upload dirs files
+		$up = rtrim($au['basedir'], '/') . '/';
+		$slfmt =
+			'<select class="widefat" name="%s" id="%s" onchange="%s">';
+		$sofmt = '<option value="%s">%s</option>' . "\n";
+		// expect jQuery to be loaded by WP (tried $() invocation
+		// but N.G. w/ MSIE. Sheesh.)
+		$jsfmt = "jQuery('[id=%s]').val";
+		$jsfmt .= '(unescape(this.options[selectedIndex].value))';
+		$jsfmt .= '; return false;';
+
 		?>
 
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
@@ -2312,28 +2333,10 @@ class SWF_put_widget_evh extends WP_Widget {
 			type="text" value="<?php echo $val; ?>" /></p>
 
 		<?php // selects for URLs and attachment id's
-		// optional print <select >
 		// escape url field id for jQuery selector
 		$id = $this->plinst->esc_jqsel($id);
-		// expect jQuery to be loaded by WP (tried $() invocation
-		// but N.G. w/ MSIE. Sheesh.)
-		$js = "jQuery('[id={$id}]').val";
-		$js .= '(unescape(this.options[selectedIndex].value))';
-		$js .= '; return false;';
-		// file select by ext pattern
-		$mpat = $this->plinst->get_mfilter_pat();
-		// files array from uploads dirs (empty if none)
-		$rhu = $this->plinst->r_find_uploads($mpat, true);
-		$af = &$rhu['rf'];
-		$au = &$rhu['wu'];
-		$aa = &$rhu['at'];
-		// url base for upload dirs files
-		$ub = rtrim($au['baseurl'], '/') . '/';
-		// directory base for upload dirs files
-		$up = rtrim($au['basedir'], '/') . '/';
-		$slfmt =
-			'<select class="widefat" name="%s" id="%s" onchange="%s">';
-		$sofmt = '<option value="%s">%s</option>' . "\n";
+		$js = sprintf($jsfmt, $id);
+		// optional print <select >
 		if ( count($af) > 0 ) {
 			$id = $this->get_field_id('files');
 			$k = $this->get_field_name('files');
@@ -2345,6 +2348,8 @@ class SWF_put_widget_evh extends WP_Widget {
 			printf($sofmt, '', $ht(__('none')));
 			foreach ( $af as $fv ) {
 				$ts = $fv[0];
+				if ( ! preg_match($mpat['av'], $ts) )
+					continue;
 				$tp = rtrim($fv[1], '/');
 				$tu = $ub . ($tp === '' ? '' : $tp . '/');
 				$tu .= $ts;
@@ -2366,6 +2371,8 @@ class SWF_put_widget_evh extends WP_Widget {
 			printf($sofmt, '', $ht(__('none')));
 			foreach ( $aa as $fn => $fi ) {
 				$m = basename($fn);
+				if ( ! preg_match($mpat['av'], $m) )
+					continue;
 				$ts = $m . " (" . $fi . ")";
 				printf($sofmt, rawurlencode($fi), $ht($ts));
 			}
@@ -2395,6 +2402,55 @@ class SWF_put_widget_evh extends WP_Widget {
 		<input class="widefat" id="<?php echo $id; ?>"
 			name="<?php echo $nm; ?>"
 			type="text" value="<?php echo $val; ?>" /></p>
+
+		<?php // selects for URLs and attachment id's
+		// escape url field id for jQuery selector
+		$id = $this->plinst->esc_jqsel($id);
+		$js = sprintf($jsfmt, $id);
+		// optional print <select >
+		if ( count($af) > 0 ) {
+			$id = $this->get_field_id('ifiles');
+			$k = $this->get_field_name('ifiles');
+			$tl = $ht(__('Load image from uploads directory:'));
+			printf('<p><label for="%s">%s</label>' . "\n", $id, $tl);
+			// <select>
+			printf($slfmt . "\n", $k, $id, $js);
+			// <options>
+			printf($sofmt, '', $ht(__('none')));
+			foreach ( $af as $fv ) {
+				$ts = $fv[0];
+				if ( ! preg_match($mpat['i'], $ts) )
+					continue;
+				$tp = rtrim($fv[1], '/');
+				$tu = $ub . ($tp === '' ? '' : $tp . '/');
+				$tu .= $ts;
+				if ( $tp !== '' )
+					$ts .= " (" . $tp . ")";
+				printf($sofmt, rawurlencode($tu), $ht($ts));
+			}
+			// end select
+			echo "</select></td></tr>\n";
+		} // end if there are upload files
+		if ( ! empty($aa) ) {
+			$id = $this->get_field_id('iatch');
+			$k = $this->get_field_name('iatch');
+			$tl = $ht(__('Load image ID from media library:'));
+			printf('<p><label for="%s">%s</label>' . "\n", $id, $tl);
+			// <select>
+			printf($slfmt . "\n", $k, $id, $js);
+			// <options>
+			printf($sofmt, '', $ht(__('none')));
+			foreach ( $aa as $fn => $fi ) {
+				$m = basename($fn);
+				if ( ! preg_match($mpat['i'], $m) )
+					continue;
+				$ts = $m . " (" . $fi . ")";
+				printf($sofmt, rawurlencode($fi), $ht($ts));
+			}
+			// end select
+			echo "</select></td></tr>\n";
+		} // end if there are upload files
+		?>
 
 		<?php
 		$val = $instance['audio'];
