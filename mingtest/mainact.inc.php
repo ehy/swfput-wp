@@ -1336,14 +1336,7 @@ function doVolumeCtl() {
 
 // this must be assigned to MovieClip; N.F. for Button
 volbar_onMouseWheel = function(d) {
-	var s = volgadget.vbarind._width + d;
-	if ( s > const_vbar_len ) {
-		s = const_vbar_len;
-	}
-	if ( s < 0 ) {
-		s = 0;
-	}
-	setVolumeAdjust(s);
+	incrVolumeAdjust(d);
 };
 
 volbar_onMouseMove = function() {
