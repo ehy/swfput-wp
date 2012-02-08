@@ -1766,8 +1766,10 @@ class SWF_put_evh {
 
 		if ( preg_match('/^0*[1-9][0-9]*$/', $url) ) {
 			$url = wp_get_attachment_url(ltrim($url, '0'));
-			if ( ! $url )
+			if ( ! $url ) {
 				$url = '';
+				self::errlog('rejected video url media ID');
+			}
 		}
 		if ( $url === '' ) {
 			$url = $defaulturl;
@@ -1813,6 +1815,15 @@ class SWF_put_evh {
 			$ut = '';
 		}
 		$cssurl = ($esc == true) ? $fesc($ut) : $ut;
+		if ( $iimage !== '' ) {
+			if ( preg_match('/^0*[1-9][0-9]*$/', $iimage) ) {
+				$iimage = wp_get_attachment_url(ltrim($iimage, '0'));
+				if ( ! $iimage ) {
+					self::errlog('rejected i-image media ID');
+					$iimage = '';
+				}
+			}
+		}
 		if ( $iimage !== '' ) {
 			$achk['rxpath'] = '/.*\.(swf|png|jpg|jpeg|gif)$/i';
 			$ut = self::check_url($iimage, $achk);
