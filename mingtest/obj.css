@@ -9,7 +9,7 @@
 
 .bodytxt {
     font-family: Helvetica,Arial,sans-serif;
-    font-size: 18px;
+    font-size: 12pt;
 	color: #FAFF94;
 	text-align: center;
     display: block;
@@ -17,7 +17,7 @@
 
 .headtxt {
     font-family: Helvetica,Arial,sans-serif;
-    font-size: 24px;
+    font-size: 18pt;
 	color: #DF1D00;
 	text-align: center;
     font-weight: bold;
@@ -26,7 +26,7 @@
 
 .footer {
     font-family: Bookman,Times,serif;
-    font-size: 14px;
+    font-size: 10pt;
 	color: #DCE42D;
 	text-align: center;
     display: block;

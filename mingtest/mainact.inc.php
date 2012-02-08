@@ -120,10 +120,13 @@ var audb = "false" == "$audb" ? false : ("true" == "$audb" ? true:null);
 // lose the temp func:
 tf = null;
 // temp literal: vid to show with audio only files
-var v4aud = "$v4aud";
+var v4aud = ""; // "$v4aud";
+// optional initial image url
+var iimage = "$iimage";
 
 var dopause = initpause;
 var doshowbar = initshowbar;
+var loadonload = true; // load media immediately on player load
 // Timed bar hiding; has menu item to toggle
 var doshowbartime = ! initshowbar;
 var doscale = true;
@@ -181,12 +184,7 @@ var audio_bytelength = 0;
 var audcurtime = 0;
 // sound pause boolean
 var dopauseaud = dopause;
-// ARGH!!! - audio divisor - flash 8 docs say Sound object
-// duration and position are in ms, which proves true, but
-// other audio formats are available, and AAC time values
-// are in whole seconds!  This is lame; the plugin should do
-// conversion to a consistent scale, it's ridiculous for AS script
-// to have to know and handle this.
+// Sound object duration and position are in ms
 var adiv = 1000;
 // url RTMP stream protocol?
 var brtmp = false;
@@ -1252,8 +1250,10 @@ function resizeFace() {
 	// other item adjustment
 	wait._x = Stage.width / 2;
 	wait._y = Stage.height / 2;
-	inibut._x = Stage.width / 2;
-	inibut._y = Stage.height / 2;
+	if ( inibut !== null ) {
+		inibut._x = Stage.width / 2;
+		inibut._y = Stage.height / 2;
+	}
 
 	// hide the playback and download text fields if
 	// width is too narrow for nice display
@@ -1275,16 +1275,19 @@ function ctlpanelHit () {
 
 // click callback for initial play button
 function initialbutHit () {
-	togglepause();
-
-	if ( inibut._visible === false ) {
-		return;
+	if ( inibut !== null ) {
+		//inibut.gotoAndStop(1);
+		inibut.stop();
+		inibut.initialbut.enabled = inibut.initialimg.enabled = false;
+		inibut.initialbut._visible = inibut.initialimg._visible = false;
+		inibut.enabled = false;
+		inibut._visible = false;
+		delete inibut.initialimg.imld;
+		inibut.initialimg = null;
+		inibut = null;
 	}
-	inibut.gotoAndStop(1);
-	inibut.initialbut.enabled = inibut.initialimg.enabled = false;
-	inibut.initialbut._visible = inibut.initialimg._visible = false;
-	inibut.enabled = false;
-	inibut._visible = false;
+
+	togglepause();
 }
 
 // click callback for timeline progress bar
@@ -1559,7 +1562,6 @@ function startVideo() {
 // to be called by handler of NetConnection 'connected' event;
 // not directly
 function ConnectedStartVideo() {
-	dopauseaud = dopause;
 	audcurtime = 0;
 	isrunning = true;
 
@@ -1863,6 +1865,12 @@ if ( (vurl == null || vurl == "") && _level0.FN != undefined ) {
 }
 adddbgtext(" vurl: '" + vurl + "'\n");
 
+// get initial image if url is provided
+if ( (iimage == null || iimage == "") && _level0.II != undefined ) {
+	iimage = urlesc(_level0.II);
+	adddbgtext(" II: '" + _level0.II + "'\n");
+}
+
 // Misc. Gnash hacks
 if ( flvers.indexOf("10,1,999,0") >= 0 ) {
 	adddbgtext("Gnash bug hacks . . .\n");
@@ -1892,10 +1900,11 @@ if ( v_id == null && _level0.IDV != undefined && _level0.IDV != '' ) {
 }
 
 // boolean rtmp: by protocol
-if ( (brtmp = check_rtmp(vurl)) == false ) {
+// update: overload v_id: playpath for rtmp, or vid to accompany audio
+//if ( (brtmp = check_rtmp(vurl)) == false ) {
 	// not rtmp? don't want v_id
-	v_id = null;
-}
+	//v_id = null;
+//}
 adddbgtext(" v_id: '" + v_id + "'\n");
 
 // is stream known to be audio only?
@@ -1909,6 +1918,11 @@ if ( audb == null || audb == false ) {
 	audb = check4aud(vurl, false);
 }
 adddbgtext(" audb: '" + audb + "'\n");
+// if audio, use v_id for accompanying video
+if ( audb ) {
+	v4aud = urlesc(v_id);
+	adddbgtext(" v4aud: '" + v4aud + "'\n");
+}
 
 // initial size interface items by stage size
 resizeFace();
@@ -1996,8 +2010,8 @@ if ( _level0.PA != undefined && _level0.PA != '' ) {
 
 adddbgtext("Flash v. " + flvers + "\n");
 
-var iimgurl = 'initimg3.jpeg';
-//var iimgurl = 'http://lucy.example.org/~evh/mingtest/initimg.jpeg';
+// set up initial button, and image if url
+// TODO: make image proportional vs. fitted an option
 var iiproportion = true;
 if ( brtmp || initpause ) {
 	inibut.initialbut.useHandCursor = true;
@@ -2006,7 +2020,10 @@ if ( brtmp || initpause ) {
 	inibut.initialbut._visible = inibut.initialbut.enabled = true;
 	inibut.initialimg._visible = inibut.initialimg.enabled = false;
 	inibut._visible = inibut.enabled = true;
-	if ( iimgurl ) {
+	if ( iimage ) {
+		// initial image to display implies no load until start button
+		initpause = dopauseaud = dopause = false;
+		loadonload = false;
 		t = {
 			onLoadInit: function (m) {
 				var ia = m._width / m._height;
@@ -2037,22 +2054,26 @@ if ( brtmp || initpause ) {
 		};
 		inibut.initialimg.imld = new MovieClipLoader();
 		inibut.initialimg.imld.addListener(t);
-		inibut.initialimg.imld.loadClip(iimgurl, inibut.initialimg);
+		inibut.initialimg.imld.loadClip(iimage, inibut.initialimg);
 	}
 } else {
 	inibut.initialbut.enabled = inibut.initialimg.enabled = false;
 	inibut.initialbut._visible = inibut.initialimg._visible = false;
 	inibut.enabled = false;
 	inibut._visible = false;
+	inibut.initialimg = null;
+	inibut = null;
 }
 
 // start the movie, but . . .
 // initial pause is handled elsewhere except for rtmp which does not
 // handle pause well, so simulate initial pause here if requested
-if ( ! (dopause && brtmp) ) {
+dopauseaud = dopause;
+if ( ! (dopause && brtmp) && loadonload ) {
 	startVideo();
 } else {
 	stopVideo();
+	audcurtime = 0;
 }
 
 OMM;

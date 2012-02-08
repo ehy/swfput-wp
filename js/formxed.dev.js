@@ -29,6 +29,7 @@ SWFPut_putswf_video_xed.prototype = {
 	defs : {
 		url: "",
 		cssurl: "",
+		iimage: "",
 		width: "240",
 		height: "180",
 		audio: "false",       
@@ -150,6 +151,7 @@ SWFPut_putswf_video_xed.prototype = {
 			// varied complex strings; not sanitized here
 			case 'url':
 			case 'cssurl':
+			case 'iimage':
 			case 'mtype':
 			case 'playpath':
 			case 'classid':

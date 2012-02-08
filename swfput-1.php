@@ -506,8 +506,10 @@ class SWF_put_evh {
 		$id = 'SWFPut_putswf_video';
 		$tl = __('SWFPut Flash Video Shortcode');
 		$fn = 'put_xed_form';
-		add_meta_box($id, $tl, array($cl, $fn), 'post', 'normal');
-		add_meta_box($id, $tl, array($cl, $fn), 'page', 'normal');
+		if ( current_user_can('edit_posts') )
+			add_meta_box($id, $tl, array($cl, $fn), 'post', 'normal');
+		if ( current_user_can('edit_pages') )
+			add_meta_box($id, $tl, array($cl, $fn), 'page', 'normal');
 	}
 
 	// register shortcode editor forms javascript
@@ -915,21 +917,16 @@ class SWF_put_evh {
 	// the WP post editor: following example at:
 	// http://bluedogwebservices.com/wordpress-25-shortcodes/
 	public static function put_xed_form() {
-		// cap check: not sure if this is necessary here,
-		// hope it doesn't cause failures for legit users
-		if ( ! current_user_can('edit_posts') ) {
-			return;
-		}
-		
+		// cap check is done at registration of this callback
 		$pr = self::swfput_params;
 		$pr = new $pr();
 		extract($pr->getparams());
 
-		$sc = self::shortcode;
+		$sc = 'putswf_video';
 		// file select by ext pattern
 		$mpat = self::get_mfilter_pat();
 		// files array from uploads dirs (empty if none)
-		$rhu = self::r_find_uploads($mpat, true);
+		$rhu = self::r_find_uploads($mpat['m'], true);
 		$af = &$rhu['rf'];
 		$au = &$rhu['wu'];
 		$aa = &$rhu['at'];
@@ -961,16 +958,34 @@ class SWF_put_evh {
 		$jfuf = "from_xed(this.form,'{$id}','caption','{$sc}')";
 		// js replace last found shortcode in editor
 		$jfuc = "repl_xed(this.form,'{$id}','caption','{$sc}')";
-		// js copy upload select option to url textfield
-		$jfus = "form_cpval(this.form,'{$id}','files','url')";
-		// js copy attachment select option to url textfield
-		$jfua = "form_cpval(this.form,'{$id}','atch','url')";
+		// js to copy from select/dropdown to text input
+		$jfsl = "form_cpval(this.form,'%s','%s','%s')";
 		// input text widths, wide, narrow
 		$iw = 95; $in = 16;
 		
 		// begin form
 		?>
 		<table class="form-table">
+		<!-- form buttons, css on posts page may place these at top -->
+			<tr valign="middle">
+				<p  class="submit">
+				<?php $l = self::ht(__('Reset default values'));
+					printf($bjfmt, $job, $jfur, $l); ?>
+				<?php $l = self::ht(__('Fill form from editor'));
+					printf($bjfmt, $job, $jfuf, $l); ?>
+				<?php $l = self::ht(__('Replace current in editor'));
+					printf($bjfmt, $job, $jfuc, $l); ?>
+				<?php $l = self::ht(__('Place new in editor'));
+					printf($bjfmt, $job, $jfu, $l); ?>
+				</p>
+			</tr>
+		</table>
+		<div class="postbox" id="<?php
+			echo $id . '_L2_1'; ?>">
+		<div title="Click to toggle" class="handlediv">
+		<br/></div><h3 class="hndle"><span><?php
+			echo self::ht(__('Media')); ?></span></h3>
+		<div class="inside"><table class="form-table">
 			<tr valign="top">
 				<?php $k = 'caption';
 					$l = self::ht(__('Caption:'));
@@ -989,16 +1004,20 @@ class SWF_put_evh {
 			</tr>
 			<?php
 			// if there are upload files, print <select >
+			$kl = $k;
 			if ( count($af) > 0 ) {
 				$k = 'files';
+				$jfcp = sprintf($jfsl, $id, $k, $kl);
 				$l = self::ht(__('Url from uploads directory:'));
 				printf($thfmt . '<td>', $id, $k, $l);
 				// <select>
-				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfus);
+				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfcp);
 				// <options>
 				printf($sofmt, '', self::ht(__('none')));
 				foreach ( $af as $fv ) {
 					$ts = $fv[0];
+					if ( ! preg_match($mpat['av'], $ts) )
+						continue;
 					$tp = rtrim($fv[1], '/');
 					$tu = $ub . ($tp === '' ? '' : $tp . '/');
 					$tu .= $ts;
@@ -1011,14 +1030,17 @@ class SWF_put_evh {
 			} // end if there are upload files
 			if ( ! empty($aa) ) {
 				$k = 'atch';
+				$jfcp = sprintf($jfsl, $id, $k, $kl);
 				$l = self::ht(__('Select ID from media library:'));
 				printf($thfmt . '<td>', $id, $k, $l);
 				// <select>
-				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfua);
+				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfcp);
 				// <options>
 				printf($sofmt, '', self::ht(__('none')));
 				foreach ( $aa as $fn => $fi ) {
 					$m = basename($fn);
+					if ( ! preg_match($mpat['av'], $m) )
+						continue;
 					$ts = $m . " (" . $fi . ")";
 					printf($sofmt, rawurlencode($fi), self::ht($ts));
 				}
@@ -1034,6 +1056,76 @@ class SWF_put_evh {
 					<?php printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
 				</td>
 			</tr>
+			<tr valign="top">
+				<?php $k = 'iimage';
+					$l = self::ht(__('Url of initial image file (optional):'));
+					printf($thfmt, $id, $k, $l); ?>
+				<td>
+					<?php printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
+				</td>
+			</tr>
+			<?php
+			// if there are upload files, print <select >
+			$kl = $k;
+			if ( count($af) > 0 ) {
+				$k = 'ifiles';
+				$jfcp = sprintf($jfsl, $id, $k, $kl);
+				$l = self::ht(__('Load image from uploads directory:'));
+				printf($thfmt . '<td>', $id, $k, $l);
+				// <select>
+				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfcp);
+				// <options>
+				printf($sofmt, '', self::ht(__('none')));
+				foreach ( $af as $fv ) {
+					$ts = $fv[0];
+					if ( ! preg_match($mpat['i'], $ts) )
+						continue;
+					$tp = rtrim($fv[1], '/');
+					$tu = $ub . ($tp === '' ? '' : $tp . '/');
+					$tu .= $ts;
+					if ( $tp !== '' )
+						$ts .= " (" . $tp . ")";
+					printf($sofmt, rawurlencode($tu), self::ht($ts));
+				}
+				// end select
+				echo "</select></td></tr>\n";
+			} // end if there are upload files
+			if ( ! empty($aa) ) {
+				$k = 'iatch';
+				$jfcp = sprintf($jfsl, $id, $k, $kl);
+				$l = self::ht(__('Load image ID from media library:'));
+				printf($thfmt . '<td>', $id, $k, $l);
+				// <select>
+				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfcp);
+				// <options>
+				printf($sofmt, '', self::ht(__('none')));
+				foreach ( $aa as $fn => $fi ) {
+					$m = basename($fn);
+					if ( ! preg_match($mpat['i'], $m) )
+						continue;
+					$ts = $m . " (" . $fi . ")";
+					printf($sofmt, rawurlencode($fi), self::ht($ts));
+				}
+				// end select
+				echo "</select></td></tr>\n";
+			} // end if there are upload files
+			?>
+			<tr valign="top">
+				<?php $k = 'audio';
+					$l = self::ht(__('Medium is audio:'));
+					printf($thfmt, $id, $k, $l); ?>
+				<td>
+					<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
+						printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
+				</td>
+			</tr>
+		</table></div></div>
+		<div class="postbox" id="<?php
+			echo $id . '_L2_2'; ?>">
+		<div title="Click to toggle" class="handlediv">
+		<br/></div><h3 class="hndle"><span><?php
+			echo self::ht(__('Dimensions, aspect')); ?></span></h3>
+		<div class="inside"><table class="form-table">
 			<tr valign="top">
 				<?php $k = 'width';
 					$l = self::ht(__('Width:'));
@@ -1051,17 +1143,8 @@ class SWF_put_evh {
 				</td>
 			</tr>
 			<tr valign="top">
-				<?php $k = 'audio';
-					$l = self::ht(__('Audio (e.g. *.mp3):'));
-					printf($thfmt, $id, $k, $l); ?>
-				<td>
-					<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
-						printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
-				</td>
-			</tr>
-			<tr valign="top">
 				<?php $k = 'aspectautoadj';
-					$l = self::ht(__('Auto Aspect (e.g. 360x240 to 4:3):'));
+					$l = self::ht(__('Auto aspect (e.g. 360x240 to 4:3):'));
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
 					<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
@@ -1070,7 +1153,7 @@ class SWF_put_evh {
 			</tr>
 			<tr valign="top">
 				<?php $k = 'displayaspect';
-					$l = self::ht(__('Display Aspect (e.g. 4:3, precludes Auto):'));
+					$l = self::ht(__('Display aspect (e.g. 4:3, precludes Auto):'));
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
 					<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
@@ -1078,15 +1161,22 @@ class SWF_put_evh {
 			</tr>
 			<tr valign="top">
 				<?php $k = 'pixelaspect';
-					$l = self::ht(__('Pixel Aspect (e.g. 8:9, precluded by Display):'));
+					$l = self::ht(__('Pixel aspect (e.g. 8:9, precluded by Display):'));
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
 					<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
 				</td>
 			</tr>
+		</table></div></div>
+		<div class="postbox" id="<?php
+			echo $id . '_L2_3'; ?>">
+		<div title="Click to toggle" class="handlediv">
+		<br/></div><h3 class="hndle"><span><?php
+			echo self::ht(__('Behavior')); ?></span></h3>
+		<div class="inside"><table class="form-table">
 			<tr valign="top">
 				<?php $k = 'volume';
-					$l = self::ht(__('Initial Volume (0-100):'));
+					$l = self::ht(__('Initial volume (0-100):'));
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
 					<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
@@ -1139,26 +1229,13 @@ class SWF_put_evh {
 			</tr>
 			<tr valign="top">
 				<?php $k = 'barheight';
-					$l = self::ht(__('Control Bar Height (20-50):'));
+					$l = self::ht(__('Control bar Height (20-50):'));
 					printf($thfmt, $id, $k, $l); ?>
 				<td>
 					<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
 				</td>
 			</tr>
-		<!-- form buttons, css on posts page may place these at top -->
-			<tr valign="middle">
-				<p  class="submit">
-				<?php $l = self::ht(__('Reset default values'));
-					printf($bjfmt, $job, $jfur, $l); ?>
-				<?php $l = self::ht(__('Fill form from editor'));
-					printf($bjfmt, $job, $jfuf, $l); ?>
-				<?php $l = self::ht(__('Replace current in editor'));
-					printf($bjfmt, $job, $jfuc, $l); ?>
-				<?php $l = self::ht(__('Place new in editor'));
-					printf($bjfmt, $job, $jfu, $l); ?>
-				</p>
-			</tr>
-		</table>
+		</table></div></div>
 		<?php
 	}
 
@@ -1356,7 +1433,10 @@ class SWF_put_evh {
 	// return preg_match() pattern for media filter by file extension
 	public static function get_mfilter_pat() {
 		// TODO: build from extensions option
-		return '/.*\.(flv|f4v|m4v|mp4|mp3)$/';
+		return array('av' =>'/.*\.(flv|f4v|m4v|mp4|mp3)$/i',
+			'i' => '/.*\.(swf|png|jpg|jpeg|gif)$/i',
+			'm' => '/.*\.(flv|f4v|m4v|mp4|mp3|swf|png|jpg|jpeg|gif)$/i'
+			);
 	}
 
 	// escape symbol for use in jQuery selector or similar; see
@@ -1430,10 +1510,13 @@ class SWF_put_evh {
 	// current drive; else forget it.
 	public static function r_find_uploads($pat, $follow = false) {
 		global $wpdb;
-		$qsf = "SELECT * FROM $wpdb->posts WHERE post_type = '%s'%s";
-		$qsfa = sprintf(' LIMIT %u, %u', 0, 1024);
-		$qs = sprintf($qsf, 'attachment', $qsfa);
-		$rat = $wpdb->get_results($wpdb->prepare($qs));
+		$minq = 0; $maxq = 1024; $tq = 'attachment';
+
+		$qs = "SELECT * FROM $wpdb->posts WHERE post_type = '%s'";
+		$qs .= ' LIMIT %d, %d';
+		$rat =
+			$wpdb->get_results($wpdb->prepare($qs, $tq, $minq, $maxq));
+
 		$aa = array();
 		
 		foreach ( $rat as $att ) {
@@ -1730,11 +1813,20 @@ class SWF_put_evh {
 			$ut = '';
 		}
 		$cssurl = ($esc == true) ? $fesc($ut) : $ut;
+		if ( $iimage !== '' ) {
+			$achk['rxpath'] = '/.*\.(swf|png|jpg|jpeg|gif)$/i';
+			$ut = self::check_url($iimage, $achk);
+			if ( ! $ut ) {
+				self::errlog('rejected i-image URL: "' . $iimage . '"');
+				$ut = '';
+			}
+			$iimage = ($esc == true) ? $fesc($ut) : $ut;
+		}
 		$playpath = ($esc == true) ? $fesc($playpath) : $playpath;
 		
 		// query vars
-		$qv = sprintf('ST=%s&WI=%u&HI=%u&IDV=%s&FN=%s',
-			$cssurl, $w, $h, $playpath, $url);
+		$qv = sprintf('ST=%s&WI=%u&HI=%u&IDV=%s&FN=%s&II=%s',
+			$cssurl, $w, $h, $playpath, $url, $iimage);
 		$qv .= sprintf('&PL=%s&HB=%s&VL=%u&LP=%s&DB=%s',
 			$play, $hidebar, $volume, $loop, $disablebar);
 		$qv .= sprintf('&AU=%s&AA=%s&DA=%s&PA=%s',
@@ -1811,6 +1903,7 @@ class SWF_params_evh {
 		'defaulturl' => 'default', // subs. distributed default file
 		'defrtmpurl' => 'rtmp://cp82347.live.edgefcs.net/live', //akamai
 		'cssurl' => '',
+		'iimage' => '',
 		'width' => '240',
 		'height' => '180',
 		'audio' => 'false',        // source is audio; (mp3 is detected)
@@ -1994,6 +2087,7 @@ class SWF_params_evh {
 			case 'caption':
 			case 'url':
 			case 'cssurl':
+			case 'iimage':
 			case 'mtype':
 			case 'playpath':
 			case 'classid':
@@ -2176,7 +2270,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $ht($instance['title']);
 		$id = $this->get_field_id('title');
 		$nm = $this->get_field_name('title');
-		$tl = $ht(__('Widget Title:'));
+		$tl = $ht(__('Widget title:'));
 		?>
 
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
@@ -2273,12 +2367,35 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $instance['playpath'];
 		$id = $this->get_field_id('playpath');
 		$nm = $this->get_field_name('playpath');
-		$tl = $ht(__('Playpath (rtmp):'));
+		$tl = $ht(__('Playpath (rtmp) or co-video (mp3):'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
 			name="<?php echo $nm; ?>"
 			type="text" value="<?php echo $val; ?>" /></p>
+
+		<?php
+		$val = $instance['iimage'];
+		$id = $this->get_field_id('iimage');
+		$nm = $this->get_field_name('iimage');
+		$tl = $ht(__('Url of initial image file (optional):'));
+		?>
+		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
+		<input class="widefat" id="<?php echo $id; ?>"
+			name="<?php echo $nm; ?>"
+			type="text" value="<?php echo $val; ?>" /></p>
+
+		<?php
+		$val = $instance['audio'];
+		$id = $this->get_field_id('audio');
+		$nm = $this->get_field_name('audio');
+		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
+		$tl = $ht(__('Medium is audio (e.g. *.mp3):'));
+		?>
+		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
+		<input class="widefat" id="<?php echo $id; ?>"
+			name="<?php echo $nm; ?>" style="width:16%;" type="checkbox"
+			value="<?php echo $val; ?>"<?php echo $ck; ?> /></p>
 
 		<?php
 		$val = $ht($instance['width']);
@@ -2303,23 +2420,11 @@ class SWF_put_widget_evh extends WP_Widget {
 			type="text" value="<?php echo $val; ?>" /></p>
 
 		<?php
-		$val = $instance['audio'];
-		$id = $this->get_field_id('audio');
-		$nm = $this->get_field_name('audio');
-		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
-		$tl = $ht(__('Audio (e.g. *.mp3):'));
-		?>
-		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
-		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>" style="width:16%;" type="checkbox"
-			value="<?php echo $val; ?>"<?php echo $ck; ?> /></p>
-
-		<?php
 		$val = $instance['aspectautoadj'];
 		$id = $this->get_field_id('aspectautoadj');
 		$nm = $this->get_field_name('aspectautoadj');
 		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
-		$tl = $ht(__('Auto Aspect (e.g. 360x240 to 4:3):'));
+		$tl = $ht(__('Auto aspect (e.g. 360x240 to 4:3):'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -2330,7 +2435,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $instance['displayaspect'];
 		$id = $this->get_field_id('displayaspect');
 		$nm = $this->get_field_name('displayaspect');
-		$tl = $ht(__('Display Aspect (e.g. 4:3, precludes Auto):'));
+		$tl = $ht(__('Display aspect (e.g. 4:3, precludes Auto):'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -2341,7 +2446,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $instance['pixelaspect'];
 		$id = $this->get_field_id('pixelaspect');
 		$nm = $this->get_field_name('pixelaspect');
-		$tl = $ht(__('Pixel Aspect (e.g. 8:9, precluded by Display):'));
+		$tl = $ht(__('Pixel aspect (e.g. 8:9, precluded by Display):'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -2352,7 +2457,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $ht($instance['volume']);
 		$id = $this->get_field_id('volume');
 		$nm = $this->get_field_name('volume');
-		$tl = $ht(__('Initial Volume (0-100):'));
+		$tl = $ht(__('Initial volume (0-100):'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -2423,7 +2528,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $ht($instance['barheight']);
 		$id = $this->get_field_id('barheight');
 		$nm = $this->get_field_name('barheight');
-		$tl = $ht(__('Control Bar Height (20-50):'));
+		$tl = $ht(__('Control bar Height (20-50):'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"

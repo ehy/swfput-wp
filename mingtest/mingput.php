@@ -557,6 +557,24 @@ foreach ( $av as $k => $v ) {
 				}
 			}
 			break;
+		case 'II': // player css
+			if ( $v ) {
+				$a = array(
+					'requirehost' => false, // can use orig host
+					'requirepath' => true,
+					'rejuser' => true,
+					'rejquery' => true,
+					'rejfrag' => true,
+					'rxpath' => '/.*\.(swf|png|jpg|jpeg|gif)$/i',
+					'rxproto' => '/^https?$/'
+					);
+				$iimage = check_url_arg($v, $a);
+				if ( $iimage === false ) {
+					error_log("unacceptable i-image URL: '" . $v . "'");
+					$iimage = '';
+				}
+			}
+			break;
 		case 'PL':
 			if ( $v == 'true' ) {
 				$initpause = 'false';
@@ -646,6 +664,8 @@ if ( !isset($v_id) )
 // if null, set in actionscript for extension .mp3
 if ( !isset($audb) )
 	$audb = null;
+if ( !isset($iimage) )
+	$iimage = '';
 // use dummy values to force progress bar action on size-less streams?
 // string representation of boolean
 $stream_dummies = "false";
