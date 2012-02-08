@@ -392,7 +392,7 @@ SWFPut_putswf_video_xed.prototype = {
 				if ( this.type == "checkbox" ) {
 					this.checked = v == 'true' ? 'checked' : '';
 				} else if ( this.type == "text" ) {
-					if ( v != '' ) {
+					if ( true || v != '' ) {
 						this.value = v;
 					}
 				}
