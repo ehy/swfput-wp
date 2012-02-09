@@ -1387,9 +1387,9 @@ class SWF_put_evh {
 	
 	// help for plugin file path/name; __FILE__ alone
 	// is not good enough -- see comment in body
-	public static function mk_pluginfile() {
+	public static function mk_plugindir() {
 		if ( self::$pluginfile !== null ) {
-			return self::$pluginfile;
+			return dirname(self::$pluginfile);
 		}
 	
 		$pf = __FILE__;
@@ -1401,15 +1401,50 @@ class SWF_put_evh {
 		if ( defined('WP_PLUGIN_DIR') ) {
 			$ad = explode('/', rtrim(plugin_dir_path($pf), '/'));
 			$pd = $ad[count($ad) - 1];
-			$pf = WP_PLUGIN_DIR . '/' . $pd . '/' . basename($pf);
+			$pf = WP_PLUGIN_DIR . '/' . $pd;
 		} else {
 			// this is similar to common methods w/  __FILE__; but
 			// can cause regi* failures due to symlinks in path
-			$pf = rtrim(plugin_dir_path($pf), '/').'/' . basename($pf);
+			$pf = rtrim(plugin_dir_path($pf), '/');
 		}
 		
 		// store and return corrected file path
-		return self::$pluginfile = $pf;
+		return $pf;
+	}
+	
+	// help for plugin file path/name; __FILE__ alone
+	// is not good enough -- see comment in body
+	public static function mk_pluginfile() {
+		if ( self::$pluginfile !== null ) {
+			return self::$pluginfile;
+		}
+	
+		$pf = self::mk_plugindir();
+		$ff = basename(__FILE__);
+		
+		// store and return corrected file path
+		return self::$pluginfile = $pf . '/' . $ff;
+	}
+	
+	// help for swf player file path/name; it is
+	// contained in the plugin directory
+	public static function mk_playerdir() {
+		$pd = self::mk_plugindir();
+		return $pd . '/' . self::$swfputdir;
+	}
+
+	// help for swf player file path/name; it is
+	// contained in the plugin directory
+	public static function mk_playerfile() {
+		$pd = self::mk_playerdir();
+		return $pd . '/' . self::$swfputphpname;
+	}
+
+	// help for swf player file path/name; it is
+	// contained in the plugin directory
+	public static function mk_playerbinfile() {
+		$pd = self::mk_playerdir();
+		return $pd . '/' . self::$swfputbinname;
 	}
 
 	// can php+ming be used?
@@ -1706,31 +1741,62 @@ class SWF_put_evh {
 
 	// helper for selecting swf bin near desired bar height
 	public function get_swf_binurl($bh = 48) {
-		$f = 'mingput.swf';
-		$t = dirname($this->swfputbin);
-		$bins = array(
-			24 => 'mingput24.swf',
-			28 => 'mingput28.swf',
-			32 => 'mingput32.swf',
-			36 => 'mingput36.swf',
-			40 => 'mingput40.swf',
-			44 => 'mingput44.swf'
-		);
-		$bh = abs((int)$bh);
-		if ( (int)$bh <= 24 ) {
-			$f = $bins[24];
-		} else if ( (int)$bh <= 28 ) {
-			$f = $bins[28];
-		} else if ( (int)$bh <= 32 ) {
-			$f = $bins[32];
-		} else if ( (int)$bh <= 36 ) {
-			$f = $bins[36];
-		} else if ( (int)$bh <= 40 ) {
-			$f = $bins[40];
-		} else {
-			$f = $bins[44];
+		$d = self::mk_playerdir();
+		$f = self::$swfputbinname;
+		$a = explode('.', $f);
+		$p = sprintf('/^%s([0-9]+)\.%s$/i', $a[0], $a[1]);
+		$vmin = 65535; $vmax = 0;
+
+		$a = array();
+		foreach ( scandir($d) as $e ) {
+			$t = $d . '/' . $e;
+			if ( ! is_file($t) )
+				continue;
+			if ( ! is_readable($t) )
+				continue;
+			if ( ! preg_match($p, $e, $m) )
+				continue;
+			$a[$m[1]] = $e;
+			$n = (int)$m[1];
+			$vmin = min($vmin, $n);
+			$vmax = max($vmax, $n);
 		}
 
+		$bh = (int)$bh;
+		$n = count($a);
+		if ( $n === 0 ) {
+			$f = self::$swfputbinname;
+		} else if ( $n === 1 ) {
+			// $vmax will index the only entry in $a
+			$f = $a['' . $vmax];
+		} else if ( $bh >= $vmax ) {
+			$f = $a['' . $vmax];
+		} else if ( $bh <= $vmin ) {
+			$f = $a['' . $vmin];
+		} else {
+			$ak = array_keys($a);
+			sort($ak, SORT_NUMERIC);
+			$lk = (int)$ak[0];
+			for ( $n = 1; $n < count($ak); $n++ ) {
+				$k = (int)$ak[$n];
+				// $bh must be found < $k within this loop
+				// due to above test 'if ( $bh >== $vmax )'
+				if ( $bh > $k ) {
+					$lk = (int)$ak[$n];
+					continue;
+				}
+				if ( ($bh - $lk) < ($k - $bh) ) {
+					$n--;
+				}
+				break;
+			}
+			if ( $n >= count($ak) ) {
+				die('broken logic in ' . __FUNCTION__);
+			}
+			$f = $a[$ak[$n]];
+		}
+
+		$t = dirname($this->swfputbin);
 		return $t . '/' . $f;
 	}
 
@@ -1758,6 +1824,14 @@ class SWF_put_evh {
 	public function get_swf_tags($uswf, $par, $esc = true) {
 		extract($par->getparams());
 		$ming = self::should_use_ming();
+
+		if ( ! $uswf ) {
+			if ( $ming ) {
+				$uswf = $this->get_swf_url('post', $width, $height);
+			} else {
+				$uswf = $this->get_swf_binurl($barheight);
+			}
+		}
 
 		$fesc = 'rawurlencode';
 		if ( isset($esc_t) && $esc_t === 'plus' ) {
