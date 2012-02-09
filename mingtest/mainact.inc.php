@@ -48,6 +48,9 @@ $mainact = <<<OMM
 Stage.scaleMode = "noScale";
 Stage.align = "TL";
 _focusrect = false; // seems to be default, but just the same . . .
+var stream = null;
+var connection = null;
+var sound = null;
 var flvers = System.capabilities.version;
 var curdate = new Date();
 var obj_css = new TextField.StyleSheet();
@@ -123,6 +126,8 @@ tf = null;
 var v4aud = ""; // "$v4aud";
 // optional initial image url
 var iimage = "$iimage";
+// optional initial image scale proportional vs. WxH full fit
+var iiproportion = true;
 
 var dopause = initpause;
 var doshowbar = initshowbar;
@@ -1178,15 +1183,31 @@ function startWait() {
 // can be simplified to use relative values from Stage difference,
 // init must handle any start size
 function resizeFace() {
-	// repeat here setup done in PHP code,
-	// but using Stage dimensions
+	// informational text adjustment
 	itxt._width = Stage.width / 2.0;
 	itxt._height = Stage.height * 3.0 / 4.0;
 	itxt._x = Stage.width / 4.0;
 	itxt._y = Stage.height / 8.0;
 
-	bbar._x = 0 + barpadding;
-	bbar.ctlpanel._x = 0;
+	// wait movie adjustment
+	wait._x = Stage.width / 2;
+	wait._y = Stage.height / 2;
+
+	// initial button/image adjustment (if not started yet)
+	if ( inibut !== null ) {
+		inibut.resize();
+	}
+
+	// control bar adjustment
+	bbar.resize();
+
+	// some gadgets are relative to bar yhome
+	volgadget._y = bbar.yhome - volbarwid * 2;
+}
+
+var bbar_resize = function () {
+	this._x = 0 + barpadding;
+	this.ctlpanel._x = 0 + barpadding;
 
 	barlength = Stage.width - barsubtr;
 	butwidth =  barheight * butwidthfactor;
@@ -1198,74 +1219,106 @@ function resizeFace() {
 	// control bar y placement accounts for hiding offscreen --
 	// 'yhome' is the base y position
 	var y = Stage.height - barheight - barpadding;
-	var t = y - bbar.yhome;
-	bbar.yhome = y;
-	bbar.yshowpos += t;
-	bbar._y += t;
-	// some gadgets are relative to bar yhome
-	volgadget._y = bbar.yhome - volbarwid * 2;
+	var t = y - this.yhome;
+	this.yhome = y;
+	this.yshowpos += t;
+	this._y += t;
 
 	// order of width changes is important; textfield
 	// width is not based on Stage width ( but _x is )
 	// these lines are meant to force autosizing
-	t = bbar.tmtxt.text;
-	bbar.tmtxt.autoSize = true;
-	bbar.tmtxt.text = "00:00:00/00:00:00";
-	var w = bbar.tmtxt._width;
-	bbar.tmtxt.autoSize = false;
-	bbar.tmtxt.text = t;
-	bbar.tmtxt._width = w;
-	bbar.dltxt.autoSize = false;
-	bbar.dltxt._width = w;
-	bbar.tmtxt._height = bbar.dltxt._height;
+	t = this.tmtxt.text;
+	this.tmtxt.autoSize = true;
+	this.tmtxt.text = "00:00:00/00:00:00";
+	var w = this.tmtxt._width;
+	this.tmtxt.autoSize = false;
+	this.tmtxt.text = t;
+	this.tmtxt._width = w;
+	this.dltxt.autoSize = false;
+	this.dltxt._width = w;
+	this.tmtxt._height = this.dltxt._height;
 
 	// order of width changes is important; if Stage is now wider,
 	// then bar should be widened before its children, and vice versa
-	if ( barlength > bbar._width ) {
-		bbar._width = barlength;
-		bbar.ctlpanel._width = barlength;
+	if ( barlength > this._width ) {
+		this._width = barlength;
+		this.ctlpanel._width = barlength;
 	}
 
 	// progress bar adjustment here,
 	// between possible bbar width adjustments
-	bbar.progpb._width = progressbarlength;
-	bbar.progpl._width = progressbarlength;
-	bbar.progdlb._width = progressbarlength;
-	bbar.progdl._width = progressbarlength;
-	bbar.progpb._x = progressbarxoffs;
-	bbar.progpl._x = progressbarxoffs;
-	bbar.progdlb._x = progressbarxoffs;
-	bbar.progdl._x = progressbarxoffs;
+	this.progpb._width = progressbarlength;
+	this.progpl._width = progressbarlength;
+	this.progdlb._width = progressbarlength;
+	this.progdl._width = progressbarlength;
+	this.progpb._x = progressbarxoffs;
+	this.progpl._x = progressbarxoffs;
+	this.progdlb._x = progressbarxoffs;
+	this.progdl._x = progressbarxoffs;
 
 	// text _x set here, between possible bbar width adjustments
-	bbar.tmtxt._x = barlength - (w + timetxt_rb);
-	bbar.dltxt._x = bbar.tmtxt._x;
+	this.tmtxt._x = barlength - (w + timetxt_rb);
+	this.dltxt._x = this.tmtxt._x;
 
-	// see comment above at "if ( barlength > bbar._width )"
-	if ( barlength < bbar._width ) {
-		bbar.ctlpanel._width = barlength;
-		bbar._width = barlength;
-	}
-
-	// other item adjustment
-	wait._x = Stage.width / 2;
-	wait._y = Stage.height / 2;
-	if ( inibut !== null ) {
-		inibut._x = Stage.width / 2;
-		inibut._y = Stage.height / 2;
+	// see comment above at "if ( barlength > this._width )"
+	if ( barlength < this._width ) {
+		this.ctlpanel._width = barlength;
+		this._width = barlength;
 	}
 
 	// hide the playback and download text fields if
 	// width is too narrow for nice display
 	// (rtmbut is set in php to rightmost button)
-	if ( (rtmbut._x + rtmbut._width + timetxt_rb) > bbar.tmtxt._x ) {
-		bbar.tmtxt._visible = false;
-		bbar.dltxt._visible = false;
+	if ( (rtmbut._x + rtmbut._width + timetxt_rb) > this.tmtxt._x ) {
+		this.tmtxt._visible = false;
+		this.dltxt._visible = false;
 	} else {
-		bbar.tmtxt._visible = doshowtxt;
-		bbar.dltxt._visible = doshowtxt;
+		this.tmtxt._visible = doshowtxt;
+		this.dltxt._visible = doshowtxt;
 	}
-}
+
+	// BUG: only with audio (mp3), and initial image and so media
+	// not loading until start button -- when immediately switched
+	// to full screen after start, the backing 'ctlpanel' does not
+	// resize properly (width too small). But, all other objects
+	// resized here do resize properly!  I can see nothing in the
+	// code that could interfere with ctlpanel so I believe it's
+	// a flash plugin bug.
+	// Re-diddling, as below, has been working.
+	this.ctlpanel._x = 0 + barpadding;
+	this.ctlpanel._width = barlength;
+};
+
+var inibut_resize = function () {
+	this._x = Stage.width / 2;
+	this._y = Stage.height / 2;
+
+	var m = this.initialimg;
+	if ( m && m.ok ) {
+		var xs = m._xscale / 100;
+		var ys = m._yscale / 100;
+		var ia = (m._width * xs) / (m._height * ys);
+		var sa = Stage.width / Stage.height;
+		
+		m._x = -this._x;
+		m._y = -this._y;
+
+		if ( ! _root.iiproportion ) {
+			m._xscale = Stage.width / m._width * 100.0 * xs;
+			m._yscale = Stage.height / m._height * 100.0 * ys;
+		} else if ( sa > ia ) {
+			var sc = Stage.height / m._height * 100.0 * xs;
+			m._xscale = sc;
+			m._yscale = sc;
+			m._x += (Stage.width - m._width) / 2;
+		} else {
+			var sc = Stage.width / m._width * 100.0 * ys;
+			m._xscale = sc;
+			m._yscale = sc;
+			m._y += (Stage.height - m._height) / 2;
+		}
+	}
+};
 
 // click callback for control bar background
 function ctlpanelHit () {
@@ -1782,6 +1835,7 @@ obj_css.load(obj_css_url);
 video.smoothing = true;
 
 // other setup
+bbar.resize = bbar_resize;
 bbar.yhome = bbar.yshowpos = bbar._y;
 add_filter(bbar.stopbutdisable, new flash.filters.BlurFilter(3, 3, 3));
 bbar.stopbutdisable.useHandCursor = false;
@@ -2006,7 +2060,8 @@ adddbgtext("Flash v. " + flvers + "\n");
 
 // set up initial button, and image if url
 // TODO: make image proportional vs. fitted an option
-var iiproportion = true;
+inibut.initialimg.ok = false;
+inibut.resize = inibut_resize;
 if ( brtmp || initpause ) {
 	inibut.initialbut.useHandCursor = true;
 	inibut._x = Stage.width / 2 - inibut.width / 2;
@@ -2020,30 +2075,12 @@ if ( brtmp || initpause ) {
 		loadonload = false;
 		t = {
 			onLoadInit: function (m) {
-				var ia = m._width / m._height;
-				var sa = Stage.width / Stage.height;
-				
-				m._x = -inibut._x;
-				m._y = -inibut._y;
-
-				if ( ! iiproportion ) {
-					m._xscale = Stage.width / m._width * 100.0;
-					m._yscale = Stage.height / m._height * 100.0;
-				} else if ( sa > ia ) {
-					var sc = Stage.height / m._height * 100.0;
-					var d = Stage.width - m._width * sc / 100.0;
-					m._xscale = sc;
-					m._yscale = sc;
-					m._x += d / 2;
-				} else {
-					var sc = Stage.width / m._width * 100.0;
-					var d = Stage.height - m._height * sc / 100.0;
-					m._xscale = sc;
-					m._yscale = sc;
-					m._y += d / 2;
-				}
-
+				var bv = bbar._visible; // load corrupts bbar drawing
+				bbar._visible = false;
+				m.ok = true;
+				inibut.resize();
 				m._visible = m.enabled = true;
+				bbar._visible = bv;
 			}
 		};
 		inibut.initialimg.imld = new MovieClipLoader();
