@@ -2064,8 +2064,8 @@ inibut.initialimg.ok = false;
 inibut.resize = inibut_resize;
 if ( brtmp || initpause ) {
 	inibut.initialbut.useHandCursor = true;
-	inibut._x = Stage.width / 2 - inibut.width / 2;
-	inibut._y = Stage.height / 2 - inibut.height / 2;
+	inibut._x = Stage.width / 2;
+	inibut._y = Stage.height / 2;
 	inibut.initialbut._visible = inibut.initialbut.enabled = true;
 	inibut.initialimg._visible = inibut.initialimg.enabled = false;
 	inibut._visible = inibut.enabled = true;
