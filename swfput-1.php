@@ -1018,11 +1018,9 @@ class SWF_put_evh {
 				printf($sofmt, '', self::ht(__('none')));
 				foreach ( $af as $d => $e ) {
 					$hit = array();
-					foreach ( $e as $fv ) {
-						if ( preg_match($mpat['av'], $fv) ) {
-							$hit[] = $fv;
-						}
-					}
+					for ( $i = 0; $i < count($e); $i++ )
+						if ( preg_match($mpat['av'], $e[$i]) )
+							$hit[] = &$af[$d][$i];
 					if ( empty($hit) )
 						continue;
 					printf($sgfmt, self::ht($d));
@@ -1086,11 +1084,9 @@ class SWF_put_evh {
 				printf($sofmt, '', self::ht(__('none')));
 				foreach ( $af as $d => $e ) {
 					$hit = array();
-					foreach ( $e as $fv ) {
-						if ( preg_match($mpat['i'], $fv) ) {
-							$hit[] = $fv;
-						}
-					}
+					for ( $i = 0; $i < count($e); $i++ )
+						if ( preg_match($mpat['i'], $e[$i]) )
+							$hit[] = &$af[$d][$i];
 					if ( empty($hit) )
 						continue;
 					printf($sgfmt, self::ht($d));
@@ -1675,6 +1671,10 @@ class SWF_put_evh {
 				if ( ! preg_match($rxpath, $t) ) {
 					return false;
 				}
+			}
+			// no '..' in path!
+			if ( preg_match('/^(.*\/)?\.\.(\/.*)?$/', $t) ) {
+				return false;
 			}
 			$p .= $fesc === '' ? $t : $fesc($t);
 		} else if ( isset($requirepath) && $requirepath ) {
@@ -2438,11 +2438,9 @@ class SWF_put_widget_evh extends WP_Widget {
 			printf($sofmt, '', $ht(__('none')));
 			foreach ( $af as $d => $e ) {
 				$hit = array();
-				foreach ( $e as $fv ) {
-					if ( preg_match($mpat['av'], $fv) ) {
-						$hit[] = $fv;
-					}
-				}
+				for ( $i = 0; $i < count($e); $i++ )
+					if ( preg_match($mpat['av'], $e[$i]) )
+						$hit[] = &$af[$d][$i];
 				if ( empty($hit) )
 					continue;
 				printf($sgfmt, $ht($d));
@@ -2515,11 +2513,9 @@ class SWF_put_widget_evh extends WP_Widget {
 			printf($sofmt, '', $ht(__('none')));
 			foreach ( $af as $d => $e ) {
 				$hit = array();
-				foreach ( $e as $fv ) {
-					if ( preg_match($mpat['i'], $fv) ) {
-						$hit[] = $fv;
-					}
-				}
+				for ( $i = 0; $i < count($e); $i++ )
+					if ( preg_match($mpat['i'], $e[$i]) )
+						$hit[] = &$af[$d][$i];
 				if ( empty($hit) )
 					continue;
 				printf($sgfmt, $ht($d));
