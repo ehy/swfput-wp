@@ -948,6 +948,8 @@ class SWF_put_evh {
 		$bjfmt = '<input type="button" onclick="return %s.%s;" value="%s" />';
 		// form <select > format string
 		$slfmt = '<select name="%sX%sX" id="%s_%s" style="width:%u%%;" onchange="return %s.%s;">' . "\n";
+		// form <select > <optgroup > format string
+		$sgfmt = '<optgroup label="%s">' . "\n";
 		// form <select > <option > format string
 		$sofmt = '<option value="%s">%s</option>' . "\n";
 		// js send form values to editor method
@@ -1014,16 +1016,25 @@ class SWF_put_evh {
 				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfcp);
 				// <options>
 				printf($sofmt, '', self::ht(__('none')));
-				foreach ( $af as $fv ) {
-					$ts = $fv[0];
-					if ( ! preg_match($mpat['av'], $ts) )
+				foreach ( $af as $d => $e ) {
+					$hit = false;
+					foreach ( $e as $fv ) {
+						if ( preg_match($mpat['av'], $fv) ) {
+							$hit = true;
+							break;
+						}
+					}
+					if ( ! $hit )
 						continue;
-					$tp = rtrim($fv[1], '/');
-					$tu = $ub . ($tp === '' ? '' : $tp . '/');
-					$tu .= $ts;
-					if ( $tp !== '' )
-						$ts .= " (" . $tp . ")";
-					printf($sofmt, rawurlencode($tu), self::ht($ts));
+					printf($sgfmt, $d);
+					foreach ( $e as $fv ) {
+						if ( ! preg_match($mpat['av'], $fv) )
+							continue;
+						$tu = rtrim($ub, '/') . '/' . $d . '/' . $fv;
+						$fv = self::ht($fv);
+						printf($sofmt, rawurlencode($tu), $fv);
+					}
+					echo "</optgroup>\n";
 				}
 				// end select
 				echo "</select></td></tr>\n";
@@ -1076,16 +1087,25 @@ class SWF_put_evh {
 				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfcp);
 				// <options>
 				printf($sofmt, '', self::ht(__('none')));
-				foreach ( $af as $fv ) {
-					$ts = $fv[0];
-					if ( ! preg_match($mpat['i'], $ts) )
+				foreach ( $af as $d => $e ) {
+					$hit = false;
+					foreach ( $e as $fv ) {
+						if ( preg_match($mpat['i'], $fv) ) {
+							$hit = true;
+							break;
+						}
+					}
+					if ( ! $hit )
 						continue;
-					$tp = rtrim($fv[1], '/');
-					$tu = $ub . ($tp === '' ? '' : $tp . '/');
-					$tu .= $ts;
-					if ( $tp !== '' )
-						$ts .= " (" . $tp . ")";
-					printf($sofmt, rawurlencode($tu), self::ht($ts));
+					printf($sgfmt, $d);
+					foreach ( $e as $fv ) {
+						if ( ! preg_match($mpat['i'], $fv) )
+							continue;
+						$tu = rtrim($ub, '/') . '/' . $d . '/' . $fv;
+						$fv = self::ht($fv);
+						printf($sofmt, rawurlencode($tu), $fv);
+					}
+					echo "</optgroup>\n";
 				}
 				// end select
 				echo "</select></td></tr>\n";
@@ -1531,7 +1551,8 @@ class SWF_put_evh {
 	                        continue;
 	                }
 	                if ( is_file($t) && preg_match($pat, $e) ) {
-	                        $ao[] = array($e, $pr);
+	                        //$ao[] = array($e, $pr);
+	                        $ao[$dir][] = $e;
 	                }
 	        }
 	        return $ao;
@@ -2370,6 +2391,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$up = rtrim($au['basedir'], '/') . '/';
 		$slfmt =
 			'<select class="widefat" name="%s" id="%s" onchange="%s">';
+		$sgfmt = '<optgroup label="%s">' . "\n";
 		$sofmt = '<option value="%s">%s</option>' . "\n";
 		// expect jQuery to be loaded by WP (tried $() invocation
 		// but N.G. w/ MSIE. Sheesh.)
@@ -2420,16 +2442,25 @@ class SWF_put_widget_evh extends WP_Widget {
 			printf($slfmt . "\n", $k, $id, $js);
 			// <options>
 			printf($sofmt, '', $ht(__('none')));
-			foreach ( $af as $fv ) {
-				$ts = $fv[0];
-				if ( ! preg_match($mpat['av'], $ts) )
+			foreach ( $af as $d => $e ) {
+				$hit = false;
+				foreach ( $e as $fv ) {
+					if ( preg_match($mpat['av'], $fv) ) {
+						$hit = true;
+						break;
+					}
+				}
+				if ( ! $hit )
 					continue;
-				$tp = rtrim($fv[1], '/');
-				$tu = $ub . ($tp === '' ? '' : $tp . '/');
-				$tu .= $ts;
-				if ( $tp !== '' )
-					$ts .= " (" . $tp . ")";
-				printf($sofmt, rawurlencode($tu), $ht($ts));
+				printf($sgfmt, $d);
+				foreach ( $e as $fv ) {
+					if ( ! preg_match($mpat['av'], $fv) )
+						continue;
+					$tu = rtrim($ub, '/') . '/' . $d . '/' . $fv;
+					$fv = $ht($fv);
+					printf($sofmt, rawurlencode($tu), $fv);
+				}
+				echo "</optgroup>\n";
 			}
 			// end select
 			echo "</select></td></tr>\n";
@@ -2491,16 +2522,25 @@ class SWF_put_widget_evh extends WP_Widget {
 			printf($slfmt . "\n", $k, $id, $js);
 			// <options>
 			printf($sofmt, '', $ht(__('none')));
-			foreach ( $af as $fv ) {
-				$ts = $fv[0];
-				if ( ! preg_match($mpat['i'], $ts) )
+			foreach ( $af as $d => $e ) {
+				$hit = false;
+				foreach ( $e as $fv ) {
+					if ( preg_match($mpat['i'], $fv) ) {
+						$hit = true;
+						break;
+					}
+				}
+				if ( ! $hit )
 					continue;
-				$tp = rtrim($fv[1], '/');
-				$tu = $ub . ($tp === '' ? '' : $tp . '/');
-				$tu .= $ts;
-				if ( $tp !== '' )
-					$ts .= " (" . $tp . ")";
-				printf($sofmt, rawurlencode($tu), $ht($ts));
+				printf($sgfmt, $d);
+				foreach ( $e as $fv ) {
+					if ( ! preg_match($mpat['i'], $fv) )
+						continue;
+					$tu = rtrim($ub, '/') . '/' . $d . '/' . $fv;
+					$fv = $ht($fv);
+					printf($sofmt, rawurlencode($tu), $fv);
+				}
+				echo "</optgroup>\n";
 			}
 			// end select
 			echo "</select></td></tr>\n";
