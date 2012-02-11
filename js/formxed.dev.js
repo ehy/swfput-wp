@@ -231,25 +231,20 @@ SWFPut_putswf_video_xed.prototype = {
 		return ret;
 	},
 	sc_from_line : function(l, cs, sc) {
-		var ce = "[/" + sc + "]";
-		p = l.indexOf(ce, 0);
+		var cap = false;
+		var p = l.indexOf("[/" + sc + "]", 0);
 		if ( p > 0 ) {
+			cap = true;
 			l = l.slice(0, p);
-			p = l.indexOf("]", 0);
-			// must be found
-			if ( p < 0 ) {
-				return false;
-			}
-			this['map'][cs] = l.substring(p + 1);
 		}
-		p = l.indexOf("]", 0);
-		if ( p < 0 ) {
-			return false;
+		while ( l.charAt(0) == " " ) l = l.substring(1);
+		if ( l.charAt(0) == "]" ) {
+			if ( cap )
+				this['map'][cs] = l.substring(1);
+			return true;
 		}
-		l = l.slice(0, p);
 		while ( (p = l.indexOf("=", 0)) > 0 ) {
 			var k = l.slice(0, p);
-			while ( k.charAt(0) == " " ) k = k.substring(1);
 			if ( k.length < 1 ) {
 				return false;
 			}
@@ -264,8 +259,14 @@ SWFPut_putswf_video_xed.prototype = {
 			}
 			this['map'][k] = l.slice(0, p);
 			l = l.substring(p + 1);
+			while ( l.charAt(0) == " " ) l = l.substring(1);
+			if ( l.charAt(0) == "]" ) {
+				if ( cap )
+					this['map'][cs] = l.substring(1);
+				return true;
+			}
 		}
-		return true;
+		return false;
 	},
 	repl_xed : function(f, id, cs, sc) {
 		if ( this.last_match == '' ) {
