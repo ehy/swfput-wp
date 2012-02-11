@@ -1026,7 +1026,7 @@ class SWF_put_evh {
 					}
 					if ( ! $hit )
 						continue;
-					printf($sgfmt, $d);
+					printf($sgfmt, self::ht($d));
 					foreach ( $e as $fv ) {
 						if ( ! preg_match($mpat['av'], $fv) )
 							continue;
@@ -1097,7 +1097,7 @@ class SWF_put_evh {
 					}
 					if ( ! $hit )
 						continue;
-					printf($sgfmt, $d);
+					printf($sgfmt, self::ht($d));
 					foreach ( $e as $fv ) {
 						if ( ! preg_match($mpat['i'], $fv) )
 							continue;
@@ -2452,7 +2452,7 @@ class SWF_put_widget_evh extends WP_Widget {
 				}
 				if ( ! $hit )
 					continue;
-				printf($sgfmt, $d);
+				printf($sgfmt, $ht($d));
 				foreach ( $e as $fv ) {
 					if ( ! preg_match($mpat['av'], $fv) )
 						continue;
@@ -2532,7 +2532,7 @@ class SWF_put_widget_evh extends WP_Widget {
 				}
 				if ( ! $hit )
 					continue;
-				printf($sgfmt, $d);
+				printf($sgfmt, $ht($d));
 				foreach ( $e as $fv ) {
 					if ( ! preg_match($mpat['i'], $fv) )
 						continue;
