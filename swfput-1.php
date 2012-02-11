@@ -1017,19 +1017,16 @@ class SWF_put_evh {
 				// <options>
 				printf($sofmt, '', self::ht(__('none')));
 				foreach ( $af as $d => $e ) {
-					$hit = false;
+					$hit = array();
 					foreach ( $e as $fv ) {
 						if ( preg_match($mpat['av'], $fv) ) {
-							$hit = true;
-							break;
+							$hit[] = $fv;
 						}
 					}
-					if ( ! $hit )
+					if ( empty($hit) )
 						continue;
 					printf($sgfmt, self::ht($d));
-					foreach ( $e as $fv ) {
-						if ( ! preg_match($mpat['av'], $fv) )
-							continue;
+					foreach ( $hit as $fv ) {
 						$tu = rtrim($ub, '/') . '/' . $d . '/' . $fv;
 						$fv = self::ht($fv);
 						printf($sofmt, rawurlencode($tu), $fv);
@@ -1088,19 +1085,16 @@ class SWF_put_evh {
 				// <options>
 				printf($sofmt, '', self::ht(__('none')));
 				foreach ( $af as $d => $e ) {
-					$hit = false;
+					$hit = array();
 					foreach ( $e as $fv ) {
 						if ( preg_match($mpat['i'], $fv) ) {
-							$hit = true;
-							break;
+							$hit[] = $fv;
 						}
 					}
-					if ( ! $hit )
+					if ( empty($hit) )
 						continue;
 					printf($sgfmt, self::ht($d));
-					foreach ( $e as $fv ) {
-						if ( ! preg_match($mpat['i'], $fv) )
-							continue;
+					foreach ( $hit as $fv ) {
 						$tu = rtrim($ub, '/') . '/' . $d . '/' . $fv;
 						$fv = self::ht($fv);
 						printf($sofmt, rawurlencode($tu), $fv);
@@ -2443,19 +2437,16 @@ class SWF_put_widget_evh extends WP_Widget {
 			// <options>
 			printf($sofmt, '', $ht(__('none')));
 			foreach ( $af as $d => $e ) {
-				$hit = false;
+				$hit = array();
 				foreach ( $e as $fv ) {
 					if ( preg_match($mpat['av'], $fv) ) {
-						$hit = true;
-						break;
+						$hit[] = $fv;
 					}
 				}
-				if ( ! $hit )
+				if ( empty($hit) )
 					continue;
 				printf($sgfmt, $ht($d));
-				foreach ( $e as $fv ) {
-					if ( ! preg_match($mpat['av'], $fv) )
-						continue;
+				foreach ( $hit as $fv ) {
 					$tu = rtrim($ub, '/') . '/' . $d . '/' . $fv;
 					$fv = $ht($fv);
 					printf($sofmt, rawurlencode($tu), $fv);
@@ -2523,19 +2514,16 @@ class SWF_put_widget_evh extends WP_Widget {
 			// <options>
 			printf($sofmt, '', $ht(__('none')));
 			foreach ( $af as $d => $e ) {
-				$hit = false;
+				$hit = array();
 				foreach ( $e as $fv ) {
 					if ( preg_match($mpat['i'], $fv) ) {
-						$hit = true;
-						break;
+						$hit[] = $fv;
 					}
 				}
-				if ( ! $hit )
+				if ( empty($hit) )
 					continue;
 				printf($sgfmt, $ht($d));
-				foreach ( $e as $fv ) {
-					if ( ! preg_match($mpat['i'], $fv) )
-						continue;
+				foreach ( $hit as $fv ) {
 					$tu = rtrim($ub, '/') . '/' . $d . '/' . $fv;
 					$fv = $ht($fv);
 					printf($sofmt, rawurlencode($tu), $fv);
