@@ -53,9 +53,21 @@ SWFPut_putswf_video_xed.prototype = {
 	map : {},
 	last_from : 0,
 	last_match : '',
-	trim : function(s){
-		var m = s.match(/^[ \t]*([^ \t](.*[^ \t])?)[ \t]*$/);
-		return m === null ? (/^[ \t]+$/.test(s) ? '' : s) : m[1];
+	ltrim : function(s, ch) {
+		var c = (ch === undefined) ? " " : ch;
+		while ( s.charAt(0) === c )
+			s = s.substring(1);
+		return s;
+	},
+	rtrim : function(s, ch) {
+		var c = (ch === undefined) ? " " : ch;
+		while ( s.charAt(s.length - 1) === c )
+			s = s.slice(0, s.length - 1);
+		return s;
+	},
+	trim : function(s, ch) {
+		var c = (ch === undefined) ? " " : ch;
+		return this.rtrim(this.ltrim(s, c), c);
 	},
 	sanitize : function(fuzz) {
 		var t;
@@ -237,7 +249,7 @@ SWFPut_putswf_video_xed.prototype = {
 			cap = true;
 			l = l.slice(0, p);
 		}
-		while ( l.charAt(0) == " " ) l = l.substring(1);
+		l = this.ltrim(l);
 		if ( l.charAt(0) == "]" ) {
 			if ( cap )
 				this['map'][cs] = l.substring(1);
@@ -258,8 +270,7 @@ SWFPut_putswf_video_xed.prototype = {
 				return false;
 			}
 			this['map'][k] = l.slice(0, p);
-			l = l.substring(p + 1);
-			while ( l.charAt(0) == " " ) l = l.substring(1);
+			l = this.ltrim(l.substring(p + 1));
 			if ( l.charAt(0) == "]" ) {
 				if ( cap )
 					this['map'][cs] = l.substring(1);
