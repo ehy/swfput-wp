@@ -448,6 +448,28 @@ SWFPut_putswf_video_xed.prototype = {
 			}
 		});
 		return false;
+	},
+	elh : {},
+	hideshow : function(id, btnid, txhide, txshow, sltype) {
+		var sel = "[id="+id+"]";
+		var btn = document.getElementById(btnid);
+		var slt = (sltype === undefined) ? "normal" : sltype;
+	
+		if ( this.elh[id] === undefined || this.elh[id] === 0 ) {
+			this.elh[id] = 1;
+			jQuery(sel).slideUp(slt);
+			if ( btn ) {
+				btn.value = txshow;
+			}
+		} else {
+			this.elh[id] = 0;
+			jQuery(sel).slideDown(slt);
+			if ( btn ) {
+				btn.value = txhide;
+			}
+		}
+
+		return false;
 	}
 };
 

@@ -964,32 +964,62 @@ class SWF_put_evh {
 		$jfsl = "form_cpval(this.form,'%s','%s','%s')";
 		// input text widths, wide, narrow
 		$iw = 100; $in = 16;
+		// incr var for sliding divs
+		$ndiv = 0;
+		// button format for sliding divs
+		$dbfmt = '<input type="button" id="%s" value="%s" onclick="%s.%s" />';
+		// button values for sliding divs
+		$dbvhi = self::ht(__('Hide'));
+		$dbvsh = self::ht(__('Show'));
+		// js to show/hide sliding divs
+		$jdsh = "hideshow('%s', this.id, '{$dbvhi}', '{$dbvsh}')";
+		// class and base of id for sliding divs
+		$dvio = $id . '_odiv';
+		$dvii = $id . '_idiv';
 		
 		// begin form
 		?>
 		<!-- form buttons, it seems these *must* be in a table? -->
-		<table id="sheesh"><tr><td>
+		<table id="<?php echo $id . '_buttons'; ?>"><tr><td>
 			<span  class="submit">
 			<?php $l = self::ht(__('Reset default values'));
-				printf($bjfmt, $job, $jfur, $l); ?>
-			<?php $l = self::ht(__('Fill form from editor'));
-				printf($bjfmt, $job, $jfuf, $l); ?>
-			<?php $l = self::ht(__('Replace current in editor'));
-				printf($bjfmt, $job, $jfuc, $l); ?>
-			<?php $l = self::ht(__('Place new in editor'));
-				printf($bjfmt, $job, $jfu, $l); ?>
+				printf($bjfmt, $job, $jfur, $l);
+				$l = self::ht(__('Fill form from editor'));
+				printf($bjfmt, $job, $jfuf, $l);
+				$l = self::ht(__('Replace current in editor'));
+				printf($bjfmt, $job, $jfuc, $l);
+				$l = self::ht(__('Place new in editor'));
+				printf($bjfmt, $job, $jfu, $l);
+			?>
 			</span>
 		</td></tr></table>
+
+		<?php $ndiv++;
+			$dvon = $dvio . $ndiv;
+			$dvin = $dvii . $ndiv;
+			$dvib = $dvin . '_btn';
+			$jdft = sprintf($jdsh, $dvin);
+		?>
+		<div class="<?php echo $dvio; ?>"
+			id="<?php echo $dvon; ?>">
+		<span class="submit">
+			<?php printf($dbfmt, $dvib, $dbvhi, $job, $jdft); ?>
+		</span>
+		<h3 class="hndle"><span><?php
+			echo self::ht(__('Media')); ?></span></h3>
+		<div class="<?php echo $dvii; ?>"
+			id="<?php echo $dvin; ?>">
+
 		<p>
 			<?php $k = 'caption';
 				$l = self::ht(__('Caption:'));
-				printf($lbfmt, $id, $k, $l); ?>
-				<?php printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
+				printf($lbfmt, $id, $k, $l);
+				printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
 		</p><p>
 			<?php $k = 'url';
 				$l = self::ht(__('Url or media library ID:'));
-				printf($lbfmt, $id, $k, $l); ?>
-				<?php printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
+				printf($lbfmt, $id, $k, $l);
+				printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
 		</p>
 			<?php
 			// if there are upload files, print <select >
@@ -1048,13 +1078,13 @@ class SWF_put_evh {
 		<p>
 			<?php $k = 'playpath'; 
 				$l = self::ht(__('Playpath (rtmp):'));
-				printf($lbfmt, $id, $k, $l); ?>
-				<?php printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
+				printf($lbfmt, $id, $k, $l);
+				printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
 		</p><p>
 			<?php $k = 'iimage';
 				$l = self::ht(__('Url of initial image file (optional):'));
-				printf($lbfmt, $id, $k, $l); ?>
-				<?php printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
+				printf($lbfmt, $id, $k, $l);
+				printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
 		</p>
 			<?php
 			// if there are upload files, print <select >
@@ -1113,78 +1143,116 @@ class SWF_put_evh {
 		<p>
 			<?php $k = 'audio';
 				$l = self::ht(__('Medium is audio:'));
-				printf($lbfmt, $id, $k, $l); ?>
-				<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
-					printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
+				printf($lbfmt, $id, $k, $l);
+				$ck = $$k == 'true' ? 'checked="checked" ' : '';
+				printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
 		</p>
+
+		</div></div>
+		<?php $ndiv++;
+			$dvon = $dvio . $ndiv;
+			$dvin = $dvii . $ndiv;
+			$dvib = $dvin . '_btn';
+			$jdft = sprintf($jdsh, $dvin);
+		?>
+		<div class="<?php echo $dvio; ?>"
+			id="<?php echo $dvon; ?>">
+		<span class="submit">
+			<?php printf($dbfmt, $dvib, $dbvhi, $job, $jdft); ?>
+		</span>
+		<h3 class="hndle"><span><?php
+			echo self::ht(__('Dimensions')); ?></span></h3>
+		<div class="<?php echo $dvii; ?>"
+			id="<?php echo $dvin; ?>">
+
 		<p>
 			<?php $k = 'width';
 				$l = self::ht(__('Width:'));
-				printf($lbfmt, $id, $k, $l); ?>
-				<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
+				printf($lbfmt, $id, $k, $l);
+				printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
 		</p><p>
 			<?php $k = 'height';
 				$l = self::ht(__('Height:'));
-				printf($lbfmt, $id, $k, $l); ?>
-				<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
+				printf($lbfmt, $id, $k, $l);
+				printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
 		</p><p>
 			<?php $k = 'aspectautoadj';
 				$l = self::ht(__('Auto aspect (e.g. 360x240 to 4:3):'));
-				printf($lbfmt, $id, $k, $l); ?>
-				<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
-					printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
+				printf($lbfmt, $id, $k, $l);
+				$ck = $$k == 'true' ? 'checked="checked" ' : '';
+				printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
 		</p><p>
 			<?php $k = 'displayaspect';
 				$l = self::ht(__('Display aspect (e.g. 4:3, precludes Auto):'));
-				printf($lbfmt, $id, $k, $l); ?>
-				<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
+				printf($lbfmt, $id, $k, $l);
+				printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
 		</p><p>
 			<?php $k = 'pixelaspect';
 				$l = self::ht(__('Pixel aspect (e.g. 8:9, precluded by Display):'));
-				printf($lbfmt, $id, $k, $l); ?>
-				<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
+				printf($lbfmt, $id, $k, $l);
+				printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
 		</p>
+
+		</div></div>
+		<?php $ndiv++;
+			$dvon = $dvio . $ndiv;
+			$dvin = $dvii . $ndiv;
+			$dvib = $dvin . '_btn';
+			$jdft = sprintf($jdsh, $dvin);
+		?>
+		<div class="<?php echo $dvio; ?>"
+			id="<?php echo $dvon; ?>">
+		<span class="submit">
+			<?php printf($dbfmt, $dvib, $dbvhi, $job, $jdft); ?>
+		</span>
+		<h3 class="hndle"><span><?php
+			echo self::ht(__('Behavior')); ?></span></h3>
+		<div class="<?php echo $dvii; ?>"
+			id="<?php echo $dvin; ?>">
+
 		<p>
 			<?php $k = 'volume';
 				$l = self::ht(__('Initial volume (0-100):'));
-				printf($lbfmt, $id, $k, $l); ?>
-				<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
+				printf($lbfmt, $id, $k, $l);
+				printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
 		</p><p>
 			<?php $k = 'play';
 				$l = self::ht(__('Play on load (else waits for play button):'));
-				printf($lbfmt, $id, $k, $l); ?>
-				<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
-					printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
+				printf($lbfmt, $id, $k, $l);
+				$ck = $$k == 'true' ? 'checked="checked" ' : '';
+				printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
 		</p><p>
 			<?php $k = 'loop';
 				$l = self::ht(__('Loop play:'));
-				printf($lbfmt, $id, $k, $l); ?>
-				<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
-					printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
+				printf($lbfmt, $id, $k, $l);
+				$ck = $$k == 'true' ? 'checked="checked" ' : '';
+				printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
 		</p><p>
 			<?php $k = 'hidebar';
 				$l = self::ht(__('Hide control bar initially:'));
-				printf($lbfmt, $id, $k, $l); ?>
-				<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
-					printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
+				printf($lbfmt, $id, $k, $l);
+				$ck = $$k == 'true' ? 'checked="checked" ' : '';
+				printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
 		</p><p>
 			<?php $k = 'disablebar';
 				$l = self::ht(__('Hide and disable control bar:'));
-				printf($lbfmt, $id, $k, $l); ?>
-				<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
-					printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
+				printf($lbfmt, $id, $k, $l);
+				$ck = $$k == 'true' ? 'checked="checked" ' : '';
+				printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
 		</p><p>
 			<?php $k = 'allowfull';
 				$l = self::ht(__('Allow full screen:'));
-				printf($lbfmt, $id, $k, $l); ?>
-				<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
-					printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
+				printf($lbfmt, $id, $k, $l);
+				$ck = $$k == 'true' ? 'checked="checked" ' : '';
+				printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
 		</p><p>
 			<?php $k = 'barheight';
 				$l = self::ht(__('Control bar Height (20-50):'));
-				printf($lbfmt, $id, $k, $l); ?>
-				<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
+				printf($lbfmt, $id, $k, $l);
+				printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
 		</p>
+
+		</div></div>
 
 		<?php
 	}
