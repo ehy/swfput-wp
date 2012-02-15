@@ -287,13 +287,16 @@ SWFPut_putswf_video_xed.prototype = {
 		if ( v == null ) {
 			return false;
 		}
+		var sep = "[" + sc;
+		var va = v.split(sep);
+		if ( va.length < 2 ) {
+			return false;
+		}
 		this.fill_map(f, id);
 		var c = this.mk_shortcode(cs, sc);
 		if ( c == null ) {
 			return false;
 		}
-		var sep = "[" + sc;
-		var va = v.split(sep);
 		var i = 0;
 		var l;
 		for ( ; i < va.length; i++ ) {
@@ -328,8 +331,11 @@ SWFPut_putswf_video_xed.prototype = {
 		if ( v == null ) {
 			return false;
 		}
-		this.set_fm('defs', f, id);
 		var va = v.split("[" + sc);
+		if ( va.length < 2 ) {
+			return false;
+		}
+		this.set_fm('defs', f, id);
 		if ( this.last_from >= va.length ) {
 			this.last_from = 0;
 		}

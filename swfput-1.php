@@ -936,8 +936,8 @@ class SWF_put_evh {
 		$up = rtrim($au['basedir'], '/') . '/';
 		// id base for form and js
 		$id = 'SWFPut_putswf_video';
-		// table <th> format string
-		$thfmt = '<th scope="row"><label for="%s_%s">%s</label></th>';
+		// label format string
+		$lbfmt = '<label for="%s_%s">%s</label>';
 		// table <input type="text"> format string
 		$infmt = '<input type="text" size="40" style="width:%u%%;" name="%sX%sX" id="%s_%s" value="%s" />';
 		// table <input type="checkbox"> format string
@@ -963,55 +963,43 @@ class SWF_put_evh {
 		// js to copy from select/dropdown to text input
 		$jfsl = "form_cpval(this.form,'%s','%s','%s')";
 		// input text widths, wide, narrow
-		$iw = 95; $in = 16;
+		$iw = 100; $in = 16;
 		
 		// begin form
 		?>
-		<table class="form-table">
-		<!-- form buttons, css on posts page may place these at top -->
-			<tr valign="middle">
-				<p  class="submit">
-				<?php $l = self::ht(__('Reset default values'));
-					printf($bjfmt, $job, $jfur, $l); ?>
-				<?php $l = self::ht(__('Fill form from editor'));
-					printf($bjfmt, $job, $jfuf, $l); ?>
-				<?php $l = self::ht(__('Replace current in editor'));
-					printf($bjfmt, $job, $jfuc, $l); ?>
-				<?php $l = self::ht(__('Place new in editor'));
-					printf($bjfmt, $job, $jfu, $l); ?>
-				</p>
-			</tr>
-		</table>
-		<div class="postbox" id="<?php
-			echo $id . '_L2_1'; ?>">
-		<div title="Click to toggle" class="handlediv">
-		<br/></div><h3 class="hndle"><span><?php
-			echo self::ht(__('Media')); ?></span></h3>
-		<div class="inside"><table class="form-table">
-			<tr valign="top">
-				<?php $k = 'caption';
-					$l = self::ht(__('Caption:'));
-					printf($thfmt, $id, $k, $l); ?>
-				<td>
-					<?php printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
-				</td>
-			</tr>
-			<tr valign="top">
-				<?php $k = 'url';
-					$l = self::ht(__('Url or media library ID:'));
-					printf($thfmt, $id, $k, $l); ?>
-				<td>
-					<?php printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
-				</td>
-			</tr>
+		<!-- form buttons, it seems these *must* be in a table? -->
+		<table id="sheesh"><tr><td>
+			<span  class="submit">
+			<?php $l = self::ht(__('Reset default values'));
+				printf($bjfmt, $job, $jfur, $l); ?>
+			<?php $l = self::ht(__('Fill form from editor'));
+				printf($bjfmt, $job, $jfuf, $l); ?>
+			<?php $l = self::ht(__('Replace current in editor'));
+				printf($bjfmt, $job, $jfuc, $l); ?>
+			<?php $l = self::ht(__('Place new in editor'));
+				printf($bjfmt, $job, $jfu, $l); ?>
+			</span>
+		</td></tr></table>
+		<p>
+			<?php $k = 'caption';
+				$l = self::ht(__('Caption:'));
+				printf($lbfmt, $id, $k, $l); ?>
+				<?php printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
+		</p><p>
+			<?php $k = 'url';
+				$l = self::ht(__('Url or media library ID:'));
+				printf($lbfmt, $id, $k, $l); ?>
+				<?php printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
+		</p>
 			<?php
 			// if there are upload files, print <select >
 			$kl = $k;
 			if ( count($af) > 0 ) {
+				echo "<p>\n";
 				$k = 'files';
 				$jfcp = sprintf($jfsl, $id, $k, $kl);
 				$l = self::ht(__('Url from uploads directory:'));
-				printf($thfmt . '<td>', $id, $k, $l);
+				printf($lbfmt, $id, $k, $l);
 				// <select>
 				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfcp);
 				// <options>
@@ -1032,13 +1020,15 @@ class SWF_put_evh {
 					echo "</optgroup>\n";
 				}
 				// end select
-				echo "</select></td></tr>\n";
+				echo "</select><br />\n";
+				echo "</p>\n";
 			} // end if there are upload files
 			if ( ! empty($aa) ) {
+				echo "<p>\n";
 				$k = 'atch';
 				$jfcp = sprintf($jfsl, $id, $k, $kl);
 				$l = self::ht(__('Select ID from media library:'));
-				printf($thfmt . '<td>', $id, $k, $l);
+				printf($lbfmt, $id, $k, $l);
 				// <select>
 				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfcp);
 				// <options>
@@ -1051,33 +1041,30 @@ class SWF_put_evh {
 					printf($sofmt, rawurlencode($fi), self::ht($ts));
 				}
 				// end select
-				echo "</select></td></tr>\n";
+				echo "</select><br />\n";
+				echo "</p>\n";
 			} // end if there are upload files
 			?>
-			<tr valign="top">
-				<?php $k = 'playpath'; 
-					$l = self::ht(__('Playpath (rtmp):'));
-					printf($thfmt, $id, $k, $l); ?>
-				<td>
-					<?php printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
-				</td>
-			</tr>
-			<tr valign="top">
-				<?php $k = 'iimage';
-					$l = self::ht(__('Url of initial image file (optional):'));
-					printf($thfmt, $id, $k, $l); ?>
-				<td>
-					<?php printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
-				</td>
-			</tr>
+		<p>
+			<?php $k = 'playpath'; 
+				$l = self::ht(__('Playpath (rtmp):'));
+				printf($lbfmt, $id, $k, $l); ?>
+				<?php printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
+		</p><p>
+			<?php $k = 'iimage';
+				$l = self::ht(__('Url of initial image file (optional):'));
+				printf($lbfmt, $id, $k, $l); ?>
+				<?php printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
+		</p>
 			<?php
 			// if there are upload files, print <select >
 			$kl = $k;
 			if ( count($af) > 0 ) {
+				echo "<p>\n";
 				$k = 'ifiles';
 				$jfcp = sprintf($jfsl, $id, $k, $kl);
 				$l = self::ht(__('Load image from uploads directory:'));
-				printf($thfmt . '<td>', $id, $k, $l);
+				printf($lbfmt, $id, $k, $l);
 				// <select>
 				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfcp);
 				// <options>
@@ -1098,13 +1085,15 @@ class SWF_put_evh {
 					echo "</optgroup>\n";
 				}
 				// end select
-				echo "</select></td></tr>\n";
+				echo "</select><br />\n";
+				echo "</p>\n";
 			} // end if there are upload files
 			if ( ! empty($aa) ) {
+				echo "<p>\n";
 				$k = 'iatch';
 				$jfcp = sprintf($jfsl, $id, $k, $kl);
 				$l = self::ht(__('Load image ID from media library:'));
-				printf($thfmt . '<td>', $id, $k, $l);
+				printf($lbfmt, $id, $k, $l);
 				// <select>
 				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfcp);
 				// <options>
@@ -1117,135 +1106,86 @@ class SWF_put_evh {
 					printf($sofmt, rawurlencode($fi), self::ht($ts));
 				}
 				// end select
-				echo "</select></td></tr>\n";
+				echo "</select><br />\n";
+				echo "</p>\n";
 			} // end if there are upload files
 			?>
-			<tr valign="top">
-				<?php $k = 'audio';
-					$l = self::ht(__('Medium is audio:'));
-					printf($thfmt, $id, $k, $l); ?>
-				<td>
-					<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
-						printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
-				</td>
-			</tr>
-		</table></div></div>
-		<div class="postbox" id="<?php
-			echo $id . '_L2_2'; ?>">
-		<div title="Click to toggle" class="handlediv">
-		<br/></div><h3 class="hndle"><span><?php
-			echo self::ht(__('Dimensions, aspect')); ?></span></h3>
-		<div class="inside"><table class="form-table">
-			<tr valign="top">
-				<?php $k = 'width';
-					$l = self::ht(__('Width:'));
-					printf($thfmt, $id, $k, $l); ?>
-				<td>
-					<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
-				</td>
-			</tr>
-			<tr valign="top">
-				<?php $k = 'height';
-					$l = self::ht(__('Height:'));
-					printf($thfmt, $id, $k, $l); ?>
-				<td>
-					<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
-				</td>
-			</tr>
-			<tr valign="top">
-				<?php $k = 'aspectautoadj';
-					$l = self::ht(__('Auto aspect (e.g. 360x240 to 4:3):'));
-					printf($thfmt, $id, $k, $l); ?>
-				<td>
-					<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
-						printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
-				</td>
-			</tr>
-			<tr valign="top">
-				<?php $k = 'displayaspect';
-					$l = self::ht(__('Display aspect (e.g. 4:3, precludes Auto):'));
-					printf($thfmt, $id, $k, $l); ?>
-				<td>
-					<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
-				</td>
-			</tr>
-			<tr valign="top">
-				<?php $k = 'pixelaspect';
-					$l = self::ht(__('Pixel aspect (e.g. 8:9, precluded by Display):'));
-					printf($thfmt, $id, $k, $l); ?>
-				<td>
-					<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
-				</td>
-			</tr>
-		</table></div></div>
-		<div class="postbox" id="<?php
-			echo $id . '_L2_3'; ?>">
-		<div title="Click to toggle" class="handlediv">
-		<br/></div><h3 class="hndle"><span><?php
-			echo self::ht(__('Behavior')); ?></span></h3>
-		<div class="inside"><table class="form-table">
-			<tr valign="top">
-				<?php $k = 'volume';
-					$l = self::ht(__('Initial volume (0-100):'));
-					printf($thfmt, $id, $k, $l); ?>
-				<td>
-					<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
-				</td>
-			</tr>
-			<tr valign="top">
-				<?php $k = 'play';
-					$l = self::ht(__('Play on load (else waits for play button):'));
-					printf($thfmt, $id, $k, $l); ?>
-				<td>
-					<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
-						printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
-				</td>
-			</tr>
-			<tr valign="top">
-				<?php $k = 'loop';
-					$l = self::ht(__('Loop play:'));
-					printf($thfmt, $id, $k, $l); ?>
-				<td>
-					<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
-						printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
-				</td>
-			</tr>
-			<tr valign="top">
-				<?php $k = 'hidebar';
-					$l = self::ht(__('Hide control bar initially:'));
-					printf($thfmt, $id, $k, $l); ?>
-				<td>
-					<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
-						printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
-				</td>
-			</tr>
-			<tr valign="top">
-				<?php $k = 'disablebar';
-					$l = self::ht(__('Hide and disable control bar:'));
-					printf($thfmt, $id, $k, $l); ?>
-				<td>
-					<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
-						printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
-				</td>
-			</tr>
-			<tr valign="top">
-				<?php $k = 'allowfull';
-					$l = self::ht(__('Allow full screen:'));
-					printf($thfmt, $id, $k, $l); ?>
-				<td>
-					<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
-						printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
-				</td>
-			</tr>
-			<tr valign="top">
-				<?php $k = 'barheight';
-					$l = self::ht(__('Control bar Height (20-50):'));
-					printf($thfmt, $id, $k, $l); ?>
-				<td>
-					<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
-				</td>
-			</tr>
-		</table></div></div>
+		<p>
+			<?php $k = 'audio';
+				$l = self::ht(__('Medium is audio:'));
+				printf($lbfmt, $id, $k, $l); ?>
+				<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
+					printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
+		</p>
+		<p>
+			<?php $k = 'width';
+				$l = self::ht(__('Width:'));
+				printf($lbfmt, $id, $k, $l); ?>
+				<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
+		</p><p>
+			<?php $k = 'height';
+				$l = self::ht(__('Height:'));
+				printf($lbfmt, $id, $k, $l); ?>
+				<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
+		</p><p>
+			<?php $k = 'aspectautoadj';
+				$l = self::ht(__('Auto aspect (e.g. 360x240 to 4:3):'));
+				printf($lbfmt, $id, $k, $l); ?>
+				<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
+					printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
+		</p><p>
+			<?php $k = 'displayaspect';
+				$l = self::ht(__('Display aspect (e.g. 4:3, precludes Auto):'));
+				printf($lbfmt, $id, $k, $l); ?>
+				<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
+		</p><p>
+			<?php $k = 'pixelaspect';
+				$l = self::ht(__('Pixel aspect (e.g. 8:9, precluded by Display):'));
+				printf($lbfmt, $id, $k, $l); ?>
+				<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
+		</p>
+		<p>
+			<?php $k = 'volume';
+				$l = self::ht(__('Initial volume (0-100):'));
+				printf($lbfmt, $id, $k, $l); ?>
+				<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
+		</p><p>
+			<?php $k = 'play';
+				$l = self::ht(__('Play on load (else waits for play button):'));
+				printf($lbfmt, $id, $k, $l); ?>
+				<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
+					printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
+		</p><p>
+			<?php $k = 'loop';
+				$l = self::ht(__('Loop play:'));
+				printf($lbfmt, $id, $k, $l); ?>
+				<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
+					printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
+		</p><p>
+			<?php $k = 'hidebar';
+				$l = self::ht(__('Hide control bar initially:'));
+				printf($lbfmt, $id, $k, $l); ?>
+				<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
+					printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
+		</p><p>
+			<?php $k = 'disablebar';
+				$l = self::ht(__('Hide and disable control bar:'));
+				printf($lbfmt, $id, $k, $l); ?>
+				<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
+					printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
+		</p><p>
+			<?php $k = 'allowfull';
+				$l = self::ht(__('Allow full screen:'));
+				printf($lbfmt, $id, $k, $l); ?>
+				<?php $ck = $$k == 'true' ? 'checked="checked" ' : '';
+					printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
+		</p><p>
+			<?php $k = 'barheight';
+				$l = self::ht(__('Control bar Height (20-50):'));
+				printf($lbfmt, $id, $k, $l); ?>
+				<?php printf($infmt, $in, $id, $k, $id, $k, $$k); ?>
+		</p>
+
 		<?php
 	}
 
