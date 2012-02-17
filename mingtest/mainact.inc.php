@@ -443,8 +443,9 @@ if ( guardinit == undefined ) {
 			if ( curkey == 32 ) {
 				// space
 				if ( ! brtmp ) {
-					togglepause();
+					//togglepause();
 					//togglepauseVideo();
+					initialbutHit();
 				}
 			} else if ( curkey == 81 || curkey == 113 ) {
 				// Q,q
