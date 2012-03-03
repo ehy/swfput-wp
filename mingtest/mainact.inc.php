@@ -176,7 +176,7 @@ var stream_frameHeight = null;
 var stream_displayHeight = null;
 // aspect factors, calculated from metadate if available
 var upixaspect = parseFloat(System.capabilities.pixelAspectRatio);
-if ( upixaspect === NaN || upixaspect < 0.25 /*arbitrary cmp value*/ )
+if ( upixaspect === NaN || upixaspect < 0.125 /*arbitrary minimum*/ )
 	upixaspect = 1.0;
 var afactW = 1;
 var afactH = 1;
@@ -471,7 +471,13 @@ if ( guardinit == undefined ) {
 				} else {
 					upixaspect = 1.0;
 				}
-				afactW = 1.0 / upixaspect;
+				// at 1st I thought flash had pixaspect inverted, partly
+				// because, unknown to me, Ubuntu had hard coded 96 dpi
+				// for the X display, which is quite wrong, so . . .
+				// incorrect:
+				//afactW = 1.0 / upixaspect;
+				// correct:
+				afactW = upixaspect;
 				}
 			} else if ( curkey == 86 || curkey == 118 ) {
 				// V,v
@@ -804,7 +810,13 @@ stream_onMetaData = function(info) {
 		var va = stream_width / stream_height;
 		var da = stream_displayWidth / stream_displayHeight;
 
-		afactW = 1.0/upixaspect; //System.capabilities.pixelAspectRatio;
+		// at 1st I thought flash had pixaspect inverted, partly
+		// because, unknown to me, Ubuntu had hard coded 96 dpi
+		// for the X display, which is quite wrong, so . . .
+		// incorrect:
+		//afactW = 1.0/upixaspect; //System.capabilities.pixelAspectRatio;
+		afactW = upixaspect; //System.capabilities.pixelAspectRatio;
+		// correct:
 		afactH = 1;
 		if ( Math.abs(da - va) > 0.001 ) {
 			afactW *= da * stream_height / stream_width;
@@ -2020,7 +2032,7 @@ if ( _level0.AA != undefined && _level0.AA != '' ) {
 if ( _level0.DA != undefined && _level0.DA != '' ) {
 	displayaspect = _level0.DA;
 	// sadly, AS2 does not support RegExp(): always false
-	// I read AS3 has support; that's no help here
+	// I've read AS3 has support; but that's no help here
 	//if ( RegExp('^[1-9][0-9]*[x:][1-9][0-9]*$').exec(_level0.DA) )
 	if ( _level0.DA != 'D' ) {
 		var t = displayaspect.split(":");
