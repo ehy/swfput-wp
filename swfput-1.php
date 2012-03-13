@@ -14,7 +14,7 @@ License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
 /*
  *      swfput-1.php
  *      
- *      Copyright 2011 Ed Hynan <freecode@verizon.net>
+ *      Copyright 2011 Ed Hynan <edhynan@gmail.com>
  *      
  *      This program is free software; you can redistribute it and/or modify
  *      it under the terms of the GNU General Public License as published by
