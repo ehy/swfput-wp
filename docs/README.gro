@@ -1,15 +1,19 @@
 .TL
 README for SWFPut
 .br
-Mandelbrot Set Generator in Java
+A Flash Video Player Plugin for WordPress
 .AU
 Ed Hynan <edhynan@gmail.com>
 <<CMAC>>
 .SH
 What is it?
 .PP
-\fBSWFPut\fP is a Java program demonstrating the
-generation of Mandelbrot set and Julia set images.
+\fBSWFPut\fP is a cleverly named plugin for
+the popular \fBWordPress\fP content management and weblog
+software. It provides a video player program
+for the flash plugin and the means to configure
+an instance with a video source and playback
+attributes.
 \fBSWFPut\fP also includes an adaptation of
 the program \fBppmforge\fP by John Walker.
 The fractal planet image generator

@@ -1,18 +1,17 @@
-SHELL= /bin/sh
 
-ROFF = groff
+ROFF  = groff
 TROFF = troff
 GROTT = grotty -c
-TMAC = -ms
-ROFFMAC = $(ROFF) $(TMAC)
+TMAC  = -ms
+ROFFMAC = $(ROFF)  $(TMAC)
 ROFFTXT = $(TROFF) $(TMAC)
-TTT = ascii
+TTT   = ascii
 #TTT = utf8
 
 NAME = README
 OPS  = $(NAME).ps
 OTXT = $(NAME).txt
-OANS = $(NAME).tty
+OTTY = $(NAME).tty
 
 TDEF = $(OTXT)
 
@@ -26,15 +25,15 @@ ASRC = asc2ans
 
 .SUFFIXES: .gro .ps .txt .ansi
 
-all: $(TDEF)
+all:  $(TDEF)
 
-txt: $(OTXT)
+txt:  $(OTXT)
 
-ansi: $(OANS)
+tty:  $(OTTY)
 
 ps: $(OPS)
 
-$(OANS) : $(SRC) $(ASRC)
+$(OTTY) : $(SRC) $(ASRC)
 	$(SED) -e 's;^<<CMAC>>;\.1C;' < \
 	$(SRC) | $(ROFFMAC) -T$(TTT) | $(COL) | ./$(ASRC) | \
 	$(SED) -e 's;^\(.\{1,\}\);    \1;' > $@
@@ -55,5 +54,5 @@ install: all
 	mv -f $(TDEF) ..
 
 clean:
-	-rm -f $(OANS) $(OTXT) $(OPS) $(ASRC)
+	-rm -f $(OTTY) $(OTXT) $(OPS) $(ASRC)
 
