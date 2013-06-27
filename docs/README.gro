@@ -1,3 +1,6 @@
+
+\" CR gives courier (tt):
+\" \f(CRhttp://netpbm.sourceforge.net/\fR.
 .TL
 README for SWFPut
 .br
@@ -14,16 +17,41 @@ software. It provides a video player program
 for the flash plugin and the means to configure
 an instance with a video source and playback
 attributes.
-\fBSWFPut\fP also includes an adaptation of
-the program \fBppmforge\fP by John Walker.
-The fractal planet image generator
-is a Java port of
-the \fBppmforge\fP code.
-The C program \fBppmforge\fP is included
-in the \fIpbmplus\fP and \fInetpbm\fP raster
-image processing utility packages.
-For the netpbm package see
-\f(CRhttp://netpbm.sourceforge.net/\fR.
+There are two separate components:
+the flash video player, and the WP plugin proper.
+The video player is delivered to site visitors
+by the plugin in the traditional <object ...>
+block with the necessary arguments. Flash video
+objects may be placed in posts and pages, or in
+the widget areas supported by your theme (i.e.,
+the plugin includes a widget).
+Video is placed in posts and pages with a
+\fIshortcode\fP; if you do not know what a
+shortcode is, or do not want to deal with them,
+no problem.
+(in fact it is preferable that the shortcodes
+\fInot\fP be hand-edited.) The plugin adds to
+the administrative interface a full featured
+form to setup and add, or edit, or delete
+video objects, so the user does not need
+to be troubled with shortcodes (they will be visible
+in the editor; you will get used to them).
+The flash video widget has a similar full
+featured form.
+.PP
+The plugin does not add any \fIJavaScript\fP
+to the pages generated for your visitors,
+which might be helpful if you try keep your
+pages useful to those who disable JavaScript
+in their browser. (Such visitors might need
+to explicitely enable the flash plugin, but that
+is another unavoidable issue.)
+JavaScript is used in the administrative
+interface for the forms and manipulation
+of shortcodes in the editor; but of course
+you must have JavaScript enabled when you
+log in to your site \(em \(lqthis\(rq `does' not
+affect your visitors.
 .SH
 Building From the Source
 .PP
@@ -74,3 +102,4 @@ the distribution archive are under the
 \f(BIGNU GPL\fP.
 See the included file \fBCOPYING\fP.
 
+\".TC

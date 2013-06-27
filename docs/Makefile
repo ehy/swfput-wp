@@ -12,6 +12,8 @@ NAME = README
 OPS  = $(NAME).ps
 OTXT = $(NAME).txt
 OTTY = $(NAME).tty
+UTTY = $(NAME).tt8
+UTF8 = $(NAME).ut8
 
 TDEF = $(OTXT)
 
@@ -31,12 +33,25 @@ txt:  $(OTXT)
 
 tty:  $(OTTY)
 
-ps: $(OPS)
+tt8:  $(UTTY)
+
+ut8:  $(UTF8)
+
+ps:   $(OPS)
 
 $(OTTY) : $(SRC) $(ASRC)
 	$(SED) -e 's;^<<CMAC>>;\.1C;' < \
 	$(SRC) | $(ROFFMAC) -T$(TTT) | $(COL) | ./$(ASRC) | \
 	$(SED) -e 's;^\(.\{1,\}\);    \1;' > $@
+
+$(UTTY) : $(SRC) $(ASRC)
+	$(SED) -e 's;^<<CMAC>>;\.1C;' < \
+	$(SRC) | $(ROFFMAC) -Tutf8 | $(COL) | ./$(ASRC) | \
+	$(SED) -e 's;^\(.\{1,\}\);    \1;' > $@
+
+$(UTF8) : $(SRC) $(ASRC)
+	$(SED) -e 's;^<<CMAC>>;\.1C;' < \
+	$(SRC) | $(ROFFTXT) -Tutf8 | $(GROTT) > $@
 
 $(OTXT) : $(SRC) $(ASRC)
 	$(SED) -e 's;^<<CMAC>>;\.1C;' < \
@@ -54,5 +69,5 @@ install: all
 	mv -f $(TDEF) ..
 
 clean:
-	-rm -f $(OTTY) $(OTXT) $(OPS) $(ASRC)
+	-rm -f $(OTTY) $(UTTY) $(UTF8) $(OTXT) $(OPS) $(ASRC)
 
