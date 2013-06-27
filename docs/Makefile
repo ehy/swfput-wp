@@ -66,7 +66,7 @@ $(ASRC) : $(ASRC).c
 	$(CC) -o $@ $<
 
 install: all
-	mv -f $(TDEF) ..
+	mv -f $(TDEF) ../$(README)
 
 clean:
 	-rm -f $(OTTY) $(UTTY) $(UTF8) $(OTXT) $(OPS) $(ASRC)

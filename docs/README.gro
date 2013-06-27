@@ -12,7 +12,7 @@ Ed Hynan <edhynan@gmail.com>
 What is it?
 .PP
 \fBSWFPut\fP is a cleverly named plugin for
-the popular \fBWordPress\fP content management and weblog
+the popular \fIWordPress\fP content management and weblog
 software. It provides a video player program
 for the flash plugin and the means to configure
 an instance with a video source and playback
@@ -28,9 +28,10 @@ the plugin includes a widget).
 Video is placed in posts and pages with a
 \fIshortcode\fP; if you do not know what a
 shortcode is, or do not want to deal with them,
-no problem.
-(in fact it is preferable that the shortcodes
-\fInot\fP be hand-edited.) The plugin adds to
+that's no problem.
+(In fact, it is preferable that the shortcodes
+\fInot\fP be hand-edited, and they will not
+be discussed in detail here.) The plugin adds to
 the administrative interface a full featured
 form to setup and add, or edit, or delete
 video objects, so the user does not need
@@ -50,25 +51,43 @@ JavaScript is used in the administrative
 interface for the forms and manipulation
 of shortcodes in the editor; but of course
 you must have JavaScript enabled when you
-log in to your site \(em \(lqthis\(rq `does' not
+log in to your site\(emthis does not
 affect your visitors.
+\
 .SH
 Building From the Source
 .PP
-The source directories contain simple
-Makefiles for building the \fB.class\fP
-files.
-\fIMakefile.unix\fP is written for
-\fIGNU\fP \fBgmake\fP but is probably usable
-with no or few changes
-with most \fIUnix\fP make utilities.
-\fIMakefile.dos\fP is written for
-\fISymantec\fP's \fBsmake\fP,
-and might be a better starting point for
-other \fIDOS\fP make utilities.
+\fBSWFPut\fP is distributed as a \fIZIP\fP
+archive prepared for installation on a
+\fIWordPress\fP site with the \(lqAdd New\(rq
+item under the \(lqPlugins\(rq menu.
+Therefore, there is no need to build the
+package before use.
 .PP
-The makefiles have a target named \(lqzip\(rq
-for generating a \fBjar\fP archive.
+The actual plugin is composed of
+\fIPHP\fP code, and JavaScript for
+the administrative parts, and neither of those
+requires compilation or link editing.
+The flash video player is a compiled program,
+but binaries are included in the installable
+package so that use does not require
+compilation by the user. Of course,
+the source code is included and the
+binaries may be built if necessary
+(or desired). Compiling the flash
+program will require the \fIMing\fP
+PHP extension. See the files
+\f(CRMakefile\fR,
+\f(CRmingtest/mingput\.php\fR, and
+\f(CRmingtest/mainact\.inc\.php\fR
+if you wish to learn to build the player.
+.PP
+If you wish to change the JavaScript code,
+edit \f(CRjs/formxed\.dev\.js\fR, rather than
+\f(CRjs/formxed\.dev\.js\fR.
+The latter is merely a compacted version
+of the former; see \f(CRMakefile\fR.
+\
 .SH
 Running
 .PP
