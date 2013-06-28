@@ -581,8 +581,8 @@ foreach ( $av as $k => $v ) {
 			}
 			break;
 		case 'HB':
-			if ( $v == 'true' ) {
-				$initshowbar = 'false';
+			if ( $v == 'false' ) {
+				$initshowbar = 'true';
 			}
 			break;
 		case 'VL':
@@ -699,7 +699,7 @@ $streambuftime = 5; // seconds of stream buffering
 if ( !isset($initpause) )
 	$initpause   = 'true'; // initial pause video?
 if ( !isset($initshowbar) )
-	$initshowbar = 'true'; // initial show control bar?
+	$initshowbar = 'false'; // initial show control bar?
 if ( !isset($initvolume) )
 	$initvolume = 50; // initial volume if no local setting
 if ( !isset($doloop) )

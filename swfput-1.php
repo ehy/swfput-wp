@@ -2009,7 +2009,7 @@ class SWF_params_evh {
 		'pixelaspect' => '0',      // use if display aspect unknown
 		'volume' => '50',          // if host has no saved setting
 		'play' => 'false',         // play (or pause) on load
-		'hidebar' => 'false',      // initially hide control bar
+		'hidebar' => 'true',      // initially hide control bar
 		'disablebar' => 'false',   // disable and hide control bar
 		'barheight' => '36',
 		'quality' => 'high',

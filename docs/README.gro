@@ -8,11 +8,12 @@ A Flash Video Player Plugin for WordPress
 .AU
 Ed Hynan <edhynan@gmail.com>
 <<CMAC>>
-.SH
+.NH 1
 What is it?
 .PP
-\fBSWFPut\fP is a cleverly named plugin for
-the popular \fIWordPress\fP content management and weblog
+\fBSWFPut\fP is a plugin for
+the popular \fIWordPress\fP
+content management and weblog
 software. It provides a video player program
 for the flash plugin and the means to configure
 an instance with a video source and playback
@@ -45,7 +46,7 @@ to the pages generated for your visitors,
 which might be helpful if you try keep your
 pages useful to those who disable JavaScript
 in their browser. (Such visitors might need
-to explicitely enable the flash plugin, but that
+to explicitly enable the flash plugin, but that
 is another, unavoidable, issue.)
 JavaScript is used in the administrative
 interface for the forms and manipulation
@@ -61,7 +62,7 @@ does not handle *\.mp4 files well, even though
 it handles h\.264 video and AAC audio if they
 are in an FLV container file.)
 \
-.SH
+.NH 1
 Building From the Source
 .PP
 \fBSWFPut\fP is distributed as a \fIZIP\fP
@@ -107,25 +108,166 @@ The Makefiles require a \fIUnix\fP-like or
 builds as necessary and then creates the
 ZIP file.
 \
-.SH
+.NH 1
 Usage
 .PP
 A logged in session is assumed.
 .PP
 \fBSWFPut\fP installed will add an item
-under the \(lqSettings\(rq named
+under the \(lqSettings\(rq menu named
 \(lqSWFPut Plugin\(rq. Selecting that should
 produce the plugin's configuration page.
 The configuration page includes optional verbose
 help, and so it will not be described here.
 .PP
-Below the editor for posts (and pages)
-the plugin will place an interactive form
-with the title
+When editing posts or pages,
+below the editor
+the plugin will have placed an interactive
+form with the title
 \(lqSWFPut Flash Video Shortcode\(rq.
 Directly under the title is a row of buttons.
+Under the row of buttons, the bulk of the
+form is placed in three sections entitled
+\(lqMedia\(rq, \(lqDimensions\(rq, and
+\(lqBehavior\(rq.
+The title bar of each section has a button
+that will hide or show that section, which
+might help if the height of the form is
+greater than that the display.
+.PP
+.RS
+.NH 2
+Form Buttons
+\" .RS
+.IP \(bu
+\fBFill form from editor\fP:
+When the post (or page) already contains
+a \fBSWFPut\fP flash
+video object (i.e., shortcode),
+this will find it in the
+editor and fill the form with its details.
+A post may contain any number of
+\fBSWFPut\fP video objects. If there
+is more than one, then repeatedly
+using this button will cycle through
+each in turn.
+.IP \(bu
+\fBReplace current in editor\fP:
+When the form has been filled with
+the details of a video object using
+\(lq\fBFill form from editor\fP\(rq (described
+above), or if it contains the details
+of a new video object that has just been
+added, the form items may be changed, and
+this button will edit the associated
+shortcode (video object) with the changes.
+.IP \(bu
+\fBDelete current in editor\fP:
+As described above for
+\(lq\fBReplace current in editor\fP\(rq,
+except that rather than changing
+the details of the shortcode, it is
+deleted.
+.IP \(bu
+\fBPlace new in editor\fP:
+After making sure that the cursor
+(insertion point) in the editor is
+at the desired position, and setting
+the form items, use this button to add
+a new shortcode (video).
+.IP \(bu
+\fBReset default values\fP:
+Except for the \(lqCaption\(rq text
+field, all form items are set to
+default values, or cleared. It is
+assumed that text typed into
+the \(lqCaption\(rq field would be better
+maintained by hand, so that field is
+not cleared.
+\" .RE
 \
-.SH
+.NH 2
+Form Sections
+.RS
+.NH 3
+Media
+.IP \(bu
+\fBCaption\fP:
+A video object is set in a page as
+an image would be, with the same border,
+and an optional caption, which may be set
+here. If this field is left blank, there
+will be no caption.
+.IP \(bu
+\fBUrl or media library ID\fP:
+A fully qualified URL may be given here,
+or an ID valid for the \fIWorpPress\fP
+database.
+Or more conveniently, this field may be set from the two
+drop-down lists described next.
+Acceptable protocols are \fIHTTP\fP,
+\fIHTTPS\fp, and \fIRTMP\fP.
+Support for \fIRTMP\fP is only
+partial and very limited. See
+\(lq\fBPlaypath (rtmp)\fP\(rq
+below. Acceptable file (media) types
+are \fBFLV\fP, \fBMP4\fP (video), and
+\fBMP3\fP (audio). Note that it is the file
+\fItype\P that matters, not the
+file name suffix.
+.IP \(bu
+\fBUrl from uploads directory\fP:
+This is a drop=down list from which
+the \f(lq\fBUrl or media library ID\fP\f(rq
+field may be set. The \fIWorpPress\fP
+\f(CRuploads\fR directory is searched
+recursively for files with the suffixes
+\fBFLV\fP, \fBMP4\fP, and \fBMP3\fP, and
+for each a URL is placed in this list.
+This has the advantage that it will find
+files added by hand (rather than with
+the `add media interface') if they are
+placed in \f(CRuploads\fR or a
+directory under it.
+.IP \(bu
+\fBSelect ID from media library\fP:
+This is a drop=down list from which
+the \f(lq\fBUrl or media library ID\fP\f(rq
+field may be set, as above, with the
+difference that it searches the
+\fIWorpPress\fP media database, and
+presents the suitable filenames
+and media ID's found.
+.IP \(bu
+\fBPlaypath (rtmp)\fP:
+If the \f(lq\fBUrl or media library ID\fP\f(rq
+is given a \fIRTMP\fP URL, the `playpath'
+is given here. Note that only the simplest
+RTMP connections are supported: those
+requiring only the playpath.
+.IP \(bu
+\fBUrl of initial image file (optional)\fP:
+.IP \(bu
+\fBLoad image from uploads directory\fP:
+.IP \(bu
+\fBLoad image ID from media library\fP:
+.IP \(bu
+\fBMedium is audio\fP:
+\
+.NH 3
+Dimensions
+.IP \(bu
+\fB\fP:
+\
+.NH 3
+Behavior
+.IP \(bu
+\fB\fP:
+\
+.RE
+.RE
+\
+.NH 1
 License
 .PP
 This program and all files included in

@@ -38,7 +38,7 @@ SWFPut_putswf_video_xed.prototype = {
 		pixelaspect: "0",     
 		volume: "50",         
 		play: "false",        
-		hidebar: "false",     
+		hidebar: "true",     
 		disablebar: "false",  
 		barheight: "36",
 		quality: "high",

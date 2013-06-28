@@ -1,3 +1,4 @@
+PKG   = SWFPut
 
 ROFF  = groff
 TROFF = troff
@@ -5,15 +6,18 @@ GROTT = grotty -c
 TMAC  = -ms
 ROFFMAC = $(ROFF)  $(TMAC)
 ROFFTXT = $(TROFF) $(TMAC)
+PS2PDF  = ps2pdf
+#PS2PDF  = pstopdf
 TTT   = ascii
 #TTT = utf8
 
 NAME = README
 OPS  = $(NAME).ps
+OPDF = $(NAME).pdf
 OTXT = $(NAME).txt
 OTTY = $(NAME).tty
-UTTY = $(NAME).tt8
 UTF8 = $(NAME).ut8
+UTTY = $(NAME).tt8
 
 TDEF = $(OTXT)
 
@@ -39,6 +43,9 @@ ut8:  $(UTF8)
 
 ps:   $(OPS)
 
+pdf:  $(OPDF)
+
+
 $(OTTY) : $(SRC) $(ASRC)
 	$(SED) -e 's;^<<CMAC>>;\.1C;' < \
 	$(SRC) | $(ROFFMAC) -T$(TTT) | $(COL) | ./$(ASRC) | \
@@ -61,6 +68,9 @@ $(OTXT) : $(SRC) $(ASRC)
 $(OPS) : $(SRC)
 	$(SED) -e 's;^<<CMAC>>;\.2C;' < \
 	$(SRC) | $(ROFFMAC) -Tps > $@
+
+$(OPDF) : $(OPS)
+	$(PS2PDF)  $(OPS) $(OPDF)
 
 $(ASRC) : $(ASRC).c
 	$(CC) -o $@ $<
