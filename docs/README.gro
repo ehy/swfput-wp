@@ -206,19 +206,19 @@ database.
 Or more conveniently, this field may be set from the two
 drop-down lists described next.
 Acceptable protocols are \fIHTTP\fP,
-\fIHTTPS\fp, and \fIRTMP\fP.
+\fIHTTPS\fP, and \fIRTMP\fP.
 Support for \fIRTMP\fP is only
 partial and very limited. See
 \(lq\fBPlaypath (rtmp)\fP\(rq
 below. Acceptable file (media) types
 are \fBFLV\fP, \fBMP4\fP (video), and
 \fBMP3\fP (audio). Note that it is the file
-\fItype\P that matters, not the
+\fItype\fP that matters, not the
 file name suffix.
 .IP \(bu
 \fBUrl from uploads directory\fP:
-This is a drop=down list from which
-the \f(lq\fBUrl or media library ID\fP\f(rq
+This is a drop-down list from which
+the \(lq\fBUrl or media library ID\fP\(rq
 field may be set. The \fIWorpPress\fP
 \f(CRuploads\fR directory is searched
 recursively for files with the suffixes
@@ -226,22 +226,22 @@ recursively for files with the suffixes
 for each a URL is placed in this list.
 This has the advantage that it will find
 files added by hand (rather than with
-the `add media interface') if they are
+the `add media' interface) if they are
 placed in \f(CRuploads\fR or a
 directory under it.
 .IP \(bu
 \fBSelect ID from media library\fP:
-This is a drop=down list from which
-the \f(lq\fBUrl or media library ID\fP\f(rq
+This is a drop-down list from which
+the \(lq\fBUrl or media library ID\fP\(rq
 field may be set, as above, with the
 difference that it searches the
 \fIWorpPress\fP media database, and
 presents the suitable filenames
-and media ID's found.
+their media IDs.
 .IP \(bu
 \fBPlaypath (rtmp)\fP:
-If the \f(lq\fBUrl or media library ID\fP\f(rq
-is given a \fIRTMP\fP URL, the `playpath'
+If the \(lq\fBUrl or media library ID\fP\(rq
+is given an \fBRTMP\fP URL, the `playpath'
 is given here. Note that only the simplest
 RTMP connections are supported: those
 requiring only the playpath.
