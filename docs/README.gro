@@ -46,13 +46,20 @@ which might be helpful if you try keep your
 pages useful to those who disable JavaScript
 in their browser. (Such visitors might need
 to explicitely enable the flash plugin, but that
-is another unavoidable issue.)
+is another, unavoidable, issue.)
 JavaScript is used in the administrative
 interface for the forms and manipulation
 of shortcodes in the editor; but of course
 you must have JavaScript enabled when you
 log in to your site\(emthis does not
 affect your visitors.
+.PP
+(Note that the flash video player has been
+coded to work well with the free \fIGnash\fP
+flash plugin. As of this writing, \fIGnash\fP
+does not handle *\.mp4 files well, even though
+it handles h\.264 video and AAC audio if they
+are in an FLV container file.)
 \
 .SH
 Building From the Source
@@ -63,6 +70,10 @@ archive prepared for installation on a
 item under the \(lqPlugins\(rq menu.
 Therefore, there is no need to build the
 package before use.
+.PP
+(You may skip forward to the
+\fBUsage\fP section if you don't intend
+to modify the player or plugin.)
 .PP
 The actual plugin is composed of
 \fIPHP\fP code, and JavaScript for
@@ -84,41 +95,44 @@ if you wish to learn to build the player.
 .PP
 If you wish to change the JavaScript code,
 edit \f(CRjs/formxed\.dev\.js\fR, rather than
-\f(CRjs/formxed\.dev\.js\fR.
-The latter is merely a compacted version
+\f(CRjs/formxed\.js\fR.
+The latter is merely a `minified' version
 of the former; see \f(CRMakefile\fR.
+.PP
+This file (README*) is built with
+\fIgroff\fP; see \f(CRdocs/Makefile\fR.
+.PP
+The Makefiles require a \fIUnix\fP-like or
+\fIPOSIX\fP system. The default target
+builds as necessary and then creates the
+ZIP file.
 \
 .SH
-Running
+Usage
 .PP
-\fBSWFPut\fP will run as an application or applet.
-The same set of classes are used except for the
-class containing the entry point, which differs
-for each.  The application is invoked via 
-\fBFractalForge.class\fP and the applet via
-\fBFractApplet.class\fP. (The application uses
-one additional class not used by the application.)
-The file \fIFractApplet.html\fP is included to
-help run the applet with \fIJava\fP's \fBappletviewer\fP.
-\fIFractalForge.bat\fP is a simple \fIDOS\fP
-batch file that \fIDOS\fP users can run the
-application with, and \fIFractalForge\fP is
-a simple \fI/bin/sh\fP script.
-Both of these scripts expect to be invoked from
-the directory containing the class files. If the
-class files are installed in a library directory,
-then edit your script as necessary.
+A logged in session is assumed.
 .PP
-The application version can save
-images in the \fB.PPM\fP format.
-When run as an applet image saving menu
-items are disabled.
+\fBSWFPut\fP installed will add an item
+under the \(lqSettings\(rq named
+\(lqSWFPut Plugin\(rq. Selecting that should
+produce the plugin's configuration page.
+The configuration page includes optional verbose
+help, and so it will not be described here.
+.PP
+Below the editor for posts (and pages)
+the plugin will place an interactive form
+with the title
+\(lqSWFPut Flash Video Shortcode\(rq.
+Directly under the title is a row of buttons.
+\
 .SH
 License
 .PP
 This program and all files included in
 the distribution archive are under the
-\f(BIGNU GPL\fP.
-See the included file \fBCOPYING\fP.
-
+\f(BIGNU GPL\fP, version 3.
+See the file \f(CRCOPYING\fP, which
+should be present in the top-level
+directory of the distribution archive.
+\
 \".TC
