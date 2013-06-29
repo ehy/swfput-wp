@@ -2,9 +2,7 @@
 \" CR gives courier (tt):
 \" \f(CRhttp://netpbm.sourceforge.net/\fR.
 .TL
-README for SWFPut
-.br
-A Flash Video Player Plugin for WordPress
+SWFPut \(em Flash Video Player Plugin for WordPress
 .AU
 Ed Hynan <edhynan@gmail.com>
 <<CMAC>>
@@ -212,9 +210,18 @@ partial and very limited. See
 \(lq\fBPlaypath (rtmp)\fP\(rq
 below. Acceptable file (media) types
 are \fBFLV\fP, \fBMP4\fP (video), and
-\fBMP3\fP (audio). Note that it is the file
-\fItype\fP that matters, not the
-file name suffix.
+\fBMP3\fP\**
+.FS
+For \fBMP3\fP files, you may try placing
+a video (\fBFLV\fP or \fBMP4\fP) file in the
+\(lq\fBPlaypath (rtmp)\fP\(rq field to play
+along with the audio. If the video has an
+audio stream, that will mix in, so it should
+probably be a video only file. This is an
+experimental, incidental, and \fBunsupported\fP
+feature.
+.FE
+(audio).
 .IP \(bu
 \fBUrl from uploads directory\fP:
 This is a drop-down list from which
@@ -222,7 +229,8 @@ the \(lq\fBUrl or media library ID\fP\(rq
 field may be set. The \fIWorpPress\fP
 \f(CRuploads\fR directory is searched
 recursively for files with the suffixes
-\fBFLV\fP, \fBMP4\fP, and \fBMP3\fP, and
+\fBFLV\fP, \fBMP4\fP, and \fBMP3\fP,
+and
 for each a URL is placed in this list.
 This has the advantage that it will find
 files added by hand (rather than with
@@ -241,6 +249,7 @@ their media IDs.
 .IP \(bu
 \fBPlaypath (rtmp)\fP:
 If the \(lq\fBUrl or media library ID\fP\(rq
+field
 is given an \fBRTMP\fP URL, the `playpath'
 is given here. Note that only the simplest
 RTMP connections are supported: those

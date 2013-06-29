@@ -8,6 +8,7 @@ SRCS = ${PRJNAME}.php \
 	OptSection_0_0_2.inc.php \
 	OptPage_0_0_2.inc.php
 
+DOCSD = docs
 JSDIR = js
 JSBIN = $(JSDIR)/formxed.js
 JSSRC = $(JSDIR)/formxed.dev.js
@@ -23,8 +24,9 @@ SBINS = $(SDIRI)/default.flv \
 	$(SDIRI)/mingput28.swf \
 	$(SDIRI)/mingput24.swf
 
-ALSO = Makefile README
-ZALL = ${SRCS} ${ALSO}
+ALSO = Makefile
+READS= README README.tty README.tt8 README.pdf README.html
+ZALL = ${SRCS} ${ALSO} ${READS}
 ZSALL = ${SSRCS} ${SBINS}
 BINALL = ${SBINS} ${JSBIN}
 PRJDIR = ${PRJNAME}
@@ -38,7 +40,9 @@ all: ${PRJZIP}
 
 ${PRJZIP}: ${SBINS} ${JSBIN} ${ZALL}
 	test -e ttd && rm -rf ttd; test -e ${PRJDIR} && mv ${PRJDIR} ttd; \
-	mkdir ${PRJDIR} ${PRJSDIR} && cp -r -p ${ZALL} ${JSDIR} ${PRJDIR} && \
+	mkdir ${PRJDIR} ${PRJSDIR} && \
+	cp -r -p ${ZALL} ${JSDIR} ${DOCSD} ${PRJDIR} && \
+	( cd ${PRJDIR}/${DOCSD} && make clean; true ) && \
 	cp -r -p ${ZSALL} ${PRJSDIR} && rm -f ${PRJZIP} && \
 	$(ZIP) ${PRJZIP} ${PRJDIR} && rm -rf ${PRJDIR} && \
 	(test -e ttd && mv ttd ${PRJDIR}; ls -l ${PRJZIP})
@@ -73,11 +77,16 @@ ${JSBIN}: ${JSSRC}
 		'use JavaScript::Packer;$$p=JavaScript::Packer->init();$$o=join("",<STDIN>);$$p->minify(\$$o,{"compress"=>"clean"});print STDOUT $$o;' < ${JSSRC} > ${JSBIN}) \
 	|| cp -f ${JSSRC} ${JSBIN}
 
-README: docs/README.gro
-	(cd docs && make) && cp -f docs/README.txt README
+$(READS): docs/README.gro
+	(cd docs && make txt tty tt8 pdf html && \
+	cp -f README.txt README.tty README.tt8 README.pdf README.html ..)
+	rm -f README && mv README.txt README
 
 clean-docs:
 	cd docs && make clean
 
 clean: clean-docs
 	rm -f ${PRJZIP} ${BINALL}
+
+cleanall: clean
+	rm -f $(READS)

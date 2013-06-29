@@ -18,6 +18,7 @@ OTXT = $(NAME).txt
 OTTY = $(NAME).tty
 UTF8 = $(NAME).ut8
 UTTY = $(NAME).tt8
+HTML = $(NAME).html
 
 TDEF = $(OTXT)
 
@@ -45,6 +46,12 @@ ps:   $(OPS)
 
 pdf:  $(OPDF)
 
+html: $(HTML)
+
+
+$(HTML) : $(SRC)
+	$(SED) -e 's;^<<CMAC>>;\.1C;' < \
+	$(SRC) | $(ROFFMAC) -Thtml  > $@
 
 $(OTTY) : $(SRC) $(ASRC)
 	$(SED) -e 's;^<<CMAC>>;\.1C;' < \
@@ -56,7 +63,7 @@ $(UTTY) : $(SRC) $(ASRC)
 	$(SRC) | $(ROFFMAC) -Tutf8 | $(COL) | ./$(ASRC) | \
 	$(SED) -e 's;^\(.\{1,\}\);    \1;' > $@
 
-$(UTF8) : $(SRC) $(ASRC)
+$(UTF8) : $(SRC)
 	$(SED) -e 's;^<<CMAC>>;\.1C;' < \
 	$(SRC) | $(ROFFTXT) -Tutf8 | $(GROTT) > $@
 
@@ -79,5 +86,6 @@ install: all
 	mv -f $(TDEF) ../$(README)
 
 clean:
-	-rm -f $(OTTY) $(UTTY) $(UTF8) $(OTXT) $(OPS) $(ASRC)
+	-rm -f $(OTTY) $(HTML) $(UTTY) $(UTF8) $(OTXT) $(OPS) $(OPDF) \
+	 $(ASRC)
 
