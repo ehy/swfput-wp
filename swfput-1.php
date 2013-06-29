@@ -1520,6 +1520,20 @@ class SWF_put_evh {
 	public static function r_find_files($dir, $pat, $follow = false) {
 	        $ao = array();
 	        $pr = $dir === '.' ? '' : $dir . '/';
+
+	        // although this procedure should not be handling
+	        // external input, take some security measures anyway
+	        if ( preg_match('/^\.\.\//', $pr) ) {
+				// found ../*
+				return $ao; // empty
+			} else if ( preg_match('/\/\.\.\//', $pr) ) {
+				// found */../*
+				return $ao; // empty
+			} else if ( preg_match('/^\//', $pr) ) {
+				// found /*
+				return $ao; // empty
+			}
+
 	        foreach ( scandir($dir) as $e) {
 	                if ( $e === '.' || $e === '..' )
 	                        continue;

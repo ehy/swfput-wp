@@ -15,49 +15,49 @@
 
 
 
-    What is it?
+    1.  What is it?
 
-         SWFPut is a cleverly named plugin for the popular Word-
-    Press content management and weblog software. It provides  a
-    video  player  program for the flash plugin and the means to
-    configure an instance  with  a  video  source  and  playback
-    attributes.   There  are  two separate components: the flash
-    video player, and the WP plugin proper.  The video player is
-    delivered  to site visitors by the plugin in the traditional
-    <object ...> block with the necessary arguments. Flash video
-    objects  may  be placed in posts and pages, or in the widget
-    areas supported by your theme (i.e., the plugin  includes  a
-    widget).   Video  is placed in posts and pages with a short-
-    code; if you do not know what a shortcode is, or do not want
-    to  deal  with  them,  that's  no  problem.  (In fact, it is
-    preferable that the shortcodes not be hand-edited, and  they
-    will  not  be  discussed in detail here.) The plugin adds to
-    the administrative interface a full featured form  to  setup
-    and  add, or edit, or delete video objects, so the user does
-    not need to be troubled with shortcodes (they will be  visi-
-    ble  in  the  editor; you will get used to them).  The flash
-    video widget has a similar full featured form.
+         SWFPut  is  a  plugin for the popular WordPress content
+    management and weblog software. It provides a  video  player
+    program  for  the flash plugin and the means to configure an
+    instance with a video source and playback attributes.  There
+    are two separate components: the flash video player, and the
+    WP plugin proper.  The video player  is  delivered  to  site
+    visitors by the plugin in the traditional <object ...> block
+    with the necessary arguments. Flash  video  objects  may  be
+    placed  in posts and pages, or in the widget areas supported
+    by your theme (i.e., the plugin includes a  widget).   Video
+    is placed in posts and pages with a shortcode; if you do not
+    know what a shortcode is, or do not want to deal with  them,
+    that's  no  problem.   (In  fact,  it is preferable that the
+    shortcodes not be hand-edited, and they  will  not  be  dis-
+    cussed  in  detail here.) The plugin adds to the administra-
+    tive interface a full featured form to  setup  and  add,  or
+    edit,  or delete video objects, so the user does not need to
+    be troubled with shortcodes (they will  be  visible  in  the
+    editor;  you will get used to them).  The flash video widget
+    has a similar full featured form.
 
          The plugin does not add any  JavaScript  to  the  pages
     generated  for  your visitors, which might be helpful if you
     try keep your pages useful to those who  disable  JavaScript
-    in  their  browser. (Such visitors might need to explicitely
-    enable the flash plugin, but  that  is  another  unavoidable
+    in  their  browser.  (Such visitors might need to explicitly
+    enable the flash plugin, but that is  another,  unavoidable,
     issue.)   JavaScript is used in the administrative interface
     for the forms and manipulation of shortcodes in the  editor;
     but  of course you must have JavaScript enabled when you log
     in to your site--this does not affect your visitors.
 
-    Building From the Source
+         (Note that the flash video player  has  been  coded  to
+    work well with the free Gnash flash plugin. As of this writ-
+    ing, Gnash does not handle *.mp4 files well, even though  it
+    handles h.264 video and AAC audio if they are in an FLV con-
+    tainer file.)
+
+    2.  Building From the Source
 
          SWFPut is distributed as a  ZIP  archive  prepared  for
     installation  on  a  WordPress  site with the "Add New" item
-    under the "Plugins" menu.  Therefore, there is  no  need  to
-    build the package before use.
-
-         The   actual  plugin  is  composed  of  PHP  code,  and
-    JavaScript for the  administrative  parts,  and  neither  of
-    those requires compilation or link editing.  The flash video
 
 
 
@@ -70,52 +70,184 @@
                                  -2-
 
 
-    player is a compiled program, but binaries are  included  in
-    the  installable package so that use does not require compi-
-    lation by the user. Of course, the source code  is  included
-    and  the  binaries  may  be built if necessary (or desired).
+    under the "Plugins" menu.  Therefore, there is  no  need  to
+    build the package before use.
+
+         (You may skip forward to the Usage section if you don't
+    intend to modify the player or plugin.)
+
+         The  actual  plugin  is  composed  of  PHP  code,   and
+    JavaScript  for  the  administrative  parts,  and neither of
+    those requires compilation or link editing.  The flash video
+    player  is  a compiled program, but binaries are included in
+    the installable package so that use does not require  compi-
+    lation  by  the user. Of course, the source code is included
+    and the binaries may be built  if  necessary  (or  desired).
     Compiling the flash program will require the Ming PHP exten-
-    sion.  See  the  files  Makefile,  mingtest/mingput.php, and
-    mingtest/mainact.inc.php if you wish to learn to  build  the
+    sion. See  the  files  Makefile,  mingtest/mingput.php,  and
+    mingtest/mainact.inc.php  if  you wish to learn to build the
     player.
 
          If you wish to change the JavaScript code, edit js/for-
-    mxed.dev.js, rather than js/formxed.dev.js.  The  latter  is
-    merely a compacted version of the former; see Makefile.
+    mxed.dev.js,  rather  than  js/formxed.js.   The  latter  is
+    merely a `minified' version of the former; see Makefile.
 
-    Running
+         This file (README*) is built with groff; see docs/Make-
+    file.
 
-         SWFPut  will run as an application or applet.  The same
-    set of classes are used except for the class containing  the
-    entry  point,  which  differs  for each.  The application is
-    invoked via FractalForge.class and the applet  via  FractAp-
-    plet.class.  (The  application uses one additional class not
-    used by the  application.)   The  file  FractApplet.html  is
-    included  to  help  run the applet with Java's appletviewer.
-    FractalForge.bat is a simple DOS batch file that  DOS  users
-    can  run  the application with, and FractalForge is a simple
-    /bin/sh script.  Both of these scripts expect to be  invoked
-    from  the directory containing the class files. If the class
-    files are installed in a library directory, then  edit  your
-    script as necessary.
+         The  Makefiles require a Unix-like or POSIX system. The
+    default target builds as necessary and then creates the  ZIP
+    file.
 
-         The  application  version  can  save images in the .PPM
-    format.  When run as an applet image saving menu  items  are
-    disabled.
+    3.  Usage
 
-    License
+         A logged in session is assumed.
+
+         SWFPut  installed will add an item under the "Settings"
+    menu named "SWFPut Plugin". Selecting  that  should  produce
+    the  plugin's  configuration  page.   The configuration page
+    includes optional verbose  help,  and  so  it  will  not  be
+    described here.
+
+         When editing posts or pages, below the editor the plug-
+    in will have placed an interactive form with the title "SWF-
+    Put  Flash  Video Shortcode".  Directly under the title is a
+    row of buttons.  Under the row of buttons, the bulk  of  the
+    form  is  placed in three sections entitled "Media", "Dimen-
+    sions", and "Behavior".  The title bar of each section has a
+    button that will hide or show that section, which might help
+    if the height of the form is greater than that the display.
+
+
+         3.1.  Form Buttons
+
+
+         o    Fill form from editor: When  the  post  (or  page)
+              already  contains  a  SWFPut  flash  video  object
+
+
+
+
+
+
+
+
+
+                                 -3-
+
+
+              (i.e., shortcode), this will find it in the editor
+              and  fill  the  form with its details.  A post may
+              contain any number of  SWFPut  video  objects.  If
+              there is more than one, then repeatedly using this
+              button will cycle through each in turn.
+
+         o    Replace current in editor: When the form has  been
+              filled  with  the  details of a video object using
+              "Fill form from editor" (described above),  or  if
+              it contains the details of a new video object that
+              has  just  been  added,  the  form  items  may  be
+              changed,  and this button will edit the associated
+              shortcode (video object) with the changes.
+
+         o    Delete current in editor: As described  above  for
+              "Replace  current  in  editor", except that rather
+              than changing the details of the shortcode, it  is
+              deleted.
+
+         o    Place  new  in  editor: After making sure that the
+              cursor (insertion point) in the editor is  at  the
+              desired  position, and setting the form items, use
+              this button to add a new shortcode (video).
+
+         o    Reset default values:  Except  for  the  "Caption"
+              text field, all form items are set to default val-
+              ues, or cleared. It is  assumed  that  text  typed
+              into  the  "Caption"  field  would be better main-
+              tained by hand, so that field is not cleared.
+
+
+         3.2.  Form Sections
+
+              3.2.1.  Media
+
+              o    Caption: A video object is set in a  page  as
+                   an  image would be, with the same border, and
+                   an optional caption, which may be  set  here.
+                   If this field is left blank, there will be no
+                   caption.
+
+              o    Url or media library ID:  A  fully  qualified
+                   URL may be given here, or an ID valid for the
+                   WorpPress database.   Or  more  conveniently,
+                   this  field may be set from the two drop-down
+                   lists described next.   Acceptable  protocols
+                   are  HTTP, HTTPS, and RTMP.  Support for RTMP
+                   is only partial and very limited. See  "Play-
+                   path  (rtmp)"  below. Acceptable file (media)
+                   types are FLV, MP4 (video), and MP3  (audio).
+                   Note  that  it is the file type that matters,
+                   not the file name suffix.
+
+
+
+
+
+
+
+
+
+
+
+                                 -4-
+
+
+              o    Url from uploads directory: This is  a  drop-
+                   down  list  from  which  the  "Url  or  media
+                   library ID" field may be set.  The  WorpPress
+                   uploads directory is searched recursively for
+                   files with the suffixes FLV,  MP4,  and  MP3,
+                   and  for  each  a URL is placed in this list.
+                   This has the  advantage  that  it  will  find
+                   files  added  by  hand  (rather than with the
+                   `add media' interface) if they are placed  in
+                   uploads or a directory under it.
+
+              o    Select ID from media library: This is a drop-
+                   down  list  from  which  the  "Url  or  media
+                   library  ID" field may be set, as above, with
+                   the difference that it searches the WorpPress
+                   media  database,  and  presents  the suitable
+                   filenames their media IDs.
+
+              o    Playpath (rtmp): If the "Url or media library
+                   ID"  is  given an RTMP URL, the `playpath' is
+                   given here. Note that only the simplest  RTMP
+                   connections  are  supported:  those requiring
+                   only the playpath.
+
+              o    Url of initial image file (optional):
+
+              o    Load image from uploads directory:
+
+              o    Load image ID from media library:
+
+              o    Medium is audio:
+
+              3.2.2.  Dimensions
+
+              o    :
+
+              3.2.3.  Behavior
+
+              o    :
+
+    4.  License
 
          This program and all files included in the distribution
-    archive are under the GNU GPL.  See the included file  COPY-
-    ING.
-
-
-
-
-
-
-
-
+    archive  are  under  the  GNU  GPL, version 3.  See the file
+    COPYING, which should be present in the top-level  directory
+    of the distribution archive.
 
 
 
