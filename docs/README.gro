@@ -61,6 +61,9 @@ As of this writing, \fIGnash\fP
 does not handle *\.mp4 files well, even though
 it handles h\.264 video and AAC audio if they
 are in an FLV container file.)
+.PP
+This `README' serves as the main documentation
+for the \fBSWFPut\fP \fIWordPress\fP plugin.
 \
 .NH 1
 Building From the Source
@@ -188,7 +191,7 @@ not cleared.
 \
 .NH 2
 Form Sections
-.RS
+\" .RS
 .NH 3
 Media
 .IP \(bu
@@ -212,7 +215,7 @@ partial and very limited. See
 \(lq\fBPlaypath (rtmp)\fP\(rq
 below. Acceptable file (media) types
 are \fBFLV\fP, \fBMP4\fP (video), and
-\fBMP3\fP\**
+\fBMP3\fP (audio)\**.
 .FS
 For \fBMP3\fP files, you may try placing
 a video (\fBFLV\fP or \fBMP4\fP) file in the
@@ -223,7 +226,7 @@ probably be a video only file. This is an
 experimental, incidental, and \fBunsupported\fP
 feature.
 .FE
-(audio).
+\
 .IP \(bu
 \fBUrl from uploads directory\fP:
 This is a drop-down list from which
@@ -310,15 +313,194 @@ the \fBMP3\fP suffix, check this.
 .NH 3
 Dimensions
 .IP \(bu
-\fB\fP:
+\fBPixel Width \(mu Height\fP:
+set these to the desired size of the
+player's embedded window.
+This does not need to be the same
+as the display size of the video to be played,
+but the appearance will be best if the \fIaspect\fP
+of the player's display is the same as the
+display aspect of the video. For example,
+if set for a video with a size of 400\(mu300,
+then setting these to fields to 320\(mu240
+would look good (the width:height ratio is the
+same). In any case, the player will scale the
+video to fit within its display, but it maintains
+the aspect ratio, so horizontal or vertical
+black (unused) areas will be visible if the
+aspect ratios do not match. It is also important
+to note that the browser will (probably) honor
+a maximum width for a page column set in \fICSS\fP,
+and force the browser's flash plugin to display
+at a smaller width than the user specified.
+For example, if you set these fields to 640\(mu480,
+but the column in which posts appear has a width
+of 600, the display would be at 600\(mu480. In
+such a case, you might try 600\(mu450 to maintain
+the aspect so that the video matches display size.
+The above assumes a 4:3 aspect; you would use
+the correct numbers, of course.
+.IP \(bu
+\fBAuto aspect\fP:
+This enables a feature meant to be helpful
+when the video to be played might have been
+prepared as DVD-Video (NTSC or PAL) for
+standard (non-widescreen) 4:3 display. Such
+video has non-square pixels; i.e., its
+actual width\(muheight does not match its
+intended display aspect. With this check
+enabled, the video player will force display
+at 4:3 ratio if the video dimensions match
+one of the DVD-Video pixel sizes. This is
+not suitable for widescreen DVD-Video, which
+has one of the expected DVD-Video pixel sizes, but
+is meant to be displayed with a 16:9 aspect.
+.IP \(bu
+\fBDisplay aspect\fP:
+Set the intended display aspect ratio in this
+field if you know that the video has non-square
+pixels. A value of 0 (zero) disables this field;
+otherwise, a value may be given as a decimal
+number (e.g., 1.33333333) or as a ratio using
+`:' or `x' or `/' as separator (e.g., 4:3,
+or 16x9, of 20/11, etc.\(emseveral other characters
+will also be accepted as a separator, but it's
+sensible to use those listed here).
+.IP \(bu
+\fBPixel aspect\fP:
+Similar to \(lq\fBDisplay aspect\fP\(rq
+above, but this field takes the source
+(pixel) aspect ratio rather than the display
+aspect in the unlikely event that that
+value is more readily available. For example,
+video prepared for NTSC DVD at 720\(mu480
+pixels intended for standard (4:3) display
+has a pixel aspect ratio of 8:9, and at
+352\(mu240 a pixel aspect ratio of 10:11.
+As above, `0' disables this field.
 \
 .NH 3
 Behavior
 .IP \(bu
-\fB\fP:
+\fBInitial volume\fP:
+The video player has a volume control
+that visitors can adjust, but this
+field will set a default volume. If
+the web browser flash plugin is permitted
+to save values locally on a visitor's
+machine, then their adjustment will be
+saved, and will be used rather than the default
+when they visit again (or reload the
+page).
+.IP \(bu
+\fBPlay on load\fP:
+This will cause the video (or audio)
+to begin playing as soon as the
+player program is loaded. When this
+is not set, the player waits for the
+play button.
+.IP \(bu
+\fBLoop play\fP:
+This will cause the medium to play again
+from the beginning each time it ends.
+When this is not set, the media plays
+once, and then pauses.
+.IP \(bu
+\fBHide control bar initially\fP:
+This will cause the control bar to
+hide a few seconds after the player
+loads (e.g., so that it does not
+obscure an initial image). Note that
+this also changes the control bar
+behavior in general: the bar will show
+whenever mouse movement is detected
+within the embedded window, and hide
+again when there has been no mouse
+movement for a few seconds.
+When this is not set, the control
+bar is left showing when the player
+loads, and thereafter is always
+shown when the mouse is within the
+embedded window, and is always hidden
+when the mouse is \fIdetected\fP
+leaving the window (when the mouse
+is moved out of the player window
+with rapid motion the browser plugin
+often fails to deliver a `mouse has left'
+event to the player program, so hiding
+the bar is not always reliable).
+.IP \(bu
+\fBHide and disable control bar\fP:
+Enable this if the media should play
+through without interruption.
+.IP \(bu
+\fBAllow full screen\fP:
+This enables a control bar button that
+will place the video in full-screen
+mode.
+.IP \(bu
+\fBControl bar Height (20-50)\fP:
+The control bar height can be adjusted
+with this. Actually, there is a fixed
+number precompiled sizes in the player
+binaries that are distributed with
+the package, and this field causes the
+nearest size to be selected. If the
+\fIWordPress\fP host's \fIPHP\fP
+configuration includes the \fIMing\fP
+extension, then you may select an
+option on the \fBSWFPut\fP
+configuration page called
+\(lqDynamic SWF generation\(rq.
+This produces the video player
+on the fly, and in this case the
+value of this field builds the
+control bar at the requested
+size rather than using a near match.
 \
+\" .RE
 .RE
-.RE
+\
+.NH 2
+The Widget
+.PP
+The player can also be used as a widget.
+The \(lqAppearance\(rq menu
+\(lqWidgets\(rq item should produce the
+\(lqWidgets\(rq page which, after installation
+of \fBSWFPut\fP, should show
+\(lq\fBSWFPut Flash Video\fP\(rq under
+\(lq\fBAvailable Widgets\fP\(rq. After dragging
+this to a widget area the setup form
+should display (click the arrow near
+the title if necessary). The widget's
+form has the same items described under
+\(lq\fBForm Sections\fP\(rq above, although
+this form is not displayed in the three
+separate sections and does not have the
+buttons near the top.
+There is one additional
+item at the top of the widget form: a
+text field named \(lqWidget title\(rq.
+Not surprisingly, the contents of that
+field will be displayed as a title
+above the widget on the pages that
+include the particular widget area used.
+.PP
+The description under
+\(lq\fBPixel Width \(mu Height\fP\(rq above
+mentioned the maximum column widths set by
+the theme's CSS, and how the video window
+may be limited by the those.
+The same applies to
+widget areas, but the maximum width is
+likely much less than that in the posts
+area. These fields have defaults in the
+widget form that have been useful with
+the themes distributed with
+\fIWordPress\fP, but the user should
+certainly do some testing along with
+the chosen theme.
 \
 .NH 1
 License
@@ -328,6 +510,8 @@ the distribution archive are under the
 \f(BIGNU GPL\fP, version 3.
 See the file \f(CRCOPYING\fP, which
 should be present in the top-level
-directory of the distribution archive.
+directory of the distribution archive;
+or, see the license at
+\f(CRhttp://www.gnu.org/licenses/\fP.
 \
 \".TC
