@@ -1,6 +1,3 @@
-
-\" CR gives courier (tt):
-\" \f(CRhttp://netpbm.sourceforge.net/\fR.
 .TL
 SWFPut \(em Flash Video Player Plugin for WordPress
 .AU
@@ -17,7 +14,8 @@ for the flash plugin and the means to configure
 an instance with a video source and playback
 attributes.
 There are two separate components:
-the flash video player, and the WP plugin proper.
+the flash video player, and the \fIWordPress\fP
+plugin proper.
 The video player is delivered to site visitors
 by the plugin in the traditional <object ...>
 block with the necessary arguments. Flash video
@@ -41,21 +39,25 @@ featured form.
 .PP
 The plugin does not add any \fIJavaScript\fP
 to the pages generated for your visitors,
-which might be helpful if you try keep your
+which might be helpful if you try to keep your
 pages useful to those who disable JavaScript
-in their browser. (Such visitors might need
-to explicitly enable the flash plugin, but that
+in their browsers. (Such visitors might need
+to explicitly enable the flash
+web browser plugin, but that
 is another, unavoidable, issue.)
 JavaScript is used in the administrative
 interface for the forms and manipulation
 of shortcodes in the editor; but of course
 you must have JavaScript enabled when you
-log in to your site\(emthis does not
+log in to your \fIWordPress\fP
+site \(em this does not
 affect your visitors.
 .PP
-(Note that the flash video player has been
+(Note that the \fBSWFPut\fP video player has been
 coded to work well with the free \fIGnash\fP
-flash plugin. As of this writing, \fIGnash\fP
+web browser plugin, as well as the closed
+binary-only proprietary version in common use.
+As of this writing, \fIGnash\fP
 does not handle *\.mp4 files well, even though
 it handles h\.264 video and AAC audio if they
 are in an FLV container file.)
@@ -199,7 +201,7 @@ will be no caption.
 .IP \(bu
 \fBUrl or media library ID\fP:
 A fully qualified URL may be given here,
-or an ID valid for the \fIWorpPress\fP
+or an ID valid for the \fIWordPress\fP
 database.
 Or more conveniently, this field may be set from the two
 drop-down lists described next.
@@ -226,7 +228,7 @@ feature.
 \fBUrl from uploads directory\fP:
 This is a drop-down list from which
 the \(lq\fBUrl or media library ID\fP\(rq
-field may be set. The \fIWorpPress\fP
+field may be set. The \fIWordPress\fP
 \f(CRuploads\fR directory is searched
 recursively for files with the suffixes
 \fBFLV\fP, \fBMP4\fP, and \fBMP3\fP,
@@ -243,7 +245,7 @@ This is a drop-down list from which
 the \(lq\fBUrl or media library ID\fP\(rq
 field may be set, as above, with the
 difference that it searches the
-\fIWorpPress\fP media database, and
+\fIWordPress\fP media database, and
 presents the suitable filenames
 their media IDs.
 .IP \(bu
@@ -256,12 +258,54 @@ RTMP connections are supported: those
 requiring only the playpath.
 .IP \(bu
 \fBUrl of initial image file (optional)\fP:
+An \fBHTTP\fP or \fBHTTPS\fP URL for an
+image file may be placed here. When the player
+is loaded, if it is not set to play on load,
+this image is displayed until the play
+button is invoked. Accepted image types are
+\fBJPEG\fP, \fBPNG\fP, and \fBGIF\fP, and
+\fBSWF\fP\**.
+.FS
+\fBSWF\fP files may be stills or
+animations. This type is a flash
+\fIprogram\fP that the flash
+web browser plugin
+will be executing, so, of course, it must
+not interfere with the \fBSWFPut\fP
+player. Test thoroughly if this is used.
+.FE
 .IP \(bu
 \fBLoad image from uploads directory\fP:
+This is a drop-down list from which
+the \(lq\fBUrl of initial image file (optional)\fP\(rq
+field may be set. The \fIWordPress\fP
+\f(CRuploads\fR directory is searched
+recursively for files with the suffixes
+listed as acceptable for that field,
+and
+for each a URL is placed in this list.
+This has the advantage that it will find
+files added by hand (rather than with
+the `add media' interface) if they are
+placed in \f(CRuploads\fR or a
+directory under it.
 .IP \(bu
 \fBLoad image ID from media library\fP:
+This is a drop-down list from which
+the \(lq\fBUrl of initial image file (optional)\fP\(rq
+field may be set, as above, with the
+difference that it searches the
+\fIWordPress\fP media database, and
+presents the suitable filenames
+their media IDs.
 .IP \(bu
 \fBMedium is audio\fP:
+To determine whether to play video or audio,
+the file suffix of the medium is checked.
+If the file suffix is not known, the
+medium is assumed to be video. If the medium is
+an mp3 audio file, but it does not have
+the \fBMP3\fP suffix, check this.
 \
 .NH 3
 Dimensions

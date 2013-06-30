@@ -24,7 +24,7 @@ SBINS = $(SDIRI)/default.flv \
 	$(SDIRI)/mingput28.swf \
 	$(SDIRI)/mingput24.swf
 
-ALSO = Makefile
+ALSO = Makefile COPYING
 READS= README README.tty README.tt8 README.pdf README.html
 ZALL = ${SRCS} ${ALSO} ${READS}
 ZSALL = ${SSRCS} ${SBINS}
@@ -80,7 +80,7 @@ ${JSBIN}: ${JSSRC}
 $(READS): docs/README.gro
 	(cd docs && make txt tty tt8 pdf html && \
 	cp -f README.txt README.tty README.tt8 README.pdf README.html ..)
-	rm -f README && mv README.txt README
+	rm -f README; mv README.txt README
 
 clean-docs:
 	cd docs && make clean
