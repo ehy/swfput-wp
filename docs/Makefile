@@ -11,6 +11,8 @@ PS2PDF  = ps2pdf
 TTT   = ascii
 #TTT = utf8
 
+SRC  = readme.roff
+
 NAME = README
 OPS  = $(NAME).ps
 OPDF = $(NAME).pdf
@@ -22,15 +24,11 @@ HTML = $(NAME).html
 
 TDEF = $(OTXT)
 
-SRC  = $(NAME).gro
-
 #COL  = col -x
 COL  = cat
 SED  = sed
 
 ASRC = asc2ans
-
-.SUFFIXES: .gro .ps .txt .ansi
 
 all:  $(TDEF)
 
@@ -83,7 +81,7 @@ $(ASRC) : $(ASRC).c
 	$(CC) -o $@ $<
 
 install: all
-	mv -f $(TDEF) ../$(README)
+	mv -f $(TDEF) ..
 
 clean:
 	-rm -f $(OTTY) $(HTML) $(UTTY) $(UTF8) $(OTXT) $(OPS) $(OPDF) \

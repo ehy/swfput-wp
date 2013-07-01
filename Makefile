@@ -77,7 +77,7 @@ ${JSBIN}: ${JSSRC}
 		'use JavaScript::Packer;$$p=JavaScript::Packer->init();$$o=join("",<STDIN>);$$p->minify(\$$o,{"compress"=>"clean"});print STDOUT $$o;' < ${JSSRC} > ${JSBIN}) \
 	|| cp -f ${JSSRC} ${JSBIN}
 
-$(READS): docs/README.gro
+$(READS): docs/readme.roff
 	(cd docs && make txt tty tt8 pdf html && \
 	cp -f README.txt README.tty README.tt8 README.pdf README.html ..)
 	rm -f README; mv README.txt README
