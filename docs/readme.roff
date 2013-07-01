@@ -1,7 +1,15 @@
+\" these two registers are probably groff-only
+.nr PORPHANS 3
+.nr PORPHANS 3
 .TL
 SWFPut \(em Flash Video Player Plugin for WordPress
 .AU
 Ed Hynan <edhynan@gmail.com>
+.AB no
+This `README' serves as the main documentation
+for the \fBSWFPut\fP \fIWordPress\fP plugin, and
+the conventional role of the `README' as well.
+.AE
 <<CMAC>>
 .NH 1
 What is it?
@@ -58,12 +66,9 @@ coded to work well with the free \fIGnash\fP
 web browser plugin, as well as the closed
 binary-only proprietary version in common use.
 As of this writing, \fIGnash\fP
-does not handle *\.mp4 files well, even though
-it handles h\.264 video and AAC audio if they
+does not handle \fBMP4\fP files well, even though
+it handles H\.264 video and AAC audio if they
 are in an FLV container file.)
-.PP
-This `README' serves as the main documentation
-for the \fBSWFPut\fP \fIWordPress\fP plugin.
 \
 .NH 1
 Building From the Source
@@ -104,7 +109,9 @@ The latter is merely a `minified' version
 of the former; see \f(CRMakefile\fR.
 .PP
 This file (README*) is built with
-\fIgroff\fP; see \f(CRdocs/Makefile\fR.
+the \fIGNU\fP roff
+\fIgroff\fP with \fIms\fP macros;
+see \f(CRdocs/Makefile\fR.
 .PP
 The Makefiles require a \fIUnix\fP-like or
 \fIPOSIX\fP system. The default target
@@ -206,7 +213,8 @@ will be no caption.
 A fully qualified URL may be given here,
 or an ID valid for the \fIWordPress\fP
 database.
-Or more conveniently, this field may be set from the two
+Or more conveniently,
+this field may be set from the two
 drop-down lists described next.
 Acceptable protocols are \fIHTTP\fP,
 \fIHTTPS\fP, and \fIRTMP\fP.
@@ -218,12 +226,12 @@ are \fBFLV\fP, \fBMP4\fP (video), and
 \fBMP3\fP (audio)\**.
 .FS
 For \fBMP3\fP files, you may try placing
-a video (\fBFLV\fP or \fBMP4\fP) file in the
+a video URL in the
 \(lq\fBPlaypath (rtmp)\fP\(rq field to play
 along with the audio. If the video has an
 audio stream, that will mix in, so it should
 probably be a video only file. This is an
-experimental, incidental, and \fBunsupported\fP
+experimental and \fBunsupported\fP
 feature.
 .FE
 \
@@ -491,7 +499,7 @@ The description under
 \(lq\fBPixel Width \(mu Height\fP\(rq above
 mentioned the maximum column widths set by
 the theme's CSS, and how the video window
-may be limited by the those.
+width might be limited by the those.
 The same applies to
 widget areas, but the maximum width is
 likely much less than that in the posts
