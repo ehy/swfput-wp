@@ -348,6 +348,7 @@ class SWF_put_evh {
 					self::optuseming,
 					$items[self::optuseming],
 					array($this, 'put_useming_opt'));
+
 			// section object includes description callback
 			$sections[$ns++] = new $Cs($fields,
 					'swfput1_general_section',
@@ -369,11 +370,14 @@ class SWF_put_evh {
 					self::optdispwdg,
 					$items[self::optdispwdg],
 					array($this, 'put_widget_opt'));
-			$fields[$nf++] = new $Cf(self::optdisphdr,
-					self::ht(__('Place in header area:')),
-					self::optdisphdr,
-					$items[self::optdisphdr],
-					array($this, 'put_inhead_opt'));
+			// commented: from early false assumption that header
+			// could be easily hooked:
+			//$fields[$nf++] = new $Cf(self::optdisphdr,
+					//self::ht(__('Place in header area:')),
+					//self::optdisphdr,
+					//$items[self::optdisphdr],
+					//array($this, 'put_inhead_opt'));
+
 			// section object includes description callback
 			$sections[$ns++] = new $Cs($fields,
 					'swfput1_placement_section',
@@ -395,6 +399,7 @@ class SWF_put_evh {
 					self::optpregmsg,
 					$items[self::optpregmsg],
 					array($this, 'put_rxposts_opt'));
+
 			// section object includes description callback
 			$sections[$ns++] = new $Cs($fields,
 					'swfput1_postsopts_section',
@@ -416,6 +421,7 @@ class SWF_put_evh {
 					self::optcodewdg,
 					$items[self::optcodewdg],
 					array($this, 'put_scwdg_opt'));
+
 			// section object includes description callback
 			$sections[$ns++] = new $Cs($fields,
 					'swfput1_wdgsopts_section',
@@ -423,29 +429,7 @@ class SWF_put_evh {
 						self::ht(__('Video In Widget Areas'))
 						. '</a>',
 					array($this, 'put_wdgsopts_desc'));
-			
-/*
-			// prepare fields to appear under various sections
-			// of admin page
-			$nf = 0;
-			$fields = array();
-			$fields[$nf++] =	new $Cf(self::optdisplay,
-					self::ht(__('Fortune display type:'));
-					self::optdisplay,
-					$items[self::optdisplay],
-					array($this, 'put_disp_opt')),
-			$fields[$nf++] = new $Cf(self::opttextpos,
-					self::ht(__('Fortune inline placement:'));
-					self::opttextpos,
-					$items[self::opttextpos],
-					array($this, 'put_text_pos'));
-			// prepare sections to appear under admin page
-			$sections[$ns++] = new $Cs($fields,
-					'swfput1_text_section',
-					self::ht(__('Fortune Display Settings')),
-					array($this, 'put_text_desc'));
-*/
-			
+						
 			// install opts section:
 			// field: delete opts on uninstall?
 			$nf = 0;
@@ -455,6 +439,7 @@ class SWF_put_evh {
 					self::optdelopts,
 					$items[self::optdelopts],
 					array($this, 'put_del_opts'));
+
 			// prepare sections to appear under admin page
 			$sections[$ns++] = new $Cs($fields,
 					'swfput1_inst_section',
@@ -683,7 +668,7 @@ class SWF_put_evh {
 
 		// now register updates
 		if ( $nupd > 0 ) {
-			$str = $nerr == 0 ? __('Settings updated correctly') :
+			$str = $nerr == 0 ? __('Settings updated successfully') :
 				sprintf(__('Some settings (%d) updated'), $nupd);
 			add_settings_error(self::opt_group, self::opt_group,
 				self::ht($str), 'updated');
@@ -720,7 +705,7 @@ class SWF_put_evh {
 				This option is only displayed if the Ming
 				PHP extension is installed and loaded; if you
 				are reading this then Ming has been found to
-				be loaded. Generation the player on the fly
+				be loaded. Generation of the player on the fly
 				has the advantage of making options available
 				even if they require compilation changes. The binaries
 				might save a (very small) bit of server load, but
@@ -741,8 +726,8 @@ class SWF_put_evh {
 
 		$t = self::ht(__('This section includes options to select 
 			where the Flash player may be embedded. By various
-			means video may be placed near the head of the page,
-			in widget areass, or in select posts.'));
+			means video may be placed in widget areas,
+			or in select posts.'));
 		printf('<p>%s</p>%s', $t, "\n");
 		$t = self::ht(__('Go back to top (General section).'));
 		printf('<p><a href="#general">%s</a></p>%s', $t, "\n");
@@ -853,12 +838,14 @@ class SWF_put_evh {
 		$this->put_single_checkbox($a, $k, $tt);
 	}
 
+	// commented: from early false assumption that header
+	// could be easily hooked:
 	// callback, put SWF in head?
-	public function put_inhead_opt($a) {
-		$tt = self::ht(__('Enable SWF in head'));
-		$k = self::optdisphdr;
-		$this->put_single_checkbox($a, $k, $tt);
-	}
+	//public function put_inhead_opt($a) {
+		//$tt = self::ht(__('Enable SWF in head'));
+		//$k = self::optdisphdr;
+		//$this->put_single_checkbox($a, $k, $tt);
+	//}
 
 	// callback, put SWF in sidebar (widget)?
 	public function put_widget_opt($a) {

@@ -84,6 +84,6 @@ install: all
 	mv -f $(TDEF) ..
 
 clean:
-	-rm -f $(OTTY) $(HTML) $(UTTY) $(UTF8) $(OTXT) $(OPS) $(OPDF) \
-	 $(ASRC)
+	-rm -f $(OTTY) $(HTML) $(UTTY) $(UTF8) \
+		$(OTXT) $(OPS) $(OPDF) $(ASRC)
 
