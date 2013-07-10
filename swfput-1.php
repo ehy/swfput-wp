@@ -690,9 +690,10 @@ class SWF_put_evh {
 		}
 
 		$t = self::ht(__('The verbose option selects whether
-			long and hopefully helpful descriptions
+			verbose descriptions
 			should be displayed with the various settings
-			sections. This paragraph is an example, and
+			sections. The long descriptions, of which 
+			this paragraph is an example,
 			will not be shown if the option is not
 			selected.'));
 		printf('<p>%s</p>%s', $t, "\n");
@@ -700,18 +701,15 @@ class SWF_put_evh {
 		if ( self::can_use_ming() ) {
 			$t = self::ht(__('The PHP+Ming option selects whether
 				the Flash player program is generated with PHP
-				and the Ming extension for each request, or
-				precompiled binary Flash players are used.
+				and the Ming extension for each request.
+				When this option is not selected, then
+				a compiled binary player is used.
 				This option is only displayed if the Ming
 				PHP extension is installed and loaded; if you
 				are reading this then Ming has been found to
-				be loaded. Generation of the player on the fly
-				has the advantage of making options available
-				even if they require compilation changes. The binaries
-				might save a (very small) bit of server load, but
-				they are less flexible (that is the reason that
-				there is more than one binary player: each has
-				small differences selected when compiled).'));
+				be loaded.
+				Note that this option will increase the load on the
+				server of your site.'));
 			printf('<p>%s</p>%s', $t, "\n");
 		}
 	}
@@ -724,10 +722,14 @@ class SWF_put_evh {
 			return;
 		}
 
-		$t = self::ht(__('This section includes options to select 
-			where the Flash player may be embedded. By various
-			means video may be placed in widget areas,
-			or in select posts.'));
+		$t = self::ht(__('These options enable or disable the
+			video placed in posts or widgets. If the placement
+			of video must be switched on or off, for either
+			or both, these are the options to use.'));
+		//$t = self::ht(__('This section includes options to select 
+			//where the Flash player may be embedded. By various
+			//means video may be placed in widget areas,
+			//or in select posts.'));
 		printf('<p>%s</p>%s', $t, "\n");
 		$t = self::ht(__('Go back to top (General section).'));
 		printf('<p><a href="#general">%s</a></p>%s', $t, "\n");
@@ -831,7 +833,7 @@ class SWF_put_evh {
 		$this->put_single_checkbox($a, $k, $tt);
 	}
 
-	// callback, put SWF in head?
+	// callback, dynamic use of php+ming?
 	public function put_useming_opt($a) {
 		$tt = self::ht(__('Use SWF script if PHP+Ming is available'));
 		$k = self::optuseming;
@@ -1313,7 +1315,7 @@ class SWF_put_evh {
 		return sprintf('%s%s%s</div>', $dv, $em, $c);
 	}
 
-	// filter the blogger's posts for attachments that can be
+	// filter the posts for attachments that can be
 	// replaced with SWF video
 	// subject to option $optdispmsg
 	public function post_sed($dat) {
