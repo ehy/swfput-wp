@@ -237,7 +237,12 @@ SWFPut_putswf_video_xed.prototype = {
 		}
 		
 		var ret = '[' + sc + atts + ']';
-		if ( c.length > 0 ) {
+		// update 2013/07/12: make this unconditional -- while
+		// [/scode] is optional when there is no caption, its
+		// absence causes an error when another shortcode
+		// follows -- consider [scode] foo [scode]caption[/scode]
+		// the first code is not terminated before [/] is seen
+		if ( true || c.length > 0 ) {
 			ret += c + '[/' + sc + ']';
 		}
 		return ret;

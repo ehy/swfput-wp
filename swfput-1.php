@@ -234,7 +234,9 @@ class SWF_put_evh {
 		register_activation_hook($pf,   array($cl,   'on_activate'));
 		register_uninstall_hook($pf,    array($cl,  'on_uninstall'));
 
-		// some things are to be done in init hook
+		// some things are to be done in init hook: add
+		// hooks for shortcode and widget, and optionally
+		// posts processing to scan attachments, etc...
 		add_action('init', array($this, 'init_hook_func'));
 
 		// add 'Settings' link on the plugins page entry
@@ -578,19 +580,37 @@ class SWF_put_evh {
 	// to be done at WP init stage
 	public function init_hook_func () {
 		// add here to be sure option is ready
-		if ( self::get_posts_code_option() === 'true' ) {
+		// update 2013/07/12: do not use test because
+		// if shortcodes are disabled by removing the
+		// hook, then the raw shortcodes remain in posts;
+		// instead test the option in the callback and
+		// do the right thing there
+		// TODO: remove old code when certain
+		if ( false ) {
+			if ( self::get_posts_code_option() === 'true' ) {
+				$scf = array($this, 'post_shortcode');
+				add_shortcode(self::shortcode, $scf);
+			} else {
+				remove_shortcode(self::shortcode);
+			}
+		} else {
 			$scf = array($this, 'post_shortcode');
 			add_shortcode(self::shortcode, $scf);
-		} else {
-			remove_shortcode(self::shortcode);
 		}
 
-		if ( self::get_widget_code_option() === 'true' ) {
-			$scf = array($this, 'wdg_do_shortcode');
-			add_filter('widget_text', $scf);
+		// see update above? same here
+		// TODO: remove old code when certain
+		if ( false ) {
+			if ( self::get_widget_code_option() === 'true' ) {
+				$scf = array($this, 'wdg_do_shortcode');
+				add_filter('widget_text', $scf);
+			} else {
+				$scf = array($this, 'wdg_do_shortcode');
+				remove_filter('widget_text', $scf);
+			}
 		} else {
 			$scf = array($this, 'wdg_do_shortcode');
-			remove_filter('widget_text', $scf);
+			add_filter('widget_text', $scf);
 		}
 
 		if ( self::get_posts_preg_option() === 'true' ) {
@@ -858,7 +878,7 @@ class SWF_put_evh {
 
 	// callback, put SWF in posts?
 	public function put_inposts_opt($a) {
-		$tt = self::ht(__('Enable regex search or shortcode'));
+		$tt = self::ht(__('Enable shortcode or attachment search'));
 		$k = self::optdispmsg;
 		$this->put_single_checkbox($a, $k, $tt);
 	}
@@ -1250,6 +1270,16 @@ class SWF_put_evh {
 		if ( $this->in_wdg_do_shortcode < 1 ) {
 			return $this->post_shortcode($atts, $content, $code);
 		}
+		if ( self::get_widget_code_option() === 'false' ) {
+			$c = '';
+			$fmt = self::ht(__(' [A/V content%s disabled] '));
+			// Note '!=' -- not '!=='
+			if ( $content != null ) {
+				$c = ' "' . do_shortcode($content) . '"';
+			}
+			return sprintf($fmt, $c);
+		}
+
 		$pr = self::swfput_params;
 		$pr = new $pr();
 		$pr->setarray(shortcode_atts($pr->getparams(), $atts));
@@ -1272,7 +1302,8 @@ class SWF_put_evh {
 		$dv .= ' style="width: '.$dw.'px">';
 		$em = $this->get_swf_tags($swf, $pr);
 		$c = '';
-		if ( $content !== null ) {
+		// Note '!=' -- not '!=='
+		if ( $content != null ) {
 			$c = do_shortcode($content);
 			$c = '</p><p><span align="center">' . $c . '</span></p><p>';
 		}
@@ -1286,6 +1317,16 @@ class SWF_put_evh {
 		if ( $this->in_wdg_do_shortcode > 0 ) {
 			return $this->wdg_shortcode($atts, $content, $code);
 		}
+		if ( self::get_posts_code_option() === 'false' ) {
+			$c = '';
+			$fmt = self::ht(__(' [A/V content%s disabled] '));
+			// Note '!=' -- not '!=='
+			if ( $content != null ) {
+				$c = ' "' . do_shortcode($content) . '"';
+			}
+			return sprintf($fmt, $c);
+		}
+
 		$pr = self::swfput_params;
 		$pr = new $pr();
 		$pr->setarray(shortcode_atts($pr->getparams(), $atts));
@@ -1308,7 +1349,8 @@ class SWF_put_evh {
 		$dv .= ' style="width: '.$dw.'px">';
 		$em = $this->get_swf_tags($swf, $pr);
 		$c = '';
-		if ( $content !== null ) {
+		// Note '!=' -- not '!=='
+		if ( $content != null ) {
 			$c = do_shortcode($content);
 			$c = '<p class="wp-caption-text">' . $c . '</p>';
 		}
@@ -1360,7 +1402,8 @@ class SWF_put_evh {
 					$s = '<div style="width: '.($w+0).'px" '
 						. 'class="wp-caption aligncenter">'
 						. $this->get_swf_tags($swf, $pr)
-						. '<p class="wp-caption-text"></p></div>'
+						// . '<p class="wp-caption-text"></p>'
+						. '</div>'
 						. $sep;
 					$out .= $s . $line . $sep;
 				}
