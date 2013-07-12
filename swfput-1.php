@@ -736,20 +736,29 @@ class SWF_put_evh {
 
 	// callback: put html for placement field description
 	public function put_place_desc() {
-		$t = self::ht(__('SWF placement options:'));
+		$t = self::ht(__('Enable/disable flash video placement:'));
 		printf('<p>%s</p>%s', $t, "\n");
 		if ( self::get_verbose_option() !== 'true' ) {
 			return;
 		}
 
-		$t = self::ht(__('These options enable or disable the
-			video placed in posts or widgets. If the placement
+		$t = self::ht(__('These options enable or completely disable the
+			placement video in posts or widgets. If the placement
 			of video must be switched on or off, for either
-			or both, these are the options to use.'));
-		//$t = self::ht(__('This section includes options to select 
-			//where the Flash player may be embedded. By various
-			//means video may be placed in widget areas,
-			//or in select posts.'));
+			posts (and pages) or widgets
+			or both, these are the options to use.
+			<p>
+			When the plugin shortcode is disabled the flash
+			video player that would have been displayed is
+			replaced by a notice with the form
+			"[A/V content &lt;caption&gt; disabled],"
+			where "&lt;caption&gt;"
+			is any caption that was included with the shortcode,
+			or empty if there was no caption.
+			<p>
+			Note that in the two following sections,
+			"Video In Posts" and "Video In Widget Areas,"
+			the options are effective only if enabled here.'));
 		printf('<p>%s</p>%s', $t, "\n");
 		$t = self::ht(__('Go back to top (General section).'));
 		printf('<p><a href="#general">%s</a></p>%s', $t, "\n");
@@ -757,26 +766,36 @@ class SWF_put_evh {
 
 	// callback: put html for placement field description
 	public function put_postopts_desc() {
-		$t = self::ht(__('SWF in posts options:'));
+		$t = self::ht(__('Flash video in posts options:'));
 		printf('<p>%s</p>%s', $t, "\n");
 		if ( self::get_verbose_option() !== 'true' ) {
 			return;
 		}
 
 		$t = self::ht(__('This section includes options to select 
-			how Flash video (or audio) will be placed in posts.
-			Select shortcodes for any new posts (and preferably
-			for existing posts) that should include Flash media.
-			This is an efficient method supported by the
+			how flash video (or audio) will be placed in posts.
+			Use shortcodes for any new posts (and preferably
+			for existing posts) that should include
+			the flash media player of this plugin.
+			Shortcodes are an efficient method provided by the
 			<em>Wordpress</em> API. When shortcodes are enabled
-			a parameters form will appear in the post and page
-			editing pages (it will be near the bottom of the page,
-			but it can be dragged nearer the editor).
-			The next option might help with some existing posts if
-			you have attached media (i.e. the posts contain
-			attachment_id=N links). Using this option is discouraged
-			because it requires significant processing of each
-			line of a post and so increases load. User parameters
+			a form for parameters will appear in the post (and page)
+			editing pages (probably near the bottom of the page,
+			but it can be dragged nearer to the editor).
+			<p>
+			The "Search attachment"
+			option might help with some existing posts if
+			you already have attached media (i.e., the posts contain
+			attachment_id=N links).
+			The attachment number is used to find the associated
+			URL, and if the filename extension suggests that the
+			medium is a suitable type, the flash player code
+			is put in line with the URL; the original attachment_id
+			URL is placed after the flash player.
+			Use of this option is discouraged
+			because it requires additional processing of each
+			line of each post (or page) displayed,
+			and so it increases server load. User parameters
 			are not available for this method.'));
 		printf('<p>%s</p>%s', $t, "\n");
 		$t = self::ht(__('Go back to top (General section).'));
@@ -785,24 +804,32 @@ class SWF_put_evh {
 
 	// callback: put html for placement field description
 	public function put_wdgsopts_desc() {
-		$t = self::ht(__('SWF in widget area options:'));
+		$t = self::ht(__('Flash video in widget area options:'));
 		printf('<p>%s</p>%s', $t, "\n");
 		if ( self::get_verbose_option() !== 'true' ) {
 			return;
 		}
 
 		$t = self::ht(__('This section includes options to select 
-			how Flash video (or audio) will be placed in widget areas.
+			how flash video (or audio) will be placed in widget areas.
 			The first option selects use of the included multi-widget.
-			This widget is configured on the in the widgets page,
+			This widget is configured in the
+			Appearance-&gt;Widgets page, just
 			like the widgets included with <em>Wordpress</em>, and
-			includes a form to set parameters. The second option
-			selects shortcode processing in widget output, as for
+			the widget setup interface
+			includes a form to set parameters.
+			<p>
+			The second option "shortcodes in widgets"
+			selects shortcode processing in other widget output, as for
 			posts. This is probably only useful with the
-			<em>Wordpress</em> Text widget or similar. These
-			shortcodes must be entered by hand, but a shortcode
-			can be made for a post, with that form, then cut and
-			pasted into the widget text (on a line of its own).'));
+			<em>Wordpress</em> Text widget or a similar widget. These
+			shortcodes must be entered by hand and therefore this
+			option requires a knowledge of the shortcode and
+			parameters used by this plugin.
+			(If necessary, a temporary shortcode
+			can be made within a post using the provided form, and
+			then cut and
+			pasted into the widget text, on a line of its own.)'));
 		printf('<p>%s</p>%s', $t, "\n");
 		$t = self::ht(__('Go back to top (General section).'));
 		printf('<p><a href="#general">%s</a></p>%s', $t, "\n");
