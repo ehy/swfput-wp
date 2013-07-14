@@ -175,9 +175,7 @@ var stream_displayWidth = null;
 var stream_frameHeight = null;
 var stream_displayHeight = null;
 // aspect factors, calculated from metadate if available
-var upixaspect = parseFloat(System.capabilities.pixelAspectRatio);
-if ( upixaspect === NaN || upixaspect < 0.125 /*arbitrary minimum*/ )
-	upixaspect = 1.0;
+var upixaspect = 1.0;
 var afactW = 1;
 var afactH = 1;
 var stream_unknownkey = null;
@@ -463,11 +461,13 @@ if ( guardinit == undefined ) {
 				}
 			} else if ( curkey == 65 || curkey == 97 ) {
 				// A,a
-				if ( b_release != true ) {
 				// debugging broken gnash 0.8.10 aspect 0.561...
 				if ( Math.abs(upixaspect - 1.0) < 0.001 ) {
 					upixaspect =
 					   parseFloat(System.capabilities.pixelAspectRatio);
+					if ( upixaspect === NaN ||
+						upixaspect < 0.125 /*arbitrary minimum*/ )
+						upixaspect = 1.0;
 				} else {
 					upixaspect = 1.0;
 				}
@@ -478,7 +478,6 @@ if ( guardinit == undefined ) {
 				//afactW = 1.0 / upixaspect;
 				// correct:
 				afactW = upixaspect;
-				}
 			} else if ( curkey == 86 || curkey == 118 ) {
 				// V,v
 				volgadget._visible = ! volgadget._visible;
