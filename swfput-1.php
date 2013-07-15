@@ -451,6 +451,9 @@ class SWF_put_evh {
 					array($this, 'put_inst_desc'));
 
 			// prepare admin page specific hooks per page. e.g.:
+			// (now set to false, but code remains for reference;
+			// see comment '// hook&filter to make shortcode form for editor'
+			// in __construct())
 			if ( false ) {
 				$suffix_hooks = array(
 					'admin_head' => array($this, 'admin_head'),
@@ -472,7 +475,7 @@ class SWF_put_evh {
 				array(__CLASS__, 'validate_opts'),
 				/* pagetype = 'options' */ '',
 				/* capability = 'manage_options' */ '',
-				/* callback */ '',
+				array($this, 'setting_page_output_callback')/* callback '' */,
 				/* 'hook_suffix' callback array */ $suffix_hooks,
 				self::ht(__('Configuration of SWFPut Plugin')),
 				self::ht(__('Display and Runtime Settings.')),
@@ -483,6 +486,23 @@ class SWF_put_evh {
 		}
 	}
 	
+	// This function is pace here below the function that sets-up
+	// the options page so that it is easy to see from that function.
+	// It exists only for the echo "<a name='aSubmit'/>\n";
+	// line which mindbogglingly cannot be printed from
+	// Options::admin_page() -- it is somehow *always* stripped out!
+	// After hours I cannot figure this out; but, having added this
+	// function as the page callback, I can add the anchor after
+	// calling $this->opt->admin_page() (which is Options::admin_page())
+	// BUT it still does not show in the page if the echo is moved
+	// into Options::admin_page() and placed just before return!
+	// Baffled.
+	public function setting_page_output_callback() {
+		$r = $this->opt->admin_page();
+		echo "<a name='aSubmit'/>\n";
+		return $r;
+	}
+
 	/**
 	 * General hook/filter callbacks
 	 */
@@ -732,6 +752,8 @@ class SWF_put_evh {
 				server of your site.'));
 			printf('<p>%s</p>%s', $t, "\n");
 		}
+		$t = self::ht(__('Go forward to save button.'));
+		printf('<p><a href="#aSubmit">%s</a></p>%s', $t, "\n");
 	}
 
 	// callback: put html for placement field description
@@ -760,6 +782,8 @@ class SWF_put_evh {
 			"Video In Posts" and "Video In Widget Areas,"
 			the options are effective only if enabled here.'));
 		printf('<p>%s</p>%s', $t, "\n");
+		$t = self::ht(__('Go forward to save button.'));
+		printf('<p><a href="#aSubmit">%s</a></p>%s', $t, "\n");
 		$t = self::ht(__('Go back to top (General section).'));
 		printf('<p><a href="#general">%s</a></p>%s', $t, "\n");
 	}
@@ -798,6 +822,8 @@ class SWF_put_evh {
 			and so it increases server load. User parameters
 			are not available for this method.'));
 		printf('<p>%s</p>%s', $t, "\n");
+		$t = self::ht(__('Go forward to save button.'));
+		printf('<p><a href="#aSubmit">%s</a></p>%s', $t, "\n");
 		$t = self::ht(__('Go back to top (General section).'));
 		printf('<p><a href="#general">%s</a></p>%s', $t, "\n");
 	}
@@ -831,6 +857,8 @@ class SWF_put_evh {
 			then cut and
 			pasted into the widget text, on a line of its own.)'));
 		printf('<p>%s</p>%s', $t, "\n");
+		$t = self::ht(__('Go forward to save button.'));
+		printf('<p><a href="#aSubmit">%s</a></p>%s', $t, "\n");
 		$t = self::ht(__('Go back to top (General section).'));
 		printf('<p><a href="#general">%s</a></p>%s', $t, "\n");
 	}
@@ -853,6 +881,8 @@ class SWF_put_evh {
 			for development, but you might think of another reason
 			to use it.'));
 		printf('<p>%s</p>%s', $t, "\n");
+		$t = self::ht(__('Go forward to save button.'));
+		printf('<p><a href="#aSubmit">%s</a></p>%s', $t, "\n");
 		$t = self::ht(__('Go back to top (General section).'));
 		printf('<p><a href="#general">%s</a></p>%s', $t, "\n");
 	}

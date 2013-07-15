@@ -162,6 +162,7 @@ class Options_0_0_2 {
 		</form></div>
 		
 		<?php
+		return true;
 	}
 
 	// begin 'admin_init' callback set
