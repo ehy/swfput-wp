@@ -7,7 +7,7 @@ from arbitrary URL's or media library ID's or file in your media upload
 directory tree (even if not added by Wordpress and assigned an ID).
 Version: 0.1.0
 Author: Ed Hynan
-Author URI: http://wpblog.example.org/
+Author URI: http://agalena.nfshost.com/b1/
 License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
 */
 

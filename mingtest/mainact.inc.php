@@ -23,7 +23,7 @@
 * Description: SWF video app with PHP/Ming, main A/S include
 * Version: 0.1.0
 * Author: Ed Hynan
-* Author URI: http://wpblog.example.org/
+* Author URI: http://agalena.nfshost.com/b1/
 * License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
 */
 
