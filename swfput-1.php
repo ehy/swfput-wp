@@ -2467,7 +2467,10 @@ class SWF_put_widget_evh extends WP_Widget {
 			'height' => self::defheight));
 		$instance = wp_parse_args((array)$instance, $pr->getparams());
 
-		$val = $ht($instance['title']);
+		$val = '';
+		if ( array_key_exists('title', $instance) ) {
+			$val = $ht($instance['title']);
+		}
 		$id = $this->get_field_id('title');
 		$nm = $this->get_field_name('title');
 		$tl = $ht(__('Widget title:'));
