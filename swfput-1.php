@@ -486,7 +486,7 @@ class SWF_put_evh {
 		}
 	}
 	
-	// This function is pace here below the function that sets-up
+	// This function is placed here below the function that sets-up
 	// the options page so that it is easy to see from that function.
 	// It exists only for the echo "<a name='aSubmit'/>\n";
 	// line which mindbogglingly cannot be printed from
@@ -579,7 +579,7 @@ class SWF_put_evh {
 		if ( ! isset($wp_widget_factory) ) {
 			return;
 		}
-		if ( function_exists(register_widget) ) {
+		if ( function_exists('register_widget') ) {
 			$cl = self::swfput_widget;
 			register_widget($cl);
 		}
@@ -591,7 +591,7 @@ class SWF_put_evh {
 		if ( ! isset($wp_widget_factory) ) {
 			return;
 		}
-		if ( function_exists(unregister_widget) ) {
+		if ( function_exists('unregister_widget') ) {
 			$cl = self::swfput_widget;
 			unregister_widget($cl);
 		}
