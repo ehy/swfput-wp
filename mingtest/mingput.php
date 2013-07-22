@@ -82,6 +82,7 @@ endif;
 
 /**
  * encode a path for a URL, e.g. from parse_url['path']
+ * leaving '/' un-encoded
  * $func might also be urlencode(), or user defined
  * inheritable
  */

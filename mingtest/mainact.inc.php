@@ -220,6 +220,11 @@ function null_proc () {}
 // Encode elements of a path.  The closed flash plugin is flexible
 // regarding URLs and paths, but GNash requires encoding as necessary.
 // the builtin escape() does not handle path elements.
+// Update 2013/07/22: in fact ActionScript escape() does all
+// non-alphanumeric characters, which is simplistic, and it turns
+// out some servers do not handle, e.g., escaped underscore '_';
+// so, this proc is best as a fallback -- a properly escaped arg
+// should be provided to the player if possible.
 function pathesc(path) {
 	var p = path;
 	var pa = p.split('/');
@@ -1917,7 +1922,12 @@ bbar.dltxt.autoSize = true;
 // without builtin video URL, get one -- this is the case
 // with pre-built .swf, not on the fly PHP CGI
 if ( (vurl == null || vurl == "") && _level0.FN != undefined ) {
-	vurl = urlesc(_level0.FN);
+	if ( _level0.F2 != undefined ) {
+		adddbgtext(" F2: '" + _level0.F2 + "'\n");
+		vurl = _level0.F2;
+	} else {
+		vurl = urlesc(_level0.FN);
+	}
 	adddbgtext(" FN: '" + _level0.FN + "'\n");
 	adddbgtext(" HI: '" + _level0.HI + "'\n");
 	adddbgtext(" WI: '" + _level0.WI + "'\n");

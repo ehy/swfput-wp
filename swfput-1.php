@@ -1753,6 +1753,18 @@ class SWF_put_evh {
 	}
 
 	/**
+	 * encode a path for a URL, e.g. from parse_url['path']
+	 * leaving '/' un-encoded
+	 * $func might also be urlencode(), or user defined
+	 * inheritable
+	 */
+	public static function upathencode($p, $func = 'rawurlencode') {
+		return implode('/',
+			array_map($func,
+				explode('/', $p) ) );
+	}
+
+	/**
 	 * check that URL passed in query is OK; re{encode,escape}
 	 * $args is array of booleans, plus two regex pats -- all optional
 	 * requirehost, requirepath, rejuser, rejport, rejquery, rejfrag +
@@ -1776,7 +1788,7 @@ class SWF_put_evh {
 			if ( preg_match('/^(.*\/)?\.\.(\/.*)?$/', $t) ) {
 				return false;
 			}
-			$p .= $fesc === '' ? $t : $fesc($t);
+			$p .= $fesc === '' ? $t : self::upathencode($t, $fesc);
 		} else if ( isset($requirepath) && $requirepath ) {
 			return false;
 		}
@@ -1970,7 +1982,7 @@ class SWF_put_evh {
 			$url = $defrtmpurl;
 			$playpath = $defaultplaypath;
 		}
-
+		
 		$achk = array(
 			'requirehost' => false, // can use orig host
 			'requirepath' => true,
@@ -1986,6 +1998,19 @@ class SWF_put_evh {
 		}
 		// escaping: note url used here is itself a query arg
 		$url = ($esc == true) ? $fesc($ut) : $ut;
+		// Hack: double escaped URL. This is to releive the swf
+		// player of the need to escape URL with the simplistic
+		// ActionScript escape(), the need for which arises from
+		// attempting Gnash comaptibility because it differs
+		// from the adobe binary in not internally encoding
+		// URL args to a/v objects -- escaping is doubled because
+		// flashvars are always unescaped by the plugin, making
+		// a 2nd level necessary.
+		$e2url = self::check_url($ut, $achk, 'rawurlencode');
+		if ( $esc == true ) {
+			$e2url = $fesc($e2url);
+		}
+
 		$w = $width; $h = $height;
 		if ( $cssurl === '' )
 			$cssurl = $this->get_swf_css_url();
@@ -2025,8 +2050,8 @@ class SWF_put_evh {
 		$playpath = ($esc == true) ? $fesc($playpath) : $playpath;
 		
 		// query vars
-		$qv = sprintf('ST=%s&WI=%u&HI=%u&IDV=%s&FN=%s&II=%s',
-			$cssurl, $w, $h, $playpath, $url, $iimage);
+		$qv = sprintf('ST=%s&WI=%u&HI=%u&IDV=%s&FN=%s&II=%s&F2=%s',
+			$cssurl, $w, $h, $playpath, $url, $iimage, $e2url);
 		$qv .= sprintf('&PL=%s&HB=%s&VL=%u&LP=%s&DB=%s',
 			$play, $hidebar, $volume, $loop, $disablebar);
 		$qv .= sprintf('&AU=%s&AA=%s&DA=%s&PA=%s',
