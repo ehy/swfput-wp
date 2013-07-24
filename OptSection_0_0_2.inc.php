@@ -23,7 +23,7 @@
 * Description: class used by class for settings page
 * Version: 0.0.2
 * Author: Ed Hynan
-* Author URI: http://agalena.nfshost.com/b1/
+* Author URI: http://agalena.nfshost.com/b1/?page_id=46
 * License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
 */
 

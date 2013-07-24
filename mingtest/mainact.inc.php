@@ -23,7 +23,7 @@
 * Description: SWF video app with PHP/Ming, main A/S include
 * Version: 0.1.0
 * Author: Ed Hynan
-* Author URI: http://agalena.nfshost.com/b1/
+* Author URI: http://agalena.nfshost.com/b1/?page_id=46
 * License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
 */
 
@@ -1922,6 +1922,9 @@ bbar.dltxt.autoSize = true;
 // without builtin video URL, get one -- this is the case
 // with pre-built .swf, not on the fly PHP CGI
 if ( (vurl == null || vurl == "") && _level0.FN != undefined ) {
+	// param F2 is preferably provided as an escaped URL, because
+	// A/S escape() used in urlesc(_level0.FN) is too simplistic
+	// for some sites, e.g. archive dot org rejects escaped '_'
 	if ( _level0.F2 != undefined ) {
 		adddbgtext(" F2: '" + _level0.F2 + "'\n");
 		vurl = _level0.F2;
