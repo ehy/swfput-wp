@@ -764,12 +764,12 @@ class SWF_put_evh {
 			return;
 		}
 
-		$t = self::ht(__('These options enable or completely disable the
-			placement video in posts or widgets. If the placement
+		$t = self::ht(__('These options enable or completely disable
+			placing video in posts or widgets. If the placement
 			of video must be switched on or off, for either
 			posts (and pages) or widgets
 			or both, these are the options to use.
-			<p>
+			</p><p>
 			When the plugin shortcode is disabled the flash
 			video player that would have been displayed is
 			replaced by a notice with the form
@@ -777,7 +777,7 @@ class SWF_put_evh {
 			where "&lt;caption&gt;"
 			is any caption that was included with the shortcode,
 			or empty if there was no caption.
-			<p>
+			</p><p>
 			Note that in the two following sections,
 			"Video In Posts" and "Video In Widget Areas,"
 			the options are effective only if enabled here.'));
@@ -796,21 +796,21 @@ class SWF_put_evh {
 			return;
 		}
 
-		$t = self::ht(__('This section includes options to select 
-			how flash video (or audio) will be placed in posts.
+		$t = self::ht(__('These options select 
+			how flash video (or audio) may be placed in posts or pages.
 			Use shortcodes for any new posts (and preferably
 			for existing posts) that should include
 			the flash media player of this plugin.
 			Shortcodes are an efficient method provided by the
-			<em>Wordpress</em> API. When shortcodes are enabled
+			<em>WordPress</em> API. When shortcodes are enabled,
 			a form for parameters will appear in the post (and page)
 			editing pages (probably near the bottom of the page,
 			but it can be dragged nearer to the editor).
-			<p>
+			</p><p>
 			The "Search attachment"
 			option might help with some existing posts if
 			you already have attached media (i.e., the posts contain
-			attachment_id=N links).
+			attachment_id=<em>N</em> links).
 			The attachment number is used to find the associated
 			URL, and if the filename extension suggests that the
 			medium is a suitable type, the flash player code
@@ -836,20 +836,20 @@ class SWF_put_evh {
 			return;
 		}
 
-		$t = self::ht(__('This section includes options to select 
-			how flash video (or audio) will be placed in widget areas.
+		$t = self::ht(__('These options select 
+			how flash video (or audio) may be placed in widget areas.
 			The first option selects use of the included multi-widget.
 			This widget is configured in the
 			Appearance-&gt;Widgets page, just
-			like the widgets included with <em>Wordpress</em>, and
+			like the widgets included with <em>WordPress</em>, and
 			the widget setup interface
 			includes a form to set parameters.
-			<p>
+			</p><p>
 			The second option "shortcodes in widgets"
 			selects shortcode processing in other widget output, as for
 			posts. This is probably only useful with the
-			<em>Wordpress</em> Text widget or a similar widget. These
-			shortcodes must be entered by hand and therefore this
+			<em>WordPress</em> Text widget or a similar widget. These
+			shortcodes must be entered by hand, and therefore this
 			option requires a knowledge of the shortcode and
 			parameters used by this plugin.
 			(If necessary, a temporary shortcode
@@ -874,12 +874,15 @@ class SWF_put_evh {
 		$t = self::ht(__('This section includes optional
 			features for plugin install or uninstall. Presently
 			the only option is whether to remove the plugin\'s
-			set of options from the database when it is deleted.
+			set of options from the database when
+			the plugin is deleted.
 			There is probably no reason to leave the options in
-			place; you may simply deactivate the plugin if
-			you want it off temporarily. This option is useful
-			for development, but you might think of another reason
-			to use it.'));
+			place if you intend to delete the plugin permanently;
+			you may simply deactivate the plugin if
+			you want it off temporarily.
+			If you intend to delete and then reinstall the plugin,
+			possibly for a new version or update, then selecting this
+			might be helpful.'));
 		printf('<p>%s</p>%s', $t, "\n");
 		$t = self::ht(__('Go forward to save button.'));
 		printf('<p><a href="#aSubmit">%s</a></p>%s', $t, "\n");
