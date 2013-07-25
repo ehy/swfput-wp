@@ -26,7 +26,7 @@ SBINS = $(SDIRI)/default.flv \
 
 ALSO = Makefile COPYING
 READS= README README.tty README.tt8 README.pdf README.html
-ZALL = ${SRCS} ${ALSO} ${READS}
+ZALL = ${SRCS} ${ALSO} ${READS} readme.txt
 ZSALL = ${SSRCS} ${SBINS}
 BINALL = ${SBINS} ${JSBIN}
 PRJDIR = ${PRJNAME}

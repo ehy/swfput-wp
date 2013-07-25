@@ -1,114 +1,132 @@
 === Plugin Name ===
-Contributors: (this should be a list of wordpress.org userid's)
-Donate link: http://example.com/
-Tags: comments, spam
-Requires at least: 3.0.1
-Tested up to: 3.4
-Stable tag: 4.3
-License: GPLv2 or later
-License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Contributors: EdHynan
+Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4Q2Y8ZUG8HXLC
+Tags: video, audio, movies, tube, flash, graphics, webcam, movie, cat videos, audio-visual, a/v content
+Requires at least: 3.0.2
+Tested up to: 3.5.2
+Stable tag: 1.0
+License: GPLv3 or later
+License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
-Here is a short description of the plugin.  This should be no more than 150 characters.  No markup here.
+SWFPut provides a flash video player for posts and a widget and the forms to configure instances with a video source and playback attributes.
 
 == Description ==
 
-This is the long description.  No limit, and you can use Markdown (as well as in the following sections).
+     SWFPut  is  a  plugin  for the popular WordPress weblog
+software. It provides a video player program for  the  flash
+plugin  and  the means to configure an instance with a video
+source and playback attributes.  There are two separate com-
+ponents:  the  flash  video player, and the WordPress plugin
+proper.  The video player is delivered to site  visitors  by
+the  plugin  in  the traditional <object ...> block with the
+necessary arguments. Flash video objects may  be  placed  in
+posts  and  pages,  or in the widget areas supported by your
+theme (i.e., the plugin includes a widget).  Video is placed
+in posts and pages with a shortcode; if you do not know what
+a shortcode is, or do not want to deal with them, that's  no
+problem.  (In fact, it is preferable that the shortcodes not
+be hand-edited, and they will not  be  discussed  in  detail
+here.)  The  plugin  adds  to the administrative interface a
+full featured form to setup and  add,  or  edit,  or  delete
+video objects, so the user does not need to be troubled with
+shortcodes (they will be visible in the editor; you will get
+used  to  them).   The flash video widget has a similar full
+featured form.
 
-For backwards compatibility, if this section is missing, the full length of the short description will be used, and
-Markdown parsed.
+     The plugin does not add any  JavaScript  to  the  pages
+generated  for  your visitors, which might be helpful if you
+try  to  keep  your  pages  useful  to  those  who   disable
+JavaScript  in  their browsers. (Such visitors might need to
+explicitly enable the flash web browser plugin, but that  is
+another,  unavoidable,  issue.)   JavaScript  is used in the
+administrative interface for the forms and  manipulation  of
+shortcodes  in  the  editor;  but  of  course  you must have
+JavaScript enabled when you log in to your WordPress site --
+this does not affect your visitors.
 
-A few notes about the sections above:
-
-*   "Contributors" is a comma separated list of wp.org/wp-plugins.org usernames
-*   "Tags" is a comma separated list of tags that apply to the plugin
-*   "Requires at least" is the lowest version that the plugin will work on
-*   "Tested up to" is the highest version that you've *successfully used to test the plugin*. Note that it might work on
-higher versions... this is just the highest one you've verified.
-*   Stable tag should indicate the Subversion "tag" of the latest stable version, or "trunk," if you use `/trunk/` for
-stable.
-
-    Note that the `readme.txt` of the stable tag is the one that is considered the defining one for the plugin, so
-if the `/trunk/readme.txt` file says that the stable tag is `4.3`, then it is `/tags/4.3/readme.txt` that'll be used
-for displaying information about the plugin.  In this situation, the only thing considered from the trunk `readme.txt`
-is the stable tag pointer.  Thus, if you develop in trunk, you can update the trunk `readme.txt` to reflect changes in
-your in-development version, without having that information incorrectly disclosed about the current stable version
-that lacks those changes -- as long as the trunk's `readme.txt` points to the correct stable tag.
-
-    If no stable tag is provided, it is assumed that trunk is stable, but you should specify "trunk" if that's where
-you put the stable version, in order to eliminate any doubt.
+     (Note  that  the  SWFPut video player has been coded to
+work well with the free Gnash web browser plugin, as well as
+the  closed  binary-only  proprietary version in common use.
+As of this writing, Gnash does not handle  MP4  files  well,
+even though it handles H.264 video and AAC audio if they are
+in an FLV container file.)
 
 == Installation ==
 
-This section describes how to install the plugin and get it working.
+SWFPut is installed through the WordPress administrative interface.
 
-e.g.
+1 Fetch the SWFPut zip file; save it on your computer
 
-1. Upload `plugin-name.php` to the `/wp-content/plugins/` directory
-1. Activate the plugin through the 'Plugins' menu in WordPress
-1. Place `<?php do_action('plugin_name_hook'); ?>` in your templates
+1 Log in at your WordPress site
+
+1 Select 'Plugins -> Add New'
+
+1 Select 'Upload'
+
+1 Select 'Browse'
+
+1 In your system's file selector, select the SWFPut zip file;
+  select 'OK' or equivalent
+
+1 Select 'Install Now'
+
+1 Select 'Activate Plugin'
+
+At this point "SWFlash Put" should be an entry on the plugins page.
+The Settings menu should have an item "SWFPut Plugin".
+
+If the above is not so, there is probably a problem at your site's
+host; for example if the host is Unix system there is very likely
+a problem with incorrect permissions metadata (mode) on a directory
+such as wp-content/uploads, or an unsuitable user or group ownership
+of (probably several) files and directories. This can be a frequent
+problem if the host has PHP configured in "safe mode".
+
+If the host is not a Unix system, I'm sorry to say I cannot help;
+maybe your hosting provider can.
+
+If the installation was successful, you should see a "SWFPut Flash Video"
+widget under 'Appearance -> Widgets' and a form entitled
+"SWFPut Flash Video Shortcode" on the posts and pages editing pages.
+
+For additional help, you will find README* files (differing in format,
+and excluding 'readme.txt', which is this file) that discuss the
+flash video player in more detail.
 
 == Frequently Asked Questions ==
 
-= A question that someone might have =
+= How many questions have been asked frequently =
 
-An answer to that question.
+See below.
 
-= What about foo bar? =
+= How many questions have been asked in all =
 
-Answer to foo bar dilemma.
+At the time of this writing, 0 (zero). The time of this writing
+is the time of preparation for initial release, so that amount
+should not seem too small. Of course, this answer might be present
+here until the next release, and it might have happened that questions
+have been asked in the interim, and so 0 might not really be an
+accurate figure.
+
+= How many questions have been answered in all =
+
+Three more than have been asked. At the time of this writing.
 
 == Screenshots ==
 
-1. This screen shot description corresponds to screenshot-1.(png|jpg|jpeg|gif). Note that the screenshot is taken from
-the /assets directory or the directory that contains the stable readme.txt (tags or trunk). Screenshots in the /assets 
-directory take precedence. For example, `/assets/screenshot-1.png` would win over `/tags/4.3/screenshot-1.png` 
-(or jpg, jpeg, gif).
-2. This is the second screen shot
+TBA
 
 == Changelog ==
 
 = 1.0 =
-* A change since the previous version.
-* Another change.
-
-= 0.5 =
-* List versions from most recent at top to oldest at bottom.
+* Initial release.
 
 == Upgrade Notice ==
 
 = 1.0 =
-Upgrade notices describe the reason a user should upgrade.  No more than 300 characters.
-
-= 0.5 =
-This version fixes a security related bug.  Upgrade immediately.
+None as yet.
 
 == Arbitrary section ==
 
-You may provide arbitrary sections, in the same format as the ones above.  This may be of use for extremely complicated
-plugins where more information needs to be conveyed that doesn't fit into the categories of "description" or
-"installation."  Arbitrary sections will be shown below the built-in sections outlined above.
+Coming: media preparation resources.
 
-== A brief Markdown Example ==
-
-Ordered list:
-
-1. Some feature
-1. Another feature
-1. Something else about the plugin
-
-Unordered list:
-
-* something
-* something else
-* third thing
-
-Here's a link to [WordPress](http://wordpress.org/ "Your favorite software") and one to [Markdown's Syntax Documentation][markdown syntax].
-Titles are optional, naturally.
-
-[markdown syntax]: http://daringfireball.net/projects/markdown/syntax
-            "Markdown is what the parser uses to process much of the readme file"
-
-Markdown uses email style notation for blockquotes and I've been told:
-> Asterisks for *emphasis*. Double it up  for **strong**.
-
-`<?php code(); // goes in backticks ?>`

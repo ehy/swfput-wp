@@ -1,11 +1,11 @@
 <?php
 /*
-Plugin Name: SWFlash Put
-Plugin URI: http://lucy.example.org/dl/wp-plugin-swfput-1/
-Description: Add Shockwave Flash video to Wordpress posts and widgets,
-from arbitrary URL's or media library ID's or file in your media upload
+Plugin Name: SWFPut
+Plugin URI: http://agalena.nfshost.com/b1/?page_id=46
+Description: Add Shockwave Flash video to WordPress posts and widgets,
+from arbitrary URL's or media library ID's or files in your media upload
 directory tree (even if not added by Wordpress and assigned an ID).
-Version: 0.1.0
+Version: 1.0.0
 Author: Ed Hynan
 Author URI: http://agalena.nfshost.com/b1/?page_id=46
 License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
