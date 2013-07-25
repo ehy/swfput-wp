@@ -881,8 +881,8 @@ class SWF_put_evh {
 			you may simply deactivate the plugin if
 			you want it off temporarily.
 			If you intend to delete and then reinstall the plugin,
-			possibly for a new version or update, then selecting this
-			might be helpful.'));
+			possibly for a new version or update, then keeping the
+			options might be helpful.'));
 		printf('<p>%s</p>%s', $t, "\n");
 		$t = self::ht(__('Go forward to save button.'));
 		printf('<p><a href="#aSubmit">%s</a></p>%s', $t, "\n");
