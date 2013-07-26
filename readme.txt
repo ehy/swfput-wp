@@ -1,4 +1,4 @@
-=== Plugin Name ===
+=== SWFPut - SWFlash Put ===
 Contributors: EdHynan
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4Q2Y8ZUG8HXLC
 Tags: video, audio, movies, tube, flash, graphics, webcam, movie, cat videos, audio-visual, a/v content
@@ -12,7 +12,7 @@ SWFPut provides a flash video player for posts and a widget and the forms to con
 
 == Description ==
 
-     SWFPut  is  a  plugin  for the popular WordPress weblog
+SWFPut  is  a  plugin  for the popular WordPress weblog
 software. It provides a video player program for  the  flash
 plugin  and  the means to configure an instance with a video
 source and playback attributes.  There are two separate com-
@@ -33,7 +33,7 @@ shortcodes (they will be visible in the editor; you will get
 used  to  them).   The flash video widget has a similar full
 featured form.
 
-     The plugin does not add any  JavaScript  to  the  pages
+The plugin does not add any  JavaScript  to  the  pages
 generated  for  your visitors, which might be helpful if you
 try  to  keep  your  pages  useful  to  those  who   disable
 JavaScript  in  their browsers. (Such visitors might need to
@@ -44,7 +44,7 @@ shortcodes  in  the  editor;  but  of  course  you must have
 JavaScript enabled when you log in to your WordPress site --
 this does not affect your visitors.
 
-     (Note  that  the  SWFPut video player has been coded to
+(Note  that  the  SWFPut video player has been coded to
 work well with the free Gnash web browser plugin, as well as
 the  closed  binary-only  proprietary version in common use.
 As of this writing, Gnash does not handle  MP4  files  well,
@@ -55,22 +55,22 @@ in an FLV container file.)
 
 SWFPut is installed through the WordPress administrative interface.
 
-1 Fetch the SWFPut zip file; save it on your computer
+* Fetch the SWFPut zip file; save it on your computer
 
-1 Log in at your WordPress site
+* Log in at your WordPress site
 
-1 Select 'Plugins -> Add New'
+* Select 'Plugins -> Add New'
 
-1 Select 'Upload'
+* Select 'Upload'
 
-1 Select 'Browse'
+* Select 'Browse'
 
-1 In your system's file selector, select the SWFPut zip file;
+* In your system's file selector, select the SWFPut zip file;
   select 'OK' or equivalent
 
-1 Select 'Install Now'
+* Select 'Install Now'
 
-1 Select 'Activate Plugin'
+* Select 'Activate Plugin'
 
 At this point "SWFlash Put" should be an entry on the plugins page.
 The Settings menu should have an item "SWFPut Plugin".
