@@ -1,0 +1,528 @@
+
+
+
+
+
+
+
+
+
+          [1mSWFPut — Flash Video Player Plugin for WordPress[0m
+
+
+                    [4mEd[24m [4mHynan[24m [4m<edhynan@gmail.com>[0m
+
+
+              This  ‘README’  serves as the main documenta‐
+         tion for the [1mSWFPut [4m[22mWordPress[24m plugin, and  as  the
+         conventional ‘README’ as well.
+
+
+
+    [1m1.  What is it?[0m
+
+         [1mSWFPut  [22mis  a  plugin  for the popular [4mWordPress[24m weblog
+    software. It provides a video player program for  the  flash
+    plugin  and  the means to configure an instance with a video
+    source and playback attributes.  There are two separate com‐
+    ponents:  the  flash  video player, and the [4mWordPress[24m plugin
+    proper.  The video player is delivered to site  visitors  by
+    the  plugin  in  the traditional <object ...> block with the
+    necessary arguments. Flash video objects may  be  placed  in
+    posts  and  pages,  or in the widget areas supported by your
+    theme (i.e., the plugin includes a widget).  Video is placed
+    in posts and pages with a [4mshortcode[24m; if you do not know what
+    a shortcode is, or do not want to deal with them, that’s  no
+    problem.  (In fact, it is preferable that the shortcodes [4mnot[0m
+    be hand‐edited, and they will not  be  discussed  in  detail
+    here.)  The  plugin  adds  to the administrative interface a
+    full featured form to setup and  add,  or  edit,  or  delete
+    video objects, so the user does not need to be troubled with
+    shortcodes (they will be visible in the editor; you will get
+    used  to  them).   The flash video widget has a similar full
+    featured form.
+
+         The plugin does not add any  [4mJavaScript[24m  to  the  pages
+    generated  for  your visitors, which might be helpful if you
+    try  to  keep  your  pages  useful  to  those  who   disable
+    JavaScript  in  their browsers. (Such visitors might need to
+    explicitly enable the flash web browser plugin, but that  is
+    another,  unavoidable,  issue.)   JavaScript  is used in the
+    administrative interface for the forms and  manipulation  of
+    shortcodes  in  the  editor;  but  of  course  you must have
+    JavaScript enabled when you log in to your [4mWordPress[24m site  —
+    this does not affect your visitors.
+
+         (Note  that  the  [1mSWFPut [22mvideo player has been coded to
+    work well with the free [4mGnash[24m web browser plugin, as well as
+    the  closed  binary‐only  proprietary version in common use.
+    As of this writing, [4mGnash[24m does not handle  [1mMP4  [22mfiles  well,
+    even though it handles H.264 video and AAC audio if they are
+
+
+
+
+
+
+
+
+
+                                 ‐2‐
+
+
+    in an FLV container file.)
+
+    [1m2.  Building From the Source[0m
+
+         [1mSWFPut [22mis distributed as a  [4mZIP[24m  archive  prepared  for
+    installation  on  a  [4mWordPress[24m  site with the “Add New” item
+    under the “Plugins” menu.  Therefore, there is  no  need  to
+    build the package before use.
+
+         (You may skip forward to the [1mUsage [22msection if you don’t
+    intend to modify the player or plugin.)
+
+         The  actual  plugin  is  composed  of  [4mPHP[24m  code,   and
+    JavaScript  for  the  administrative  parts,  and neither of
+    those requires compilation or link editing.  The flash video
+    player  is  a compiled program, but binaries are included in
+    the installable package so that use does not require  compi‐
+    lation  by  the user. Of course, the source code is included
+    and the binaries may be built  if  necessary  (or  desired).
+    Compiling the flash program will require the [4mMing[24m PHP exten‐
+    sion. See  the  files  Makefile,  mingtest/mingput.php,  and
+    mingtest/mainact.inc.php  if  you wish to learn to build the
+    player.
+
+         If you wish to change the JavaScript code, edit js/for‐
+    mxed.dev.js,  rather  than  js/formxed.js.   The  latter  is
+    merely a ‘minified’ version of the former; see Makefile.
+
+         This file (README*) is built with the  [4mGNU[24m  roff  [4mgroff[0m
+    with [4mms[24m macros; see docs/Makefile.
+
+         The  Makefiles require a [4mUnix[24m‐like or [4mPOSIX[24m system. The
+    default target builds as necessary and then creates the  ZIP
+    file.
+
+    [1m3.  Usage[0m
+
+         A logged in session is assumed.
+
+         [1mSWFPut  [22minstalled will add an item under the “Settings”
+    menu named “SWFPut Plugin”. Selecting  that  should  produce
+    the  plugin’s  configuration  page.   The configuration page
+    includes optional verbose  help,  and  so  it  will  not  be
+    described here.
+
+         When editing posts or pages, below the editor the plug‐
+    in will have placed an interactive form with the title “SWF‐
+    Put  Flash  Video Shortcode”.  Directly under the title is a
+    row of buttons.  Under the row of buttons, the bulk  of  the
+    form  is  placed in three sections entitled “Media”, “Dimen‐
+    sions”, and “Behavior”.  The title bar of each section has a
+    button that will hide or show that section, which might help
+    if the height of the form is greater than that the display.
+
+
+
+
+
+
+
+
+
+
+                                 ‐3‐
+
+
+         [1m3.1.  Form Buttons[0m
+
+
+         ·    [1mFill form from editor[22m: When  the  post  (or  page)
+              already  contains  a  [1mSWFPut  [22mflash  video  object
+              (i.e., shortcode), this will find it in the editor
+              and  fill  the  form with its details.  A post may
+              contain any number of  [1mSWFPut  [22mvideo  objects.  If
+              there is more than one, then repeatedly using this
+              button will cycle through each in turn.
+
+         ·    [1mReplace current in editor[22m: When the form has  been
+              filled  with  the  details of a video object using
+              “[1mFill form from editor[22m” (described above),  or  if
+              it contains the details of a new video object that
+              has  just  been  added,  the  form  items  may  be
+              changed,  and this button will edit the associated
+              shortcode (video object) with the changes.
+
+         ·    [1mDelete current in editor[22m: As described  above  for
+              “[1mReplace  current  in  editor[22m”, except that rather
+              than changing the details of the shortcode, it  is
+              deleted.
+
+         ·    [1mPlace  new  in  editor[22m: After making sure that the
+              cursor (insertion point) in the editor is  at  the
+              desired  position, and setting the form items, use
+              this button to add a new shortcode (video).
+
+         ·    [1mReset default values[22m:  Except  for  the  “Caption”
+              text field, all form items are set to default val‐
+              ues, or cleared. It is  assumed  that  text  typed
+              into  the  “Caption”  field  would be better main‐
+              tained by hand, so that field is not cleared.
+
+
+         [1m3.2.  Form Sections[0m
+
+
+         [1m3.2.1.  Media[0m
+
+         ·    [1mCaption[22m: A video object is set in  a  page  as  an
+              image  would  be,  with  the  same  border, and an
+              optional caption, which may be set here.  If  this
+              field is left blank, there will be no caption.
+
+         ·    [1mUrl or media library ID[22m: A fully qualified URL may
+              be given here, or an ID valid  for  the  [4mWordPress[0m
+              database.  Or more conveniently, this field may be
+              set from the two drop‐down lists  described  next.
+              Acceptable  protocols  are  [4mHTTP[24m, [4mHTTPS[24m, and [4mRTMP[24m.
+              Support for [4mRTMP[24m is only partial and very limited.
+              See   “[1mPlaypath  (rtmp)[22m”  below.  Acceptable  file
+              (media)  types  are  [1mFLV[22m,  [1mMP4  [22m(video),  and  [1mMP3[0m
+
+
+
+
+
+
+
+
+
+                                 ‐4‐
+
+
+              (audio)1.
+
+         ·    [1mUrl from uploads directory[22m: This  is  a  drop‐down
+              list  from  which  the  “[1mUrl  or media library ID[22m”
+              field may be set. The [4mWordPress[24m uploads  directory
+              is  searched  recursively  for files with the suf‐
+              fixes [1mFLV[22m, [1mMP4[22m, and [1mMP3[22m, and for  each  a  URL  is
+              placed  in this list.  This has the advantage that
+              it will find files added by hand (rather than with
+              the  ‘add  media’ interface) if they are placed in
+              uploads or a directory under it.
+
+         ·    [1mSelect ID from media library[22m: This is a  drop‐down
+              list  from  which  the  “[1mUrl  or media library ID[22m”
+              field may be set, as above,  with  the  difference
+              that it searches the [4mWordPress[24m media database, and
+              presents the suitable filenames their media IDs.
+
+         ·    [1mPlaypath (rtmp)[22m: If the “[1mUrl or media library  ID[22m”
+              field  is  given  an  [1mRTMP  [22mURL, the ‘playpath’ is
+              given here. Note that only the simplest RTMP  con‐
+              nections  are  supported: those requiring only the
+              playpath.
+
+         ·    [1mUrl of initial image file (optional)[22m: An  [1mHTTP  [22mor
+              [1mHTTPS  [22mURL  for  an image file may be placed here.
+              When the player is loaded, if it  is  not  set  to
+              play  on  load,  this image is displayed until the
+              play button is invoked. Accepted image  types  are
+              [1mJPEG[22m, [1mPNG[22m, and [1mGIF[22m, and [1mSWF[22m2.
+
+         ·    [1mLoad image from uploads directory[22m: This is a drop‐
+              down list from which the  “[1mUrl  of  initial  image[0m
+              [1mfile  (optional)[22m”  field may be set. The [4mWordPress[0m
+              uploads  directory  is  searched  recursively  for
+              files  with  the suffixes listed as acceptable for
+              that field, and for each a URL is placed  in  this
+              list.   This  has  the advantage that it will find
+              files added by hand (rather  than  with  the  ‘add
+              media’ interface) if they are placed in uploads or
+              a directory under it.
+
+    ───────────
+      1 For [1mMP3 [22mfiles, you may try placing a video URL
+    in the “[1mPlaypath (rtmp)[22m” field to play along  with
+    the  audio. If the video has an audio stream, that
+    will mix in, so it should probably be a video only
+    file. This is an experimental and [1munsupported [22mfea‐
+    ture.
+      2 [1mSWF  [22mfiles  may  be stills or animations. This
+    type is a flash [4mprogram[24m that the flash web browser
+    plugin  will  be executing, so, of course, it must
+    not interfere with the [1mSWFPut [22mplayer.  Test  thor‐
+    oughly if this is used.
+
+
+
+
+
+
+
+
+
+                                 ‐5‐
+
+
+         ·    [1mLoad image ID from media library[22m: This is a  drop‐
+              down  list  from  which  the “[1mUrl of initial image[0m
+              [1mfile (optional)[22m” field may be set, as above,  with
+              the  difference  that  it  searches  the [4mWordPress[0m
+              media database, and presents  the  suitable  file‐
+              names their media IDs.
+
+         ·    [1mMedium  is  audio[22m:  To  determine  whether to play
+              video or audio, the file suffix of the  medium  is
+              checked.   If  the  file  suffix is not known, the
+              medium is assumed to be video. If the medium is an
+              mp3  audio file, but it does not have the [1mMP3 [22msuf‐
+              fix, check this.
+
+         [1m3.2.2.  Dimensions[0m
+
+         ·    [1mPixel Width × Height[22m: set  these  to  the  desired
+              size  of  the player’s embedded window.  This does
+              not need to be the same as the display size of the
+              video  to  be  played,  but the appearance will be
+              best if the [4maspect[24m of the player’s display is  the
+              same as the display aspect of the video. For exam‐
+              ple, if set for a video with a  size  of  400×300,
+              then setting these to fields to 320×240 would look
+              good (the width:height ratio is the same). In  any
+              case,  the  player  will  scale  the  video to fit
+              within its display, but it  maintains  the  aspect
+              ratio,  so  horizontal  or vertical black (unused)
+              areas will be visible if the aspect ratios do  not
+              match.  It  is  also  important  to  note that the
+              browser will (probably) honor a maximum width  for
+              a  page column set in [4mCSS[24m, and force the browser’s
+              flash plugin to display at a  smaller  width  than
+              the user specified.  For example, if you set these
+              fields to 640×480, but the column in  which  posts
+              appear has a width of 600, the display would be at
+              600×480. In such a case, you might try 600×450  to
+              maintain the aspect so that the video matches dis‐
+              play size.  The above assumes a  4:3  aspect;  you
+              would use the correct numbers, of course.
+
+         ·    [1mAuto  aspect[22m:  This  enables a feature meant to be
+              helpful when the video to  be  played  might  have
+              been prepared as DVD‐Video (NTSC or PAL) for stan‐
+              dard (non‐widescreen) 4:3 display. Such video  has
+              non‐square  pixels;  i.e., its actual width×height
+              does not match its intended display  aspect.  With
+              this  check  enabled,  the video player will force
+              display at 4:3 ratio if the video dimensions match
+              one  of  the  DVD‐Video  pixel  sizes. This is not
+              suitable for widescreen DVD‐Video, which  has  one
+              of  the  expected  DVD‐Video  pixel  sizes, but is
+              meant to be displayed with a 16:9 aspect.
+
+
+
+
+
+
+
+
+
+
+                                 ‐6‐
+
+
+         ·    [1mDisplay aspect[22m: Set the  intended  display  aspect
+              ratio in this field if you know that the video has
+              non‐square pixels. A value of  0  (zero)  disables
+              this  field;  otherwise, a value may be given as a
+              decimal number (e.g., 1.33333333) or  as  a  ratio
+              using  ‘:’  or ‘x’ or ‘/’ as separator (e.g., 4:3,
+              or 16x9, of 20/11, etc.—several  other  characters
+              will  also  be  accepted  as a separator, but it’s
+              sensible to use those listed here).
+
+         ·    [1mPixel aspect[22m: Similar to “[1mDisplay  aspect[22m”  above,
+              but  this  field  takes  the source (pixel) aspect
+              ratio  rather  than  the  display  aspect  in  the
+              unlikely  event  that  that  value is more readily
+              available. For example, video  prepared  for  NTSC
+              DVD  at 720×480 pixels intended for standard (4:3)
+              display has a pixel aspect ratio of  8:9,  and  at
+              352×240  a pixel aspect ratio of 10:11.  As above,
+              ‘0’ disables this field.
+
+         [1m3.2.3.  Behavior[0m
+
+         ·    [1mInitial volume[22m: The video player has a volume con‐
+              trol that visitors can adjust, but this field will
+              set a default volume. If  the  web  browser  flash
+              plugin  is  permitted  to save values locally on a
+              visitor’s machine, then their adjustment  will  be
+              saved,  and  will  be used rather than the default
+              when they visit again (or reload the page).
+
+         ·    [1mPlay on load[22m: This will cause the video (or audio)
+              to  begin playing as soon as the player program is
+              loaded. When this is not set, the player waits for
+              the play button.
+
+         ·    [1mLoop  play[22m:  This  will  cause  the medium to play
+              again from the beginning each time it ends.   When
+              this  is  not  set, the media plays once, and then
+              pauses.
+
+         ·    [1mHide control bar initially[22m: This  will  cause  the
+              control bar to hide a few seconds after the player
+              loads (e.g., so that it does not obscure  an  ini‐
+              tial  image). Note that this also changes the con‐
+              trol bar behavior in general: the  bar  will  show
+              whenever  mouse  movement  is  detected within the
+              embedded window, and hide  again  when  there  has
+              been  no  mouse  movement for a few seconds.  When
+              this is not set, the control bar is  left  showing
+              when  the  player  loads, and thereafter is always
+              shown when the mouse is within the  embedded  win‐
+              dow,  and  is  always  hidden  when  the  mouse is
+              [4mdetected[24m leaving the window  (when  the  mouse  is
+              moved  out  of the player window with rapid motion
+
+
+
+
+
+
+
+
+
+                                 ‐7‐
+
+
+              the browser plugin often fails to deliver a ‘mouse
+              has  left’  event to the player program, so hiding
+              the bar is not always reliable).
+
+         ·    [1mHide and disable control bar[22m: Enable this  if  the
+              media should play through without interruption.
+
+         ·    [1mAllow full screen[22m: This enables a control bar but‐
+              ton that will place the video in full‐screen mode.
+
+         ·    [1mControl bar Height (20‐50)[22m: The control bar height
+              can  be  adjusted  with this. Actually, there is a
+              fixed number precompiled sizes in the player bina‐
+              ries  that  are  distributed with the package, and
+              this field causes the nearest size to be selected.
+              If the [4mWordPress[24m host’s [4mPHP[24m configuration includes
+              the [4mMing[24m extension, then you may select an  option
+              on  the  [1mSWFPut [22mconfiguration page called “Dynamic
+              SWF generation”.  This produces the  video  player
+              on  the  fly,  and  in this case the value of this
+              field builds the control bar at the requested size
+              rather than using a near match.
+
+
+    [1m3.3.  The Widget[0m
+
+         The  player can also be used as a widget.  The “Appear‐
+    ance” menu “Widgets” item should produce the “Widgets”  page
+    which,  after  installation  of  [1mSWFPut[22m, should show “[1mSWFPut[0m
+    [1mFlash Video[22m” under “[1mAvailable Widgets[22m”. After dragging  this
+    to  a  widget  area the setup form should display (click the
+    arrow near the title if necessary). The  widget’s  form  has
+    the  same  items  described  under  “[1mForm  Sections[22m”  above,
+    although this form is not displayed in  the  three  separate
+    sections  and does not have the buttons near the top.  There
+    is one additional item at the top of the widget form: a text
+    field  named “Widget title”.  Not surprisingly, the contents
+    of that field will be displayed as a title above the  widget
+    on the pages that include the particular widget area used.
+
+         The description under “[1mPixel Width × Height[22m” above men‐
+    tioned the maximum column widths set by the theme’s CSS, and
+    how  the  video  window width might be limited by the those.
+    The same applies to widget areas, but the maximum  width  is
+    likely  much  less than that in the posts area. These fields
+    have defaults in the widget form that have been useful  with
+    the  themes  distributed with [4mWordPress[24m, but the user should
+    certainly do some testing along with the chosen theme.
+
+    [1m4.  License[0m
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                 ‐8‐
+
+
+         This program and all files included in the distribution
+    archive  are  under  the  [4m[1mGNU[24m  [4mGPL[24m[22m, version 3.  See the file
+    COPYING, which should be present in the top‐level  directory
+    of   the  distribution  archive;  or,  see  the  license  at
+    http://www.gnu.org/licenses/.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
