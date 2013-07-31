@@ -1,6 +1,6 @@
 <?php
 /*
- *  evh_settings.inc.php
+ *  Options_0_0_2.inc.php
  *  
  *  Copyright 2011 Ed Hynan <edhynan@gmail.com>
  *  
