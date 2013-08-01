@@ -1,10 +1,10 @@
 === SWFPut - SWFlash Put ===
 Contributors: EdHynan
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4Q2Y8ZUG8HXLC
-Tags: video, audio, movies, tube, flash, graphics, webcam, movie, cat videos, audio-visual, a/v content
+Tags: video, audio, movies, tube, flash, graphics, web-cam, movie, cat videos, audio-visual, a/v content
 Requires at least: 3.0.2
 Tested up to: 3.5.2
-Stable tag: 1.0
+Stable tag: 1.0.1
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -12,65 +12,116 @@ SWFPut provides a flash video player for posts and a widget and the forms to con
 
 == Description ==
 
-SWFPut  is  a  plugin  for the popular WordPress weblog
-software. It provides a video player program for  the  flash
-plugin  and  the means to configure an instance with a video
-source and playback attributes.  There are two separate com-
-ponents:  the  flash  video player, and the WordPress plugin
-proper.  The video player is delivered to site  visitors  by
-the  plugin  in  the traditional <object ...> block with the
-necessary arguments. Flash video objects may  be  placed  in
-posts  and  pages,  or in the widget areas supported by your
-theme (i.e., the plugin includes a widget).  Video is placed
-in posts and pages with a shortcode; if you do not know what
-a shortcode is, or do not want to deal with them, that's  no
-problem.  (In fact, it is preferable that the shortcodes not
-be hand-edited, and they will not  be  discussed  in  detail
-here.)  The  plugin  adds  to the administrative interface a
-full featured form to setup and  add,  or  edit,  or  delete
-video objects, so the user does not need to be troubled with
-shortcodes (they will be visible in the editor; you will get
-used  to  them).   The flash video widget has a similar full
-featured form.
+SWFPut helps place flash video within posts, on pages,
+and in the sidebar or other widget areas (by providing a
+widget). Video objects are placed and configured with
+forms, so the user doesn't need to learn a shortcode or
+maintain one with hand-editing. A shortcode will be visible
+in the editor for posts and pages; it can be considered a
+visual indication that the video is in place. The widget
+does not use a shortcode. If you don't know what a shortcode
+is, that's okay, SWFPut does not require you to know.
 
-The plugin does not add any  JavaScript  to  the  pages
-generated  for  your visitors, which might be helpful if you
-try  to  keep  your  pages  useful  to  those  who   disable
-JavaScript  in  their browsers. (Such visitors might need to
-explicitly enable the flash web browser plugin, but that  is
-another,  unavoidable,  issue.)   JavaScript  is used in the
-administrative interface for the forms and  manipulation  of
-shortcodes  in  the  editor;  but  of  course  you must have
-JavaScript enabled when you log in to your WordPress site --
-this does not affect your visitors.
+There are several plugins that provide video in some form.
+Here are some features of SWFPut to consider if you wonder
+whether it will suit your purpose:
 
-(Note  that  the  SWFPut video player has been coded to
-work well with the free Gnash web browser plugin, as well as
-the  closed  binary-only  proprietary version in common use.
-As of this writing, Gnash does not handle  MP4  files  well,
-even though it handles H.264 video and AAC audio if they are
-in an FLV container file.)
+*	SWFPut includes and uses its own
+	video player program (that runs in the
+	web browser's flash plugin).
+	It is not designed to work
+	with other flash video player programs.
+
+*	SWFPut works directly with media file (.flv, .mp4)
+	URLs; that is, SWFPut does *not* embed
+	the video players of providers such as YouTube or Vimeo.
+	SWFPut is for video files which are accessible by URL,
+	whether hosted at your site or off-site.
+	The administrative setup form provides two media lists:
+	one offers media files (.flv, .mp4) that you
+	upload with the WordPress 'Add Media' feature,
+	and one offer media files (.flv, .mp4) that are
+	found in a search under the "uploads" directory
+	(this allows you upload media files without using
+	the WordPress PHP upload, which might has a size
+	limit too low for audio/visual material). Of course,
+	a URL may be placed directly in a text input field.
+
+*	An initial image (sometimes called a "poster") that
+	will display until the play button is clicked can
+	(and should) be provided. The setup form provides for
+	this in the same way as described above.
+
+*	SWFPut should not interfere with the appearance of
+	a site: a video is presented much like an image
+	(such as .png or .jpg) is, with the same sort of
+	border and optional caption.
+
+*	SWFPut allows you to set the size of the
+	video player window. Generally, you would want the
+	aspect ratio of the window to match that of the video
+	(but that is not required). The size of the player
+	window does not need to match the display size of
+	the video frames; the video will be scaled to fit
+	the player window, maintaining the video aspect ratio
+	as set by you or as implied by the width and height.
+	Note that the widths of the page columns set by
+	your theme's CSS limit the width of the player window.
+
+*	SWFPut allows you to set the display aspect ratio
+	for the video. Some video is 'anamorphic' in that
+	the pixel width and height do not match the intended
+	proportion of display width and height. You might
+	film your child's school play as 16:9 'widescreen'
+	but use a space saving feature of your recorder that
+	saves the video at 480x360 (which is 4:3). You can
+	set SWFPut to display the video at the intended 16:9
+	aspect ratio. You may set any aspect ratio (make it
+	distorted if you wish).
+
+*	The core features of the flash video player program
+	included with SWFPut have been verified to work with
+	the Gnash free-software browser plugin, which is good
+	because non-free binary-only software is bad. (At the
+	time of this writing, Gnash does not handle the MP4
+	video container format, so it is preferable that you
+	prepare video in the FLV container, even using the
+	h.264 and AAC codecs. Of course, you may use MP4 if
+	you must.)
+
+*	The flash video player program included with SWFPut
+	is written and compiled with the *Ming* PHP extension,
+	and the code is included, so you may modify the player.
+
+*	SWFPut does not add any JavaScript to the pages
+	generated for your visitors, which might be helpful if
+	you try to keep your pages useful to those who disable
+	JavaScript in their browsers. (Such visitors might need to
+	explicitly enable the flash web browser plugin, but that is
+	another, unavoidable, issue.) JavaScript is only used in the
+	administrative interface for the forms and manipulation of
+	shortcodes in the editor.
 
 == Installation ==
 
 SWFPut is installed through the WordPress administrative interface.
 
-* Fetch the SWFPut zip file; save it on your computer
+1. Fetch the SWFPut zip file; save it on your computer
 
-* Log in at your WordPress site
+1. Log in at your WordPress site
 
-* Select 'Plugins -> Add New'
+1. Select 'Plugins -> Add New'
 
-* Select 'Upload'
+1. Select 'Upload'
 
-* Select 'Browse'
+1. Select 'Browse'
 
-* In your system's file selector, select the SWFPut zip file;
+1. In your system's file selector, select the SWFPut zip file;
   select 'OK' or equivalent
 
-* Select 'Install Now'
+1. Select 'Install Now'
 
-* Select 'Activate Plugin'
+1. Select 'Activate Plugin'
 
 At this point "SWFlash Put" should be an entry on the plugins page.
 The Settings menu should have an item "SWFPut Plugin".
@@ -95,22 +146,59 @@ flash video player in more detail.
 
 == Frequently Asked Questions ==
 
-= How many questions have been asked frequently =
+= Is this really a FAQ? =
 
-See below.
+At the time of this writing, 0 (zero) questions have
+been asked, which implies that few have been asked
+frequently. Until this becomes a true FAQ, it will
+be used to answer questions that are merely anticipated,
+as is common practice.
 
-= How many questions have been asked in all =
+= Do I really need to understand "aspect ratio" and such-like? =
 
-At the time of this writing, 0 (zero). The time of this writing
-is the time of preparation for initial release, so that amount
-should not seem too small. Of course, this answer might be present
-here until the next release, and it might have happened that questions
-have been asked in the interim, and so 0 might not really be an
-accurate figure.
+Probably not. In most case the width and height of the
+video will match the intended display proportion.
+"Anamorphic" video is not rare, but probably not too common
+either. The author has seen videos on e.g., YouTube,
+that are distorted by wrong display aspect ratio
+(which is not YouTube's fault), but only a few.
+If you find that your video looks squeezed or stretched,
+you can always use a little trial & error with the display
+aspect setting until it looks good.
 
-= How many questions have been answered in all =
+What you *must* understand is that you *must* convert
+video to the format (the type) that the web-browser plugin
+can handle; namely, FLV or MP4. If you use a converter
+program designed for non-experts, you won't need to
+understand too many details. A web search should turn up
+some converter programs that might be worth a try.
 
-Three more than have been asked. At the time of this writing.
+= Why doesn't SWFPut support HTML5 video? =
+
+Because the author has decided that that would be
+done best in a separate (but similar) plugin. The
+author might write one, particularly if SWFPut generates
+some interest.
+
+The problem with including HTML5 video in the same
+package is that HTML5 video in its current specification
+does not provide features that SWFPut provides; for
+example, HTML5 video will not scale video disproportionate
+to the pixel width and height and will *only* scale video
+(proportionally) to the width or height of the html video
+element (an insane JavaScript hack can create a not-displayed
+video object and use a timeout callback at at least the video
+frame rate to paint the current frame on a canvas with scaling
+suitably calculated for an anamorphic video, but using this
+method squanders the visitor's CPU, increases dropped frames,
+has no full-screen mode, and provides no built in controls,
+and is a bad idea that the author has looked into and
+rejected). There are other reasons, such as different
+supported file formats.
+
+= Are you going to anticipate more questions? =
+
+Maybe later.
 
 == Screenshots ==
 
@@ -123,10 +211,5 @@ TBA
 
 == Upgrade Notice ==
 
-= 1.0 =
+= 1.0.1 =
 None as yet.
-
-== Arbitrary section ==
-
-Coming: media preparation resources.
-

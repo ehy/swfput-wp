@@ -3,14 +3,14 @@
 Plugin Name: SWFPut
 Plugin URI: http://agalena.nfshost.com/b1/?page_id=46
 Description: Add Shockwave Flash video to WordPress posts and widgets, from arbitrary URI's or media library ID's or files in your media upload directory tree (even if not added by WordPress and assigned an ID).
-Version: 1.0.0
+Version: 1.0.1
 Author: Ed Hynan
-Author URI: http://agalena.nfshost.com/b1/?page_id=46
+Author URI: http://agalena.nfshost.com/b1/
 License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
 */
 
 /*
- *      swfput-1.php
+ *      swfput.php
  *      
  *      Copyright 2011 Ed Hynan <edhynan@gmail.com>
  *      
@@ -38,7 +38,7 @@ License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
 \**********************************************************************/
 
 
-// supporting classes found in files named __CLASS__.inc.php
+// supporting classes found in files named "${cl}.inc.php"
 // each class must define static method id_token() which returns
 // the correct int, to help avoid name clashes
 function swfput_paranoid_require_class ($cl, $rfunc = 'require_once') {
