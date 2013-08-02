@@ -1,8 +1,10 @@
 #! /usr/bin/make -f
 
-PRJNAME = swfput-1
+PRJVERS = 1.0.1
+PRJSTEM = swfput
+PRJNAME = $(PRJSTEM)-$(PRJVERS)
 
-SRCS = ${PRJNAME}.php \
+SRCS = ${PRJSTEM}.php \
 	Options_0_0_2.inc.php \
 	OptField_0_0_2.inc.php \
 	OptSection_0_0_2.inc.php \

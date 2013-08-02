@@ -3,14 +3,14 @@
 Plugin Name: SWFPut
 Plugin URI: http://agalena.nfshost.com/b1/?page_id=46
 Description: Add Shockwave Flash video to WordPress posts and widgets, from arbitrary URI's or media library ID's or files in your media upload directory tree (even if not added by WordPress and assigned an ID).
-Version: 1.0.0
+Version: 1.0.1
 Author: Ed Hynan
-Author URI: http://agalena.nfshost.com/b1/?page_id=46
+Author URI: http://agalena.nfshost.com/b1/
 License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
 */
 
 /*
- *      swfput-1.php
+ *      swfput.php
  *      
  *      Copyright 2011 Ed Hynan <edhynan@gmail.com>
  *      
@@ -38,9 +38,10 @@ License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
 \**********************************************************************/
 
 
-// supporting classes found in files named __CLASS__.inc.php
+// supporting classes found in files named "${cl}.inc.php"
 // each class must define static method id_token() which returns
 // the correct int, to help avoid name clashes
+if ( ! function_exists( 'swfput_paranoid_require_class' ) ) :
 function swfput_paranoid_require_class ($cl, $rfunc = 'require_once') {
 	$id = 0xED00AA33;
 	$meth = 'id_token';
@@ -75,6 +76,7 @@ function swfput_paranoid_require_class ($cl, $rfunc = 'require_once') {
 		wp_die('class name conflict: ' . $cl);
 	}
 }
+endif;
 
 // these support classes are in separate files as they are
 // not specific to this plugin, and may be used in others
@@ -287,7 +289,7 @@ class SWF_put_evh {
 		return $items;
 	}
 	
-	// initialize plugin options from defaults of WPDB
+	// initialize plugin options from defaults or WPDB
 	protected function init_opts() {
 		$items = self::get_opts_defaults();
 		$opts = self::get_opt_group();
@@ -323,7 +325,7 @@ class SWF_put_evh {
 		if ( ! $this->opt ) {
 			$items = $this->init_opts();
 			
-			// set up Options_evh with its page, sections, and fields
+			// use Opt* classes for page, sections, and fields
 			
 			// mk_aclv adds a suffix to class names
 			$Cf = self::mk_aclv('OptField');
@@ -342,12 +344,13 @@ class SWF_put_evh {
 					$items[self::optverbose],
 					array($this, 'put_verbose_opt'));
 			// this field is not printed if ming is n.a.
-			if ( self::can_use_ming() )
-			$fields[$nf++] = new $Cf(self::optuseming,
-					self::ht(__('Dynamic SWF generation:')),
-					self::optuseming,
-					$items[self::optuseming],
-					array($this, 'put_useming_opt'));
+			if ( self::can_use_ming() ) {
+				$fields[$nf++] = new $Cf(self::optuseming,
+						self::ht(__('Dynamic SWF generation:')),
+						self::optuseming,
+						$items[self::optuseming],
+						array($this, 'put_useming_opt'));
+			}
 
 			// section object includes description callback
 			$sections[$ns++] = new $Cs($fields,

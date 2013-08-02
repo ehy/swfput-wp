@@ -1,6 +1,6 @@
 <?php
 /*
- *  evh_settings.inc.php
+ *  Options_0_0_2.inc.php
  *  
  *  Copyright 2011 Ed Hynan <edhynan@gmail.com>
  *  
@@ -23,7 +23,6 @@
 * Description: class for settings page
 * Version: 1.0
 * Author: Ed Hynan
-* Author URI: http://agalena.nfshost.com/b1/?page_id=46
 * License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
 */
 

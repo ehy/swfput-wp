@@ -23,7 +23,6 @@
 * Description: SWF video app with PHP/Ming, main A/S include
 * Version: 0.1.0
 * Author: Ed Hynan
-* Author URI: http://agalena.nfshost.com/b1/?page_id=46
 * License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
 */
 
@@ -131,7 +130,8 @@ var iiproportion = true;
 
 var dopause = initpause;
 var doshowbar = initshowbar;
-var loadonload = true; // load media immediately on player load
+// 2-8-13: loadonload changed to false: TODO: make it an option
+var loadonload = false; // load media immediately on player load
 // Timed bar hiding; has menu item to toggle
 var doshowbartime = ! initshowbar;
 var doscale = true;

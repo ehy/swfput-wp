@@ -1,23 +1,5 @@
 K 25
 svn:wc:ra_dav:version-url
 V 34
-/!svn/ver/747459/swfput/trunk/docs
-END
-asc2ans.c
-K 25
-svn:wc:ra_dav:version-url
-V 44
-/!svn/ver/747459/swfput/trunk/docs/asc2ans.c
-END
-Makefile
-K 25
-svn:wc:ra_dav:version-url
-V 43
-/!svn/ver/747459/swfput/trunk/docs/Makefile
-END
-readme.roff
-K 25
-svn:wc:ra_dav:version-url
-V 46
-/!svn/ver/747459/swfput/trunk/docs/readme.roff
+/!svn/ver/750260/swfput/trunk/docs
 END
