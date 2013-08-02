@@ -3,7 +3,7 @@ Contributors: EdHynan
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4Q2Y8ZUG8HXLC
 Tags: video, audio, movies, tube, flash, graphics, web-cam, movie, cat videos, audio-visual, a/v content
 Requires at least: 3.0.2
-Tested up to: 3.5.2
+Tested up to: 3.6
 Stable tag: 1.0.1
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -22,7 +22,6 @@ visual indication that the video is in place. The widget
 does not use a shortcode. If you don't know what a shortcode
 is, that's okay, SWFPut does not require you to know.
 
-There are several plugins that provide video in some form.
 Here are some features of SWFPut to consider if you wonder
 whether it will suit your purpose:
 
@@ -37,13 +36,13 @@ whether it will suit your purpose:
 	the video players of providers such as YouTube or Vimeo.
 	SWFPut is for video files which are accessible by URL,
 	whether hosted at your site or off-site.
-	The administrative setup form provides two media lists:
-	one offers media files (.flv, .mp4) that you
+	The setup form provides two media lists:
+	one offers media files (.flv, .mp4) that you can
 	upload with the WordPress 'Add Media' feature,
 	and one offer media files (.flv, .mp4) that are
 	found in a search under the "uploads" directory
 	(this allows you upload media files without using
-	the WordPress PHP upload, which might has a size
+	the WordPress PHP upload, which might have a size
 	limit too low for audio/visual material). Of course,
 	a URL may be placed directly in a text input field.
 
@@ -74,7 +73,7 @@ whether it will suit your purpose:
 	proportion of display width and height. You might
 	film your child's school play as 16:9 'widescreen'
 	but use a space saving feature of your recorder that
-	saves the video at 480x360 (which is 4:3). You can
+	saves the video at 480x360 (which is not 16:9). You can
 	set SWFPut to display the video at the intended 16:9
 	aspect ratio. You may set any aspect ratio (make it
 	distorted if you wish).
@@ -186,15 +185,18 @@ does not provide features that SWFPut provides; for
 example, HTML5 video will not scale video disproportionate
 to the pixel width and height and will *only* scale video
 (proportionally) to the width or height of the html video
-element (an insane JavaScript hack can create a not-displayed
+element. (An insane JavaScript hack can create a not-displayed
 video object and use a timeout callback at at least the video
 frame rate to paint the current frame on a canvas with scaling
 suitably calculated for an anamorphic video, but using this
 method squanders the visitor's CPU, increases dropped frames,
 has no full-screen mode, and provides no built in controls,
 and is a bad idea that the author has looked into and
-rejected). There are other reasons, such as different
+rejected.) There are other reasons, such as different
 supported file formats.
+
+Update 1 August 2013: WordPress 3.6 is released, with HTML5
+video and audio support. That's another reason.
 
 = Are you going to anticipate more questions? =
 
