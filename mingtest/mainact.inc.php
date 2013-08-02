@@ -130,7 +130,8 @@ var iiproportion = true;
 
 var dopause = initpause;
 var doshowbar = initshowbar;
-var loadonload = true; // load media immediately on player load
+// 2-8-13: loadonload changed to false: TODO: make it an option
+var loadonload = false; // load media immediately on player load
 // Timed bar hiding; has menu item to toggle
 var doshowbartime = ! initshowbar;
 var doscale = true;

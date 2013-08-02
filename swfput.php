@@ -287,7 +287,7 @@ class SWF_put_evh {
 		return $items;
 	}
 	
-	// initialize plugin options from defaults of WPDB
+	// initialize plugin options from defaults or WPDB
 	protected function init_opts() {
 		$items = self::get_opts_defaults();
 		$opts = self::get_opt_group();
@@ -323,7 +323,7 @@ class SWF_put_evh {
 		if ( ! $this->opt ) {
 			$items = $this->init_opts();
 			
-			// set up Options_evh with its page, sections, and fields
+			// use Opt* classes for page, sections, and fields
 			
 			// mk_aclv adds a suffix to class names
 			$Cf = self::mk_aclv('OptField');
@@ -342,12 +342,13 @@ class SWF_put_evh {
 					$items[self::optverbose],
 					array($this, 'put_verbose_opt'));
 			// this field is not printed if ming is n.a.
-			if ( self::can_use_ming() )
-			$fields[$nf++] = new $Cf(self::optuseming,
-					self::ht(__('Dynamic SWF generation:')),
-					self::optuseming,
-					$items[self::optuseming],
-					array($this, 'put_useming_opt'));
+			if ( self::can_use_ming() ) {
+				$fields[$nf++] = new $Cf(self::optuseming,
+						self::ht(__('Dynamic SWF generation:')),
+						self::optuseming,
+						$items[self::optuseming],
+						array($this, 'put_useming_opt'));
+			}
 
 			// section object includes description callback
 			$sections[$ns++] = new $Cs($fields,
