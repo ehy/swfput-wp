@@ -41,6 +41,7 @@ License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
 // supporting classes found in files named "${cl}.inc.php"
 // each class must define static method id_token() which returns
 // the correct int, to help avoid name clashes
+if ( ! function_exists( 'swfput_paranoid_require_class' ) ) :
 function swfput_paranoid_require_class ($cl, $rfunc = 'require_once') {
 	$id = 0xED00AA33;
 	$meth = 'id_token';
@@ -75,6 +76,7 @@ function swfput_paranoid_require_class ($cl, $rfunc = 'require_once') {
 		wp_die('class name conflict: ' . $cl);
 	}
 }
+endif;
 
 // these support classes are in separate files as they are
 // not specific to this plugin, and may be used in others

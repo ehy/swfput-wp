@@ -8,7 +8,7 @@ Stable tag: 1.0.1
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
-SWFPut provides a flash video player for posts and a widget and the forms to configure instances with a video source and playback attributes.
+SWFPut provides a flash video player for posts and pages, and a widget, and forms to configure display and video playback.
 
 == Description ==
 
@@ -204,14 +204,34 @@ Maybe later.
 
 == Screenshots ==
 
-TBA
+1. The SWFPut widget setup form (bottom).
+
+2. The SWFPut posts/page setup form ('meta box') with the first
+	section hidden.
+
+3. The appearance of video placed by SWFPut (Twentyeleven theme
+	with dark custom colors, sidebar on left), not yet playing.
 
 == Changelog ==
 
-= 1.0 =
+= 1.0.1 =
+* Maintenance.
+* Editing and corrections in readme.txt.
+* Behavior change: without initial image ('poster'), medium is no
+	longer fetched automatically (without visitor play); was a
+	misfeature that would simulate an initial image by pausing
+	at a random point within first few seconds of the video, but
+	the unsolicited download is a bad idea. (Might be an option
+	in future.)
+
+= 1.0.0 =
 * Initial release.
 
 == Upgrade Notice ==
 
 = 1.0.1 =
-None as yet.
+This revision has one important change: a misfeature that would
+simulate an initial image (if one was not set) by pausing
+at a random point within first few seconds of the video, but
+causing an unsolicited download of the medium in order to do so,
+has been disabled.
