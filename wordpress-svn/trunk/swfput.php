@@ -253,7 +253,7 @@ class SWF_put_evh {
 		// hook&filter to make shortcode form for editor
 		if ( self::get_posts_code_option() === 'true' ) {
 			add_action('admin_menu', array($cl, 'hook_admin_menu'));
-			add_filter('admin_print_scripts',
+			add_action('admin_print_scripts',
 				array($cl, 'filter_admin_print_scripts'));
 		}
 	}
@@ -636,9 +636,9 @@ class SWF_put_evh {
 
 		if ( self::get_posts_preg_option() === 'true' ) {
 			$scf = array($this, 'post_sed');
-			add_action('the_content', $scf, 20);
+			add_filter('the_content', $scf, 20);
 		} else {
-			remove_action('the_content', array($this, 'post_sed'));
+			remove_filter('the_content', array($this, 'post_sed'));
 		}
 	}
 
