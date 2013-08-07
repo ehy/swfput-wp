@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: video, audio, movies, tube, flash, graphics, web-cam, movie, cat videos, audio-visual, a/v content
 Requires at least: 3.0.2
 Tested up to: 3.6
-Stable tag: 1.0.2
+Stable tag: 1.0.1
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 

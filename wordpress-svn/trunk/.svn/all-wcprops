@@ -3,18 +3,6 @@ svn:wc:ra_dav:version-url
 V 29
 /!svn/ver/750260/swfput/trunk
 END
-OptSection_0_0_2.inc.php
-K 25
-svn:wc:ra_dav:version-url
-V 54
-/!svn/ver/750259/swfput/trunk/OptSection_0_0_2.inc.php
-END
-README.pdf
-K 25
-svn:wc:ra_dav:version-url
-V 40
-/!svn/ver/750259/swfput/trunk/README.pdf
-END
 COPYING
 K 25
 svn:wc:ra_dav:version-url
@@ -37,7 +25,7 @@ readme.txt
 K 25
 svn:wc:ra_dav:version-url
 V 40
-/!svn/ver/750259/swfput/trunk/readme.txt
+/!svn/ver/752614/swfput/trunk/readme.txt
 END
 OptPage_0_0_2.inc.php
 K 25
@@ -55,7 +43,7 @@ Makefile
 K 25
 svn:wc:ra_dav:version-url
 V 38
-/!svn/ver/750259/swfput/trunk/Makefile
+/!svn/ver/752613/swfput/trunk/Makefile
 END
 README
 K 25
@@ -67,7 +55,7 @@ swfput.php
 K 25
 svn:wc:ra_dav:version-url
 V 40
-/!svn/ver/750259/swfput/trunk/swfput.php
+/!svn/ver/752613/swfput/trunk/swfput.php
 END
 README.html
 K 25
@@ -80,4 +68,16 @@ K 25
 svn:wc:ra_dav:version-url
 V 52
 /!svn/ver/750259/swfput/trunk/OptField_0_0_2.inc.php
+END
+OptSection_0_0_2.inc.php
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/!svn/ver/750259/swfput/trunk/OptSection_0_0_2.inc.php
+END
+README.pdf
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/!svn/ver/750259/swfput/trunk/README.pdf
 END

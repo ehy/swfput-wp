@@ -214,6 +214,12 @@ Maybe later.
 
 == Changelog ==
 
+= 1.0.2 =
+* Corrections in (vaguely distinguished)
+	add_(action|filter) calls, according to tag used, checked against
+	WP source (whether do_action() or apply_filters() is invoked
+	for the tag in question).
+
 = 1.0.1 =
 * Maintenance.
 * Editing and corrections in readme.txt.
@@ -228,6 +234,9 @@ Maybe later.
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.0.2 =
+Maintenance.
 
 = 1.0.1 =
 This revision has one important change: a misfeature that would
