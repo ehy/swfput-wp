@@ -517,7 +517,9 @@ SWFPut_putswf_video_xed.prototype = {
 			if ( this.name != undefined ) {
 				var k = this.name.substring(len, this.name.length - 1);
 				if ( k == to ) {
-					this.value = unescape(v);
+					// EH: 2013/08/10 -- had unsuitable unescape(),
+					// changed to decodeURIComponent()
+					this.value = decodeURIComponent(v);
 					return false;
 				}
 			}

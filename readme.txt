@@ -1,10 +1,10 @@
 === SWFPut - SWFlash Put ===
 Contributors: EdHynan
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4Q2Y8ZUG8HXLC
-Tags: video, audio, movies, tube, flash, graphics, web-cam, movie, cat videos, audio-visual, a/v content
+Tags: video, audio, movies, tube, flash, flash player, graphics, movie, audio-visual, a/v content
 Requires at least: 3.0.2
 Tested up to: 3.6
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -219,6 +219,11 @@ Maybe later.
 	add_(action|filter) calls, according to tag used, checked against
 	WP source (whether do_action() or apply_filters() is invoked
 	for the tag in question).
+* Changed JS unescape() to decodeURIComponent().
+* Removed compiled README.{tty,tt8} from distribution.
+* Changed 'wptexturize' to 'htmlentities' for paths and things that
+	should not be pretty-pretty'd.
+* Changed 'Tags:' in readme.txt (and stable, etc.).
 
 = 1.0.1 =
 * Maintenance.
@@ -236,11 +241,15 @@ Maybe later.
 == Upgrade Notice ==
 
 = 1.0.2 =
-Maintenance.
+BUG FIX: URLs with non-8-bit characters would be corrupted in form
+	fields, causing not-found errors in the player: changed
+	JS unescape() to decodeURIComponent(). (Feedback on non-UTF-8
+	charsets would be welcome!)
 
 = 1.0.1 =
 This revision has one important change: a misfeature that would
-simulate an initial image (if one was not set) by pausing
-at a random point within first few seconds of the video, but
-causing an unsolicited download of the medium in order to do so,
-has been disabled.
+	simulate an initial image (if one was not set) by pausing
+	at a random point within first few seconds of the video, but
+	causing an unsolicited download of the medium in order to do so,
+	has been disabled.
+	
