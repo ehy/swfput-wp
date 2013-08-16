@@ -42,7 +42,8 @@ License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
 // each class must define static method id_token() which returns
 // the correct int, to help avoid name clashes
 if ( ! function_exists( 'swfput_paranoid_require_class' ) ) :
-function swfput_paranoid_require_class ($cl, $rfunc = 'require_once') {
+function swfput_paranoid_require_class ($cl, $rfunc = 'require_once')
+{
 	$id = 0xED00AA33;
 	$meth = 'id_token';
 	if ( ! class_exists($cl) ) {
@@ -107,8 +108,23 @@ endif;
  * not, through any alias
  */
 if ( ! function_exists( 'swfput_php52_htmlent' ) ) :
-function swfput_php52_htmlent ($text, $cset = 'UTF-8' )
+function swfput_php52_htmlent ($text, $cset = null)
 {
+	// try to use get_option('blog_charset') only once;
+	// it's not cheap enough even with WP's cache for
+	// the number of times this might be called
+	global $swfput_blog_charset;
+	if ( ! isset($swfput_blog_charset) ) {
+		$swfput_blog_charset = get_option('blog_charset');
+		if ( ! $swfput_blog_charset ) {
+			$swfput_blog_charset = 'UTF-8';
+		}
+	}
+
+	if ( $cset === null ) {
+		$cset = $swfput_blog_charset;
+	}
+
 	return htmlentities($text, ENT_QUOTES, $cset);
 }
 endif;
@@ -1604,7 +1620,22 @@ class SWF_put_evh {
 	}
 	
 	// 'html-ize' a text string
-	public static function ht($text) {
+	public static function ht($text, $cset = null) {
+		// try to use get_option('blog_charset') only once;
+		// it's not cheap enough even with WP's cache for
+		// the number of times this might be called
+		global $swfput_blog_charset;
+		if ( ! isset($swfput_blog_charset) ) {
+			$swfput_blog_charset = get_option('blog_charset');
+			if ( ! $swfput_blog_charset ) {
+				$swfput_blog_charset = 'UTF-8';
+			}
+		}
+	
+		if ( $cset === null ) {
+			$cset = $swfput_blog_charset;
+		}
+
 		return htmlentities($text, ENT_QUOTES, 'UTF-8');
 	}
 	
