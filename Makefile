@@ -1,6 +1,6 @@
 #! /usr/bin/make -f
 
-PRJVERS = 1.0.2
+PRJVERS = 1.0.3
 PRJSTEM = swfput
 PRJNAME = $(PRJSTEM)-$(PRJVERS)
 

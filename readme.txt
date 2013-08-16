@@ -214,6 +214,8 @@ Maybe later.
 
 == Changelog ==
 
+= 1.0.3 =
+
 = 1.0.2 =
 * Corrections in (vaguely distinguished)
 	add_(action|filter) calls, according to tag used, checked against
@@ -239,6 +241,8 @@ Maybe later.
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.0.3 =
 
 = 1.0.2 =
 BUG FIX: URLs with non-8-bit characters would be corrupted in form
