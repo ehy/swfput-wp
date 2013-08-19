@@ -215,6 +215,10 @@ Maybe later.
 == Changelog ==
 
 = 1.0.3 =
+* Maintenance.
+* Put i18n final code (__() was already present), added make rules to
+	build *.mo using (added) script in new locale dir, added FPO/test
+	en_US.mo, confirmed working with dummy string replacement.
 
 = 1.0.2 =
 * Corrections in (vaguely distinguished)
@@ -241,8 +245,6 @@ Maybe later.
 * Initial release.
 
 == Upgrade Notice ==
-
-= 1.0.3 =
 
 = 1.0.2 =
 BUG FIX: URLs with non-8-bit characters would be corrupted in form
