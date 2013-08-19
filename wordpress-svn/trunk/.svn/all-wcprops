@@ -1,7 +1,13 @@
 K 25
 svn:wc:ra_dav:version-url
 V 29
-/!svn/ver/758567/swfput/trunk
+/!svn/ver/758736/swfput/trunk
+END
+README.pdf
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/!svn/ver/754547/swfput/trunk/README.pdf
 END
 COPYING
 K 25
@@ -43,7 +49,7 @@ swfput.php
 K 25
 svn:wc:ra_dav:version-url
 V 40
-/!svn/ver/758736/swfput/trunk/swfput.php
+/!svn/ver/758875/swfput/trunk/swfput.php
 END
 README.html
 K 25
@@ -62,10 +68,4 @@ K 25
 svn:wc:ra_dav:version-url
 V 54
 /!svn/ver/750259/swfput/trunk/OptSection_0_0_2.inc.php
-END
-README.pdf
-K 25
-svn:wc:ra_dav:version-url
-V 40
-/!svn/ver/754547/swfput/trunk/README.pdf
 END

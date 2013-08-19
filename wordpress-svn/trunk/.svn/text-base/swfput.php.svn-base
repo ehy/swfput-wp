@@ -7,6 +7,7 @@ Version: 1.0.3
 Author: Ed Hynan
 Author URI: http://agalena.nfshost.com/b1/
 License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
+Text Domain: swfput_l10n
 */
 
 /*
@@ -187,7 +188,7 @@ class SWF_put_evh {
 	const shortcode = 'putswf_video';
 
 	// object of class to handle options under WordPress
-	protected $opt;
+	protected $opt = null;
 
 	// swfput program directory
 	protected static $swfputdir = 'mingput';
@@ -247,27 +248,6 @@ class SWF_put_evh {
 			return;
 		}
 		
-		// Do .mo load, in case translations exist;
-		// Wrappers self::_T()/_E() take one arg, and
-		// invokes translate()/_e() with a domain string arg.
-		// Second arg to load*() function is deprecated.
-		// Third arg is path relative to WP_PLUGIN_DIR,
-		// and will be WP_PLUGIN_DIR alone if arg 3 is false.
-		// We don't want to install .mo in WP_PLUGIN_DIR;
-		// so, pass this plugin's install dir and a .mo
-		// subdir. With this set of args, .mo files will
-		// need to have paths like:
-		//  <WP_PLUGIN_DIR>/plugin_dirname/subdir/domain-en_US.mo
-		// where "en_US" is the filtered return from
-		// get_locale(), "domain" is the domain arg
-		// (arg 1). This plugin will use subir "locale"
-		// to hold .mo files, if any.
-		$t = basename(trim(self::mk_plugindir(), '/')) . '/locale';
-		load_plugin_textdomain(self::swfput_textdomain, false, $t);
-		
-		// Settings/Options page setup
-		$this->init_settings_page();
-
 		// keep it clean: {de,}activation
 		$cl = __CLASS__;
 		register_deactivation_hook($pf, array($cl, 'on_deactivate'));
@@ -362,169 +342,171 @@ class SWF_put_evh {
 	// initialize options/settings page, only if $this->full_init==true
 	// ($this->full_init set and checked in ctor)
 	protected function init_settings_page() {
-		if ( ! $this->opt ) {
-			$items = $this->init_opts();
-			
-			// use Opt* classes for page, sections, and fields
-			
-			// mk_aclv adds a suffix to class names
-			$Cf = self::mk_aclv('OptField');
-			$Cs = self::mk_aclv('OptSection');
-			// prepare fields to appear under various sections
-			// of admin page
-			$ns = 0;
-			$sections = array();
-
-			// General options section
-			$nf = 0;
-			$fields = array();
-			$fields[$nf++] = new $Cf(self::optverbose,
-					self::wt(self::_T('Show verbose descriptions:')),
-					self::optverbose,
-					$items[self::optverbose],
-					array($this, 'put_verbose_opt'));
-			// this field is not printed if ming is n.a.
-			if ( self::can_use_ming() ) {
-				$fields[$nf++] = new $Cf(self::optuseming,
-						self::wt(self::_T('Dynamic SWF generation:')),
-						self::optuseming,
-						$items[self::optuseming],
-						array($this, 'put_useming_opt'));
-			}
-
-			// section object includes description callback
-			$sections[$ns++] = new $Cs($fields,
-					'swfput1_general_section',
-					'<a name="general">' .
-						self::wt(self::_T('General Options'))
-						. '</a>',
-					array($this, 'put_general_desc'));
-
-			// placement section: (posts, sidebar, header)
-			$nf = 0;
-			$fields = array();
-			$fields[$nf++] = new $Cf(self::optdispmsg,
-					self::wt(self::_T('Place in posts:')),
-					self::optdispmsg,
-					$items[self::optdispmsg],
-					array($this, 'put_inposts_opt'));
-			$fields[$nf++] = new $Cf(self::optdispwdg,
-					self::wt(self::_T('Place in widget areas:')),
-					self::optdispwdg,
-					$items[self::optdispwdg],
-					array($this, 'put_widget_opt'));
-			// commented: from early false assumption that header
-			// could be easily hooked:
-			//$fields[$nf++] = new $Cf(self::optdisphdr,
-					//self::wt(self::_T('Place in header area:')),
-					//self::optdisphdr,
-					//$items[self::optdisphdr],
-					//array($this, 'put_inhead_opt'));
-
-			// section object includes description callback
-			$sections[$ns++] = new $Cs($fields,
-					'swfput1_placement_section',
-					'<a name="placement">' .
-						self::wt(self::_T('Video Placement Options'))
-						. '</a>',
-					array($this, 'put_place_desc'));
-			
-			// options for posts
-			$nf = 0;
-			$fields = array();
-			$fields[$nf++] = new $Cf(self::optcodemsg,
-					self::wt(self::_T('Use shortcodes in posts:')),
-					self::optcodemsg,
-					$items[self::optcodemsg],
-					array($this, 'put_scposts_opt'));
-			$fields[$nf++] = new $Cf(self::optpregmsg,
-					self::wt(self::_T('Search attachment links in posts:')),
-					self::optpregmsg,
-					$items[self::optpregmsg],
-					array($this, 'put_rxposts_opt'));
-
-			// section object includes description callback
-			$sections[$ns++] = new $Cs($fields,
-					'swfput1_postsopts_section',
-					'<a name="postopts">' .
-						self::wt(self::_T('Video In Posts'))
-						. '</a>',
-					array($this, 'put_postopts_desc'));
-			
-			// options for widget areas
-			$nf = 0;
-			$fields = array();
-			$fields[$nf++] = new $Cf(self::optplugwdg,
-					self::wt(self::_T('Use the included widget:')),
-					self::optplugwdg,
-					$items[self::optplugwdg],
-					array($this, 'put_plwdg_opt'));
-			$fields[$nf++] = new $Cf(self::optcodewdg,
-					self::wt(self::_T('Use shortcodes in widgets:')),
-					self::optcodewdg,
-					$items[self::optcodewdg],
-					array($this, 'put_scwdg_opt'));
-
-			// section object includes description callback
-			$sections[$ns++] = new $Cs($fields,
-					'swfput1_wdgsopts_section',
-					'<a name="wdgsopts">' .
-						self::wt(self::_T('Video In Widget Areas'))
-						. '</a>',
-					array($this, 'put_wdgsopts_desc'));
-						
-			// install opts section:
-			// field: delete opts on uninstall?
-			$nf = 0;
-			$fields = array();
-			$fields[$nf++] = new $Cf(self::optdelopts,
-					self::wt(self::_T('When the plugin is uninstalled:')),
-					self::optdelopts,
-					$items[self::optdelopts],
-					array($this, 'put_del_opts'));
-
-			// prepare sections to appear under admin page
-			$sections[$ns++] = new $Cs($fields,
-					'swfput1_inst_section',
-					'<a name="install">' .
-						self::wt(self::_T('Plugin Install Settings'))
-						. '</a>',
-					array($this, 'put_inst_desc'));
-
-			// prepare admin page specific hooks per page. e.g.:
-			// (now set to false, but code remains for reference;
-			// see comment '// hook&filter to make shortcode form for editor'
-			// in __construct())
-			if ( false ) {
-				$suffix_hooks = array(
-					'admin_head' => array($this, 'admin_head'),
-					'admin_print_scripts' => array($this, 'admin_js'),
-					'load' => array($this, 'admin_load')
-					);
-			} else {
-				$suffix_hooks = '';
-			}
-			
-			// prepare admin page
-			// Note that validator applies to all options,
-			// necessitating a big switch on option keys
-			$Cp = self::mk_aclv('OptPage');
-			$page = new $Cp(self::opt_group, $sections,
-				self::settings_page_id,
-				self::wt(self::_T('SWFPut Plugin')),
-				self::wt(self::_T('SWFPut Configuration')),
-				array(__CLASS__, 'validate_opts'),
-				/* pagetype = 'options' */ '',
-				/* capability = 'manage_options' */ '',
-				array($this, 'setting_page_output_callback')/* callback '' */,
-				/* 'hook_suffix' callback array */ $suffix_hooks,
-				self::wt(self::_T('Configuration of SWFPut Plugin')),
-				self::wt(self::_T('Display and Runtime Settings.')),
-				self::wt(self::_T('Save Settings')));
-			
-			$Co = self::mk_aclv('Options');
-			$this->opt = new $Co($page);
+		if ( $this->opt ) {
+			return;
 		}
+
+		$items = $this->init_opts();
+		
+		// use Opt* classes for page, sections, and fields
+		
+		// mk_aclv adds a suffix to class names
+		$Cf = self::mk_aclv('OptField');
+		$Cs = self::mk_aclv('OptSection');
+		// prepare fields to appear under various sections
+		// of admin page
+		$ns = 0;
+		$sections = array();
+
+		// General options section
+		$nf = 0;
+		$fields = array();
+		$fields[$nf++] = new $Cf(self::optverbose,
+				self::wt(self::_T('Show verbose descriptions:')),
+				self::optverbose,
+				$items[self::optverbose],
+				array($this, 'put_verbose_opt'));
+		// this field is not printed if ming is n.a.
+		if ( self::can_use_ming() ) {
+			$fields[$nf++] = new $Cf(self::optuseming,
+					self::wt(self::_T('Dynamic SWF generation:')),
+					self::optuseming,
+					$items[self::optuseming],
+					array($this, 'put_useming_opt'));
+		}
+
+		// section object includes description callback
+		$sections[$ns++] = new $Cs($fields,
+				'swfput1_general_section',
+				'<a name="general">' .
+					self::wt(self::_T('General Options'))
+					. '</a>',
+				array($this, 'put_general_desc'));
+
+		// placement section: (posts, sidebar, header)
+		$nf = 0;
+		$fields = array();
+		$fields[$nf++] = new $Cf(self::optdispmsg,
+				self::wt(self::_T('Place in posts:')),
+				self::optdispmsg,
+				$items[self::optdispmsg],
+				array($this, 'put_inposts_opt'));
+		$fields[$nf++] = new $Cf(self::optdispwdg,
+				self::wt(self::_T('Place in widget areas:')),
+				self::optdispwdg,
+				$items[self::optdispwdg],
+				array($this, 'put_widget_opt'));
+		// commented: from early false assumption that header
+		// could be easily hooked:
+		//$fields[$nf++] = new $Cf(self::optdisphdr,
+				//self::wt(self::_T('Place in header area:')),
+				//self::optdisphdr,
+				//$items[self::optdisphdr],
+				//array($this, 'put_inhead_opt'));
+
+		// section object includes description callback
+		$sections[$ns++] = new $Cs($fields,
+				'swfput1_placement_section',
+				'<a name="placement">' .
+					self::wt(self::_T('Video Placement Options'))
+					. '</a>',
+				array($this, 'put_place_desc'));
+		
+		// options for posts
+		$nf = 0;
+		$fields = array();
+		$fields[$nf++] = new $Cf(self::optcodemsg,
+				self::wt(self::_T('Use shortcodes in posts:')),
+				self::optcodemsg,
+				$items[self::optcodemsg],
+				array($this, 'put_scposts_opt'));
+		$fields[$nf++] = new $Cf(self::optpregmsg,
+				self::wt(self::_T('Search attachment links in posts:')),
+				self::optpregmsg,
+				$items[self::optpregmsg],
+				array($this, 'put_rxposts_opt'));
+
+		// section object includes description callback
+		$sections[$ns++] = new $Cs($fields,
+				'swfput1_postsopts_section',
+				'<a name="postopts">' .
+					self::wt(self::_T('Video In Posts'))
+					. '</a>',
+				array($this, 'put_postopts_desc'));
+		
+		// options for widget areas
+		$nf = 0;
+		$fields = array();
+		$fields[$nf++] = new $Cf(self::optplugwdg,
+				self::wt(self::_T('Use the included widget:')),
+				self::optplugwdg,
+				$items[self::optplugwdg],
+				array($this, 'put_plwdg_opt'));
+		$fields[$nf++] = new $Cf(self::optcodewdg,
+				self::wt(self::_T('Use shortcodes in widgets:')),
+				self::optcodewdg,
+				$items[self::optcodewdg],
+				array($this, 'put_scwdg_opt'));
+
+		// section object includes description callback
+		$sections[$ns++] = new $Cs($fields,
+				'swfput1_wdgsopts_section',
+				'<a name="wdgsopts">' .
+					self::wt(self::_T('Video In Widget Areas'))
+					. '</a>',
+				array($this, 'put_wdgsopts_desc'));
+					
+		// install opts section:
+		// field: delete opts on uninstall?
+		$nf = 0;
+		$fields = array();
+		$fields[$nf++] = new $Cf(self::optdelopts,
+				self::wt(self::_T('When the plugin is uninstalled:')),
+				self::optdelopts,
+				$items[self::optdelopts],
+				array($this, 'put_del_opts'));
+
+		// prepare sections to appear under admin page
+		$sections[$ns++] = new $Cs($fields,
+				'swfput1_inst_section',
+				'<a name="install">' .
+					self::wt(self::_T('Plugin Install Settings'))
+					. '</a>',
+				array($this, 'put_inst_desc'));
+
+		// prepare admin page specific hooks per page. e.g.:
+		// (now set to false, but code remains for reference;
+		// see comment '// hook&filter to make shortcode form for editor'
+		// in __construct())
+		if ( false ) {
+			$suffix_hooks = array(
+				'admin_head' => array($this, 'admin_head'),
+				'admin_print_scripts' => array($this, 'admin_js'),
+				'load' => array($this, 'admin_load')
+				);
+		} else {
+			$suffix_hooks = '';
+		}
+		
+		// prepare admin page
+		// Note that validator applies to all options,
+		// necessitating a big switch on option keys
+		$Cp = self::mk_aclv('OptPage');
+		$page = new $Cp(self::opt_group, $sections,
+			self::settings_page_id,
+			self::wt(self::_T('SWFPut Plugin')),
+			self::wt(self::_T('SWFPut Configuration')),
+			array(__CLASS__, 'validate_opts'),
+			/* pagetype = 'options' */ '',
+			/* capability = 'manage_options' */ '',
+			array($this, 'setting_page_output_callback')/* callback */,
+			/* 'hook_suffix' callback array */ $suffix_hooks,
+			self::wt(self::_T('Configuration of SWFPut Plugin')),
+			self::wt(self::_T('Display and Runtime Settings.')),
+			self::wt(self::_T('Save Settings')));
+		
+		$Co = self::mk_aclv('Options');
+		$this->opt = new $Co($page);
 	}
 	
 	// This function is placed here below the function that sets-up
@@ -624,6 +606,7 @@ class SWF_put_evh {
 			$cl = self::swfput_widget;
 			register_widget($cl);
 		}
+		self::load_translations();
 	}
 
 	// unregister the SWFPut widget
@@ -638,8 +621,13 @@ class SWF_put_evh {
 		}
 	}
 
-	// to be done at WP init stage
+	// the 'init' hook callback
 	public function init_hook_func () {
+		self::load_translations();
+
+		// Settings/Options page setup
+		$this->init_settings_page();
+
 		// add here to be sure option is ready
 		// update 2013/07/12: do not use test because
 		// if shortcodes are disabled by removing the
@@ -679,6 +667,46 @@ class SWF_put_evh {
 			add_filter('the_content', $scf, 20);
 		} else {
 			remove_filter('the_content', array($this, 'post_sed'));
+		}
+	}
+
+	public static function load_translations () {
+		// The several load*() calls here are inspired by this:
+		//   http://geertdedeckere.be/article/loading-wordpress-language-files-the-right-way
+		// So, provide for custom *.mo installed in either
+		// WP_LANG_DIR or WP_PLUGIN_DIR/languages or WP_PLUGIN_DIR,
+		// and do translations in the plugin directory last.
+		
+		// The globals are a hack: want to keep this static,
+		// yet test whether .mo load call has been done
+		global $swfput_load_WP_textdomain_done;
+		global $swfput_load_plugin_langdir_textdomain_done;
+		global $swfput_load_plugin_dir_textdomain_done;
+		global $swfput_load_plugin_textdomain_done;
+
+		$dom = self::swfput_textdomain;
+
+		if ( ! isset($swfput_load_WP_textdomain_done)
+			&& defined(WP_LANG_DIR) ) {
+			$loc = apply_filters('plugin_locale', get_locale(), $dom);
+			// this file path is built in the manner shown at the
+			// URL above -- it does look strange
+			$t = sprintf('%s/%s/%s-%s.mo', WP_LANG_DIR, $dom, $dom, $loc);
+			$swfput_load_WP_textdomain_done = load_textdomain($dom, $t);
+		}
+		if ( ! isset($swfput_load_plugin_langdir_textdomain_done) ) {
+			$t = 'languages/';
+			$swfput_load_plugin_langdir_textdomain_done =
+				load_plugin_textdomain($dom, false, $t);
+		}
+		if ( ! isset($swfput_load_plugin_dir_textdomain_done) ) {
+			$swfput_load_plugin_dir_textdomain_done =
+				load_plugin_textdomain($dom, false, false);
+		}
+		if ( ! isset($swfput_load_plugin_textdomain_done) ) {
+			$t = basename(trim(self::mk_plugindir(), '/')) . '/locale/';
+			$swfput_load_plugin_textdomain_done =
+				load_plugin_textdomain($dom, false, $t);
 		}
 	}
 
