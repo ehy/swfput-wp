@@ -213,7 +213,7 @@ class SWF_put_evh {
 	protected $swfputphp;
 	// swfput program css path
 	protected $swfputcss;
-	// swfput program css path
+	// swfput program default video path
 	protected $swfputvid;
 
 	// swfput js subdirectory
@@ -254,6 +254,25 @@ class SWF_put_evh {
 			$this->init_opts();
 			return;
 		}
+		
+		// Do .mo load, in case translations exist;
+		// must use 'default' domain if invoking
+		// __()/translate() with one arg, because
+		// the second arg (domain) defaults to 'default'.
+		// Second arg to load*() function is deprecated.
+		// Third arg is path relative to WP_PLUGIN_DIR,
+		// and will be WP_PLUGIN_DIR alone if arg 3 is false.
+		// We don't want to install .mo in WP_PLUGIN_DIR;
+		// so, pass this plugin's install dir and a .mo
+		// subdir. With this set of args, .mo files will
+		// need to have paths like:
+		//  <WP_PLUGIN_DIR>/plugin_dirname/subdir/default-en_US.mo
+		// where "en_US" is the filtered return from
+		// get_locale(), "default" is the domain arg
+		// (arg 1). This plugin will use subir "locale"
+		// to hold .mo files, if any.
+		$t = basename(trim(self::mk_plugindir(), '/')) . '/locale';
+		load_plugin_textdomain('default', false, $t);
 		
 		$this->init_settings_page();
 
@@ -1698,7 +1717,6 @@ class SWF_put_evh {
 	                        continue;
 	                }
 	                if ( is_file($t) && preg_match($pat, $e) ) {
-	                        //$ao[] = array($e, $pr);
 	                        $ao[$dir][] = $e;
 	                }
 	        }
