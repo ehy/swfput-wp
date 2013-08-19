@@ -1,6 +1,6 @@
 #! /usr/bin/make -f
 
-PRJVERS = 1.0.2
+PRJVERS = 1.0.3
 PRJSTEM = swfput
 PRJNAME = $(PRJSTEM)-$(PRJVERS)
 
@@ -14,6 +14,11 @@ DOCSD = docs
 JSDIR = js
 JSBIN = $(JSDIR)/formxed.js
 JSSRC = $(JSDIR)/formxed.dev.js
+LCDIR = locale
+LCDOM = $(PRJSTEM)_l10n
+LCPOT = $(LCDIR)/$(LCDOM).pot
+LCFPO = $(LCDIR)/$(LCDOM)-en_US.mo
+LC_SH = $(LCDIR)/pot2en_US.sh
 SDIRI = mingtest
 SDIRO = mingput
 SSRCS = $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php $(SDIRI)/obj.css
@@ -36,15 +41,16 @@ PRJDIR = ${PRJNAME}
 PRJSDIR = ${PRJNAME}/${SDIRO}
 PRJZIP = ${PRJNAME}.zip
 
+XGETTEXT = xgettext
 ZIP = zip -r -9 -v -T -X
 PHPCLI = php -f
 
 all: ${PRJZIP}
 
-${PRJZIP}: ${SBINS} ${JSBIN} ${ZALL}
+${PRJZIP}: ${SBINS} ${JSBIN} ${ZALL} ${LCFPO}
 	test -e ttd && rm -rf ttd; test -e ${PRJDIR} && mv ${PRJDIR} ttd; \
 	mkdir ${PRJDIR} ${PRJSDIR} && \
-	cp -r -p ${ZALL} ${JSDIR} ${DOCSD} ${PRJDIR} && \
+	cp -r -p ${ZALL} ${JSDIR} ${LCDIR} ${DOCSD} ${PRJDIR} && \
 	( cd ${PRJDIR}/${DOCSD} && make clean; true ) && \
 	cp -r -p ${ZSALL} ${PRJSDIR} && rm -f ${PRJZIP} && \
 	$(ZIP) ${PRJZIP} ${PRJDIR} && rm -rf ${PRJDIR} && \
@@ -84,6 +90,28 @@ $(READS): docs/readme.roff
 	(cd docs && make txt tty tt8 pdf html && \
 	cp -f README.txt README.tty README.tt8 README.pdf README.html ..)
 	rm -f README; mv README.txt README
+
+en_US-mo $(LCFPO): $(LCPOT)
+	@echo Making $(LCFPO).
+	@F=$$(pwd)/$(LC_SH); test -f "$$F" && test -x "$$F" || \
+		{ printf '"%s" not found or not executable: FAILED\n' "$$F"; \
+		exit 0; }; \
+	(cd $(LCDIR) && POTNAME=$(LCDOM) "$$F") || \
+	{ echo FAILED to make the l10n binary $(LFPO); \
+	echo If you care about translations then check that \
+	GNU gettext package is installed; exit 0; }
+
+pot $(LCPOT): $(SRCS)
+	@echo Invoking $(XGETTEXT) to make $(LCPOT).
+	@$(XGETTEXT) --output=$(LCPOT) --debug --add-comments \
+	--keyword=_T --keyword=_E --keyword=_N \
+	--package-name=$(PRJSTEM) --package-version=$(PRJVERS) \
+	--copyright-holder='Ed Hynan' \
+	--language=PHP $(SRCS) && \
+	echo Succeeded with $@ || \
+	{ echo FAILED to make the i18n template $(LCPOT); \
+	echo If you care about translations then check that \
+	GNU gettext package is installed; exit 0; }
 
 clean-docs:
 	cd docs && make clean

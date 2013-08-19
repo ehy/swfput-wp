@@ -214,6 +214,12 @@ Maybe later.
 
 == Changelog ==
 
+= 1.0.3 =
+* Maintenance.
+* Put i18n final code (__() was already present), added make rules to
+	build *.mo using (added) script in new locale dir, added FPO/test
+	en_US.mo, confirmed working with dummy string replacement.
+
 = 1.0.2 =
 * Corrections in (vaguely distinguished)
 	add_(action|filter) calls, according to tag used, checked against

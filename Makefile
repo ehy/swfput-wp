@@ -15,7 +15,7 @@ JSDIR = js
 JSBIN = $(JSDIR)/formxed.js
 JSSRC = $(JSDIR)/formxed.dev.js
 LCDIR = locale
-LCDOM = default
+LCDOM = $(PRJSTEM)_l10n
 LCPOT = $(LCDIR)/$(LCDOM).pot
 LCFPO = $(LCDIR)/$(LCDOM)-en_US.mo
 LC_SH = $(LCDIR)/pot2en_US.sh
@@ -96,7 +96,7 @@ en_US-mo $(LCFPO): $(LCPOT)
 	@F=$$(pwd)/$(LC_SH); test -f "$$F" && test -x "$$F" || \
 		{ printf '"%s" not found or not executable: FAILED\n' "$$F"; \
 		exit 0; }; \
-	(cd $(LCDIR) && "$$F") || \
+	(cd $(LCDIR) && POTNAME=$(LCDOM) "$$F") || \
 	{ echo FAILED to make the l10n binary $(LFPO); \
 	echo If you care about translations then check that \
 	GNU gettext package is installed; exit 0; }
@@ -104,7 +104,7 @@ en_US-mo $(LCFPO): $(LCPOT)
 pot $(LCPOT): $(SRCS)
 	@echo Invoking $(XGETTEXT) to make $(LCPOT).
 	@$(XGETTEXT) --output=$(LCPOT) --debug --add-comments \
-	--keyword=__ --keyword=_e --keyword=_n \
+	--keyword=_T --keyword=_E --keyword=_N \
 	--package-name=$(PRJSTEM) --package-version=$(PRJVERS) \
 	--copyright-holder='Ed Hynan' \
 	--language=PHP $(SRCS) && \
