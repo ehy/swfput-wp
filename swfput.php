@@ -135,8 +135,6 @@ class SWF_put_evh {
 	const swfput_widget = 'SWF_put_widget_evh';
 	// parameter helper class name
 	const swfput_params = 'SWF_params_evh';
-	// test domain string for translate()
-	const swfput_textdomain = 'swfput_l10n';
 	
 	// identifier for settings page
 	const settings_page_id = 'swfput1_settings_page';
@@ -362,14 +360,14 @@ class SWF_put_evh {
 		$nf = 0;
 		$fields = array();
 		$fields[$nf++] = new $Cf(self::optverbose,
-				self::wt(self::_T('Show verbose descriptions:')),
+				self::wt(__('Show verbose descriptions:', 'swfput_l10n')),
 				self::optverbose,
 				$items[self::optverbose],
 				array($this, 'put_verbose_opt'));
 		// this field is not printed if ming is n.a.
 		if ( self::can_use_ming() ) {
 			$fields[$nf++] = new $Cf(self::optuseming,
-					self::wt(self::_T('Dynamic SWF generation:')),
+					self::wt(__('Dynamic SWF generation:', 'swfput_l10n')),
 					self::optuseming,
 					$items[self::optuseming],
 					array($this, 'put_useming_opt'));
@@ -379,7 +377,7 @@ class SWF_put_evh {
 		$sections[$ns++] = new $Cs($fields,
 				'swfput1_general_section',
 				'<a name="general">' .
-					self::wt(self::_T('General Options'))
+					self::wt(__('General Options', 'swfput_l10n'))
 					. '</a>',
 				array($this, 'put_general_desc'));
 
@@ -387,19 +385,19 @@ class SWF_put_evh {
 		$nf = 0;
 		$fields = array();
 		$fields[$nf++] = new $Cf(self::optdispmsg,
-				self::wt(self::_T('Place in posts:')),
+				self::wt(__('Place in posts:', 'swfput_l10n')),
 				self::optdispmsg,
 				$items[self::optdispmsg],
 				array($this, 'put_inposts_opt'));
 		$fields[$nf++] = new $Cf(self::optdispwdg,
-				self::wt(self::_T('Place in widget areas:')),
+				self::wt(__('Place in widget areas:', 'swfput_l10n')),
 				self::optdispwdg,
 				$items[self::optdispwdg],
 				array($this, 'put_widget_opt'));
 		// commented: from early false assumption that header
 		// could be easily hooked:
 		//$fields[$nf++] = new $Cf(self::optdisphdr,
-				//self::wt(self::_T('Place in header area:')),
+				//self::wt(__('Place in header area:', 'swfput_l10n')),
 				//self::optdisphdr,
 				//$items[self::optdisphdr],
 				//array($this, 'put_inhead_opt'));
@@ -408,7 +406,7 @@ class SWF_put_evh {
 		$sections[$ns++] = new $Cs($fields,
 				'swfput1_placement_section',
 				'<a name="placement">' .
-					self::wt(self::_T('Video Placement Options'))
+					self::wt(__('Video Placement Options', 'swfput_l10n'))
 					. '</a>',
 				array($this, 'put_place_desc'));
 		
@@ -416,12 +414,12 @@ class SWF_put_evh {
 		$nf = 0;
 		$fields = array();
 		$fields[$nf++] = new $Cf(self::optcodemsg,
-				self::wt(self::_T('Use shortcodes in posts:')),
+				self::wt(__('Use shortcodes in posts:', 'swfput_l10n')),
 				self::optcodemsg,
 				$items[self::optcodemsg],
 				array($this, 'put_scposts_opt'));
 		$fields[$nf++] = new $Cf(self::optpregmsg,
-				self::wt(self::_T('Search attachment links in posts:')),
+				self::wt(__('Search attachment links in posts:', 'swfput_l10n')),
 				self::optpregmsg,
 				$items[self::optpregmsg],
 				array($this, 'put_rxposts_opt'));
@@ -430,7 +428,7 @@ class SWF_put_evh {
 		$sections[$ns++] = new $Cs($fields,
 				'swfput1_postsopts_section',
 				'<a name="postopts">' .
-					self::wt(self::_T('Video In Posts'))
+					self::wt(__('Video In Posts', 'swfput_l10n'))
 					. '</a>',
 				array($this, 'put_postopts_desc'));
 		
@@ -438,12 +436,12 @@ class SWF_put_evh {
 		$nf = 0;
 		$fields = array();
 		$fields[$nf++] = new $Cf(self::optplugwdg,
-				self::wt(self::_T('Use the included widget:')),
+				self::wt(__('Use the included widget:', 'swfput_l10n')),
 				self::optplugwdg,
 				$items[self::optplugwdg],
 				array($this, 'put_plwdg_opt'));
 		$fields[$nf++] = new $Cf(self::optcodewdg,
-				self::wt(self::_T('Use shortcodes in widgets:')),
+				self::wt(__('Use shortcodes in widgets:', 'swfput_l10n')),
 				self::optcodewdg,
 				$items[self::optcodewdg],
 				array($this, 'put_scwdg_opt'));
@@ -452,7 +450,7 @@ class SWF_put_evh {
 		$sections[$ns++] = new $Cs($fields,
 				'swfput1_wdgsopts_section',
 				'<a name="wdgsopts">' .
-					self::wt(self::_T('Video In Widget Areas'))
+					self::wt(__('Video In Widget Areas', 'swfput_l10n'))
 					. '</a>',
 				array($this, 'put_wdgsopts_desc'));
 					
@@ -461,7 +459,7 @@ class SWF_put_evh {
 		$nf = 0;
 		$fields = array();
 		$fields[$nf++] = new $Cf(self::optdelopts,
-				self::wt(self::_T('When the plugin is uninstalled:')),
+				self::wt(__('When the plugin is uninstalled:', 'swfput_l10n')),
 				self::optdelopts,
 				$items[self::optdelopts],
 				array($this, 'put_del_opts'));
@@ -470,7 +468,7 @@ class SWF_put_evh {
 		$sections[$ns++] = new $Cs($fields,
 				'swfput1_inst_section',
 				'<a name="install">' .
-					self::wt(self::_T('Plugin Install Settings'))
+					self::wt(__('Plugin Install Settings', 'swfput_l10n'))
 					. '</a>',
 				array($this, 'put_inst_desc'));
 
@@ -494,16 +492,16 @@ class SWF_put_evh {
 		$Cp = self::mk_aclv('OptPage');
 		$page = new $Cp(self::opt_group, $sections,
 			self::settings_page_id,
-			self::wt(self::_T('SWFPut Plugin')),
-			self::wt(self::_T('SWFPut Configuration')),
+			self::wt(__('SWFPut Plugin', 'swfput_l10n')),
+			self::wt(__('SWFPut Configuration', 'swfput_l10n')),
 			array(__CLASS__, 'validate_opts'),
 			/* pagetype = 'options' */ '',
 			/* capability = 'manage_options' */ '',
 			array($this, 'setting_page_output_callback')/* callback */,
 			/* 'hook_suffix' callback array */ $suffix_hooks,
-			self::wt(self::_T('Configuration of SWFPut Plugin')),
-			self::wt(self::_T('Display and Runtime Settings.')),
-			self::wt(self::_T('Save Settings')));
+			self::wt(__('Configuration of SWFPut Plugin', 'swfput_l10n')),
+			self::wt(__('Display and Runtime Settings.', 'swfput_l10n')),
+			self::wt(__('Save Settings', 'swfput_l10n')));
 		
 		$Co = self::mk_aclv('Options');
 		$this->opt = new $Co($page);
@@ -534,7 +532,7 @@ class SWF_put_evh {
 	public static function hook_admin_menu() {
 		$cl = __CLASS__;
 		$id = 'SWFPut_putswf_video';
-		$tl = self::_T('SWFPut Flash Video Shortcode');
+		$tl = __('SWFPut Flash Video Shortcode', 'swfput_l10n');
 		$fn = 'put_xed_form';
 		if ( current_user_can('edit_posts') )
 			add_meta_box($id, $tl, array($cl, $fn), 'post', 'normal');
@@ -590,7 +588,7 @@ class SWF_put_evh {
 		$opturl = '<a href="' . get_option('siteurl');
 		$opturl .= '/wp-admin/options-general.php?page=';
 		$opturl .= self::settings_page_id;
-		$opturl .= '">' . self::_T('Settings') . '</a>';
+		$opturl .= '">' . __('Settings', 'swfput_l10n') . '</a>';
 		// Add a link to this plugin's settings page
 		array_unshift($links, $opturl); 
 		return $links; 
@@ -684,7 +682,7 @@ class SWF_put_evh {
 		global $swfput_load_plugin_dir_textdomain_done;
 		global $swfput_load_plugin_textdomain_done;
 
-		$dom = self::swfput_textdomain;
+		$dom = 'swfput_l10n';
 
 		if ( ! isset($swfput_load_WP_textdomain_done)
 			&& defined(WP_LANG_DIR) ) {
@@ -777,8 +775,8 @@ class SWF_put_evh {
 
 		// now register updates
 		if ( $nupd > 0 ) {
-			$str = $nerr == 0 ? self::_T('Settings updated successfully') :
-				sprintf(self::_T('Some settings (%d) updated'), $nupd);
+			$str = $nerr == 0 ? __('Settings updated successfully', 'swfput_l10n') :
+				sprintf(__('Some settings (%d) updated', 'swfput_l10n'), $nupd);
 			add_settings_error(self::opt_group, self::opt_group,
 				self::wt($str), 'updated');
 		}
@@ -792,23 +790,23 @@ class SWF_put_evh {
 	
 	// callback: put html for placement field description
 	public function put_general_desc() {
-		$t = self::wt(self::_T('General SWF plugin options:'));
+		$t = self::wt(__('General SWF plugin options:', 'swfput_l10n'));
 		printf('<p>%s</p>%s', $t, "\n");
 		if ( self::get_verbose_option() !== 'true' ) {
 			return;
 		}
 
-		$t = self::wt(self::_T('The verbose option selects whether
+		$t = self::wt(__('The verbose option selects whether
 			verbose descriptions
 			should be displayed with the various settings
 			sections. The long descriptions, of which 
 			this paragraph is an example,
 			will not be shown if the option is not
-			selected.'));
+			selected.', 'swfput_l10n'));
 		printf('<p>%s</p>%s', $t, "\n");
 
 		if ( self::can_use_ming() ) {
-			$t = self::wt(self::_T('The PHP+Ming option selects whether
+			$t = self::wt(__('The PHP+Ming option selects whether
 				the Flash player program is generated with PHP
 				and the Ming extension for each request.
 				When this option is not selected, then
@@ -818,22 +816,22 @@ class SWF_put_evh {
 				are reading this then Ming has been found to
 				be loaded.
 				Note that this option will increase the load on the
-				server of your site.'));
+				server of your site.', 'swfput_l10n'));
 			printf('<p>%s</p>%s', $t, "\n");
 		}
-		$t = self::wt(self::_T('Go forward to save button.'));
+		$t = self::wt(__('Go forward to save button.', 'swfput_l10n'));
 		printf('<p><a href="#aSubmit">%s</a></p>%s', $t, "\n");
 	}
 
 	// callback: put html for placement field description
 	public function put_place_desc() {
-		$t = self::wt(self::_T('Enable/disable flash video placement:'));
+		$t = self::wt(__('Enable/disable flash video placement:', 'swfput_l10n'));
 		printf('<p>%s</p>%s', $t, "\n");
 		if ( self::get_verbose_option() !== 'true' ) {
 			return;
 		}
 
-		$t = self::wt(self::_T('These options enable or completely disable
+		$t = self::wt(__('These options enable or completely disable
 			placing video in posts or widgets. If the placement
 			of video must be switched on or off, for either
 			posts (and pages) or widgets
@@ -849,23 +847,24 @@ class SWF_put_evh {
 			</p><p>
 			Note that in the two following sections,
 			"Video In Posts" and "Video In Widget Areas,"
-			the options are effective only if enabled here.'));
+			the options are effective only if enabled here.'
+			, 'swfput_l10n'));
 		printf('<p>%s</p>%s', $t, "\n");
-		$t = self::wt(self::_T('Go forward to save button.'));
+		$t = self::wt(__('Go forward to save button.', 'swfput_l10n'));
 		printf('<p><a href="#aSubmit">%s</a></p>%s', $t, "\n");
-		$t = self::wt(self::_T('Go back to top (General section).'));
+		$t = self::wt(__('Go back to top (General section).', 'swfput_l10n'));
 		printf('<p><a href="#general">%s</a></p>%s', $t, "\n");
 	}
 
 	// callback: put html for placement field description
 	public function put_postopts_desc() {
-		$t = self::wt(self::_T('Flash video in posts options:'));
+		$t = self::wt(__('Flash video in posts options:', 'swfput_l10n'));
 		printf('<p>%s</p>%s', $t, "\n");
 		if ( self::get_verbose_option() !== 'true' ) {
 			return;
 		}
 
-		$t = self::wt(self::_T('These options select 
+		$t = self::wt(__('These options select 
 			how flash video (or audio) may be placed in posts or pages.
 			Use shortcodes for any new posts (and preferably
 			for existing posts) that should include
@@ -889,23 +888,23 @@ class SWF_put_evh {
 			because it requires additional processing of each
 			line of each post (or page) displayed,
 			and so it increases server load. User parameters
-			are not available for this method.'));
+			are not available for this method.', 'swfput_l10n'));
 		printf('<p>%s</p>%s', $t, "\n");
-		$t = self::wt(self::_T('Go forward to save button.'));
+		$t = self::wt(__('Go forward to save button.', 'swfput_l10n'));
 		printf('<p><a href="#aSubmit">%s</a></p>%s', $t, "\n");
-		$t = self::wt(self::_T('Go back to top (General section).'));
+		$t = self::wt(__('Go back to top (General section).', 'swfput_l10n'));
 		printf('<p><a href="#general">%s</a></p>%s', $t, "\n");
 	}
 
 	// callback: put html for placement field description
 	public function put_wdgsopts_desc() {
-		$t = self::wt(self::_T('Flash video in widget area options:'));
+		$t = self::wt(__('Flash video in widget area options:', 'swfput_l10n'));
 		printf('<p>%s</p>%s', $t, "\n");
 		if ( self::get_verbose_option() !== 'true' ) {
 			return;
 		}
 
-		$t = self::wt(self::_T('These options select 
+		$t = self::wt(__('These options select 
 			how flash video (or audio) may be placed in widget areas.
 			The first option selects use of the included multi-widget.
 			This widget is configured in the
@@ -924,23 +923,24 @@ class SWF_put_evh {
 			(If necessary, a temporary shortcode
 			can be made within a post using the provided form, and
 			then cut and
-			pasted into the widget text, on a line of its own.)'));
+			pasted into the widget text, on a line of its own.)'
+			, 'swfput_l10n'));
 		printf('<p>%s</p>%s', $t, "\n");
-		$t = self::wt(self::_T('Go forward to save button.'));
+		$t = self::wt(__('Go forward to save button.', 'swfput_l10n'));
 		printf('<p><a href="#aSubmit">%s</a></p>%s', $t, "\n");
-		$t = self::wt(self::_T('Go back to top (General section).'));
+		$t = self::wt(__('Go back to top (General section).', 'swfput_l10n'));
 		printf('<p><a href="#general">%s</a></p>%s', $t, "\n");
 	}
 
 	// callback: put html install field description
 	public function put_inst_desc() {
-		$t = self::wt(self::_T('Install options:'));
+		$t = self::wt(__('Install options:', 'swfput_l10n'));
 		printf('<p>%s</p>%s', $t, "\n");
 		if ( self::get_verbose_option() !== 'true' ) {
 			return;
 		}
 
-		$t = self::wt(self::_T('This section includes optional
+		$t = self::wt(__('This section includes optional
 			features for plugin install or uninstall. Presently
 			the only option is whether to remove the plugin\'s
 			set of options from the database when
@@ -951,11 +951,11 @@ class SWF_put_evh {
 			you want it off temporarily.
 			If you intend to delete and then reinstall the plugin,
 			possibly for a new version or update, then keeping the
-			options might be helpful.'));
+			options might be helpful.', 'swfput_l10n'));
 		printf('<p>%s</p>%s', $t, "\n");
-		$t = self::wt(self::_T('Go forward to save button.'));
+		$t = self::wt(__('Go forward to save button.', 'swfput_l10n'));
 		printf('<p><a href="#aSubmit">%s</a></p>%s', $t, "\n");
-		$t = self::wt(self::_T('Go back to top (General section).'));
+		$t = self::wt(__('Go back to top (General section).', 'swfput_l10n'));
 		printf('<p><a href="#general">%s</a></p>%s', $t, "\n");
 	}
 	
@@ -977,14 +977,14 @@ class SWF_put_evh {
 
 	// callback, put verbose section descriptions?
 	public function put_verbose_opt($a) {
-		$tt = self::wt(self::_T('Show verbose descriptions'));
+		$tt = self::wt(__('Show verbose descriptions', 'swfput_l10n'));
 		$k = self::optverbose;
 		$this->put_single_checkbox($a, $k, $tt);
 	}
 
 	// callback, dynamic use of php+ming?
 	public function put_useming_opt($a) {
-		$tt = self::wt(self::_T('Use SWF script if PHP+Ming is available'));
+		$tt = self::wt(__('Use SWF script if PHP+Ming is available', 'swfput_l10n'));
 		$k = self::optuseming;
 		$this->put_single_checkbox($a, $k, $tt);
 	}
@@ -993,56 +993,56 @@ class SWF_put_evh {
 	// could be easily hooked:
 	// callback, put SWF in head?
 	//public function put_inhead_opt($a) {
-		//$tt = self::wt(self::_T('Enable SWF in head'));
+		//$tt = self::wt(__('Enable SWF in head', 'swfput_l10n'));
 		//$k = self::optdisphdr;
 		//$this->put_single_checkbox($a, $k, $tt);
 	//}
 
 	// callback, put SWF in sidebar (widget)?
 	public function put_widget_opt($a) {
-		$tt = self::wt(self::_T('Enable widget or shortcode'));
+		$tt = self::wt(__('Enable widget or shortcode', 'swfput_l10n'));
 		$k = self::optdispwdg;
 		$this->put_single_checkbox($a, $k, $tt);
 	}
 
 	// callback, put SWF in posts?
 	public function put_inposts_opt($a) {
-		$tt = self::wt(self::_T('Enable shortcode or attachment search'));
+		$tt = self::wt(__('Enable shortcode or attachment search', 'swfput_l10n'));
 		$k = self::optdispmsg;
 		$this->put_single_checkbox($a, $k, $tt);
 	}
 
 	// callback, use shortcodes in posts?
 	public function put_rxposts_opt($a) {
-		$tt = self::wt(self::_T('Search attachments in posts'));
+		$tt = self::wt(__('Search attachments in posts', 'swfput_l10n'));
 		$k = self::optpregmsg;
 		$this->put_single_checkbox($a, $k, $tt);
 	}
 
 	// callback, use plugin's widget?
 	public function put_plwdg_opt($a) {
-		$tt = self::wt(self::_T('Enable the included widget'));
+		$tt = self::wt(__('Enable the included widget', 'swfput_l10n'));
 		$k = self::optplugwdg;
 		$this->put_single_checkbox($a, $k, $tt);
 	}
 
 	// callback, use plugin's widget?
 	public function put_scwdg_opt($a) {
-		$tt = self::wt(self::_T('Enable shortcodes in widgets'));
+		$tt = self::wt(__('Enable shortcodes in widgets', 'swfput_l10n'));
 		$k = self::optcodewdg;
 		$this->put_single_checkbox($a, $k, $tt);
 	}
 
 	// callback, sed attachments in posts?
 	public function put_scposts_opt($a) {
-		$tt = self::wt(self::_T('Enable shortcode in posts'));
+		$tt = self::wt(__('Enable shortcode in posts', 'swfput_l10n'));
 		$k = self::optcodemsg;
 		$this->put_single_checkbox($a, $k, $tt);
 	}
 
 	// callback, install section field: opt delete
 	public function put_del_opts($a) {
-		$tt = self::wt(self::_T('Permanently delete settings (clean db)'));
+		$tt = self::wt(__('Permanently delete settings (clean db)', 'swfput_l10n'));
 		$k = self::optdelopts;
 		$this->put_single_checkbox($a, $k, $tt);
 	}
@@ -1109,8 +1109,8 @@ class SWF_put_evh {
 		// button format for sliding divs
 		$dbfmt = '<input type="button" id="%s" value="%s" onclick="%s.%s" />';
 		// button values for sliding divs
-		$dbvhi = self::wt(self::_T('Hide'));
-		$dbvsh = self::wt(self::_T('Show'));
+		$dbvhi = self::wt(__('Hide', 'swfput_l10n'));
+		$dbvsh = self::wt(__('Show', 'swfput_l10n'));
 		// js to show/hide sliding divs
 		$jdsh = "hideshow('%s', this.id, '{$dbvhi}', '{$dbvsh}')";
 		// class and base of id for sliding divs
@@ -1123,15 +1123,15 @@ class SWF_put_evh {
 		<table id="<?php echo $id . '_buttons'; ?>"><tr><td>
 			<span  class="submit">
 			<?php
-				$l = self::wt(self::_T('Fill form from editor'));
+				$l = self::wt(__('Fill form from editor', 'swfput_l10n'));
 				printf($bjfmt, $job, $jfuf, $l);
-				$l = self::wt(self::_T('Replace current in editor'));
+				$l = self::wt(__('Replace current in editor', 'swfput_l10n'));
 				printf($bjfmt, $job, $jfuc, $l);
-				$l = self::wt(self::_T('Delete current in editor'));
+				$l = self::wt(__('Delete current in editor', 'swfput_l10n'));
 				printf($bjfmt, $job, $jfud, $l);
-				$l = self::wt(self::_T('Place new in editor'));
+				$l = self::wt(__('Place new in editor', 'swfput_l10n'));
 				printf($bjfmt, $job, $jfu, $l);
-				$l = self::wt(self::_T('Reset default values'));
+				$l = self::wt(__('Reset default values', 'swfput_l10n'));
 				printf($bjfmt, $job, $jfur, $l);
 			?>
 			</span>
@@ -1148,17 +1148,17 @@ class SWF_put_evh {
 			<?php printf($dbfmt, $dvib, $dbvhi, $job, $jdft); ?>
 		</span>
 		<h3 class="hndle"><span><?php
-			echo self::wt(self::_T('Media')); ?></span></h3>
+			echo self::wt(__('Media', 'swfput_l10n')); ?></span></h3>
 		<div class="<?php echo $dvii; ?>" id="<?php echo $dvin; ?>">
 
 		<p>
 		<?php $k = 'caption';
-			$l = self::wt(self::_T('Caption:'));
+			$l = self::wt(__('Caption:', 'swfput_l10n'));
 			printf($lbfmt, $id, $k, $l);
 			printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
 		</p><p>
 		<?php $k = 'url';
-			$l = self::wt(self::_T('Url or media library ID:'));
+			$l = self::wt(__('Url or media library ID:', 'swfput_l10n'));
 			printf($lbfmt, $id, $k, $l);
 			printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
 		</p>
@@ -1169,12 +1169,12 @@ class SWF_put_evh {
 				echo "<p>\n";
 				$k = 'files';
 				$jfcp = sprintf($jfsl, $id, $k, $kl);
-				$l = self::wt(self::_T('Url from uploads directory:'));
+				$l = self::wt(__('Url from uploads directory:', 'swfput_l10n'));
 				printf($lbfmt, $id, $k, $l);
 				// <select>
 				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfcp);
 				// <options>
-				printf($sofmt, '', self::wt(self::_T('none')));
+				printf($sofmt, '', self::wt(__('none', 'swfput_l10n')));
 				foreach ( $af as $d => $e ) {
 					$hit = array();
 					for ( $i = 0; $i < count($e); $i++ )
@@ -1198,12 +1198,12 @@ class SWF_put_evh {
 				echo "<p>\n";
 				$k = 'atch';
 				$jfcp = sprintf($jfsl, $id, $k, $kl);
-				$l = self::wt(self::_T('Select ID from media library:'));
+				$l = self::wt(__('Select ID from media library:', 'swfput_l10n'));
 				printf($lbfmt, $id, $k, $l);
 				// <select>
 				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfcp);
 				// <options>
-				printf($sofmt, '', self::wt(self::_T('none')));
+				printf($sofmt, '', self::wt(__('none', 'swfput_l10n')));
 				foreach ( $aa as $fn => $fi ) {
 					$m = basename($fn);
 					if ( ! preg_match($mpat['av'], $m) )
@@ -1218,12 +1218,12 @@ class SWF_put_evh {
 		?>
 		<p>
 		<?php $k = 'playpath'; 
-			$l = self::wt(self::_T('Playpath (rtmp):'));
+			$l = self::wt(__('Playpath (rtmp):', 'swfput_l10n'));
 			printf($lbfmt, $id, $k, $l);
 			printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
 		</p><p>
 		<?php $k = 'iimage';
-			$l = self::wt(self::_T('Url of initial image file (optional):'));
+			$l = self::wt(__('Url of initial image file (optional):', 'swfput_l10n'));
 			printf($lbfmt, $id, $k, $l);
 			printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
 		</p>
@@ -1234,12 +1234,12 @@ class SWF_put_evh {
 				echo "<p>\n";
 				$k = 'ifiles';
 				$jfcp = sprintf($jfsl, $id, $k, $kl);
-				$l = self::wt(self::_T('Load image from uploads directory:'));
+				$l = self::wt(__('Load image from uploads directory:', 'swfput_l10n'));
 				printf($lbfmt, $id, $k, $l);
 				// <select>
 				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfcp);
 				// <options>
-				printf($sofmt, '', self::wt(self::_T('none')));
+				printf($sofmt, '', self::wt(__('none', 'swfput_l10n')));
 				foreach ( $af as $d => $e ) {
 					$hit = array();
 					for ( $i = 0; $i < count($e); $i++ )
@@ -1263,12 +1263,12 @@ class SWF_put_evh {
 				echo "<p>\n";
 				$k = 'iatch';
 				$jfcp = sprintf($jfsl, $id, $k, $kl);
-				$l = self::wt(self::_T('Load image ID from media library:'));
+				$l = self::wt(__('Load image ID from media library:', 'swfput_l10n'));
 				printf($lbfmt, $id, $k, $l);
 				// <select>
 				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfcp);
 				// <options>
-				printf($sofmt, '', self::wt(self::_T('none')));
+				printf($sofmt, '', self::wt(__('none', 'swfput_l10n')));
 				foreach ( $aa as $fn => $fi ) {
 					$m = basename($fn);
 					if ( ! preg_match($mpat['i'], $m) )
@@ -1283,7 +1283,7 @@ class SWF_put_evh {
 		?>
 		<p>
 		<?php $k = 'audio';
-			$l = self::wt(self::_T('Medium is audio:'));
+			$l = self::wt(__('Medium is audio:', 'swfput_l10n'));
 			printf($lbfmt, $id, $k, $l);
 			$ck = $$k == 'true' ? 'checked="checked" ' : '';
 			printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
@@ -1301,20 +1301,20 @@ class SWF_put_evh {
 			<?php printf($dbfmt, $dvib, $dbvhi, $job, $jdft); ?>
 		</span>
 		<h3 class="hndle"><span><?php
-			echo self::wt(self::_T('Dimensions')); ?></span></h3>
+			echo self::wt(__('Dimensions', 'swfput_l10n')); ?></span></h3>
 		<div class="<?php echo $dvii; ?>" id="<?php echo $dvin; ?>">
 
 		<?php $els = array(
 			array('width', '<p>', ' &#215; ', $in, 'inp',
-				self::_T('Pixel Width:')),
+				__('Pixel Width:', 'swfput_l10n')),
 			array('height', '', '</p>', $in, 'inp',
-				self::_T('Height:')),
+				__('Height:', 'swfput_l10n')),
 			array('aspectautoadj', '<p>', '</p>', $in, 'chk',
-				self::_T('Auto aspect (e.g. 360x240 to 4:3):')),
+				__('Auto aspect (e.g. 360x240 to 4:3):', 'swfput_l10n')),
 			array('displayaspect', '<p>', '</p>', $in, 'inp',
-				self::_T('Display aspect (e.g. 4:3, precludes Auto):')),
+				__('Display aspect (e.g. 4:3, precludes Auto):', 'swfput_l10n')),
 			array('pixelaspect', '<p>', '</p>', $in, 'inp',
-				self::_T('Pixel aspect (e.g. 8:9, precluded by Display):'))
+				__('Pixel aspect (e.g. 8:9, precluded by Display):', 'swfput_l10n'))
 			);
 			foreach ( $els as $el ) {
 				$k = $el[0];
@@ -1344,24 +1344,24 @@ class SWF_put_evh {
 			<?php printf($dbfmt, $dvib, $dbvhi, $job, $jdft); ?>
 		</span>
 		<h3 class="hndle"><span><?php
-			echo self::wt(self::_T('Behavior')); ?></span></h3>
+			echo self::wt(__('Behavior', 'swfput_l10n')); ?></span></h3>
 		<div class="<?php echo $dvii; ?>" id="<?php echo $dvin; ?>">
 		
 		<?php $els = array(
 			array('volume', '<p>', '</p>', $in, 'inp',
-				self::_T('Initial volume (0-100):')),
+				__('Initial volume (0-100):', 'swfput_l10n')),
 			array('play', '<p>', '</p>', $in, 'chk',
-				self::_T('Play on load (else waits for play button):')),
+				__('Play on load (else waits for play button):', 'swfput_l10n')),
 			array('loop', '<p>', '</p>', $in, 'chk',
-				self::_T('Loop play:')),
+				__('Loop play:', 'swfput_l10n')),
 			array('hidebar', '<p>', '</p>', $in, 'chk',
-				self::_T('Hide control bar initially:')),
+				__('Hide control bar initially:', 'swfput_l10n')),
 			array('disablebar', '<p>', '</p>', $in, 'chk',
-				self::_T('Hide and disable control bar:')),
+				__('Hide and disable control bar:', 'swfput_l10n')),
 			array('allowfull', '<p>', '</p>', $in, 'chk',
-				self::_T('Allow full screen:')),
+				__('Allow full screen:', 'swfput_l10n')),
 			array('barheight', '<p>', '</p>', $in, 'inp',
-				self::_T('Control bar Height (20-50):'))
+				__('Control bar Height (20-50):', 'swfput_l10n'))
 			);
 			foreach ( $els as $el ) {
 				$k = $el[0];
@@ -1401,7 +1401,7 @@ class SWF_put_evh {
 		}
 		if ( self::get_widget_code_option() === 'false' ) {
 			$c = '';
-			$fmt = self::wt(self::_T(' [A/V content%s disabled] '));
+			$fmt = self::wt(__(' [A/V content%s disabled] ', 'swfput_l10n'));
 			// Note '!=' -- not '!=='
 			if ( $content != null ) {
 				$c = ' "' . do_shortcode($content) . '"';
@@ -1448,7 +1448,7 @@ class SWF_put_evh {
 		}
 		if ( self::get_posts_code_option() === 'false' ) {
 			$c = '';
-			$fmt = self::wt(self::_T(' [A/V content%s disabled] '));
+			$fmt = self::wt(__(' [A/V content%s disabled] ', 'swfput_l10n'));
 			// Note '!=' -- not '!=='
 			if ( $content != null ) {
 				$c = ' "' . do_shortcode($content) . '"';
@@ -1653,16 +1653,6 @@ class SWF_put_evh {
 		return preg_replace($pat, $rep, $sym);
 	}
 
-	// wrap translate to provide a domain
-	public static function _T($text) {
-		return translate($text, self::swfput_textdomain);
-	}
-	
-	// wrap WP::_e() to provide a domain
-	public static function _E($text) {
-		return _e($text, self::swfput_textdomain);
-	}
-	
 	// hex encode a text string
 	public static function et($text) {
 		return rawurlencode($text);
@@ -2369,8 +2359,8 @@ class SWF_params_evh {
 				$t = strtolower($t);
 				if ( $t !== 'true' && $t !== 'false' ) {
 					if ( $fuzz === true ) {
-						$xt = self::_T('/^(sc?h[yi]te?)?y(e((s|ah)!?)?)?$/i');
-						$xf = self::_T('/^((he(ck|ll))?n(o!?)?)?$/i');
+						$xt = __('/^(sc?h[yi]te?)?y(e((s|ah)!?)?)?$/i', 'swfput_l10n');
+						$xf = __('/^((he(ck|ll))?n(o!?)?)?$/i', 'swfput_l10n');
 						if ( is_numeric($t) ) {
 							$t = $t == 0 ? 'false' : 'true';
 						} else if ( preg_match($xf, $t) ) {
@@ -2431,17 +2421,6 @@ class SWF_params_evh {
 			}
 		}
 	}
-
-	// wrap translate to provide a domain
-	protected static function _T($text) {
-		return translate($text, SWF_put_evh::swfput_textdomain);
-	}
-	
-	// wrap WP::_e() to provide a domain
-	protected static function _E($text) {
-		return _e($text, SWF_put_evh::swfput_textdomain);
-	}
-	
 } // End class SWF_params_evh
 else :
 	wp_die('class name conflict: SWF_params_evh in ' . __FILE__);
@@ -2482,9 +2461,9 @@ class SWF_put_widget_evh extends WP_Widget {
 	
 		$cl = __CLASS__;
 		// Label shown on widgets page
-		$lb =  self::_T('SWFPut Flash Video');
+		$lb =  __('SWFPut Flash Video', 'swfput_l10n');
 		// Description shown under label shown on widgets page
-		$desc = self::_T('Flash video for your widget areas');
+		$desc = __('Flash video for your widget areas', 'swfput_l10n');
 		$opts = array('classname' => $cl, 'description' => $desc);
 
 		// control opts width affects the parameters form,
@@ -2623,7 +2602,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		}
 		$id = $this->get_field_id('title');
 		$nm = $this->get_field_name('title');
-		$tl = $wt(self::_T('Widget title:'));
+		$tl = $wt(__('Widget title:', 'swfput_l10n'));
 
 		// file select by ext pattern
 		$mpat = $this->plinst->get_mfilter_pat();
@@ -2660,7 +2639,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $wt($instance['caption']);
 		$id = $this->get_field_id('caption');
 		$nm = $this->get_field_name('caption');
-		$tl = $wt(self::_T('Caption:'));
+		$tl = $wt(__('Caption:', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -2671,7 +2650,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $instance['url'];
 		$id = $this->get_field_id('url');
 		$nm = $this->get_field_name('url');
-		$tl = $wt(self::_T('Url or media library ID:'));
+		$tl = $wt(__('Url or media library ID:', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -2686,12 +2665,12 @@ class SWF_put_widget_evh extends WP_Widget {
 		if ( count($af) > 0 ) {
 			$id = $this->get_field_id('files');
 			$k = $this->get_field_name('files');
-			$tl = $wt(self::_T('Url from uploads directory:'));
+			$tl = $wt(__('Url from uploads directory:', 'swfput_l10n'));
 			printf('<p><label for="%s">%s</label>' . "\n", $id, $tl);
 			// <select>
 			printf($slfmt . "\n", $k, $id, $js);
 			// <options>
-			printf($sofmt, '', $wt(self::_T('none')));
+			printf($sofmt, '', $wt(__('none', 'swfput_l10n')));
 			foreach ( $af as $d => $e ) {
 				$hit = array();
 				for ( $i = 0; $i < count($e); $i++ )
@@ -2713,12 +2692,12 @@ class SWF_put_widget_evh extends WP_Widget {
 		if ( ! empty($aa) ) {
 			$id = $this->get_field_id('atch');
 			$k = $this->get_field_name('atch');
-			$tl = $wt(self::_T('Select ID from media library:'));
+			$tl = $wt(__('Select ID from media library:', 'swfput_l10n'));
 			printf('<p><label for="%s">%s</label>' . "\n", $id, $tl);
 			// <select>
 			printf($slfmt . "\n", $k, $id, $js);
 			// <options>
-			printf($sofmt, '', $wt(self::_T('none')));
+			printf($sofmt, '', $wt(__('none', 'swfput_l10n')));
 			foreach ( $aa as $fn => $fi ) {
 				$m = basename($fn);
 				if ( ! preg_match($mpat['av'], $m) )
@@ -2735,7 +2714,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $instance['playpath'];
 		$id = $this->get_field_id('playpath');
 		$nm = $this->get_field_name('playpath');
-		$tl = $wt(self::_T('Playpath (rtmp) or co-video (mp3):'));
+		$tl = $wt(__('Playpath (rtmp) or co-video (mp3):', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -2746,7 +2725,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $instance['iimage'];
 		$id = $this->get_field_id('iimage');
 		$nm = $this->get_field_name('iimage');
-		$tl = $wt(self::_T('Url of initial image file (optional):'));
+		$tl = $wt(__('Url of initial image file (optional):', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -2761,12 +2740,12 @@ class SWF_put_widget_evh extends WP_Widget {
 		if ( count($af) > 0 ) {
 			$id = $this->get_field_id('ifiles');
 			$k = $this->get_field_name('ifiles');
-			$tl = $wt(self::_T('Load image from uploads directory:'));
+			$tl = $wt(__('Load image from uploads directory:', 'swfput_l10n'));
 			printf('<p><label for="%s">%s</label>' . "\n", $id, $tl);
 			// <select>
 			printf($slfmt . "\n", $k, $id, $js);
 			// <options>
-			printf($sofmt, '', $wt(self::_T('none')));
+			printf($sofmt, '', $wt(__('none', 'swfput_l10n')));
 			foreach ( $af as $d => $e ) {
 				$hit = array();
 				for ( $i = 0; $i < count($e); $i++ )
@@ -2788,12 +2767,12 @@ class SWF_put_widget_evh extends WP_Widget {
 		if ( ! empty($aa) ) {
 			$id = $this->get_field_id('iatch');
 			$k = $this->get_field_name('iatch');
-			$tl = $wt(self::_T('Load image ID from media library:'));
+			$tl = $wt(__('Load image ID from media library:', 'swfput_l10n'));
 			printf('<p><label for="%s">%s</label>' . "\n", $id, $tl);
 			// <select>
 			printf($slfmt . "\n", $k, $id, $js);
 			// <options>
-			printf($sofmt, '', $wt(self::_T('none')));
+			printf($sofmt, '', $wt(__('none', 'swfput_l10n')));
 			foreach ( $aa as $fn => $fi ) {
 				$m = basename($fn);
 				if ( ! preg_match($mpat['i'], $m) )
@@ -2811,7 +2790,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$id = $this->get_field_id('audio');
 		$nm = $this->get_field_name('audio');
 		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
-		$tl = $wt(self::_T('Medium is audio (e.g. *.mp3):'));
+		$tl = $wt(__('Medium is audio (e.g. *.mp3):', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -2822,7 +2801,8 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $wt($instance['width']);
 		$id = $this->get_field_id('width');
 		$nm = $this->get_field_name('width');
-		$tl = $wt(self::_T('Width (default ').self::defwidth.self::_T('):'));
+		$tl = sprintf(__('Width (default %u):', 'swfput_l10n'), self::defwidth);
+		$tl = $wt($tl);
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -2833,7 +2813,8 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $wt($instance['height']);
 		$id = $this->get_field_id('height');
 		$nm = $this->get_field_name('height');
-		$tl = $wt(self::_T('Height (default ').self::defheight.self::_T('):'));
+		$tl = sprintf(__('Height (default %u):', 'swfput_l10n'), self::defheight);
+		$tl = $wt($tl);
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -2845,7 +2826,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$id = $this->get_field_id('aspectautoadj');
 		$nm = $this->get_field_name('aspectautoadj');
 		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
-		$tl = $wt(self::_T('Auto aspect (e.g. 360x240 to 4:3):'));
+		$tl = $wt(__('Auto aspect (e.g. 360x240 to 4:3):', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -2856,7 +2837,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $instance['displayaspect'];
 		$id = $this->get_field_id('displayaspect');
 		$nm = $this->get_field_name('displayaspect');
-		$tl = $wt(self::_T('Display aspect (e.g. 4:3, precludes Auto):'));
+		$tl = $wt(__('Display aspect (e.g. 4:3, precludes Auto):', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -2867,7 +2848,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $instance['pixelaspect'];
 		$id = $this->get_field_id('pixelaspect');
 		$nm = $this->get_field_name('pixelaspect');
-		$tl = $wt(self::_T('Pixel aspect (e.g. 8:9, precluded by Display):'));
+		$tl = $wt(__('Pixel aspect (e.g. 8:9, precluded by Display):', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -2878,7 +2859,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $wt($instance['volume']);
 		$id = $this->get_field_id('volume');
 		$nm = $this->get_field_name('volume');
-		$tl = $wt(self::_T('Initial volume (0-100):'));
+		$tl = $wt(__('Initial volume (0-100):', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -2890,7 +2871,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$id = $this->get_field_id('play');
 		$nm = $this->get_field_name('play');
 		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
-		$tl = $wt(self::_T('Play on load (else waits for play button):'));
+		$tl = $wt(__('Play on load (else waits for play button):', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -2902,7 +2883,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$id = $this->get_field_id('loop');
 		$nm = $this->get_field_name('loop');
 		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
-		$tl = $wt(self::_T('Loop play:'));
+		$tl = $wt(__('Loop play:', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -2914,7 +2895,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$id = $this->get_field_id('hidebar');
 		$nm = $this->get_field_name('hidebar');
 		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
-		$tl = $wt(self::_T('Hide control bar initially:'));
+		$tl = $wt(__('Hide control bar initially:', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -2926,7 +2907,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$id = $this->get_field_id('disablebar');
 		$nm = $this->get_field_name('disablebar');
 		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
-		$tl = $wt(self::_T('Hide and disable control bar:'));
+		$tl = $wt(__('Hide and disable control bar:', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -2938,7 +2919,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$id = $this->get_field_id('allowfull');
 		$nm = $this->get_field_name('allowfull');
 		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
-		$tl = $wt(self::_T('Allow full screen:'));
+		$tl = $wt(__('Allow full screen:', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -2949,7 +2930,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $ht($instance['barheight']);
 		$id = $this->get_field_id('barheight');
 		$nm = $this->get_field_name('barheight');
-		$tl = $wt(self::_T('Control bar Height (20-50):'));
+		$tl = $wt(__('Control bar Height (20-50):', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -2957,16 +2938,6 @@ class SWF_put_widget_evh extends WP_Widget {
 			type="text" value="<?php echo $val; ?>" /></p>
 
 		<?php
-	}
-
-	// wrap translate to provide a domain
-	protected function _T($text) {
-		return $this->plinst->_T($text);
-	}
-	
-	// wrap WP::_e() to provide a domain
-	protected function _E($text) {
-		return $this->plinst->_E($text);
 	}
 } // End class SWF_put_widget_evh
 else :
