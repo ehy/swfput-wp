@@ -1,7 +1,7 @@
 K 25
 svn:wc:ra_dav:version-url
 V 29
-/!svn/ver/758736/swfput/trunk
+/!svn/ver/758875/swfput/trunk
 END
 README.pdf
 K 25
@@ -25,7 +25,7 @@ readme.txt
 K 25
 svn:wc:ra_dav:version-url
 V 40
-/!svn/ver/758567/swfput/trunk/readme.txt
+/!svn/ver/759560/swfput/trunk/readme.txt
 END
 OptPage_0_0_2.inc.php
 K 25
@@ -37,7 +37,7 @@ Makefile
 K 25
 svn:wc:ra_dav:version-url
 V 38
-/!svn/ver/758736/swfput/trunk/Makefile
+/!svn/ver/759560/swfput/trunk/Makefile
 END
 README
 K 25
@@ -49,7 +49,7 @@ swfput.php
 K 25
 svn:wc:ra_dav:version-url
 V 40
-/!svn/ver/758875/swfput/trunk/swfput.php
+/!svn/ver/759560/swfput/trunk/swfput.php
 END
 README.html
 K 25

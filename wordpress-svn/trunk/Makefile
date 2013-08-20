@@ -104,7 +104,7 @@ en_US-mo $(LCFPO): $(LCPOT)
 pot $(LCPOT): $(SRCS)
 	@echo Invoking $(XGETTEXT) to make $(LCPOT).
 	@$(XGETTEXT) --output=$(LCPOT) --debug --add-comments \
-	--keyword=_T --keyword=_E --keyword=_N \
+	--keyword=__ --keyword=_e \
 	--package-name=$(PRJSTEM) --package-version=$(PRJVERS) \
 	--copyright-holder='Ed Hynan' \
 	--language=PHP $(SRCS) && \

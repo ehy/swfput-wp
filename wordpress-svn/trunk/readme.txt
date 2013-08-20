@@ -5,6 +5,7 @@ Tags: video, audio, movies, tube, flash, flash player, graphics, movie, audio-vi
 Requires at least: 3.0.2
 Tested up to: 3.6
 Stable tag: 1.0.2
+Text Domain: swfput_l10n
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
