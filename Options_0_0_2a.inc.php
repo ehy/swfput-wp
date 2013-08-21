@@ -132,8 +132,17 @@ class Options_0_0_2a {
 	// IAC, note the sequence of data and function calls
 	public function admin_page() {
 		// check caps in page object
+		// Note: the error strings are taken from WP core code (v3.6)
+		// exactly, so that it will use default translations if any.
+		// This depends, of course, on the string not changing in
+		// WP core; these strings have many translated uses
+		// (found in xgettext pot file for __ and _e), so perhaps
+		// they will be stable.
 		if ( ! current_user_can($this->pg->capability) )  {
-			wp_die(__('You have insufficient access capability.'));
+			// this has sixteen (16) uses:
+			//wp_die(__('You do not have permission to access this page.'));
+			// this has seven (7) uses:
+			wp_die(__('You do not have sufficient permissions to manage options for this site.'));
 		}
 		
 		// put html

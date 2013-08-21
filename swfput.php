@@ -499,7 +499,7 @@ class SWF_put_evh {
 			/* capability = 'manage_options' */ '',
 			array($this, 'setting_page_output_callback')/* callback */,
 			/* 'hook_suffix' callback array */ $suffix_hooks,
-			self::wt(__('Configuration of SWFPut Plugin', 'swfput_l10n')),
+			self::wt(__('SWFPut Plugin Configuration', 'swfput_l10n')),
 			self::wt(__('Display and Runtime Settings.', 'swfput_l10n')),
 			self::wt(__('Save Settings', 'swfput_l10n')));
 		

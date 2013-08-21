@@ -1,37 +1,7 @@
 K 25
 svn:wc:ra_dav:version-url
 V 29
-/!svn/ver/758875/swfput/trunk
-END
-README.pdf
-K 25
-svn:wc:ra_dav:version-url
-V 40
-/!svn/ver/754547/swfput/trunk/README.pdf
-END
-COPYING
-K 25
-svn:wc:ra_dav:version-url
-V 37
-/!svn/ver/750259/swfput/trunk/COPYING
-END
-Options_0_0_2.inc.php
-K 25
-svn:wc:ra_dav:version-url
-V 51
-/!svn/ver/750259/swfput/trunk/Options_0_0_2.inc.php
-END
-readme.txt
-K 25
-svn:wc:ra_dav:version-url
-V 40
-/!svn/ver/759560/swfput/trunk/readme.txt
-END
-OptPage_0_0_2.inc.php
-K 25
-svn:wc:ra_dav:version-url
-V 51
-/!svn/ver/750259/swfput/trunk/OptPage_0_0_2.inc.php
+/!svn/ver/759560/swfput/trunk
 END
 Makefile
 K 25
@@ -68,4 +38,34 @@ K 25
 svn:wc:ra_dav:version-url
 V 54
 /!svn/ver/750259/swfput/trunk/OptSection_0_0_2.inc.php
+END
+README.pdf
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/!svn/ver/754547/swfput/trunk/README.pdf
+END
+COPYING
+K 25
+svn:wc:ra_dav:version-url
+V 37
+/!svn/ver/750259/swfput/trunk/COPYING
+END
+Options_0_0_2.inc.php
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/!svn/ver/750259/swfput/trunk/Options_0_0_2.inc.php
+END
+readme.txt
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/!svn/ver/759560/swfput/trunk/readme.txt
+END
+OptPage_0_0_2.inc.php
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/!svn/ver/750259/swfput/trunk/OptPage_0_0_2.inc.php
 END

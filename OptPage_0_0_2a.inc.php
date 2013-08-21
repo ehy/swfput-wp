@@ -104,10 +104,17 @@ class OptPage_0_0_2a {
 
 		$this->callback = $pcallback;
 		$this->cbsuffixs = $pcbsuffixs;
-		// the following defaults are not useful . . .
+
+		// The following defaults use strings from WP core (3.6)
+		// so that installed translations should be used.
+
+		// string 'Settings' has 10 uses in WP 3.6 (.pot for __ and _e)
 		$this->pagehead = $ppagehead ? $ppagehead : __('Settings');
+		// string 'Operational Settings' has only one (1) use
+		// in WP 3.6 (.pot for __ and _e)
 		$this->pageintro =
-			$ppageintro ? $ppageintro : __('Options here:');
+			$ppageintro ? $ppageintro : __('Operational Settings');
+		// string 'Save' has 9 uses in WP 3.6 (.pot for __ and _e)
 		$this->savelabel = $psavelabel ? $psavelabel : __('Save');
 		
 		$this->page_type();

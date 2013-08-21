@@ -10,6 +10,10 @@ SRCS = ${PRJSTEM}.php \
 	OptSection_0_0_2a.inc.php \
 	OptPage_0_0_2a.inc.php
 
+# The Opt*.php are support classes, not tied to this plugin,
+# so they do not share the text-domain and are not args to xgettext
+POTSRCS = ${PRJSTEM}.php
+
 DOCSD = docs
 JSDIR = js
 JSBIN = $(JSDIR)/formxed.js
@@ -101,13 +105,13 @@ en_US-mo $(LCFPO): $(LCPOT)
 	echo If you care about translations then check that \
 	GNU gettext package is installed; exit 0; }
 
-pot $(LCPOT): $(SRCS)
+pot $(LCPOT): $(POTSRCS)
 	@echo Invoking $(XGETTEXT) to make $(LCPOT).
 	@$(XGETTEXT) --output=$(LCPOT) --debug --add-comments \
 	--keyword=__ --keyword=_e \
 	--package-name=$(PRJSTEM) --package-version=$(PRJVERS) \
 	--copyright-holder='Ed Hynan' \
-	--language=PHP $(SRCS) && \
+	--language=PHP $(POTSRCS) && \
 	echo Succeeded with $@ || \
 	{ echo FAILED to make the i18n template $(LCPOT); \
 	echo If you care about translations then check that \
