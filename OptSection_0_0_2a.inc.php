@@ -1,6 +1,6 @@
 <?php
 /*
- *  OptSection_0_0_2.inc.php
+ *  OptSection_0_0_2a.inc.php
  *  
  *  Copyright 2011 Ed Hynan <edhynan@gmail.com>
  *  
@@ -35,7 +35,7 @@
 /**
  * class for individual section of a settings/option page
  */
-class OptSection_0_0_2 {
+class OptSection_0_0_2a {
 	// help detect class name conflicts; called by using code
 	// const evh_opt_id = 0xED00AA33; // N.G. < 5.3
 	private static $evh_opt_id = 0xED00AA33;
@@ -43,12 +43,12 @@ class OptSection_0_0_2 {
 		return self::$evh_opt_id;
 	}
 
-	public $fields;       // array of OptField_0_0_2 instances
+	public $fields;       // array of OptField_0_0_2a instances
 	public $id;           // section unique id; string
 	public $label;        // not label, section header
 	public $callback;     // to put section description under header -
 	                      // if not given then
-	                      // Options_0_0_2::settings_section()
+	                      // Options_0_0_2a::settings_section()
 	                      // is used; see that as an example
 
 	public function __construct($sfields, $sid, $slabel,

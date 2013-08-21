@@ -1,6 +1,6 @@
 <?php
 /*
- *  OptPage_0_0_2.inc.php
+ *  OptPage_0_0_2a.inc.php
  *  
  *  Copyright 2011 Ed Hynan <edhynan@gmail.com>
  *  
@@ -35,7 +35,7 @@
 /**
  * class for an settings/option page
  */
-class OptPage_0_0_2 {
+class OptPage_0_0_2a {
 	// help detect class name conflicts; called by using code
 	// const evh_opt_id = 0xED00AA33; // N.G. < 5.3
 	private static $evh_opt_id = 0xED00AA33;
@@ -44,12 +44,12 @@ class OptPage_0_0_2 {
 	}
 
 	public $group;        // option group unique key (string)
-	public $sections;     // array of OptSection_0_0_2 instances
+	public $sections;     // array of OptSection_0_0_2a instances
 	public $id;           // page+menu unique id; string
 	public $label;        // not label, menu item text
 	public $title;        // page title; e.g. shown in browser titlebar
 	public $cbvalidate;   // callback to validate option values -
-	                      // if not given Options_0_0_2 class default
+	                      // if not given Options_0_0_2a class default
 	                      // is used; the default is certainly not
 	                      // suitable, but stands as an example
 	public $pagetype;     // add page of this type: see page_type()
@@ -57,7 +57,7 @@ class OptPage_0_0_2 {
 	public $capability;   // required for page access -
 	                      // default 'manage_options'
 	public $callback;     // to put page body html -
-	                      // if not given Options_0_0_2::settings_page
+	                      // if not given Options_0_0_2a::settings_page
 	                      // is used; see that as an example
 	public $cbsuffixs;    // the WP 'add_FOO_page()' functions return a
 						  // '$hook_suffix" that can be used for

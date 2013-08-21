@@ -5,10 +5,10 @@ PRJSTEM = swfput
 PRJNAME = $(PRJSTEM)-$(PRJVERS)
 
 SRCS = ${PRJSTEM}.php \
-	Options_0_0_2.inc.php \
-	OptField_0_0_2.inc.php \
-	OptSection_0_0_2.inc.php \
-	OptPage_0_0_2.inc.php
+	Options_0_0_2a.inc.php \
+	OptField_0_0_2a.inc.php \
+	OptSection_0_0_2a.inc.php \
+	OptPage_0_0_2a.inc.php
 
 DOCSD = docs
 JSDIR = js

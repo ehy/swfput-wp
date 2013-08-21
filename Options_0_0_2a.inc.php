@@ -1,6 +1,6 @@
 <?php
 /*
- *  Options_0_0_2.inc.php
+ *  Options_0_0_2a.inc.php
  *  
  *  Copyright 2011 Ed Hynan <edhynan@gmail.com>
  *  
@@ -42,7 +42,7 @@
  * inconsistency the class is named Options[...] and its methods
  * names use the word 'settings'
  */
-class Options_0_0_2 {
+class Options_0_0_2a {
 	// help detect class name conflicts; called by using code
 	// const evh_opt_id = 0xED00AA33; // N.G. < 5.3
 	private static $evh_opt_id = 0xED00AA33;
@@ -50,14 +50,14 @@ class Options_0_0_2 {
 		return self::$evh_opt_id;
 	}
 
-	// OptPage_0_0_2 instance
+	// OptPage_0_0_2a instance
 	protected $pg;
 	// this holds return from WP 'add_FOO_page()',
 	// sometimes called '$hook_suffix' in WP docs -- get value
 	// with method get_page_suffix()
 	protected $page_suffix;
 	
-	public function __construct($page_obj /* OptPage_0_0_2 instance */)
+	public function __construct($page_obj /* OptPage_0_0_2a instance */)
 	{
 		// assign our page object
 		$this->pg = $page_obj;
@@ -240,6 +240,6 @@ class Options_0_0_2 {
 	// end callback sets
 
 	// end members and methods for WP option page mechanism:
-} // end Options_0_0_2
+} // end Options_0_0_2a
 
 ?>
