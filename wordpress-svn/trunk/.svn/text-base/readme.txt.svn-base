@@ -220,6 +220,11 @@ Maybe later.
 * Put i18n final code (__() was already present), added make rules to
 	build *.mo using (added) script in new locale dir, added FPO/test
 	en_US.mo, confirmed working with dummy string replacement.
+* Changed Opt* support classes to use display strings borrowed
+	exactly from WP (3.6) core; these classes are not tied to this
+	plugin and should not use its text-domain. Using core strings,
+	they might still get translated (might get translated when the
+	plugin does not -- that is deemed OK).
 
 = 1.0.2 =
 * Corrections in (vaguely distinguished)

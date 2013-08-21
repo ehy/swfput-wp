@@ -82,10 +82,10 @@ endif;
 
 // these support classes are in separate files as they are
 // not specific to this plugin, and may be used in others
-swfput_paranoid_require_class('OptField_0_0_2');
-swfput_paranoid_require_class('OptSection_0_0_2');
-swfput_paranoid_require_class('OptPage_0_0_2');
-swfput_paranoid_require_class('Options_0_0_2');
+swfput_paranoid_require_class('OptField_0_0_2a');
+swfput_paranoid_require_class('OptSection_0_0_2a');
+swfput_paranoid_require_class('OptPage_0_0_2a');
+swfput_paranoid_require_class('Options_0_0_2a');
 
 
 /**********************************************************************\
@@ -180,7 +180,7 @@ class SWF_put_evh {
 	const defuseming = 'false';
 	
 	// autoload class version suffix
-	const aclv = '0_0_2';
+	const aclv = '0_0_2a';
 
 	// string used for (default) shortcode tag
 	const shortcode = 'putswf_video';
@@ -499,7 +499,7 @@ class SWF_put_evh {
 			/* capability = 'manage_options' */ '',
 			array($this, 'setting_page_output_callback')/* callback */,
 			/* 'hook_suffix' callback array */ $suffix_hooks,
-			self::wt(__('Configuration of SWFPut Plugin', 'swfput_l10n')),
+			self::wt(__('SWFPut Plugin Configuration', 'swfput_l10n')),
 			self::wt(__('Display and Runtime Settings.', 'swfput_l10n')),
 			self::wt(__('Save Settings', 'swfput_l10n')));
 		
