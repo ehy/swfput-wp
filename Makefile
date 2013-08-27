@@ -23,6 +23,8 @@ LCDOM = $(PRJSTEM)_l10n
 LCPOT = $(LCDIR)/$(LCDOM).pot
 LCFPO = $(LCDIR)/$(LCDOM)-en_US.mo
 LC_SH = $(LCDIR)/pot2en_US.sh
+LCSRC = $(LCPOT)
+LCALL = $(LC_SH) $(LCFPO) $(LCSRC)
 SDIRI = mingtest
 SDIRO = mingput
 SSRCS = $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php $(SDIRI)/obj.css
@@ -40,6 +42,7 @@ ALSO = Makefile COPYING
 READS= README README.pdf README.html
 ZALL = ${SRCS} ${ALSO} ${READS} readme.txt
 ZSALL = ${SSRCS} ${SBINS}
+ZDIR = $(JSDIR) $(LCDIR) $(DOCSD)
 BINALL = ${SBINS} ${JSBIN}
 PRJDIR = ${PRJNAME}
 PRJSDIR = ${PRJNAME}/${SDIRO}
@@ -54,7 +57,7 @@ all: ${PRJZIP}
 ${PRJZIP}: ${SBINS} ${JSBIN} ${ZALL} ${LCFPO}
 	test -e ttd && rm -rf ttd; test -e ${PRJDIR} && mv ${PRJDIR} ttd; \
 	mkdir ${PRJDIR} ${PRJSDIR} && \
-	cp -r -p ${ZALL} ${JSDIR} ${LCDIR} ${DOCSD} ${PRJDIR} && \
+	cp -r -p ${ZALL} ${ZDIR} ${PRJDIR} && \
 	( cd ${PRJDIR}/${DOCSD} && make clean; true ) && \
 	cp -r -p ${ZSALL} ${PRJSDIR} && rm -f ${PRJZIP} && \
 	$(ZIP) ${PRJZIP} ${PRJDIR} && rm -rf ${PRJDIR} && \
