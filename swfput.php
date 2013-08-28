@@ -343,6 +343,7 @@ class SWF_put_evh {
 		if ( $this->opt ) {
 			return;
 		}
+		$items = self::get_opt_group();
 
 		// use Opt* classes for page, sections, and fields
 		
