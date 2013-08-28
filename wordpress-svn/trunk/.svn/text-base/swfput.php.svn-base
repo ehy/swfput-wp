@@ -344,8 +344,6 @@ class SWF_put_evh {
 			return;
 		}
 
-		$items = $this->init_opts();
-		
 		// use Opt* classes for page, sections, and fields
 		
 		// mk_aclv adds a suffix to class names
@@ -600,11 +598,13 @@ class SWF_put_evh {
 		if ( ! isset($wp_widget_factory) ) {
 			return;
 		}
+		if ( self::get_widget_option() == 'false' ) {
+			return;
+		}
 		if ( function_exists('register_widget') ) {
 			$cl = self::swfput_widget;
 			register_widget($cl);
 		}
-		self::load_translations();
 	}
 
 	// unregister the SWFPut widget
@@ -624,41 +624,16 @@ class SWF_put_evh {
 		self::load_translations();
 
 		// Settings/Options page setup
-		$this->init_settings_page();
-
-		// add here to be sure option is ready
-		// update 2013/07/12: do not use test because
-		// if shortcodes are disabled by removing the
-		// hook, then the raw shortcodes remain in posts;
-		// instead test the option in the callback and
-		// do the right thing there
-		// TODO: remove old code when certain
-		if ( false ) {
-			if ( self::get_posts_code_option() === 'true' ) {
-				$scf = array($this, 'post_shortcode');
-				add_shortcode(self::shortcode, $scf);
-			} else {
-				remove_shortcode(self::shortcode);
-			}
-		} else {
-			$scf = array($this, 'post_shortcode');
-			add_shortcode(self::shortcode, $scf);
+		$this->init_opts();
+		if ( current_user_can('manage_options') ) {
+			$this->init_settings_page();
 		}
 
-		// see update above? same here
-		// TODO: remove old code when certain
-		if ( false ) {
-			if ( self::get_widget_code_option() === 'true' ) {
-				$scf = array($this, 'wdg_do_shortcode');
-				add_filter('widget_text', $scf);
-			} else {
-				$scf = array($this, 'wdg_do_shortcode');
-				remove_filter('widget_text', $scf);
-			}
-		} else {
-			$scf = array($this, 'wdg_do_shortcode');
-			add_filter('widget_text', $scf);
-		}
+		$scf = array($this, 'post_shortcode');
+		add_shortcode(self::shortcode, $scf);
+
+		$scf = array($this, 'wdg_do_shortcode');
+		add_filter('widget_text', $scf);
 
 		if ( self::get_posts_preg_option() === 'true' ) {
 			$scf = array($this, 'post_sed');

@@ -1,14 +1,14 @@
 10
 
 dir
-760172
+763684
 http://plugins.svn.wordpress.org/swfput/trunk/locale
 http://plugins.svn.wordpress.org
 
 
 
-2013-08-20T22:09:24.572524Z
-759560
+2013-08-21T17:32:29.536024Z
+760177
 EdHynan
 
 
@@ -28,16 +28,7 @@ b8457f37-d9ea-0310-8a92-e5e31aec5664
 
 swfput_l10n-en_US.mo
 file
-760177
-
-
-
-2013-08-21T17:10:53.000000Z
-66184bd8d29aa19c2cf59e477bad6370
-2013-08-21T17:32:29.536024Z
-760177
-EdHynan
-has-props
+763687
 
 
 
@@ -57,20 +48,11 @@ has-props
 
 
 
-
-14231
+deleted
 
 swfput_l10n.pot
 file
-760177
-
-
-
-2013-08-21T17:05:08.000000Z
-1d186ac0db0b5fd977b492ca5da13ffd
-2013-08-21T17:32:29.536024Z
-760177
-EdHynan
+763687
 
 
 
@@ -90,21 +72,11 @@ EdHynan
 
 
 
-
-
-11286
+deleted
 
 swfput_l10n-en_US.po
 file
-760177
-
-
-
-2013-08-21T17:10:53.000000Z
-ae33f730819db3fa86dfd5b9a59ceb71
-2013-08-21T17:32:29.536024Z
-760177
-EdHynan
+763687
 
 
 
@@ -124,9 +96,7 @@ EdHynan
 
 
 
-
-
-17822
+deleted
 
 pot2en_US.sh
 file
