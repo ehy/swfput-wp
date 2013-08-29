@@ -31,8 +31,10 @@ fail () { e2 ${1+"$@"}; exit 1; }
 mkdate () { date "+%Y-%m-%d %H:%M %Z"; }
 
 TF=$(mktemp "${PROG}.XXXXXXXX") || fail cannot make temp file
+TP=$(mktemp "${PROG}.XXXXXXXX") || fail cannot make temp file
 cleanup () {
 	test -f "$TF" && rm "$TF"
+	test -f "$TP" && rm "$TP"
 }
 trap cleanup 0
 
@@ -60,7 +62,7 @@ OF=${2:-"${PONAME}"}
 #		-e 's/\([Bb]\)ezier/\1ézier/g' \
 #
 
-:>"$TF"; while read -r L; do
+:>"$TF"; :>"$TP"; while read -r L; do
 	case "$L" in
 	"msgstr \""* )
 		sed \
@@ -70,12 +72,36 @@ OF=${2:-"${PONAME}"}
 		:>"$TF"
 		continue
 		;;
+	"msgstr[0] \""* )
+		sed \
+		-e 's/^msgid/msgstr\[0\]/' \
+		-e 's/multi-widget/widget/' \
+		< "$TF"
+		cat < "$TP" > "$TF"
+		:>"$TP"
+		continue
+		;;
+	"msgstr[1] \""* )
+		sed \
+		-e 's/^msgid_plural/msgstr\[1\]/' \
+		-e 's/multi-widget/widget/' \
+		< "$TF"
+		:>"$TF"
+		continue
+		;;
 	esac
-	test -s "$TF" && printf '%s\n' "$L" >> "$TF"
+	if test -s "$TP" ; then
+		printf '%s\n' "$L" >> "$TP"
+	elif test -s "$TF" ; then
+		test X"$L" = X'msgid_plural ""' || printf '%s\n' "$L" >> "$TF"
+	fi
 	printf '%s\n' "$L"
 	case "$L" in
 	"msgid \""* )
 		printf '%s\n' "$L" > "$TF"
+		;;
+	"msgid_plural \""* )
+		printf '%s\n' "$L" > "$TP"
 		;;
 	esac
 done < "$IF" | sed \
