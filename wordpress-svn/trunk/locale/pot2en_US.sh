@@ -93,7 +93,8 @@ OF=${2:-"${PONAME}"}
 	if test -s "$TP" ; then
 		printf '%s\n' "$L" >> "$TP"
 	elif test -s "$TF" ; then
-		test X"$L" = X'msgid_plural ""' || printf '%s\n' "$L" >> "$TF"
+		M=${L%%\"*}
+		test X"$M" = X'msgid_plural ' || printf '%s\n' "$L" >> "$TF"
 	fi
 	printf '%s\n' "$L"
 	case "$L" in
