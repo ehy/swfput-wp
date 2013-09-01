@@ -225,6 +225,9 @@ class SWF_put_evh {
 	public static $pluginfile = null;
 
 	public function __construct($init = true) {
+		// admin or public invocation?
+		$adm = is_admin();
+
 		// if arg $init is false then this instance is just
 		// meant to provide options and such
 		$pf = self::mk_pluginfile();
@@ -246,34 +249,25 @@ class SWF_put_evh {
 			return;
 		}
 		
-		// keep it clean: {de,}activation
 		$cl = __CLASS__;
-		register_deactivation_hook($pf, array($cl, 'on_deactivate'));
-		register_activation_hook($pf,   array($cl,   'on_activate'));
-		register_uninstall_hook($pf,    array($cl,  'on_uninstall'));
+
+		if ( $adm ) {
+			// add 'Settings' link on the plugins page entry
+			// cannot be in activate hook
+			$name = plugin_basename($pf);
+			add_filter("plugin_action_links_$name",
+				array($cl, 'plugin_page_addlink'));
+		}
 
 		// some things are to be done in init hook: add
 		// hooks for shortcode and widget, and optionally
 		// posts processing to scan attachments, etc...
 		add_action('init', array($this, 'init_hook_func'));
 
-		// add 'Settings' link on the plugins page entry
-		// cannot be in activate hook
-		$name = plugin_basename($pf);
-		add_filter("plugin_action_links_$name",
-			array($cl, 'plugin_page_addlink'));
-
 		// it's not enough to add this action in the activation hook;
 		// that alone does not work.  IAC administrative
 		// {de,}activate also controls the widget
 		add_action('widgets_init', array($cl, 'regi_widget'));//, 1);
-
-		// hook&filter to make shortcode form for editor
-		if ( self::get_posts_code_option() === 'true' ) {
-			add_action('admin_menu', array($cl, 'hook_admin_menu'));
-			add_action('admin_print_scripts',
-				array($cl, 'filter_admin_print_scripts'));
-		}
 	}
 
 	public function __destruct() {
@@ -337,8 +331,7 @@ class SWF_put_evh {
 		return $opts;
 	}
 
-	// initialize options/settings page, only if $this->full_init==true
-	// ($this->full_init set and checked in ctor)
+	// initialize options/settings page
 	protected function init_settings_page() {
 		if ( $this->opt ) {
 			return;
@@ -623,12 +616,36 @@ class SWF_put_evh {
 	// the 'init' hook callback
 	public function init_hook_func () {
 		self::load_translations();
+		$this->init_opts();
+
+		$pf = self::mk_pluginfile();
+		// admin or public invocation?
+		$adm = is_admin();
+
+		$cl = __CLASS__;
+
+		if ( $adm ) {
+		// keep it clean: {de,}activation
+		if ( current_user_can('activate_plugins') ) {
+		register_deactivation_hook($pf, array($cl, 'on_deactivate'));
+		register_activation_hook($pf,   array($cl,   'on_activate'));
+		}
+		if ( current_user_can('install_plugins') ) {
+		register_uninstall_hook($pf,    array($cl,  'on_uninstall'));
+		}
+
+		// hook&filter to make shortcode form for editor
+		if ( self::get_posts_code_option() === 'true' ) {
+			add_action('admin_menu', array($cl, 'hook_admin_menu'));
+			add_action('admin_print_scripts',
+				array($cl, 'filter_admin_print_scripts'));
+		}
 
 		// Settings/Options page setup
-		$this->init_opts();
 		if ( current_user_can('manage_options') ) {
 			$this->init_settings_page();
 		}
+		} // if ( $adm )
 
 		$scf = array($this, 'post_shortcode');
 		add_shortcode(self::shortcode, $scf);
@@ -2486,7 +2503,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$code = 'widget-div';
 		$dw = $w + 3;
 		// use no class, but do use deprecated align
-		$dv = '<p><div id="'.$code.'" align="center"';
+		$dv = '<div id="'.$code.'" align="center"';
 		$dv .= ' style="width: '.$dw.'px">';
 
 		extract($args);
@@ -2507,9 +2524,9 @@ class SWF_put_widget_evh extends WP_Widget {
 		echo $dv;
 		$this->plinst->put_swf_tags($uswf, $pr);
 		if ( $cap ) {
-			echo '</p><p><span align="center">' .$cap. '</span></p><p>';
+			echo '<p><span align="center">' .$cap. '</span></p>';
 		}
-		echo '</div></p>';
+		echo '</div>';
 
 		echo $after_widget;
 	}
