@@ -768,8 +768,11 @@ class SWF_put_evh {
 
 		// now register updates
 		if ( $nupd > 0 ) {
-			$str = $nerr == 0 ? __('Settings updated successfully', 'swfput_l10n') :
-				sprintf(__('Some settings (%d) updated', 'swfput_l10n'), $nupd);
+			$str = $nerr == 0 ?
+				__('Settings updated successfully', 'swfput_l10n') :
+				sprintf(_n('One (%d) setting updated',
+					'Some settings (%d) updated',
+					$nupd, 'swfput_l10n'), $nupd);
 			add_settings_error(self::opt_group, self::opt_group,
 				self::wt($str), 'updated');
 		}
@@ -1394,10 +1397,19 @@ class SWF_put_evh {
 		}
 		if ( self::get_widget_code_option() === 'false' ) {
 			$c = '';
-			$fmt = self::wt(__(' [A/V content%s disabled] ', 'swfput_l10n'));
+			// TRANSLATORS the '[]' are meant to indicate strongly
+			// that this is not normal, expected text display,
+			// because this text takes the place of a Flash program
+			// when disabled by a plugin option.
+			// 'A/V' is understood in US (all English language???)
+			// as 'Audio/Visual' e.g., film, sound.
+			// '%s' is any caption provided for a/v, if any,
+			// prepended with ASCII space ' '; '%s' is an empty string
+			// if there is no caption
+			$fmt = self::wt(__(' [A/V content "%s" disabled] ', 'swfput_l10n'));
 			// Note '!=' -- not '!=='
 			if ( $content != null ) {
-				$c = ' "' . do_shortcode($content) . '"';
+				$c = ' ' . do_shortcode($content);
 			}
 			return sprintf($fmt, $c);
 		}
@@ -1441,10 +1453,19 @@ class SWF_put_evh {
 		}
 		if ( self::get_posts_code_option() === 'false' ) {
 			$c = '';
-			$fmt = self::wt(__(' [A/V content%s disabled] ', 'swfput_l10n'));
+			// TRANSLATORS the '[]' are meant to indicate strongly
+			// that this is not normal, expected text display,
+			// because this text takes the place of a Flash program
+			// when disabled by a plugin option.
+			// 'A/V' is understood in US (all English language???)
+			// as 'Audio/Visual' e.g., film, sound.
+			// '%s' is any caption provided for a/v, if any,
+			// prepended with ASCII space ' '; '%s' is an empty string
+			// if there is no caption
+			$fmt = self::wt(__(' [A/V content "%s" disabled] ', 'swfput_l10n'));
 			// Note '!=' -- not '!=='
 			if ( $content != null ) {
-				$c = ' "' . do_shortcode($content) . '"';
+				$c = ' ' . do_shortcode($content);
 			}
 			return sprintf($fmt, $c);
 		}
@@ -2352,8 +2373,12 @@ class SWF_params_evh {
 				$t = strtolower($t);
 				if ( $t !== 'true' && $t !== 'false' ) {
 					if ( $fuzz === true ) {
-						$xt = __('/^(sc?h[yi]te?)?y(e((s|ah)!?)?)?$/i', 'swfput_l10n');
-						$xf = __('/^((he(ck|ll))?n(o!?)?)?$/i', 'swfput_l10n');
+						// TRANSLATORS perl-type regular expression
+						// that matches a 'yes'
+						$xt = __('/^?y(e((s|ah)!?)?)?$/i', 'swfput_l10n');
+						// TRANSLATORS perl-type regular expression
+						// that matches a 'no'
+						$xf = __('/^n(o!?)?)?$/i', 'swfput_l10n');
 						if ( is_numeric($t) ) {
 							$t = $t == 0 ? 'false' : 'true';
 						} else if ( preg_match($xf, $t) ) {
