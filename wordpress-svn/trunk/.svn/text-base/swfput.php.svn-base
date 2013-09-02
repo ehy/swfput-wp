@@ -225,6 +225,9 @@ class SWF_put_evh {
 	public static $pluginfile = null;
 
 	public function __construct($init = true) {
+		// admin or public invocation?
+		$adm = is_admin();
+
 		// if arg $init is false then this instance is just
 		// meant to provide options and such
 		$pf = self::mk_pluginfile();
@@ -246,34 +249,25 @@ class SWF_put_evh {
 			return;
 		}
 		
-		// keep it clean: {de,}activation
 		$cl = __CLASS__;
-		register_deactivation_hook($pf, array($cl, 'on_deactivate'));
-		register_activation_hook($pf,   array($cl,   'on_activate'));
-		register_uninstall_hook($pf,    array($cl,  'on_uninstall'));
+
+		if ( $adm ) {
+			// add 'Settings' link on the plugins page entry
+			// cannot be in activate hook
+			$name = plugin_basename($pf);
+			add_filter("plugin_action_links_$name",
+				array($cl, 'plugin_page_addlink'));
+		}
 
 		// some things are to be done in init hook: add
 		// hooks for shortcode and widget, and optionally
 		// posts processing to scan attachments, etc...
 		add_action('init', array($this, 'init_hook_func'));
 
-		// add 'Settings' link on the plugins page entry
-		// cannot be in activate hook
-		$name = plugin_basename($pf);
-		add_filter("plugin_action_links_$name",
-			array($cl, 'plugin_page_addlink'));
-
 		// it's not enough to add this action in the activation hook;
 		// that alone does not work.  IAC administrative
 		// {de,}activate also controls the widget
 		add_action('widgets_init', array($cl, 'regi_widget'));//, 1);
-
-		// hook&filter to make shortcode form for editor
-		if ( self::get_posts_code_option() === 'true' ) {
-			add_action('admin_menu', array($cl, 'hook_admin_menu'));
-			add_action('admin_print_scripts',
-				array($cl, 'filter_admin_print_scripts'));
-		}
 	}
 
 	public function __destruct() {
@@ -337,8 +331,7 @@ class SWF_put_evh {
 		return $opts;
 	}
 
-	// initialize options/settings page, only if $this->full_init==true
-	// ($this->full_init set and checked in ctor)
+	// initialize options/settings page
 	protected function init_settings_page() {
 		if ( $this->opt ) {
 			return;
@@ -623,12 +616,36 @@ class SWF_put_evh {
 	// the 'init' hook callback
 	public function init_hook_func () {
 		self::load_translations();
+		$this->init_opts();
+
+		$pf = self::mk_pluginfile();
+		// admin or public invocation?
+		$adm = is_admin();
+
+		$cl = __CLASS__;
+
+		if ( $adm ) {
+		// keep it clean: {de,}activation
+		if ( current_user_can('activate_plugins') ) {
+		register_deactivation_hook($pf, array($cl, 'on_deactivate'));
+		register_activation_hook($pf,   array($cl,   'on_activate'));
+		}
+		if ( current_user_can('install_plugins') ) {
+		register_uninstall_hook($pf,    array($cl,  'on_uninstall'));
+		}
+
+		// hook&filter to make shortcode form for editor
+		if ( self::get_posts_code_option() === 'true' ) {
+			add_action('admin_menu', array($cl, 'hook_admin_menu'));
+			add_action('admin_print_scripts',
+				array($cl, 'filter_admin_print_scripts'));
+		}
 
 		// Settings/Options page setup
-		$this->init_opts();
 		if ( current_user_can('manage_options') ) {
 			$this->init_settings_page();
 		}
+		} // if ( $adm )
 
 		$scf = array($this, 'post_shortcode');
 		add_shortcode(self::shortcode, $scf);
@@ -751,8 +768,11 @@ class SWF_put_evh {
 
 		// now register updates
 		if ( $nupd > 0 ) {
-			$str = $nerr == 0 ? __('Settings updated successfully', 'swfput_l10n') :
-				sprintf(__('Some settings (%d) updated', 'swfput_l10n'), $nupd);
+			$str = $nerr == 0 ?
+				__('Settings updated successfully', 'swfput_l10n') :
+				sprintf(_n('One (%d) setting updated',
+					'Some settings (%d) updated',
+					$nupd, 'swfput_l10n'), $nupd);
 			add_settings_error(self::opt_group, self::opt_group,
 				self::wt($str), 'updated');
 		}
@@ -1377,10 +1397,19 @@ class SWF_put_evh {
 		}
 		if ( self::get_widget_code_option() === 'false' ) {
 			$c = '';
-			$fmt = self::wt(__(' [A/V content%s disabled] ', 'swfput_l10n'));
+			// TRANSLATORS the '[]' are meant to indicate strongly
+			// that this is not normal, expected text display,
+			// because this text takes the place of a Flash program
+			// when disabled by a plugin option.
+			// 'A/V' is understood in US (all English language???)
+			// as 'Audio/Visual' e.g., film, sound.
+			// '%s' is any caption provided for a/v, if any,
+			// prepended with ASCII space ' '; '%s' is an empty string
+			// if there is no caption
+			$fmt = self::wt(__(' [A/V content "%s" disabled] ', 'swfput_l10n'));
 			// Note '!=' -- not '!=='
 			if ( $content != null ) {
-				$c = ' "' . do_shortcode($content) . '"';
+				$c = ' ' . do_shortcode($content);
 			}
 			return sprintf($fmt, $c);
 		}
@@ -1424,10 +1453,19 @@ class SWF_put_evh {
 		}
 		if ( self::get_posts_code_option() === 'false' ) {
 			$c = '';
-			$fmt = self::wt(__(' [A/V content%s disabled] ', 'swfput_l10n'));
+			// TRANSLATORS the '[]' are meant to indicate strongly
+			// that this is not normal, expected text display,
+			// because this text takes the place of a Flash program
+			// when disabled by a plugin option.
+			// 'A/V' is understood in US (all English language???)
+			// as 'Audio/Visual' e.g., film, sound.
+			// '%s' is any caption provided for a/v, if any,
+			// prepended with ASCII space ' '; '%s' is an empty string
+			// if there is no caption
+			$fmt = self::wt(__(' [A/V content "%s" disabled] ', 'swfput_l10n'));
 			// Note '!=' -- not '!=='
 			if ( $content != null ) {
-				$c = ' "' . do_shortcode($content) . '"';
+				$c = ' ' . do_shortcode($content);
 			}
 			return sprintf($fmt, $c);
 		}
@@ -2335,8 +2373,12 @@ class SWF_params_evh {
 				$t = strtolower($t);
 				if ( $t !== 'true' && $t !== 'false' ) {
 					if ( $fuzz === true ) {
-						$xt = __('/^(sc?h[yi]te?)?y(e((s|ah)!?)?)?$/i', 'swfput_l10n');
-						$xf = __('/^((he(ck|ll))?n(o!?)?)?$/i', 'swfput_l10n');
+						// TRANSLATORS perl-type regular expression
+						// that matches a 'yes'
+						$xt = __('/^?y(e((s|ah)!?)?)?$/i', 'swfput_l10n');
+						// TRANSLATORS perl-type regular expression
+						// that matches a 'no'
+						$xf = __('/^n(o!?)?)?$/i', 'swfput_l10n');
 						if ( is_numeric($t) ) {
 							$t = $t == 0 ? 'false' : 'true';
 						} else if ( preg_match($xf, $t) ) {
@@ -2486,7 +2528,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$code = 'widget-div';
 		$dw = $w + 3;
 		// use no class, but do use deprecated align
-		$dv = '<p><div id="'.$code.'" align="center"';
+		$dv = '<div id="'.$code.'" align="center"';
 		$dv .= ' style="width: '.$dw.'px">';
 
 		extract($args);
@@ -2507,9 +2549,9 @@ class SWF_put_widget_evh extends WP_Widget {
 		echo $dv;
 		$this->plinst->put_swf_tags($uswf, $pr);
 		if ( $cap ) {
-			echo '</p><p><span align="center">' .$cap. '</span></p><p>';
+			echo '<p><span align="center">' .$cap. '</span></p>';
 		}
-		echo '</div></p>';
+		echo '</div>';
 
 		echo $after_widget;
 	}

@@ -49,25 +49,7 @@ function swfput_paranoid_require_class ($cl, $rfunc = 'require_once')
 	$meth = 'id_token';
 	if ( ! class_exists($cl) ) {
 		$d = plugin_dir_path(__FILE__).'/'.$cl.'.inc.php';
-		switch ( $rfunc ) {
-			case 'require_once':
-				require_once $d;
-				break;
-			case 'require':
-				require $d;
-				break;
-			case 'include_once':
-				include_once $d;
-				break;
-			case 'include':
-				include $d;
-				break;
-			default:
-				$s = '' . $rfunc;
-				$s = sprintf('%s: what is %s?', __FUNCTION__, $s);
-				wp_die($s);
-				break;
-		}
+		require_once $d;
 	}
 	if ( method_exists($cl, $meth) ) {
 		$t = call_user_func(array($cl, $meth));
@@ -2967,10 +2949,12 @@ endif; // if ( ! class_exists('SWF_put_widget_evh') ) :
  *  plugin 'main()' level code                                        *
 \**********************************************************************/
 
-/**
- * 'main()' here
- */
-if (!defined('WP_UNINSTALL_PLUGIN')&&$swfput1_evh_instance_1 === null) {
+// Instance not needed (or wanted) if uninstalling; the registered
+// uninstall hook is saved by WP in an option so it is presistent,
+// and the plugin's static uninstall method will be called.
+// Else, make an instance, which triggers running.
+if ( ! defined('WP_UNINSTALL_PLUGIN')
+	&& $swfput1_evh_instance_1 === null ) {
 	$swfput1_evh_instance_1 = SWF_put_evh::instantiate();
 }
 
