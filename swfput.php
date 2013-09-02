@@ -43,7 +43,7 @@ Text Domain: swfput_l10n
 // each class must define static method id_token() which returns
 // the correct int, to help avoid name clashes
 if ( ! function_exists( 'swfput_paranoid_require_class' ) ) :
-function swfput_paranoid_require_class ($cl, $rfunc = 'require_once')
+function swfput_paranoid_require_class ($cl)
 {
 	$id = 0xED00AA33;
 	$meth = 'id_token';
