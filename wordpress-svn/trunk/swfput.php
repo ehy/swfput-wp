@@ -1747,7 +1747,7 @@ class SWF_put_evh {
 	// current drive; else forget it.
 	public static function r_find_uploads($pat, $follow = false) {
 		global $wpdb;
-		$minq = 0; $maxq = 1024; $tq = 'attachment';
+		$minq = 0; $maxq = 4096; $tq = 'attachment';
 
 		$qs = "SELECT * FROM $wpdb->posts WHERE post_type = '%s'";
 		$qs .= ' LIMIT %d, %d';
