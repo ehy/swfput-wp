@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: video, audio, movies, tube, flash, flash player, graphics, movie, audio-visual, a/v content
 Requires at least: 3.0.2
 Tested up to: 3.6
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 Text Domain: swfput_l10n
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -225,6 +225,11 @@ Maybe later.
 	plugin and should not use its text-domain. Using core strings,
 	they might still get translated (might get translated when the
 	plugin does not -- that is deemed OK).
+* Added is_admin() check in init code to avoid setting admin-only
+	hooks when not needed (and executing associated code); plus a
+	few more specific current_user_can() checks.
+* Increased maximum "attachment" queried when finding suitable
+	media files to present in posts/pages shortcode form.
 
 = 1.0.2 =
 * Corrections in (vaguely distinguished)
@@ -251,6 +256,12 @@ Maybe later.
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.0.3 =
+Internationalized (i18n) string handling should now be usable for
+	anyone interested in making (and contributing) translations;
+	distribution includes a .POT file. Remaining changes are cleanups
+	which should not have a noticeable effect.
 
 = 1.0.2 =
 BUG FIX: URLs with non-8-bit characters would be corrupted in form
