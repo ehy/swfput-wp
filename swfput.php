@@ -518,7 +518,9 @@ class SWF_put_evh {
 	public static function filter_admin_print_scripts() {
 		// cap check: not sure if this is necessary here,
 		// hope it doesn't cause failures for legit users
-	    if ( $GLOBALS['editing'] && current_user_can('edit_posts') ) {
+	    if ( $GLOBALS['editing']
+			&& (current_user_can('edit_posts')
+			||  current_user_can('edit_pages')) ) {
 			$jsfn = 'SWFPut_putswf_video_xed';
 			$pf = self::mk_pluginfile();
 			$t = self::$swfjsdir . '/' . self::$swfxedjsname;
