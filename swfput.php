@@ -86,16 +86,16 @@ function swfput_php52_htmlent ($text, $cset = null)
 	// try to use get_option('blog_charset') only once;
 	// it's not cheap enough even with WP's cache for
 	// the number of times this might be called
-	global $swfput_blog_charset;
-	if ( ! isset($swfput_blog_charset) ) {
-		$swfput_blog_charset = get_option('blog_charset');
-		if ( ! $swfput_blog_charset ) {
-			$swfput_blog_charset = 'UTF-8';
+	static $_blog_charset;
+	if ( ! isset($_blog_charset) ) {
+		$_blog_charset = get_option('blog_charset');
+		if ( ! $_blog_charset ) {
+			$_blog_charset = 'UTF-8';
 		}
 	}
 
 	if ( $cset === null ) {
-		$cset = $swfput_blog_charset;
+		$cset = $_blog_charset;
 	}
 
 	return htmlentities($text, ENT_QUOTES, $cset);
@@ -652,35 +652,35 @@ class SWF_put_evh {
 		// WP_LANG_DIR or WP_PLUGIN_DIR/languages or WP_PLUGIN_DIR,
 		// and do translations in the plugin directory last.
 		
-		// The globals are a hack: want to keep this static,
-		// yet test whether .mo load call has been done
-		global $swfput_load_WP_textdomain_done;
-		global $swfput_load_plugin_langdir_textdomain_done;
-		global $swfput_load_plugin_dir_textdomain_done;
-		global $swfput_load_plugin_textdomain_done;
+		// hack test whether .mo load call has been done
+		static $WP_textdomain_done;
+		static $plugin_langdir_textdomain_done;
+		static $plugin_dir_textdomain_done;
+		static $plugin_textdomain_done;
 
 		$dom = 'swfput_l10n';
 
-		if ( ! isset($swfput_load_WP_textdomain_done)
+		if ( ! isset($WP_textdomain_done)
 			&& defined(WP_LANG_DIR) ) {
 			$loc = apply_filters('plugin_locale', get_locale(), $dom);
 			// this file path is built in the manner shown at the
 			// URL above -- it does look strange
-			$t = sprintf('%s/%s/%s-%s.mo', WP_LANG_DIR, $dom, $dom, $loc);
-			$swfput_load_WP_textdomain_done = load_textdomain($dom, $t);
+			$t = sprintf('%s/%s/%s-%s.mo',
+				WP_LANG_DIR, $dom, $dom, $loc);
+			$WP_textdomain_done = load_textdomain($dom, $t);
 		}
-		if ( ! isset($swfput_load_plugin_langdir_textdomain_done) ) {
+		if ( ! isset($plugin_langdir_textdomain_done) ) {
 			$t = 'languages/';
-			$swfput_load_plugin_langdir_textdomain_done =
+			$plugin_langdir_textdomain_done =
 				load_plugin_textdomain($dom, false, $t);
 		}
-		if ( ! isset($swfput_load_plugin_dir_textdomain_done) ) {
-			$swfput_load_plugin_dir_textdomain_done =
+		if ( ! isset($plugin_dir_textdomain_done) ) {
+			$plugin_dir_textdomain_done =
 				load_plugin_textdomain($dom, false, false);
 		}
-		if ( ! isset($swfput_load_plugin_textdomain_done) ) {
+		if ( ! isset($plugin_textdomain_done) ) {
 			$t = basename(trim(self::mk_plugindir(), '/')) . '/locale/';
-			$swfput_load_plugin_textdomain_done =
+			$plugin_textdomain_done =
 				load_plugin_textdomain($dom, false, $t);
 		}
 	}
@@ -709,10 +709,23 @@ class SWF_put_evh {
 			}
 			$opts[$k] = 'false';
 		}
+		// remainder of controls
+		$ta = self::get_opts_defaults(false); // gets all
+		foreach ( $ta as $k => $v ) {
+			if ( array_key_exists($k, $opts) ) {
+				continue;
+			}
+			$opts[$k] = $v;
+		}
 	
 		foreach ( $opts as $k => $v ) {
+			if ( ! array_key_exists($k, $a_orig) ) {
+				// this happens for the IDs of extra form items
+				// in use, if not associated with an option
+				continue;
+			}
 			$ot = trim($v);
-			$oo = trim($a_orig[$k]);
+			$oo = $a_orig[$k];
 
 			switch ( $k ) {
 				case self::optverbose:
@@ -728,10 +741,9 @@ class SWF_put_evh {
 					if ( $ot != 'true' && $ot != 'false' ) {
 						$e = sprintf('bad option: %s[%s]', $k, $v);
 						self::errlog($e);
-						add_settings_error('SWFPut checkbox option',
+						add_settings_error(self::wt($k),
 							sprintf('%s[%s]', self::opt_group, $k),
-							self::wt($e),
-							'error');
+							self::wt($e), 'error');
 						$a_out[$k] = $oo;
 						$nerr++;
 					} else {
@@ -742,10 +754,10 @@ class SWF_put_evh {
 				default:
 					$e = "funny key in validate opts: '" . $k . "'";
 					self::errlog($e);
-					add_settings_error('internal error, WP broken?',
-						sprintf('%s[%s]', self::opt_group, ''),
-						self::wt($e),
-						'error');
+					add_settings_error(self::wt($k),
+						sprintf('%s[%s]',
+							self::opt_group, self::ht($k)),
+						self::wt($e), 'error');
 					$nerr++;
 			}
 		}
@@ -757,8 +769,9 @@ class SWF_put_evh {
 				sprintf(_n('One (%d) setting updated',
 					'Some settings (%d) updated',
 					$nupd, 'swfput_l10n'), $nupd);
+			$type = $nerr == 0 ? 'updated' : 'updated error';
 			add_settings_error(self::opt_group, self::opt_group,
-				self::wt($str), 'updated');
+				self::wt($str), $type);
 		}
 		
 		return $a_out;
