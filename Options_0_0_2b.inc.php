@@ -1,6 +1,6 @@
 <?php
 /*
- *  Options_0_0_2a.inc.php
+ *  Options_0_0_2b.inc.php
  *  
  *  Copyright 2011 Ed Hynan <edhynan@gmail.com>
  *  
@@ -42,7 +42,7 @@
  * inconsistency the class is named Options[...] and its methods
  * names use the word 'settings'
  */
-class Options_0_0_2a {
+class Options_0_0_2b {
 	// help detect class name conflicts; called by using code
 	// const evh_opt_id = 0xED00AA33; // N.G. < 5.3
 	private static $evh_opt_id = 0xED00AA33;
@@ -50,14 +50,14 @@ class Options_0_0_2a {
 		return self::$evh_opt_id;
 	}
 
-	// OptPage_0_0_2a instance
+	// OptPage_0_0_2b instance
 	protected $pg;
 	// this holds return from WP 'add_FOO_page()',
 	// sometimes called '$hook_suffix' in WP docs -- get value
 	// with method get_page_suffix()
 	protected $page_suffix;
 	
-	public function __construct($page_obj /* OptPage_0_0_2a instance */)
+	public function __construct($page_obj /* OptPage_0_0_2b instance */)
 	{
 		// assign our page object
 		$this->pg = $page_obj;
@@ -155,7 +155,14 @@ class Options_0_0_2a {
 			echo $this->pg->pagehead;
 			?></h2>
 		<?php 
-			settings_errors();
+			// NOTE 2013/09/20: *do not* call settings_errors();
+			// it was never needed (was here due to examples on web)
+			// at least from 3.0.2 -> 3.3.1 -- but the call was OK
+			// because apparently WP had some guard against dup call,
+			// but somewhere between 3.3.1 and 3.5.? the guard or
+			// whatever was dropped (or broken? . . .) and duplicate
+			// messages are shown! commented call left in place for info
+			//settings_errors();
 			echo $this->pg->pageintro;
 			?>
 		<form action="options.php" method="post">
@@ -249,6 +256,6 @@ class Options_0_0_2a {
 	// end callback sets
 
 	// end members and methods for WP option page mechanism:
-} // end Options_0_0_2a
+} // end Options_0_0_2b
 
 ?>

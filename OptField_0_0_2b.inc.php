@@ -1,6 +1,6 @@
 <?php
 /*
- *  OptField_0_0_2a.inc.php
+ *  OptField_0_0_2b.inc.php
  *  
  *  Copyright 2011 Ed Hynan <edhynan@gmail.com>
  *  
@@ -35,7 +35,7 @@
 /**
  * class for individual fields in a section of a settings/option page
  */
-class OptField_0_0_2a {
+class OptField_0_0_2b {
 	// help detect class name conflicts; called by using code
 	// const evh_opt_id = 0xED00AA33; // N.G. < 5.3
 	private static $evh_opt_id = 0xED00AA33;
@@ -49,7 +49,7 @@ class OptField_0_0_2a {
 	public $defval;       // a default for $opt[$key];
 	public $callback;     // to put html for form field -
 	                      // if not given then
-	                      // Options_0_0_2a::settings_field()
+	                      // Options_0_0_2b::settings_field()
 	                      // is used; see that as an example
 
 	public function __construct($fid, $flabel, $fkey, $fdefval,
