@@ -1,25 +1,25 @@
 K 25
 svn:wc:ra_dav:version-url
 V 36
-/!svn/ver/765496/swfput/trunk/locale
+/!svn/ver/767942/swfput/trunk/locale
 END
 swfput_l10n-en_US.mo
 K 25
 svn:wc:ra_dav:version-url
 V 57
-/!svn/ver/767942/swfput/trunk/locale/swfput_l10n-en_US.mo
+/!svn/ver/776140/swfput/trunk/locale/swfput_l10n-en_US.mo
 END
 swfput_l10n.pot
 K 25
 svn:wc:ra_dav:version-url
 V 52
-/!svn/ver/767942/swfput/trunk/locale/swfput_l10n.pot
+/!svn/ver/776140/swfput/trunk/locale/swfput_l10n.pot
 END
 swfput_l10n-en_US.po
 K 25
 svn:wc:ra_dav:version-url
 V 57
-/!svn/ver/767942/swfput/trunk/locale/swfput_l10n-en_US.po
+/!svn/ver/776140/swfput/trunk/locale/swfput_l10n-en_US.po
 END
 pot2en_US.sh
 K 25

@@ -1,4 +1,4 @@
-# swfput 1.0.3 Pot Source
+# swfput 1.0.4 Pot Source
 # Copyright (C) 2013 Ed Hynan
 # This file is distributed under the same license as the swfput package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: swfput 1.0.3\n"
+"Project-Id-Version: swfput 1.0.4\n"
 "Report-Msgid-Bugs-To: edhynan@gmail.com\n"
-"POT-Creation-Date: 2013-09-06 09:45-0400\n"
+"POT-Creation-Date: 2013-09-20 09:22-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -102,26 +102,26 @@ msgstr ""
 msgid "SWFPut Flash Video Shortcode"
 msgstr ""
 
-#: swfput.php:565
+#: swfput.php:567
 msgid "Settings"
 msgstr ""
 
-#: swfput.php:754
+#: swfput.php:768
 msgid "Settings updated successfully"
 msgstr ""
 
-#: swfput.php:755
+#: swfput.php:769
 #, possible-php-format
 msgid "One (%d) setting updated"
 msgid_plural "Some settings (%d) updated"
 msgstr[0] ""
 msgstr[1] ""
 
-#: swfput.php:771
+#: swfput.php:786
 msgid "General SWF plugin options:"
 msgstr ""
 
-#: swfput.php:777
+#: swfput.php:792
 msgid ""
 "The verbose option selects whether\n"
 "\t\t\tverbose descriptions\n"
@@ -132,7 +132,7 @@ msgid ""
 "\t\t\tselected."
 msgstr ""
 
-#: swfput.php:787
+#: swfput.php:802
 msgid ""
 "The PHP+Ming option selects whether\n"
 "\t\t\t\tthe Flash player program is generated with PHP\n"
@@ -147,16 +147,16 @@ msgid ""
 "\t\t\t\tserver of your site."
 msgstr ""
 
-#: swfput.php:800 swfput.php:831 swfput.php:871 swfput.php:907
-#: swfput.php:934
+#: swfput.php:815 swfput.php:846 swfput.php:886 swfput.php:922
+#: swfput.php:949
 msgid "Go forward to save button."
 msgstr ""
 
-#: swfput.php:806
+#: swfput.php:821
 msgid "Enable/disable flash video placement:"
 msgstr ""
 
-#: swfput.php:812
+#: swfput.php:827
 msgid ""
 "These options enable or completely disable\n"
 "\t\t\tplacing video in posts or widgets. If the placement\n"
@@ -177,15 +177,15 @@ msgid ""
 "\t\t\tthe options are effective only if enabled here."
 msgstr ""
 
-#: swfput.php:833 swfput.php:873 swfput.php:909 swfput.php:936
+#: swfput.php:848 swfput.php:888 swfput.php:924 swfput.php:951
 msgid "Go back to top (General section)."
 msgstr ""
 
-#: swfput.php:839
+#: swfput.php:854
 msgid "Flash video in posts options:"
 msgstr ""
 
-#: swfput.php:845
+#: swfput.php:860
 msgid ""
 "These options select \n"
 "\t\t\thow flash video (or audio) may be placed in posts or pages.\n"
@@ -214,11 +214,11 @@ msgid ""
 "\t\t\tare not available for this method."
 msgstr ""
 
-#: swfput.php:879
+#: swfput.php:894
 msgid "Flash video in widget area options:"
 msgstr ""
 
-#: swfput.php:885
+#: swfput.php:900
 msgid ""
 "These options select \n"
 "\t\t\thow flash video (or audio) may be placed in widget areas.\n"
@@ -242,11 +242,11 @@ msgid ""
 "\t\t\tpasted into the widget text, on a line of its own.)"
 msgstr ""
 
-#: swfput.php:915
+#: swfput.php:930
 msgid "Install options:"
 msgstr ""
 
-#: swfput.php:921
+#: swfput.php:936
 msgid ""
 "This section includes optional\n"
 "\t\t\tfeatures for plugin install or uninstall. Presently\n"
@@ -262,170 +262,170 @@ msgid ""
 "\t\t\toptions might be helpful."
 msgstr ""
 
-#: swfput.php:958
+#: swfput.php:973
 msgid "Show verbose descriptions"
 msgstr ""
 
-#: swfput.php:965
+#: swfput.php:980
 msgid "Use SWF script if PHP+Ming is available"
 msgstr ""
 
-#: swfput.php:981
+#: swfput.php:996
 msgid "Enable widget or shortcode"
 msgstr ""
 
-#: swfput.php:988
+#: swfput.php:1003
 msgid "Enable shortcode or attachment search"
 msgstr ""
 
-#: swfput.php:995
+#: swfput.php:1010
 msgid "Search attachments in posts"
 msgstr ""
 
-#: swfput.php:1002
+#: swfput.php:1017
 msgid "Enable the included widget"
 msgstr ""
 
-#: swfput.php:1009
+#: swfput.php:1024
 msgid "Enable shortcodes in widgets"
 msgstr ""
 
-#: swfput.php:1016
+#: swfput.php:1031
 msgid "Enable shortcode in posts"
 msgstr ""
 
-#: swfput.php:1023
+#: swfput.php:1038
 msgid "Permanently delete settings (clean db)"
 msgstr ""
 
 #. button values for sliding divs
-#: swfput.php:1090
+#: swfput.php:1105
 msgid "Hide"
 msgstr ""
 
-#: swfput.php:1091
+#: swfput.php:1106
 msgid "Show"
 msgstr ""
 
-#: swfput.php:1104
+#: swfput.php:1119
 msgid "Fill form from editor"
 msgstr ""
 
-#: swfput.php:1106
+#: swfput.php:1121
 msgid "Replace current in editor"
 msgstr ""
 
-#: swfput.php:1108
+#: swfput.php:1123
 msgid "Delete current in editor"
 msgstr ""
 
-#: swfput.php:1110
+#: swfput.php:1125
 msgid "Place new in editor"
 msgstr ""
 
-#: swfput.php:1112
+#: swfput.php:1127
 msgid "Reset default values"
 msgstr ""
 
-#: swfput.php:1129
+#: swfput.php:1144
 msgid "Media"
 msgstr ""
 
-#: swfput.php:1134 swfput.php:2642
+#: swfput.php:1149 swfput.php:2657
 msgid "Caption:"
 msgstr ""
 
-#: swfput.php:1139 swfput.php:2653
+#: swfput.php:1154 swfput.php:2668
 msgid "Url or media library ID:"
 msgstr ""
 
-#: swfput.php:1150 swfput.php:2668
+#: swfput.php:1165 swfput.php:2683
 msgid "Url from uploads directory:"
 msgstr ""
 
 #. <options>
-#: swfput.php:1155 swfput.php:1184 swfput.php:1220 swfput.php:1249
-#: swfput.php:2673 swfput.php:2700 swfput.php:2748 swfput.php:2775
+#: swfput.php:1170 swfput.php:1199 swfput.php:1235 swfput.php:1264
+#: swfput.php:2688 swfput.php:2715 swfput.php:2763 swfput.php:2790
 msgid "none"
 msgstr ""
 
-#: swfput.php:1179 swfput.php:2695
+#: swfput.php:1194 swfput.php:2710
 msgid "Select ID from media library:"
 msgstr ""
 
-#: swfput.php:1199
+#: swfput.php:1214
 msgid "Playpath (rtmp):"
 msgstr ""
 
-#: swfput.php:1204 swfput.php:2728
+#: swfput.php:1219 swfput.php:2743
 msgid "Url of initial image file (optional):"
 msgstr ""
 
-#: swfput.php:1215 swfput.php:2743
+#: swfput.php:1230 swfput.php:2758
 msgid "Load image from uploads directory:"
 msgstr ""
 
-#: swfput.php:1244 swfput.php:2770
+#: swfput.php:1259 swfput.php:2785
 msgid "Load image ID from media library:"
 msgstr ""
 
-#: swfput.php:1264
+#: swfput.php:1279
 msgid "Medium is audio:"
 msgstr ""
 
-#: swfput.php:1282
+#: swfput.php:1297
 msgid "Dimensions"
 msgstr ""
 
-#: swfput.php:1287
+#: swfput.php:1302
 msgid "Pixel Width:"
 msgstr ""
 
-#: swfput.php:1289
+#: swfput.php:1304
 msgid "Height:"
 msgstr ""
 
-#: swfput.php:1291 swfput.php:2829
+#: swfput.php:1306 swfput.php:2844
 msgid "Auto aspect (e.g. 360x240 to 4:3):"
 msgstr ""
 
-#: swfput.php:1293 swfput.php:2840
+#: swfput.php:1308 swfput.php:2855
 msgid "Display aspect (e.g. 4:3, precludes Auto):"
 msgstr ""
 
-#: swfput.php:1295 swfput.php:2851
+#: swfput.php:1310 swfput.php:2866
 msgid "Pixel aspect (e.g. 8:9, precluded by Display):"
 msgstr ""
 
-#: swfput.php:1325
+#: swfput.php:1340
 msgid "Behavior"
 msgstr ""
 
-#: swfput.php:1330 swfput.php:2862
+#: swfput.php:1345 swfput.php:2877
 msgid "Initial volume (0-100):"
 msgstr ""
 
-#: swfput.php:1332 swfput.php:2874
+#: swfput.php:1347 swfput.php:2889
 msgid "Play on load (else waits for play button):"
 msgstr ""
 
-#: swfput.php:1334 swfput.php:2886
+#: swfput.php:1349 swfput.php:2901
 msgid "Loop play:"
 msgstr ""
 
-#: swfput.php:1336 swfput.php:2898
+#: swfput.php:1351 swfput.php:2913
 msgid "Hide control bar initially:"
 msgstr ""
 
-#: swfput.php:1338 swfput.php:2910
+#: swfput.php:1353 swfput.php:2925
 msgid "Hide and disable control bar:"
 msgstr ""
 
-#: swfput.php:1340 swfput.php:2922
+#: swfput.php:1355 swfput.php:2937
 msgid "Allow full screen:"
 msgstr ""
 
-#: swfput.php:1342 swfput.php:2933
+#: swfput.php:1357 swfput.php:2948
 msgid "Control bar Height (20-50):"
 msgstr ""
 
@@ -438,51 +438,51 @@ msgstr ""
 #. '%s' is any caption provided for a/v, if any,
 #. prepended with ASCII space ' '; '%s' is an empty string
 #. if there is no caption
-#: swfput.php:1391 swfput.php:1447
+#: swfput.php:1406 swfput.php:1462
 #, possible-php-format
 msgid " [A/V content \"%s\" disabled] "
 msgstr ""
 
 #. TRANSLATORS perl-type regular expression
 #. that matches a 'yes'
-#: swfput.php:2360
+#: swfput.php:2375
 msgid "/^?y(e((s|ah)!?)?)?$/i"
 msgstr ""
 
 #. TRANSLATORS perl-type regular expression
 #. that matches a 'no'
-#: swfput.php:2363
+#: swfput.php:2378
 msgid "/^n(o!?)?)?$/i"
 msgstr ""
 
 #. Label shown on widgets page
-#: swfput.php:2464
+#: swfput.php:2479
 msgid "SWFPut Flash Video"
 msgstr ""
 
 #. Description shown under label shown on widgets page
-#: swfput.php:2466
+#: swfput.php:2481
 msgid "Flash video for your widget areas"
 msgstr ""
 
-#: swfput.php:2605
+#: swfput.php:2620
 msgid "Widget title:"
 msgstr ""
 
-#: swfput.php:2717
+#: swfput.php:2732
 msgid "Playpath (rtmp) or co-video (mp3):"
 msgstr ""
 
-#: swfput.php:2793
+#: swfput.php:2808
 msgid "Medium is audio (e.g. *.mp3):"
 msgstr ""
 
-#: swfput.php:2804
+#: swfput.php:2819
 #, possible-php-format
 msgid "Width (default %u):"
 msgstr ""
 
-#: swfput.php:2816
+#: swfput.php:2831
 #, possible-php-format
 msgid "Height (default %u):"
 msgstr ""

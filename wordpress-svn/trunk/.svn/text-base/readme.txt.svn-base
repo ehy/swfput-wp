@@ -215,6 +215,14 @@ Maybe later.
 
 == Changelog ==
 
+= 1.0.4 =
+* Fixed duplicated message on settings page update resulting from
+	uneeded settings_errors() call: this call did not cause a dup
+	from 3.0.1 to 3.3.1 (but was not needed either), but between
+	WP 3.3.1 and 3.5.? some core guard against the duplicate was
+	removed (or broken?).
+*
+
 = 1.0.3 =
 * Maintenance.
 * Put i18n final code (__() was already present), added make rules to
