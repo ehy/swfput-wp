@@ -64,10 +64,10 @@ endif;
 
 // these support classes are in separate files as they are
 // not specific to this plugin, and may be used in others
-swfput_paranoid_require_class('OptField_0_0_2a');
-swfput_paranoid_require_class('OptSection_0_0_2a');
-swfput_paranoid_require_class('OptPage_0_0_2a');
-swfput_paranoid_require_class('Options_0_0_2a');
+swfput_paranoid_require_class('OptField_0_0_2b');
+swfput_paranoid_require_class('OptSection_0_0_2b');
+swfput_paranoid_require_class('OptPage_0_0_2b');
+swfput_paranoid_require_class('Options_0_0_2b');
 
 
 /**********************************************************************\
@@ -162,7 +162,7 @@ class SWF_put_evh {
 	const defuseming = 'false';
 	
 	// autoload class version suffix
-	const aclv = '0_0_2a';
+	const aclv = '0_0_2b';
 
 	// string used for (default) shortcode tag
 	const shortcode = 'putswf_video';
