@@ -1217,7 +1217,7 @@ class SWF_put_evh {
 			printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
 		</p><p>
 		<?php $k = 'altvideo'; 
-			$l = self::wt(__('URL for alternate element (optional *.ogv, *.webm):', 'swfput_l10n'));
+			$l = self::wt(__('URLs for alternate HTML5 video (optional, prefer .ogv, .webm):', 'swfput_l10n'));
 			printf($lbfmt, $id, $k, $l);
 			printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
 		</p><p>
@@ -2209,28 +2209,34 @@ class SWF_put_evh {
 		if ( $altvideo != '' ) {
 			$vd = "\n\t\t" . '<video controls preload="none"';
 			if ( $play == 'true' ) {
-				$vd = $vd . ' autoplay';
+				$vd .= ' autoplay';
 			}
 			if ( $loop == 'true' ) {
-				$vd = $vd . ' loop';
+				$vd .= ' loop';
 			}
 			if ( $iimgunesc != '' ) {
 				$vd = sprintf('%s poster="%s"', $vd, $iimgunesc);
 			}
 			$vd = sprintf('%s width="%u" height="%u">', $vd, $w, $h);
-			// format for sourcce elements
+			// format for source elements
 			$fmt = "\n\t\t" . '<source src="%s"%s>';
-			// allow multi video src, separated by pipe
+			// allow multiple video src, separated by pipe
+			$altvideo = trim($altvideo);
+			$altvideo = trim($altvideo, '|');
+			$altvideo = trim($altvideo);
 			$av = explode('|', $altvideo);
 			// place sources
 			foreach ( $av as $src ) {
 				$typ = '';
 				// allow '?' separated type string
+				$src = trim($src);
+				$src = trim($src, '?');
+				$src = trim($src);
 				$tv = explode('?', $src);
 				if ( isset($tv[1]) ) {
-					$typ = sprintf(' type="%s"', $tv[1]);
+					$typ = sprintf(' type="%s"', trim($tv[1]));
 					// leave off src
-					$src = $tv[0];
+					$src = trim($tv[0]);
 				}
 				$vd .= sprintf($fmt, $src, $typ);
 			}
@@ -2249,11 +2255,11 @@ class SWF_put_evh {
 		// Update 2013/09/23: update object element, separating
 		// MSIE PITA, so that alternative elements can be added
 		// for no-flash browsers: previously, with the classid attribute
-		// within the object element, firefox (maybe others) would
+		// within the object element, firefox (and others) would
 		// always fall through to the now-removed embed element;
 		// therefore, browser ID is attempted to find MSIE (in
 		// self::is_msie()) on the assumption that classid will
-		// be necessary to make that work
+		// be necessary to make that one work
 		$obj = '';
 		if ( self::is_msie() ) { 
 			$obj = sprintf('
@@ -2280,7 +2286,7 @@ class SWF_put_evh {
 		', $play, $quality, $allowfull, $fv, $uswf, $pv, $altimg);
 	}
 	
-	public static function is_msie() {
+	protected static function is_msie() {
 		static $is_so = null;
 		if ( $is_so === null ) {
 			$r = preg_match('/\bMSIE\b/', $_SERVER['HTTP_USER_AGENT']);
@@ -2827,7 +2833,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $instance['altvideo'];
 		$id = $this->get_field_id('altvideo');
 		$nm = $this->get_field_name('altvideo');
-		$tl = $wt(__('URL for alternate element (optional *.ogv, *.webm):', 'swfput_l10n'));
+		$tl = $wt(__('URLs for alternate HTML5 video (optional, prefer .ogv, .webm):', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
