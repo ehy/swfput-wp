@@ -36,7 +36,7 @@
 // set this const to false on release
 // (originally had used 'const', not realizing it is new to php 5.3)
 //const develtime = true;
-define( 'develtime', true );
+define( 'develtime', false );
 $i_release = develtime ? 0 : 1;
 
 if ( develtime ) {
@@ -73,7 +73,7 @@ $climode = php_sapi_name() == 'cli' ? true : false;
  * for translations; stub example
  */
 if ( ! function_exists( '__' ) ) :
-function __ ( $text )
+function __($text, $textdomain = 'default')
 {
 	return $text;
 }
@@ -196,7 +196,7 @@ function treqbase($height)
 	//return sqrt(($height * $height) / 0.75);
 	return $height * treq_r_bh;
 }
-// in equi tri, not rotated, this is the ratio of the triangle's
+// in equi tri with base on x, this is the ratio of the triangle's
 // center point y ordinate to the base, so an equi tri in quad 1 w/
 // lower left vert at 0,0 has center point (base/2),(base*treq_mid_y)
 // this == sqrt(sqr(tan(deg2rad(30))) - 0.25)
@@ -409,6 +409,7 @@ $swfvs = 8;
 $swfcomp = 9;
 
 $vurl = '';
+$eurl = '';
 // Additional URLs, css etc.
 $obj_css_url = 'obj.css';
 
@@ -538,6 +539,25 @@ foreach ( $av as $k => $v ) {
 				}
 			} else {
 				die("empty URL argument");
+			}
+			break;
+		case 'F2': // media url encoded by caller
+			if ( $v ) {
+				$a = array(
+					'requirehost' => false, // can use orig host
+					'requirepath' => true,
+					'rejfrag' => true,
+					// no, don't try to match extension; who knows?
+					//'rxpath' => '/.*\.(flv|f4v|mp4|m4v|mp3)$/i',
+					'rxproto' => '/^(https?|rtmp[a-z]{0,2})$/'
+					);
+				$eurl = check_url_arg(urldecode($v), $a);
+				if ( $eurl === false ) {
+					die("unacceptable encoded URL: '" . $v . "'");
+				}
+				$eurl = trim($v);
+			} else {
+				die("empty encoded URL argument");
 			}
 			break;
 		case 'ST': // player css
