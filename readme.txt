@@ -221,7 +221,9 @@ Maybe later.
 	from 3.0.1 to 3.3.1 (but was not needed either), but between
 	WP 3.3.1 and 3.5.? some core guard against the duplicate was
 	removed (or broken?).
-*
+* Updated swf object element and added optional alternative
+	img and video (html5) nested elements. Removed classid from
+	object, except when MSIE is in user agent string.
 
 = 1.0.3 =
 * Maintenance.

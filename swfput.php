@@ -2207,28 +2207,53 @@ class SWF_put_evh {
 			);
 		}
 		if ( $altvideo != '' ) {
-			$vd = 'video controls preload="metadata"';
-			if ( $iimage != '' ) {
-				$vd = sprintf('%s poster="%s"', $vd, urldecode($iimage));
+			$vd = "\n\t\t" . '<video controls preload="none"';
+			if ( $play == 'true' ) {
+				$vd = $vd . ' autoplay';
 			}
-			$fmt ='%s<%s src="%s" width="%u" height="%u">%s</video>';
-			$altimg = sprintf($fmt, "\n\t\t", $vd, $altvideo, $w, $h,
+			if ( $loop == 'true' ) {
+				$vd = $vd . ' loop';
+			}
+			if ( $iimgunesc != '' ) {
+				$vd = sprintf('%s poster="%s"', $vd, $iimgunesc);
+			}
+			$vd = sprintf('%s width="%u" height="%u">', $vd, $w, $h);
+			// format for sourcce elements
+			$fmt = "\n\t\t" . '<source src="%s"%s>';
+			// allow multi video src, separated by pipe
+			$av = explode('|', $altvideo);
+			// place sources
+			foreach ( $av as $src ) {
+				$typ = '';
+				// allow '?' separated type string
+				$tv = explode('?', $src);
+				if ( isset($tv[1]) ) {
+					$typ = sprintf(' type="%s"', $tv[1]);
+					// leave off src
+					$src = $tv[0];
+				}
+				$vd .= sprintf($fmt, $src, $typ);
+			}
+
+			// place as alt the altimg, or message string
+			$vd .= sprintf("%s\n\t\t</video>",
 				$altimg == '' ?
-				self::wt(
-				__('The flash plugin is not available, nor is the video element', 'swfput_l10n')
+				self::wt("\n\t\t" .
+				__('The flash plugin is not available, nor is the <code>video</code> element', 'swfput_l10n')
 				) : $altimg
 			);
+			
+			$altimg = $vd;
 		}
 
-		// Update 2013/09/23: removing the inner <embed>; afaik
-		// that was only useful for ancient Netscape vs. MSIE
-		// difference -- all browsers should grok <object> now, yes?
-		// User comment suggested the initial image be used as
-		// "background" so it is optionally used as fallback element
-		// see $altimg assignment above
-		// Also removing the (hopefully) unnecessary
-		// codebase, and adding 'data' per whatwg.org;
-		// Removing parameter 'loop' which is handled in the swf
+		// Update 2013/09/23: update object element, separating
+		// MSIE PITA, so that alternative elements can be added
+		// for no-flash browsers: previously, with the classid attribute
+		// within the object element, firefox (maybe others) would
+		// always fall through to the now-removed embed element;
+		// therefore, browser ID is attempted to find MSIE (in
+		// self::is_msie()) on the assumption that classid will
+		// be necessary to make that work
 		$obj = '';
 		if ( self::is_msie() ) { 
 			$obj = sprintf('
@@ -2236,9 +2261,10 @@ class SWF_put_evh {
 			<param name="data" value="%s?%s">
 			', $classid, $codebase, $w, $h, $uswf, $pv);
 		} else {
+			$typ = 'application/x-shockwave-flash';
 			$obj = sprintf('
-			<object data="%s?%s" width="%u" height="%u">
-			', $uswf, $pv, $w, $h);
+			<object data="%s?%s" type="%s" width="%u" height="%u">
+			', $uswf, $pv, $typ, $w, $h);
 		}
 		return $obj
 		. sprintf('<param name="play" value="%s">
