@@ -1,6 +1,6 @@
 \" these two registers are probably groff-only
 .nr PORPHANS 3
-.nr PORPHANS 3
+.nr HORPHANS 3
 .TL
 SWFPut \(em Flash Video Player Plugin for WordPress
 .AU
@@ -260,6 +260,40 @@ difference that it searches the
 presents the suitable filenames
 their media IDs.
 .IP \(bu
+\fBMedium is audio\fP:
+To determine whether to play video or audio,
+the file suffix of the medium is checked.
+If the file suffix is not known, the
+medium is assumed to be video. If the medium is
+an mp3 audio file, but it does not have
+the \fBMP3\fP suffix, check this.
+.IP \(bu
+\fBURLs for alternate HTML5 video\fP:
+An optional series of URLs
+for an alternate HTML5 video element that a web
+browser can try if flash video
+is not available or is not supported.
+If more than one URL is given, they should be separated
+by the `\f(CR|\fR' (pipe) character. Each individual
+URL may be appended with an argument for the
+`\f(CRtype\fR' attribute of the video element,
+separated from the URL by a `\f(CR?\fR'
+character (do not include the `\f(CRtype\fR'
+keyword; give only the value that should appear
+between quotes)\**.
+.FS
+For example:
+.br
+\f(CRalt.ogv?video/ogg; codecs=dirac, speex|
+alt.webm| alt.mp4?video/mp4\fR.
+.FE
+If more than one is given they will appear in order
+and the browser should use the first type
+that it supports (if any). The OGG and WEBM
+types should have wide support; the MP4 type
+is less likely to be supported because that
+format is tainted by patents.
+.IP \(bu
 \fBPlaypath (rtmp)\fP:
 If the \(lq\fBUrl or media library ID\fP\(rq
 field
@@ -310,13 +344,13 @@ difference that it searches the
 presents the suitable filenames
 their media IDs.
 .IP \(bu
-\fBMedium is audio\fP:
-To determine whether to play video or audio,
-the file suffix of the medium is checked.
-If the file suffix is not known, the
-medium is assumed to be video. If the medium is
-an mp3 audio file, but it does not have
-the \fBMP3\fP suffix, check this.
+\fBUse initial image as non-flash alternate\fP:
+If an initial image was given, then also use
+it as an alternative display when flash is not
+supported. If optional HTML5 video URLs were
+given, they will remain the first alternate,
+and the initial image will be an alternate
+to that. This option is on by default.
 \
 .NH 3
 Dimensions

@@ -220,29 +220,31 @@
               that it searches the WordPress media database, and
               presents the suitable filenames their media IDs.
 
-         o    Playpath (rtmp): If the "Url or media library  ID"
-              field  is  given  an  RTMP  URL, the `playpath' is
-              given here. Note that only the simplest RTMP  con-
-              nections  are  supported: those requiring only the
-              playpath.
+         o    Medium is audio:  To  determine  whether  to  play
+              video  or  audio, the file suffix of the medium is
+              checked.  If the file suffix  is  not  known,  the
+              medium is assumed to be video. If the medium is an
+              mp3 audio file, but it does not have the MP3  suf-
+              fix, check this.
 
-         o    Url of initial image file (optional): An  HTTP  or
-              HTTPS  URL  for  an image file may be placed here.
-              When the player is loaded, if it  is  not  set  to
-              play  on  load,  this image is displayed until the
-              play button is invoked. Accepted image  types  are
-              JPEG, PNG, and GIF, and SWF2.
+         o    URLs for alternate HTML5 video: An optional series
+              of URLs for an alternate HTML5 video element  that
+              a web browser can try if flash video is not avail-
+              able or is not supported.  If more than one URL is
+              given,  they should be separated by the `|' (pipe)
+              character. Each individual  URL  may  be  appended
+              with  an  argument for the `type' attribute of the
+              video element, separated from the  URL  by  a  `?'
+              character (do not include the `type' keyword; give
+              only  the  value  that   should   appear   between
+              quotes)2.  If more than one  is  given  they  will
+              appear  in  order  and  the browser should use the
+              first type that it supports (if any). The OGG  and
+              WEBM  types should have wide support; the MP4 type
+              is less likely to be supported because that format
+              is tainted by patents.
 
-         o    Load image from uploads directory: This is a drop-
-              down list from which the  "Url  of  initial  image
-              file  (optional)"  field may be set. The WordPress
-              uploads  directory  is  searched  recursively  for
-              files  with  the suffixes listed as acceptable for
-              that field, and for each a URL is placed  in  this
-              list.   This  has  the advantage that it will find
-              files added by hand (rather  than  with  the  `add
-              media' interface) if they are placed in uploads or
-              a directory under it.
+
 
     -----------
       1 For MP3 files, you may try placing a video URL
@@ -251,11 +253,9 @@
     will mix in, so it should probably be a video only
     file. This is an experimental and unsupported fea-
     ture.
-      2 SWF  files  may  be stills or animations. This
-    type is a flash program that the flash web browser
-    plugin  will  be executing, so, of course, it must
-    not interfere with the SWFPut player.  Test  thor-
-    oughly if this is used.
+      2 For example:
+    alt.ogv?video/ogg;  codecs=dirac, speex| alt.webm|
+    alt.mp4?video/mp4.
 
 
 
@@ -268,19 +268,44 @@
                                  -5-
 
 
-         o    Load image ID from media library: This is a  drop-
+         o    Playpath  (rtmp): If the "Url or media library ID"
+              field is given an  RTMP  URL,  the  `playpath'  is
+              given  here. Note that only the simplest RTMP con-
+              nections are supported: those requiring  only  the
+              playpath.
+
+         o    Url  of  initial image file (optional): An HTTP or
+              HTTPS URL for an image file may  be  placed  here.
+              When  the  player  is  loaded, if it is not set to
+              play on load, this image is  displayed  until  the
+              play  button  is invoked. Accepted image types are
+              JPEG, PNG, and GIF, and SWF3.
+
+         o    Load image from uploads directory: This is a drop-
               down  list  from  which  the "Url of initial image
-              file (optional)" field may be set, as above,  with
-              the  difference  that  it  searches  the WordPress
-              media database, and presents  the  suitable  file-
+              file (optional)" field may be set.  The  WordPress
+              uploads  directory  is  searched  recursively  for
+              files with the suffixes listed as  acceptable  for
+              that  field,  and for each a URL is placed in this
+              list.  This has the advantage that  it  will  find
+              files  added  by  hand  (rather than with the `add
+              media' interface) if they are placed in uploads or
+              a directory under it.
+
+         o    Load  image ID from media library: This is a drop-
+              down list from which the  "Url  of  initial  image
+              file  (optional)" field may be set, as above, with
+              the difference  that  it  searches  the  WordPress
+              media  database,  and  presents the suitable file-
               names their media IDs.
 
-         o    Medium  is  audio:  To  determine  whether to play
-              video or audio, the file suffix of the  medium  is
-              checked.   If  the  file  suffix is not known, the
-              medium is assumed to be video. If the medium is an
-              mp3  audio file, but it does not have the MP3 suf-
-              fix, check this.
+         o    Use initial image as non-flash  alternate:  If  an
+              initial  image  was  given, then also use it as an
+              alternative display when flash is  not  supported.
+              If optional HTML5 video URLs were given, they will
+              remain the first alternate, and the initial  image
+              will be an alternate to that. This option is on by
+              default.
 
          3.2.2.  Dimensions
 
@@ -291,6 +316,24 @@
               best if the aspect of the player's display is  the
               same as the display aspect of the video. For exam-
               ple, if set for a video with a  size  of  400x300,
+    -----------
+      3 SWF files may be stills  or  animations.  This
+    type is a flash program that the flash web browser
+    plugin will be executing, so, of course,  it  must
+    not  interfere  with the SWFPut player. Test thor-
+    oughly if this is used.
+
+
+
+
+
+
+
+
+
+                                 -6-
+
+
               then setting these to fields to 320x240 would look
               good (the width:height ratio is the same). In  any
               case,  the  player  will  scale  the  video to fit
@@ -322,18 +365,6 @@
               of  the  expected  DVD-Video  pixel  sizes, but is
               meant to be displayed with a 16:9 aspect.
 
-
-
-
-
-
-
-
-
-
-                                 -6-
-
-
          o    Display aspect: Set the  intended  display  aspect
               ratio in this field if you know that the video has
               non-square pixels. A value of  0  (zero)  disables
@@ -353,6 +384,21 @@
               display has a pixel aspect ratio of  8:9,  and  at
               352x240  a pixel aspect ratio of 10:11.  As above,
               `0' disables this field.
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                 -7-
+
 
          3.2.3.  Behavior
 
@@ -388,18 +434,6 @@
               dow,  and  is  always  hidden  when  the  mouse is
               detected leaving the window  (when  the  mouse  is
               moved  out  of the player window with rapid motion
-
-
-
-
-
-
-
-
-
-                                 -7-
-
-
               the browser plugin often fails to deliver a `mouse
               has  left'  event to the player program, so hiding
               the bar is not always reliable).
@@ -420,6 +454,18 @@
               on  the  SWFPut configuration page called "Dynamic
               SWF generation".  This produces the  video  player
               on  the  fly,  and  in this case the value of this
+
+
+
+
+
+
+
+
+
+                                 -8-
+
+
               field builds the control bar at the requested size
               rather than using a near match.
 
@@ -451,57 +497,11 @@
 
     4.  License
 
-
-
-
-
-
-
-
-
-
-
-
-
-                                 -8-
-
-
          This program and all files included in the distribution
     archive  are  under  the  GNU  GPL, version 3.  See the file
     COPYING, which should be present in the top-level  directory
     of   the  distribution  archive;  or,  see  the  license  at
     http://www.gnu.org/licenses/.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

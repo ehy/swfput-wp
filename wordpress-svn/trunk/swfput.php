@@ -1210,6 +1210,17 @@ class SWF_put_evh {
 			} // end if there are upload files
 		?>
 		<p>
+		<?php $k = 'audio';
+			$l = self::wt(__('Medium is audio:', 'swfput_l10n'));
+			printf($lbfmt, $id, $k, $l);
+			$ck = $$k == 'true' ? 'checked="checked" ' : '';
+			printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
+		</p><p>
+		<?php $k = 'altvideo'; 
+			$l = self::wt(__('URLs for alternate HTML5 video (optional, prefer .ogv, .webm):', 'swfput_l10n'));
+			printf($lbfmt, $id, $k, $l);
+			printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
+		</p><p>
 		<?php $k = 'playpath'; 
 			$l = self::wt(__('Playpath (rtmp):', 'swfput_l10n'));
 			printf($lbfmt, $id, $k, $l);
@@ -1275,8 +1286,8 @@ class SWF_put_evh {
 			} // end if there are upload files
 		?>
 		<p>
-		<?php $k = 'audio';
-			$l = self::wt(__('Medium is audio:', 'swfput_l10n'));
+		<?php $k = 'iimgbg';
+			$l = self::wt(__('Use initial image as non-flash alternate:', 'swfput_l10n'));
 			printf($lbfmt, $id, $k, $l);
 			$ck = $$k == 'true' ? 'checked="checked" ' : '';
 			printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
@@ -2144,12 +2155,16 @@ class SWF_put_evh {
 				}
 			}
 		}
+		$iimgunesc = ''; // $iimage not escaped: see below
 		if ( $iimage !== '' ) {
 			$achk['rxpath'] = '/.*\.(swf|png|jpg|jpeg|gif)$/i';
 			$ut = self::check_url($iimage, $achk);
 			if ( ! $ut ) {
 				self::errlog('rejected i-image URL: "' . $iimage . '"');
 				$ut = '';
+			}
+			if ( ! preg_match('/.*\.swf$/i', $ut) ) {
+				$iimgunesc = $ut;
 			}
 			$iimage = ($esc == true) ? $fesc($ut) : $ut;
 		}
@@ -2181,13 +2196,84 @@ class SWF_put_evh {
 			$fv = &$qv;
 		}
 
-		return ''
-		. sprintf('
-		<object classid="%s" codebase="%s" width="%u" height="%u">
-		<param name="data" value="%s?%s">
-		', $classid, $codebase, $w, $h, $uswf, $pv)
+		// alternates
+		$altimg = '';
+		if ( $iimgbg == 'true' && $iimage != '' ) {
+			$fmt = '%s<img src="%s" alt="%s" width="%u" height="%u">';
+			$altimg = sprintf($fmt, "\n\t\t", $iimgunesc,
+				self::wt(
+				__('The flash plugin is not available', 'swfput_l10n')
+				), $w, $h
+			);
+		}
+		if ( $altvideo != '' ) {
+			$vd = "\n\t\t" . '<video controls preload="none"';
+			if ( $play == 'true' ) {
+				$vd .= ' autoplay';
+			}
+			if ( $loop == 'true' ) {
+				$vd .= ' loop';
+			}
+			if ( $iimgunesc != '' ) {
+				$vd = sprintf('%s poster="%s"', $vd, $iimgunesc);
+			}
+			$vd = sprintf('%s width="%u" height="%u">', $vd, $w, $h);
+			// format for source elements
+			$fmt = "\n\t\t" . '<source src="%s"%s>';
+			// allow multiple video src, separated by pipe
+			$altvideo = trim($altvideo);
+			$altvideo = trim($altvideo, '|');
+			$altvideo = trim($altvideo);
+			$av = explode('|', $altvideo);
+			// place sources
+			foreach ( $av as $src ) {
+				$typ = '';
+				// allow '?' separated type string
+				$src = trim($src);
+				$src = trim($src, '?');
+				$src = trim($src);
+				$tv = explode('?', $src);
+				if ( isset($tv[1]) ) {
+					$typ = sprintf(' type="%s"', trim($tv[1]));
+					// leave off src
+					$src = trim($tv[0]);
+				}
+				$vd .= sprintf($fmt, $src, $typ);
+			}
+
+			// place as alt the altimg, or message string
+			$vd .= sprintf("%s\n\t\t</video>",
+				$altimg == '' ?
+				self::wt("\n\t\t" .
+				__('The flash plugin is not available, nor is the <code>video</code> element', 'swfput_l10n')
+				) : $altimg
+			);
+			
+			$altimg = $vd;
+		}
+
+		// Update 2013/09/23: update object element, separating
+		// MSIE PITA, so that alternative elements can be added
+		// for no-flash browsers: previously, with the classid attribute
+		// within the object element, firefox (and others) would
+		// always fall through to the now-removed embed element;
+		// therefore, browser ID is attempted to find MSIE (in
+		// self::is_msie()) on the assumption that classid will
+		// be necessary to make that one work
+		$obj = '';
+		if ( self::is_msie() ) { 
+			$obj = sprintf('
+			<object classid="%s" codebase="%s" width="%u" height="%u">
+			<param name="data" value="%s?%s">
+			', $classid, $codebase, $w, $h, $uswf, $pv);
+		} else {
+			$typ = 'application/x-shockwave-flash';
+			$obj = sprintf('
+			<object data="%s?%s" type="%s" width="%u" height="%u">
+			', $uswf, $pv, $typ, $w, $h);
+		}
+		return $obj
 		. sprintf('<param name="play" value="%s">
-		<param name="loop" value="%s">
 		<param name="quality" value="%s">
 		<param name="allowFullScreen" value="%s">
 		<param name="allowScriptAccess" value="sameDomain">
@@ -2195,19 +2281,19 @@ class SWF_put_evh {
 		<param name="src" value="%s?%s">
 		<param name="name" value="mingput">
 		<param name="bgcolor" value="#000000">
-		<param name="align" value="middle">
-		', $play, $loop, $quality, $allowfull, $fv, $uswf, $pv)
-		. sprintf('<embed type="%s" width="%u" height="%u" src="%s?%s" '
-		. 'name="mingput" flashvars="%s" allowscriptaccess="sameDomain"'
-		. ' quality="%s" loop="%s" play="%s" ',
-		$mtype, $w, $h, $uswf, $pv, $fv, $quality, $loop, $play)
-		. sprintf('data="%s?%s" allowfullscreen="%s" align="middle"'
-		. ' bgcolor="#000000" pluginspage="%s" />
+		<param name="align" value="middle">%s
 		</object>
-		', $uswf, $pv, $allowfull,
-			'http://www.macromedia.com/go/getflashplayer');
+		', $play, $quality, $allowfull, $fv, $uswf, $pv, $altimg);
 	}
 	
+	protected static function is_msie() {
+		static $is_so = null;
+		if ( $is_so === null ) {
+			$r = preg_match('/\bMSIE\b/', $_SERVER['HTTP_USER_AGENT']);
+			$is_so = $r ? true : false;
+		}
+		return $is_so;
+	}
 } // End class SWF_put_evh
 
 // global instance of plugin class
@@ -2243,8 +2329,9 @@ class SWF_params_evh {
 		'pixelaspect' => '0',      // use if display aspect unknown
 		'volume' => '50',          // if host has no saved setting
 		'play' => 'false',         // play (or pause) on load
-		'hidebar' => 'true',      // initially hide control bar
+		'hidebar' => 'true',       // initially hide control bar
 		'disablebar' => 'false',   // disable and hide control bar
+		'iimgbg' => 'true',        // use iimage arg as alt. img element
 		'barheight' => '36',
 		'quality' => 'high',
 		'allowfull' => 'true',
@@ -2253,6 +2340,8 @@ class SWF_params_evh {
 		'mtype' => 'application/x-shockwave-flash',
 		// rtmp
 		'playpath' => '',
+		// alternative <video> within object
+		'altvideo' => '',
 		'defaultplaypath' => 'CSPAN2@14846',
 		// <object>
 		'classid' => 'clsid:d27cdb6e-ae6d-11cf-96b8-444553540000',
@@ -2364,6 +2453,7 @@ class SWF_params_evh {
 			case 'play':
 			case 'hidebar':
 			case 'disablebar':
+			case 'iimgbg':
 			case 'allowfull':
 			case 'allowxdom':
 			case 'loop':
@@ -2425,6 +2515,7 @@ class SWF_params_evh {
 			case 'iimage':
 			case 'mtype':
 			case 'playpath':
+			case 'altvideo':
 			case 'classid':
 			case 'codebase':
 				break;
@@ -2726,6 +2817,30 @@ class SWF_put_widget_evh extends WP_Widget {
 		?>
 
 		<?php
+		// audio checkbox
+		$val = $instance['audio'];
+		$id = $this->get_field_id('audio');
+		$nm = $this->get_field_name('audio');
+		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
+		$tl = $wt(__('Medium is audio (e.g. *.mp3):', 'swfput_l10n'));
+		?>
+		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
+		<input class="widefat" id="<?php echo $id; ?>"
+			name="<?php echo $nm; ?>" style="width:16%;" type="checkbox"
+			value="<?php echo $val; ?>"<?php echo $ck; ?> /></p>
+
+		<?php
+		$val = $instance['altvideo'];
+		$id = $this->get_field_id('altvideo');
+		$nm = $this->get_field_name('altvideo');
+		$tl = $wt(__('URLs for alternate HTML5 video (optional, prefer .ogv, .webm):', 'swfput_l10n'));
+		?>
+		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
+		<input class="widefat" id="<?php echo $id; ?>"
+			name="<?php echo $nm; ?>"
+			type="text" value="<?php echo $val; ?>" /></p>
+
+		<?php
 		$val = $instance['playpath'];
 		$id = $this->get_field_id('playpath');
 		$nm = $this->get_field_name('playpath');
@@ -2801,11 +2916,12 @@ class SWF_put_widget_evh extends WP_Widget {
 		?>
 
 		<?php
-		$val = $instance['audio'];
-		$id = $this->get_field_id('audio');
-		$nm = $this->get_field_name('audio');
+		// initial as 'bg', alternate checkbox
+		$val = $instance['iimgbg'];
+		$id = $this->get_field_id('iimgbg');
+		$nm = $this->get_field_name('iimgbg');
 		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
-		$tl = $wt(__('Medium is audio (e.g. *.mp3):', 'swfput_l10n'));
+		$tl = $wt(__('Use initial image as non-flash alternate:', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"

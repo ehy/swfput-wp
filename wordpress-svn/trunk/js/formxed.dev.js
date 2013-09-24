@@ -40,6 +40,7 @@ SWFPut_putswf_video_xed.prototype = {
 		play: "false",        
 		hidebar: "true",     
 		disablebar: "false",  
+		iimgbg: "true",
 		barheight: "36",
 		quality: "high",
 		allowfull: "true",
@@ -47,6 +48,7 @@ SWFPut_putswf_video_xed.prototype = {
 		loop: "false",
 		mtype: "application/x-shockwave-flash",
 		playpath: "",
+		altvideo: "",
 		classid: "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000",
 		codebase: "http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,115,0"
 	},
@@ -108,6 +110,7 @@ SWFPut_putswf_video_xed.prototype = {
 			case 'play':
 			case 'hidebar':
 			case 'disablebar':
+			case 'iimgbg':
 			case 'allowfull':
 			case 'allowxdom':
 			case 'loop':
@@ -166,6 +169,7 @@ SWFPut_putswf_video_xed.prototype = {
 			case 'iimage':
 			case 'mtype':
 			case 'playpath':
+			case 'altvideo':
 			case 'classid':
 			case 'codebase':
 				break;

@@ -115,6 +115,7 @@ var playfailhtml = "$playfailhtml";
 var nomediamsg = "$nomediamsg";
 var js_nomediamsg = "$js_nomediamsg";
 var vurl = tf(null, "$vurl", "$vurl");
+var eurl = tf(null, "$eurl", "$eurl");
 // v_id -- if RTMP, stream id, 'playpath'
 var v_id = "" == "$v_id" ? null : "$v_id";
 // boolean, is true if media at URL is *known* audio, false if known not
@@ -1928,6 +1929,8 @@ if ( (vurl == null || vurl == "") && _level0.FN != undefined ) {
 	if ( _level0.F2 != undefined ) {
 		adddbgtext(" F2: '" + _level0.F2 + "'\n");
 		vurl = _level0.F2;
+	} else if ( ! (eurl == null || eurl == "") ) {
+		vurl = eurl;
 	} else {
 		vurl = urlesc(_level0.FN);
 	}

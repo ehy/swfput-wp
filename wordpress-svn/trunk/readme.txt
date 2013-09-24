@@ -3,13 +3,13 @@ Contributors: EdHynan
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4Q2Y8ZUG8HXLC
 Tags: video, audio, movies, tube, flash, flash player, graphics, movie, audio-visual, a/v content
 Requires at least: 3.0.2
-Tested up to: 3.6
+Tested up to: 3.6.1
 Stable tag: 1.0.3
 Text Domain: swfput_l10n
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
-SWFPut provides a flash video player for posts and pages, and a widget, and forms to configure display and video playback.
+SWFPut provides a flash video player for posts and pages, and a widget, and optional HTML5 video fallback.
 
 == Description ==
 
@@ -51,6 +51,10 @@ whether it will suit your purpose:
 	will display until the play button is clicked can
 	(and should) be provided. The setup form provides for
 	this in the same way as described above.
+
+*	SWFPut allows optional HTML5 video fallback
+	(preferably .ogg, or .webm) to be specified
+	in case flash is not supported.
 
 *	SWFPut should not interfere with the appearance of
 	a site: a video is presented much like an image
@@ -221,7 +225,10 @@ Maybe later.
 	from 3.0.1 to 3.3.1 (but was not needed either), but between
 	WP 3.3.1 and 3.5.? some core guard against the duplicate was
 	removed (or broken?).
-*
+* Updated swf object element and added optional alternative
+	img and video (html5) nested elements. Removed classid from
+	object, except when MSIE is in user agent string. (inspired
+	bu suggestion from aileenf).
 
 = 1.0.3 =
 * Maintenance.
@@ -264,6 +271,11 @@ Maybe later.
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.0.4 =
+Now has option to specify fallback HTML5 video sources, and/or use
+	the initial (poster) image as display when flash video is
+	not supported.
 
 = 1.0.3 =
 Internationalized (i18n) string handling should now be usable for

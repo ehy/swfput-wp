@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: swfput 1.0.4\n"
 "Report-Msgid-Bugs-To: edhynan@gmail.com\n"
-"POT-Creation-Date: 2013-09-20 09:22-0400\n"
+"POT-Creation-Date: 2013-09-24 16:56-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -331,101 +331,109 @@ msgstr ""
 msgid "Media"
 msgstr ""
 
-#: swfput.php:1149 swfput.php:2657
+#: swfput.php:1149 swfput.php:2748
 msgid "Caption:"
 msgstr ""
 
-#: swfput.php:1154 swfput.php:2668
+#: swfput.php:1154 swfput.php:2759
 msgid "Url or media library ID:"
 msgstr ""
 
-#: swfput.php:1165 swfput.php:2683
+#: swfput.php:1165 swfput.php:2774
 msgid "Url from uploads directory:"
 msgstr ""
 
 #. <options>
-#: swfput.php:1170 swfput.php:1199 swfput.php:1235 swfput.php:1264
-#: swfput.php:2688 swfput.php:2715 swfput.php:2763 swfput.php:2790
+#: swfput.php:1170 swfput.php:1199 swfput.php:1246 swfput.php:1275
+#: swfput.php:2779 swfput.php:2806 swfput.php:2878 swfput.php:2905
 msgid "none"
 msgstr ""
 
-#: swfput.php:1194 swfput.php:2710
+#: swfput.php:1194 swfput.php:2801
 msgid "Select ID from media library:"
 msgstr ""
 
 #: swfput.php:1214
-msgid "Playpath (rtmp):"
-msgstr ""
-
-#: swfput.php:1219 swfput.php:2743
-msgid "Url of initial image file (optional):"
-msgstr ""
-
-#: swfput.php:1230 swfput.php:2758
-msgid "Load image from uploads directory:"
-msgstr ""
-
-#: swfput.php:1259 swfput.php:2785
-msgid "Load image ID from media library:"
-msgstr ""
-
-#: swfput.php:1279
 msgid "Medium is audio:"
 msgstr ""
 
-#: swfput.php:1297
+#: swfput.php:1220 swfput.php:2836
+msgid "URLs for alternate HTML5 video (optional, prefer .ogv, .webm):"
+msgstr ""
+
+#: swfput.php:1225
+msgid "Playpath (rtmp):"
+msgstr ""
+
+#: swfput.php:1230 swfput.php:2858
+msgid "Url of initial image file (optional):"
+msgstr ""
+
+#: swfput.php:1241 swfput.php:2873
+msgid "Load image from uploads directory:"
+msgstr ""
+
+#: swfput.php:1270 swfput.php:2900
+msgid "Load image ID from media library:"
+msgstr ""
+
+#: swfput.php:1290 swfput.php:2924
+msgid "Use initial image as non-flash alternate:"
+msgstr ""
+
+#: swfput.php:1308
 msgid "Dimensions"
 msgstr ""
 
-#: swfput.php:1302
+#: swfput.php:1313
 msgid "Pixel Width:"
 msgstr ""
 
-#: swfput.php:1304
+#: swfput.php:1315
 msgid "Height:"
 msgstr ""
 
-#: swfput.php:1306 swfput.php:2844
+#: swfput.php:1317 swfput.php:2960
 msgid "Auto aspect (e.g. 360x240 to 4:3):"
 msgstr ""
 
-#: swfput.php:1308 swfput.php:2855
+#: swfput.php:1319 swfput.php:2971
 msgid "Display aspect (e.g. 4:3, precludes Auto):"
 msgstr ""
 
-#: swfput.php:1310 swfput.php:2866
+#: swfput.php:1321 swfput.php:2982
 msgid "Pixel aspect (e.g. 8:9, precluded by Display):"
 msgstr ""
 
-#: swfput.php:1340
+#: swfput.php:1351
 msgid "Behavior"
 msgstr ""
 
-#: swfput.php:1345 swfput.php:2877
+#: swfput.php:1356 swfput.php:2993
 msgid "Initial volume (0-100):"
 msgstr ""
 
-#: swfput.php:1347 swfput.php:2889
+#: swfput.php:1358 swfput.php:3005
 msgid "Play on load (else waits for play button):"
 msgstr ""
 
-#: swfput.php:1349 swfput.php:2901
+#: swfput.php:1360 swfput.php:3017
 msgid "Loop play:"
 msgstr ""
 
-#: swfput.php:1351 swfput.php:2913
+#: swfput.php:1362 swfput.php:3029
 msgid "Hide control bar initially:"
 msgstr ""
 
-#: swfput.php:1353 swfput.php:2925
+#: swfput.php:1364 swfput.php:3041
 msgid "Hide and disable control bar:"
 msgstr ""
 
-#: swfput.php:1355 swfput.php:2937
+#: swfput.php:1366 swfput.php:3053
 msgid "Allow full screen:"
 msgstr ""
 
-#: swfput.php:1357 swfput.php:2948
+#: swfput.php:1368 swfput.php:3064
 msgid "Control bar Height (20-50):"
 msgstr ""
 
@@ -438,51 +446,61 @@ msgstr ""
 #. '%s' is any caption provided for a/v, if any,
 #. prepended with ASCII space ' '; '%s' is an empty string
 #. if there is no caption
-#: swfput.php:1406 swfput.php:1462
+#: swfput.php:1417 swfput.php:1473
 #, possible-php-format
 msgid " [A/V content \"%s\" disabled] "
 msgstr ""
 
+#: swfput.php:2205
+msgid "The flash plugin is not available"
+msgstr ""
+
+#: swfput.php:2248
+msgid ""
+"The flash plugin is not available, nor is the <code>video</code> "
+"element"
+msgstr ""
+
 #. TRANSLATORS perl-type regular expression
 #. that matches a 'yes'
-#: swfput.php:2375
+#: swfput.php:2465
 msgid "/^?y(e((s|ah)!?)?)?$/i"
 msgstr ""
 
 #. TRANSLATORS perl-type regular expression
 #. that matches a 'no'
-#: swfput.php:2378
+#: swfput.php:2468
 msgid "/^n(o!?)?)?$/i"
 msgstr ""
 
 #. Label shown on widgets page
-#: swfput.php:2479
+#: swfput.php:2570
 msgid "SWFPut Flash Video"
 msgstr ""
 
 #. Description shown under label shown on widgets page
-#: swfput.php:2481
+#: swfput.php:2572
 msgid "Flash video for your widget areas"
 msgstr ""
 
-#: swfput.php:2620
+#: swfput.php:2711
 msgid "Widget title:"
 msgstr ""
 
-#: swfput.php:2732
-msgid "Playpath (rtmp) or co-video (mp3):"
-msgstr ""
-
-#: swfput.php:2808
+#: swfput.php:2825
 msgid "Medium is audio (e.g. *.mp3):"
 msgstr ""
 
-#: swfput.php:2819
+#: swfput.php:2847
+msgid "Playpath (rtmp) or co-video (mp3):"
+msgstr ""
+
+#: swfput.php:2935
 #, possible-php-format
 msgid "Width (default %u):"
 msgstr ""
 
-#: swfput.php:2831
+#: swfput.php:2947
 #, possible-php-format
 msgid "Height (default %u):"
 msgstr ""

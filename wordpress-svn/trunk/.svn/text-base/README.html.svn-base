@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.21 -->
-<!-- CreationDate: Fri Sep 20 14:26:23 2013 -->
+<!-- CreationDate: Tue Sep 24 16:56:34 2013 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -346,6 +346,60 @@ filenames their media IDs.</p></td></tr>
 <td width="80%">
 
 
+<p style="margin-top: 1em"><b>Medium is audio</b>: To
+determine whether to play video or audio, the file suffix of
+the medium is checked. If the file suffix is not known, the
+medium is assumed to be video. If the medium is an mp3 audio
+file, but it does not have the <b>MP3</b> suffix, check
+this.</p> </td></tr>
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="2%">
+
+
+<p style="margin-top: 1em">&bull;</p></td>
+<td width="8%"></td>
+<td width="80%">
+
+
+<p style="margin-top: 1em"><b>URLs for alternate HTML5
+video</b>: An optional series of URLs for an alternate HTML5
+video element that a web browser can try if flash video is
+not available or is not supported. If more than one URL is
+given, they should be separated by the
+&lsquo;<tt>|</tt>&rsquo; (pipe) character. Each individual
+URL may be appended with an argument for the
+&lsquo;<tt>type</tt>&rsquo; attribute of the video element,
+separated from the URL by a &lsquo;<tt>?</tt>&rsquo;
+character (do not include the &lsquo;<tt>type</tt>&rsquo;
+keyword; give only the value that should appear between
+quotes) <small><small>2</small></small> .</p></td></tr>
+</table>
+
+<p style="margin-left:20%; margin-top: 1em"><cite>For
+example: <tt><br>
+alt.ogv?video/ogg; codecs=dirac, speex| alt.webm|
+alt.mp4?video/mp4</tt>. </cite></p>
+
+<p style="margin-left:20%; margin-top: 1em">If more than
+one is given they will appear in order and the browser
+should use the first type that it supports (if any). The OGG
+and WEBM types should have wide support; the MP4 type is
+less likely to be supported because that format is tainted
+by patents.</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="2%">
+
+
+<p style="margin-top: 1em">&bull;</p></td>
+<td width="8%"></td>
+<td width="80%">
+
+
 <p style="margin-top: 1em"><b>Playpath (rtmp)</b>: If the
 &ldquo;<b>Url or media library ID</b>&rdquo; field is given
 an <b>RTMP</b> URL, the &lsquo;playpath&rsquo; is given
@@ -367,7 +421,7 @@ image file may be placed here. When the player is loaded, if
 it is not set to play on load, this image is displayed until
 the play button is invoked. Accepted image types are
 <b>JPEG</b>, <b>PNG</b>, and <b>GIF</b>, and <b>SWF</b>
-<small><small>2</small></small> .</p></td></tr>
+<small><small>3</small></small> .</p></td></tr>
 </table>
 
 
@@ -426,12 +480,12 @@ the suitable filenames their media IDs.</p></td></tr>
 <td width="80%">
 
 
-<p style="margin-top: 1em"><b>Medium is audio</b>: To
-determine whether to play video or audio, the file suffix of
-the medium is checked. If the file suffix is not known, the
-medium is assumed to be video. If the medium is an mp3 audio
-file, but it does not have the <b>MP3</b> suffix, check
-this.</p> </td></tr>
+<p style="margin-top: 1em"><b>Use initial image as
+non-flash alternate</b>: If an initial image was given, then
+also use it as an alternative display when flash is not
+supported. If optional HTML5 video URLs were given, they
+will remain the first alternate, and the initial image will
+be an alternate to that. This option is on by default.</p></td></tr>
 </table>
 
 <h4>3.2.2. Dimensions
