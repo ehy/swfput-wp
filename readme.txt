@@ -52,8 +52,10 @@ whether it will suit your purpose:
 	(and should) be provided. The setup form provides for
 	this in the same way as described above.
 
-*	SWFPut allows optional HTML5 video fallback
-	(preferably .ogg, or .webm) to be specified
+*	SWFPut, as of version 1.0.4,
+	allows for optional URLs (with optional
+	mime and codec types) that will be placed in
+	an HTML5 video element, as a fallback
 	in case flash is not supported.
 
 *	SWFPut should not interfere with the appearance of
@@ -202,6 +204,21 @@ supported file formats.
 
 Update 1 August 2013: WordPress 3.6 is released, with HTML5
 video and audio support. That's another reason.
+
+Update for version 1.0.4: there is now a field in the video
+setup forms that can be given URLs (separated by '|' if there is
+more than one) which will appear as SOURCE elements within a
+VIDEO element within the OBJECT element that specifies the
+flash program; so, if flash support is absent, a browser might
+make use of the HTML5 alternative. It remains up to the user
+to understand the the current state of HTML5 regarding
+video formats (uneven and differing support among common
+browsers), how to prepare a set of these video files in
+different formats and specify them in the best order to be
+useful with the greatest number of browsers. Each URL may have
+an optional argument for the type attribute (NOT a whole type
+attribute statement -- only the argument that will appear
+within quotes), separated from the URL by a '?' character.
 
 = Are you going to anticipate more questions? =
 

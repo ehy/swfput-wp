@@ -86,8 +86,8 @@ function swfput_php52_htmlent ($text, $cset = null)
 	// try to use get_option('blog_charset') only once;
 	// it's not cheap enough even with WP's cache for
 	// the number of times this might be called
-	static $_blog_charset;
-	if ( ! isset($_blog_charset) ) {
+	static $_blog_charset = null;
+	if ( $_blog_charset === null ) {
 		$_blog_charset = get_option('blog_charset');
 		if ( ! $_blog_charset ) {
 			$_blog_charset = 'UTF-8';
@@ -113,6 +113,9 @@ endif;
  */
 if ( ! class_exists('SWF_put_evh') ) :
 class SWF_put_evh {
+	// web page as of release
+	const plugin_webpage = 'http://agalena.nfshost.com/b1/?page_id=46';
+	
 	// the widget class name
 	const swfput_widget = 'SWF_put_widget_evh';
 	// parameter helper class name
@@ -189,8 +192,15 @@ class SWF_put_evh {
 	// swfput program default video path
 	protected $swfputvid;
 
-	// swfput js subdirectory
-	protected static $swfjsdir = 'js';
+	// settings js subdirectory
+	protected static $settings_jsdir = 'js';
+	// settings js shortcode editor helper name
+	protected static $settings_jsname = 'screens.js';
+	// settings program js path
+	protected $settings_js;
+	// JS: name of class to control textare/button pairs
+	const js_textpair_ctl = 'evhplg_ctl_textpair';
+
 	// swfput js shortcode editor helper name
 	protected static $swfxedjsname = 'formxed.js';
 	
@@ -222,6 +232,8 @@ class SWF_put_evh {
 		$this->swfputcss = plugins_url($t, $pf);
 		$t = self::$swfputdir . '/' . self::$swfputdefvid;
 		$this->swfputvid = plugins_url($t, $pf);
+		$t = self::$settings_jsdir . '/' . self::$settings_jsname;
+		$this->settings_js = plugins_url($t, $pf);
 
 		$this->in_wdg_do_shortcode = 0;
 		
@@ -334,7 +346,7 @@ class SWF_put_evh {
 		$nf = 0;
 		$fields = array();
 		$fields[$nf++] = new $Cf(self::optverbose,
-				self::wt(__('Show verbose descriptions:', 'swfput_l10n')),
+				self::wt(__('Show verbose introductions:', 'swfput_l10n')),
 				self::optverbose,
 				$items[self::optverbose],
 				array($this, 'put_verbose_opt'));
@@ -446,18 +458,18 @@ class SWF_put_evh {
 					. '</a>',
 				array($this, 'put_inst_desc'));
 
-		// prepare admin page specific hooks per page. e.g.:
-		// (now set to false, but code remains for reference;
-		// see comment '// hook&filter to make shortcode form for editor'
-		// in __construct())
+		// prepare admin page specific hooks 
 		if ( false ) {
 			$suffix_hooks = array(
-				'admin_head' => array($this, 'admin_head'),
-				'admin_print_scripts' => array($this, 'admin_js'),
+				'admin_head' => array($this, 'settings_head'),
+				'admin_print_scripts' => array($this, 'settings_js'),
 				'load' => array($this, 'admin_load')
-				);
+			);
 		} else {
-			$suffix_hooks = '';
+			$suffix_hooks = array(
+				'admin_head' => array($this, 'settings_head'),
+				'admin_print_scripts' => array($this, 'settings_js'),
+			);
 		}
 		
 		// prepare admin page
@@ -481,6 +493,155 @@ class SWF_put_evh {
 		$this->opt = new $Co($page);
 	}
 	
+	// filter for wp-admin/includes/screen.php get_column_headers()
+	// to set text for Screen Options column
+	public function screen_options_columns($a) {
+		if ( ! is_array($a) ) {
+			$a = array();
+		}
+		// checkbox id will 'verbose_show-hide'
+		$a['verbose_show'] = __('Section introductions', 'swfput_l10n');
+		return $a;
+	}
+
+	// filter for wp-admin/includes/screen.php show_screen_options()
+	// to return true and enable the menu, or not
+	public function screen_options_show($a) {
+		if ( self::get_verbose_option() == 'true' ) {
+			return true;
+		}
+		return false;
+	}
+
+	public function settings_head() {
+		// get_current_screen() introduced in WP 3.1
+		// (thus spake codex)
+		// I have 3.0.2 to test with, and 3.3.1, nothing in between,
+		// so 3.3 will be used as minimum
+		$v = (3 << 24) | (3 << 16) | (0 << 8) | 0;
+		$ok = self::wpv_min($v);
+
+		$t = array(
+			self::wt(sprintf(
+		// TRANSLATORS: '%1$s' is the label of a checkbox option,
+		// '%2$s' is the button label 'Save Settings';
+		// The quoted string "Screen Options" should match an
+		// interface label from the WP core, so if possible
+		// use the WP core translation for that (likewise "Help").
+			__('<p>The sections of this page each have an
+			introduction which will, hopefully, be helpful.
+			These introductions may
+			be hidden or shown with a checkbox under the
+			"Screen Options" tab (next to "Help") or with
+			the "%1$s"
+			option, which is the first option on this page.
+			If "Screen Options" is absent, the verbose option
+			is off: it must be on to enable that tab.
+			</p><p>
+			<em>SWFPut</em> will work well with
+			the installed defaults, so it\'s not necessary
+			to worry over the options on this page. 
+			</p><p>
+			Remember, when any change is made, the new settings must
+			be submitted with the "%2$s" button, near the end
+			of this page, to take effect.
+			</p>', 'swfput_l10n'),
+			__('Show verbose introductions', 'swfput_l10n'),
+			__('Save Settings', 'swfput_l10n')
+			)),
+			self::wt(sprintf(
+		// TRANSLATORS: all '%s' are labels of checkbox options
+			__('<p>Although the default settings
+			will work well, consider enabling these:
+			<ul>
+			<li>"%1$s" -- because The Onion Router is a very
+			important protection for <em>real</em> people, even if
+			spammers abuse it and cause associated addresses
+			to be blacklisted</li>
+			<li>"%2$s" -- if you have access to the error log
+			of your site server, this will give you a view
+			of what the plugin has been doing</li>
+			<li>"%3$s" -- a small bit of CPU time and network
+			traffic will be saved when an IP address is
+			identified as a spammer (but in the case of a false
+			positive, this will seem rude)</li>
+			</ul>
+			<p>
+			Those options default to false/disabled (which is
+			why your attention is called to them).
+			</p><p>
+			If you find that a welcome visitor could not comment
+			because their IP address was in a blacklist, add their
+			address to the "Active User Whitelist" in the
+			"Advanced Options" section.
+			</p><p>
+			<em>Spam BLIP</em> is expected work well as a first
+			line of defense against spam, and should complement
+			spam filter plugins that work by analyzing comment content.
+			It might not work in concert with other
+			DNS blacklist plugins.
+			</p>', 'swfput_l10n'),
+			__('Whitelist TOR addresses', 'swfput_l10n'),
+			__('Log blacklist hits', 'swfput_l10n'),
+			__('Bail (wp_die()) on blacklist hits', 'swfput_l10n')
+			))
+		);
+
+		// TRANSLATORS: first '%s' is the the phrase
+		// 'For more information:'; using translation
+		// from default textdomain (WP core)
+		$tt = self::wt(sprintf(
+			__('<p><strong>%s</strong></p><p>
+			Tips and examples can be found on the
+			<a href="%s" target="_blank">web page</a>.
+			</p>', 'swfput_l10n'),
+			__('For more information:'),
+			self::plugin_webpage
+		));
+	
+		// finagle the "Screen Options" tab
+		$h = 'manage_' . $this->opt->get_page_suffix() . '_columns';
+		add_filter($h, array($this, 'screen_options_columns'));
+		$h = 'screen_options_show_screen';
+		add_filter($h, array($this, 'screen_options_show'), 200);
+
+		// put help tab content, for 3.3.1 or greater . . .
+		if ( $ok ) {
+			$scr = get_current_screen();
+			$scr->add_help_tab(array(
+				'id'      => 'overview',
+				'title'   => __('Overview'), // use transl. from core
+				'content' => $t[0]
+				// content may be a callback
+				)
+			);
+	
+			$scr->add_help_tab(array(
+				'id'      => 'help_tab_tips',
+				'title'   => __('Tips', 'swfput_l10n'),
+				'content' => $t[1]
+				// content may be a callback
+				)
+			);
+	
+			$scr->set_help_sidebar($tt);
+		
+		// . . . or, lesser
+		} else {
+			global $current_screen;
+			add_contextual_help($current_screen,
+				'<h6>' . __('Overview') . '</h6>' . $t[0] .
+				'<h6>' . __('Tips', 'swfput_l10n') . '</h6>' . $t[1] .
+				$tt);
+		}
+	}
+
+	public function settings_js() {
+		$jsfn = self::$settings_jsname;
+		$j = $this->settings_js;
+        wp_enqueue_script($jsfn, $j);
+	}
+
 	// This function is placed here below the function that sets-up
 	// the options page so that it is easy to see from that function.
 	// It exists only for the echo "<a name='aSubmit'/>\n";
@@ -514,6 +675,33 @@ class SWF_put_evh {
 			add_meta_box($id, $tl, array($cl, $fn), 'page', 'normal');
 	}
 
+	// add a help tab in the post-related pages
+	public static function hook_admin_head() {
+		// get_current_screen() introduced in WP 3.1
+		// (thus spake codex)
+		// I have 3.0.2 to test with, and 3.3.1, nothing in between,
+		// so 3.3 will be used as minimum
+		$v = (3 << 24) | (3 << 16) | (0 << 8) | 0;
+		$ok = self::wpv_min($v);
+		// no compatible alternative for now
+		if ( ! $ok ) {
+			return;
+		}
+
+		$scr = get_current_screen();
+		if ( $scr && $scr->base === 'post'
+			&& (current_user_can('edit_posts')
+			||  current_user_can('edit_pages')) ) {
+			$scr->add_help_tab(array(
+				'id'      => 'help_tab_posts_swfput',
+				'title'   => __('SWFPut Form', 'swfput_l10n'),
+				'content' => '<p>SWFPut Form Help TEST</p>' // $t[1]
+				// content may be a callback
+				)
+			);
+		}
+	}
+
 	// register shortcode editor forms javascript
 	public static function filter_admin_print_scripts() {
 		// cap check: not sure if this is necessary here,
@@ -523,7 +711,7 @@ class SWF_put_evh {
 			||  current_user_can('edit_pages')) ) {
 			$jsfn = 'SWFPut_putswf_video_xed';
 			$pf = self::mk_pluginfile();
-			$t = self::$swfjsdir . '/' . self::$swfxedjsname;
+			$t = self::$settings_jsdir . '/' . self::$swfxedjsname;
 			$jsfile = plugins_url($t, $pf);
 	        wp_enqueue_script($jsfn, $jsfile, array('jquery'), 'xed');
 	    }
@@ -610,38 +798,44 @@ class SWF_put_evh {
 
 		if ( $adm ) {
 		// keep it clean: {de,}activation
-		if ( current_user_can('activate_plugins') ) {
-		register_deactivation_hook($pf, array($cl, 'on_deactivate'));
-		register_activation_hook($pf,   array($cl,   'on_activate'));
-		}
-		if ( current_user_can('install_plugins') ) {
-		register_uninstall_hook($pf,    array($cl,  'on_uninstall'));
-		}
+			if ( current_user_can('activate_plugins') ) {
+				$aa = array($cl, 'on_deactivate');
+				register_deactivation_hook($pf, $aa);
+				$aa = array($cl, 'on_activate');
+				register_activation_hook($pf,   $aa);
+			}
+			if ( current_user_can('install_plugins') ) {
+				$aa = array($cl, 'on_uninstall');
+				register_uninstall_hook($pf,    $aa);
+			}
 
-		// hook&filter to make shortcode form for editor
-		if ( self::get_posts_code_option() === 'true' ) {
-			add_action('admin_menu', array($cl, 'hook_admin_menu'));
-			add_action('admin_print_scripts',
-				array($cl, 'filter_admin_print_scripts'));
-		}
+			// hook&filter to make shortcode form for editor
+			if ( self::get_posts_code_option() === 'true' ) {
+				$aa = array($cl, 'hook_admin_head');
+				add_action('admin_head', $aa);
+				$aa = array($cl, 'hook_admin_menu');
+				add_action('admin_menu', $aa);
+				$aa = array($cl, 'filter_admin_print_scripts');
+				add_action('admin_print_scripts', $aa);
+			}
 
-		// Settings/Options page setup
-		if ( current_user_can('manage_options') ) {
-			$this->init_settings_page();
-		}
+			// Settings/Options page setup
+			if ( current_user_can('manage_options') ) {
+				$this->init_settings_page();
+			}
 		} // if ( $adm )
 
-		$scf = array($this, 'post_shortcode');
-		add_shortcode(self::shortcode, $scf);
+		$aa = array($this, 'post_shortcode');
+		add_shortcode(self::shortcode, $aa);
 
-		$scf = array($this, 'wdg_do_shortcode');
-		add_filter('widget_text', $scf);
+		$aa = array($this, 'wdg_do_shortcode');
+		add_filter('widget_text', $aa);
 
+		$aa = array($this, 'post_sed');
 		if ( self::get_posts_preg_option() === 'true' ) {
-			$scf = array($this, 'post_sed');
-			add_filter('the_content', $scf, 20);
+			add_filter('the_content', $aa, 20);
 		} else {
-			remove_filter('the_content', array($this, 'post_sed'));
+			remove_filter('the_content', $aa);
 		}
 	}
 
@@ -783,11 +977,15 @@ class SWF_put_evh {
 	
 	// callback: put html for placement field description
 	public function put_general_desc() {
-		$t = self::wt(__('General SWF plugin options:', 'swfput_l10n'));
-		printf('<p>%s</p>%s', $t, "\n");
 		if ( self::get_verbose_option() !== 'true' ) {
 			return;
 		}
+
+		$did = 'SWFPut_General_Desc';
+		echo '<div id="' . $did . '">';
+
+		$t = self::wt(__('Introduction:', 'swfput_l10n'));
+		printf('<p><strong>%s</strong>%s</p>', $t, "\n");
 
 		$t = self::wt(__('The verbose option selects whether
 			verbose descriptions
@@ -812,18 +1010,29 @@ class SWF_put_evh {
 				server of your site.', 'swfput_l10n'));
 			printf('<p>%s</p>%s', $t, "\n");
 		}
+
+		echo '</div>';
+		?>
+		<script type="text/javascript">
+		addto_evhplg_obj_screenopt("verbose_show-hide", "<?php echo $did ?>");
+		</script>
+		<?php
+
 		$t = self::wt(__('Go forward to save button.', 'swfput_l10n'));
 		printf('<p><a href="#aSubmit">%s</a></p>%s', $t, "\n");
 	}
 
 	// callback: put html for placement field description
 	public function put_place_desc() {
-		$t = self::wt(__('Enable/disable flash video placement:', 'swfput_l10n'));
-		printf('<p>%s</p>%s', $t, "\n");
 		if ( self::get_verbose_option() !== 'true' ) {
 			return;
 		}
 
+		$did = 'SWFPut_Placement_Desc';
+		echo '<div id="' . $did . '">';
+
+		$t = self::wt(__('Introduction:', 'swfput_l10n'));
+		printf('<p><strong>%s</strong>%s</p>', $t, "\n");
 		$t = self::wt(__('These options enable or completely disable
 			placing video in posts or widgets. If the placement
 			of video must be switched on or off, for either
@@ -843,19 +1052,31 @@ class SWF_put_evh {
 			the options are effective only if enabled here.'
 			, 'swfput_l10n'));
 		printf('<p>%s</p>%s', $t, "\n");
+
+		echo '</div>';
+		?>
+		<script type="text/javascript">
+		addto_evhplg_obj_screenopt("verbose_show-hide", "<?php echo $did ?>");
+		</script>
+		<?php
+
 		$t = self::wt(__('Go forward to save button.', 'swfput_l10n'));
 		printf('<p><a href="#aSubmit">%s</a></p>%s', $t, "\n");
 		$t = self::wt(__('Go back to top (General section).', 'swfput_l10n'));
 		printf('<p><a href="#general">%s</a></p>%s', $t, "\n");
 	}
 
-	// callback: put html for placement field description
+	// callback: put html for posts options
 	public function put_postopts_desc() {
-		$t = self::wt(__('Flash video in posts options:', 'swfput_l10n'));
-		printf('<p>%s</p>%s', $t, "\n");
 		if ( self::get_verbose_option() !== 'true' ) {
 			return;
 		}
+
+		$did = 'SWFPut_PostOpts_Desc';
+		echo '<div id="' . $did . '">';
+
+		$t = self::wt(__('Introduction:', 'swfput_l10n'));
+		printf('<p><strong>%s</strong>%s</p>', $t, "\n");
 
 		$t = self::wt(__('These options select 
 			how flash video (or audio) may be placed in posts or pages.
@@ -883,19 +1104,31 @@ class SWF_put_evh {
 			and so it increases server load. User parameters
 			are not available for this method.', 'swfput_l10n'));
 		printf('<p>%s</p>%s', $t, "\n");
+
+		echo '</div>';
+		?>
+		<script type="text/javascript">
+		addto_evhplg_obj_screenopt("verbose_show-hide", "<?php echo $did ?>");
+		</script>
+		<?php
+
 		$t = self::wt(__('Go forward to save button.', 'swfput_l10n'));
 		printf('<p><a href="#aSubmit">%s</a></p>%s', $t, "\n");
 		$t = self::wt(__('Go back to top (General section).', 'swfput_l10n'));
 		printf('<p><a href="#general">%s</a></p>%s', $t, "\n");
 	}
 
-	// callback: put html for placement field description
+	// callback: put html for widget area options
 	public function put_wdgsopts_desc() {
-		$t = self::wt(__('Flash video in widget area options:', 'swfput_l10n'));
-		printf('<p>%s</p>%s', $t, "\n");
 		if ( self::get_verbose_option() !== 'true' ) {
 			return;
 		}
+
+		$did = 'SWFPut_WidgetAreaOpts_Desc';
+		echo '<div id="' . $did . '">';
+
+		$t = self::wt(__('Introduction:', 'swfput_l10n'));
+		printf('<p><strong>%s</strong>%s</p>', $t, "\n");
 
 		$t = self::wt(__('These options select 
 			how flash video (or audio) may be placed in widget areas.
@@ -919,6 +1152,14 @@ class SWF_put_evh {
 			pasted into the widget text, on a line of its own.)'
 			, 'swfput_l10n'));
 		printf('<p>%s</p>%s', $t, "\n");
+
+		echo '</div>';
+		?>
+		<script type="text/javascript">
+		addto_evhplg_obj_screenopt("verbose_show-hide", "<?php echo $did ?>");
+		</script>
+		<?php
+
 		$t = self::wt(__('Go forward to save button.', 'swfput_l10n'));
 		printf('<p><a href="#aSubmit">%s</a></p>%s', $t, "\n");
 		$t = self::wt(__('Go back to top (General section).', 'swfput_l10n'));
@@ -933,6 +1174,12 @@ class SWF_put_evh {
 			return;
 		}
 
+		$did = 'SWFPut_InstallOpts_Desc';
+		echo '<div id="' . $did . '">';
+
+		$t = self::wt(__('Introduction:', 'swfput_l10n'));
+		printf('<p><strong>%s</strong>%s</p>', $t, "\n");
+
 		$t = self::wt(__('This section includes optional
 			features for plugin install or uninstall. Presently
 			the only option is whether to remove the plugin\'s
@@ -946,6 +1193,14 @@ class SWF_put_evh {
 			possibly for a new version or update, then keeping the
 			options might be helpful.', 'swfput_l10n'));
 		printf('<p>%s</p>%s', $t, "\n");
+
+		echo '</div>';
+		?>
+		<script type="text/javascript">
+		addto_evhplg_obj_screenopt("verbose_show-hide", "<?php echo $did ?>");
+		</script>
+		<?php
+
 		$t = self::wt(__('Go forward to save button.', 'swfput_l10n'));
 		printf('<p><a href="#aSubmit">%s</a></p>%s', $t, "\n");
 		$t = self::wt(__('Go back to top (General section).', 'swfput_l10n'));
@@ -970,7 +1225,7 @@ class SWF_put_evh {
 
 	// callback, put verbose section descriptions?
 	public function put_verbose_opt($a) {
-		$tt = self::wt(__('Show verbose descriptions', 'swfput_l10n'));
+		$tt = self::wt(__('Show verbose introductions', 'swfput_l10n'));
 		$k = self::optverbose;
 		$this->put_single_checkbox($a, $k, $tt);
 	}
@@ -1217,7 +1472,7 @@ class SWF_put_evh {
 			printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
 		</p><p>
 		<?php $k = 'altvideo'; 
-			$l = self::wt(__('URLs for alternate HTML5 video (optional, prefer .ogv, .webm):', 'swfput_l10n'));
+			$l = self::wt(__('URLs for alternate HTML5 video (optional: .mp4, .webm, .ogv):', 'swfput_l10n'));
 			printf($lbfmt, $id, $k, $l);
 			printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
 		</p><p>
@@ -1685,16 +1940,16 @@ class SWF_put_evh {
 		// try to use get_option('blog_charset') only once;
 		// it's not cheap enough even with WP's cache for
 		// the number of times this might be called
-		global $swfput_blog_charset;
-		if ( ! isset($swfput_blog_charset) ) {
-			$swfput_blog_charset = get_option('blog_charset');
-			if ( ! $swfput_blog_charset ) {
-				$swfput_blog_charset = 'UTF-8';
+		static $_blog_charset = null;
+		if ( $_blog_charset === null ) {
+			$_blog_charset = get_option('blog_charset');
+			if ( ! $_blog_charset ) {
+				$_blog_charset = 'UTF-8';
 			}
 		}
 	
 		if ( $cset === null ) {
-			$cset = $swfput_blog_charset;
+			$cset = $_blog_charset;
 		}
 
 		return htmlentities($text, ENT_QUOTES, 'UTF-8');
@@ -1706,6 +1961,48 @@ class SWF_put_evh {
 			return wptexturize($text);
 		}
 		return self::ht($text);
+	}
+	
+	// get WP software version as int (at least 32 bit, major < 128)
+	public static function wpv_int() {
+		static $wp_vi = null;
+		if ( $wp_vi === null ) {
+			global $wp_version;
+			$v = 0;
+			$va = explode('.', $wp_version);
+			for ( $i = 0; $i < 4; $i++ ) {
+				if ( ! isset($va[$i]) ) {
+					break;
+				}
+				$v |= ((int)$va[$i] << ((3 - $i) * 8));
+			}
+			$wp_vi = $v;
+		}
+		return $wp_vi;
+	}
+	
+	// compare WP software version -- 1 if wp > cmp val,
+	// -1 if <, else 0
+	public static function wpv_cmp($cv) {
+		$wv = self::wpv_int();
+		$cv = (int)$cv;
+		if ( $cv < $wv ) return 1;
+		if ( $cv > $wv ) return -1;
+		return 0;
+	}
+	
+	// compare WP software version
+	public static function wpv_min($cv) {
+		return (self::wpv_cmp($cv) >= 0) ? true : false;
+	}
+	
+	protected static function is_msie() {
+		static $is_so = null;
+		if ( $is_so === null ) {
+			$r = preg_match('/\bMSIE\b/', $_SERVER['HTTP_USER_AGENT']);
+			$is_so = $r ? true : false;
+		}
+		return $is_so;
 	}
 	
 	// error messages; where {wp_}die is not suitable
@@ -2198,9 +2495,10 @@ class SWF_put_evh {
 
 		// alternates
 		$altimg = '';
-		if ( $iimgbg == 'true' && $iimage != '' ) {
+		if ( $iimgbg == 'true' && $iimgunesc != '' ) {
 			$fmt = '%s<img src="%s" alt="%s" width="%u" height="%u">';
-			$altimg = sprintf($fmt, "\n\t\t", $iimgunesc,
+			$altimg = sprintf($fmt, "\n\t\t",
+				self::ht($iimgunesc),
 				self::wt(
 				__('The flash plugin is not available', 'swfput_l10n')
 				), $w, $h
@@ -2215,37 +2513,37 @@ class SWF_put_evh {
 				$vd .= ' loop';
 			}
 			if ( $iimgunesc != '' ) {
-				$vd = sprintf('%s poster="%s"', $vd, $iimgunesc);
+				$vd .= sprintf(' poster="%s"', self::ht($iimgunesc));
 			}
-			$vd = sprintf('%s width="%u" height="%u">', $vd, $w, $h);
+			$vd .= sprintf(' width="%u" height="%u">', $w, $h);
 			// format for source elements
 			$fmt = "\n\t\t" . '<source src="%s"%s>';
 			// allow multiple video src, separated by pipe
-			$altvideo = trim($altvideo);
-			$altvideo = trim($altvideo, '|');
-			$altvideo = trim($altvideo);
+			$altvideo = trim($altvideo, " \t|");
 			$av = explode('|', $altvideo);
 			// place sources
 			foreach ( $av as $src ) {
 				$typ = '';
 				// allow '?' separated type string
-				$src = trim($src);
-				$src = trim($src, '?');
-				$src = trim($src);
+				if ( ($src = trim($src, " \t?")) === '' ) {
+					continue;
+				}
 				$tv = explode('?', $src);
 				if ( isset($tv[1]) ) {
-					$typ = sprintf(' type="%s"', trim($tv[1]));
+					if ( ($tv[1] = trim($tv[1])) !== '' ) {
+						$typ = sprintf(' type="%s"', self::ht($tv[1]));
+					}
 					// leave off src
 					$src = trim($tv[0]);
 				}
-				$vd .= sprintf($fmt, $src, $typ);
+				$vd .= sprintf($fmt, self::ht($src), $typ);
 			}
 
 			// place as alt the altimg, or message string
 			$vd .= sprintf("%s\n\t\t</video>",
 				$altimg == '' ?
 				self::wt("\n\t\t" .
-				__('The flash plugin is not available, nor is the <code>video</code> element', 'swfput_l10n')
+				__('Flash video is not available, and the alternate <code>video</code> sources were rejected by your browser', 'swfput_l10n')
 				) : $altimg
 			);
 			
@@ -2284,15 +2582,6 @@ class SWF_put_evh {
 		<param name="align" value="middle">%s
 		</object>
 		', $play, $quality, $allowfull, $fv, $uswf, $pv, $altimg);
-	}
-	
-	protected static function is_msie() {
-		static $is_so = null;
-		if ( $is_so === null ) {
-			$r = preg_match('/\bMSIE\b/', $_SERVER['HTTP_USER_AGENT']);
-			$is_so = $r ? true : false;
-		}
-		return $is_so;
 	}
 } // End class SWF_put_evh
 
@@ -2833,7 +3122,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $instance['altvideo'];
 		$id = $this->get_field_id('altvideo');
 		$nm = $this->get_field_name('altvideo');
-		$tl = $wt(__('URLs for alternate HTML5 video (optional, prefer .ogv, .webm):', 'swfput_l10n'));
+		$tl = $wt(__('URLs for alternate HTML5 video (optional: .mp4, .webm, .ogv):', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
