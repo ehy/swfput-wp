@@ -2013,9 +2013,26 @@ class SWF_put_evh {
 	
 	// helper to make self
 	public static function instantiate($init = true) {
-		$cl = __CLASS__;
-		self::$instance = new $cl($init);
+		if ( ! self::$instance ) {
+			$cl = __CLASS__;
+			self::$instance = new $cl($init);
+		}
 		return self::$instance;
+	}
+
+	// helper get instance of this class
+	public static function get_instance($init = false) {
+		global $swfput1_evh_instance_1;
+		$pg = null;
+
+		if ( ! isset($swfput1_evh_instance_1)
+			|| $swfput1_evh_instance_1 == null ) {
+			$pg = self::instantiate($init);
+		} else {
+			$pg = $swfput1_evh_instance_1;
+		}
+
+		return $pg;
 	}
 
 	// helper to recursively find files preg_matching $pat,
@@ -2846,19 +2863,13 @@ class SWF_put_widget_evh extends WP_Widget {
 
 
 	public function __construct() {
-		global $swfput1_evh_instance_1;
-		if ( ! isset($swfput1_evh_instance_1) ) {
-			$cl = self::swfput_plugin;
-			$this->plinst = new $cl(false);
-		} else {
-			$this->plinst = &$swfput1_evh_instance_1;
-		}
+		$this->plinst = SWF_put_evh::get_instance(false);
 	
 		$cl = __CLASS__;
 		// Label shown on widgets page
 		$lb =  __('SWFPut Flash Video', 'swfput_l10n');
 		// Description shown under label shown on widgets page
-		$desc = __('Flash video for your widget areas', 'swfput_l10n');
+		$desc = __('Flash video (with HTML5 video fallback option) for your widget areas', 'swfput_l10n');
 		$opts = array('classname' => $cl, 'description' => $desc);
 
 		// control opts width affects the parameters form,
