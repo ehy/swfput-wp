@@ -174,15 +174,15 @@ class SWF_put_evh {
 	protected $opt = null;
 
 	// swfput program directory
-	protected static $swfputdir = 'mingput';
+	const swfputdir = 'mingput';
 	// swfput program binary name
-	protected static $swfputbinname = 'mingput.swf';
+	const swfputbinname = 'mingput.swf';
 	// swfput program php+ming script name
-	protected static $swfputphpname = 'mingput.php';
+	const swfputphpname = 'mingput.php';
 	// swfput program css name
-	protected static $swfputcssname = 'obj.css';
+	const swfputcssname = 'obj.css';
 	// swfput default video name
-	protected static $swfputdefvid = 'default.flv';
+	const swfputdefvid = 'default.flv';
 	// swfput program binary path
 	protected $swfputbin;
 	// swfput program php+ming script path
@@ -193,16 +193,24 @@ class SWF_put_evh {
 	protected $swfputvid;
 
 	// settings js subdirectory
-	protected static $settings_jsdir = 'js';
+	const settings_jsdir = 'js';
 	// settings js shortcode editor helper name
-	protected static $settings_jsname = 'screens.js';
+	const settings_jsname = 'screens.js';
 	// settings program js path
 	protected $settings_js;
 	// JS: name of class to control textare/button pairs
 	const js_textpair_ctl = 'evhplg_ctl_textpair';
 
+	// for a link to an html help doc
+	const helphtmlname = 'README.html';
+	const helphtml_ref = '#3.1. Form Buttons';
+	protected static $helphtml = null;
+	// for a link to an pdf help doc
+	const helppdfname = 'README.pdf';
+	protected static $helppdf = null;
+
 	// swfput js shortcode editor helper name
-	protected static $swfxedjsname = 'formxed.js';
+	const swfxedjsname = 'formxed.js';
 	
 	// hold an instance
 	private static $instance;
@@ -224,16 +232,25 @@ class SWF_put_evh {
 		// meant to provide options and such
 		$pf = self::mk_pluginfile();
 		// URL setup
-		$t = self::$swfputdir . '/' . self::$swfputbinname;
+		$t = self::swfputdir . '/' . self::swfputbinname;
 		$this->swfputbin = plugins_url($t, $pf);
-		$t = self::$swfputdir . '/' . self::$swfputphpname;
+		$t = self::swfputdir . '/' . self::swfputphpname;
 		$this->swfputphp = plugins_url($t, $pf);
-		$t = self::$swfputdir . '/' . self::$swfputcssname;
+		$t = self::swfputdir . '/' . self::swfputcssname;
 		$this->swfputcss = plugins_url($t, $pf);
-		$t = self::$swfputdir . '/' . self::$swfputdefvid;
+		$t = self::swfputdir . '/' . self::swfputdefvid;
 		$this->swfputvid = plugins_url($t, $pf);
-		$t = self::$settings_jsdir . '/' . self::$settings_jsname;
+		$t = self::settings_jsdir . '/' . self::settings_jsname;
 		$this->settings_js = plugins_url($t, $pf);
+		// these are used in static methods, so are static members
+		if ( self::$helphtml === null ) {
+			$t = self::helphtmlname . self::helphtml_ref;
+			self::$helphtml = plugins_url($t, $pf);
+		}
+		if ( self::$helppdf === null ) {
+			$t = self::helppdfname;
+			self::$helppdf = plugins_url($t, $pf);
+		}
 
 		$this->in_wdg_do_shortcode = 0;
 		
@@ -550,40 +567,9 @@ class SWF_put_evh {
 			__('Save Settings', 'swfput_l10n')
 			)),
 			self::wt(sprintf(
-		// TRANSLATORS: all '%s' are labels of checkbox options
-			__('<p>Although the default settings
-			will work well, consider enabling these:
-			<ul>
-			<li>"%1$s" -- because The Onion Router is a very
-			important protection for <em>real</em> people, even if
-			spammers abuse it and cause associated addresses
-			to be blacklisted</li>
-			<li>"%2$s" -- if you have access to the error log
-			of your site server, this will give you a view
-			of what the plugin has been doing</li>
-			<li>"%3$s" -- a small bit of CPU time and network
-			traffic will be saved when an IP address is
-			identified as a spammer (but in the case of a false
-			positive, this will seem rude)</li>
-			</ul>
-			<p>
-			Those options default to false/disabled (which is
-			why your attention is called to them).
-			</p><p>
-			If you find that a welcome visitor could not comment
-			because their IP address was in a blacklist, add their
-			address to the "Active User Whitelist" in the
-			"Advanced Options" section.
-			</p><p>
-			<em>Spam BLIP</em> is expected work well as a first
-			line of defense against spam, and should complement
-			spam filter plugins that work by analyzing comment content.
-			It might not work in concert with other
-			DNS blacklist plugins.
+			__('<p>TODO: %s
 			</p>', 'swfput_l10n'),
-			__('Whitelist TOR addresses', 'swfput_l10n'),
-			__('Log blacklist hits', 'swfput_l10n'),
-			__('Bail (wp_die()) on blacklist hits', 'swfput_l10n')
+			__('WRITE TIPS', 'swfput_l10n')
 			))
 		);
 
@@ -616,6 +602,8 @@ class SWF_put_evh {
 				)
 			);
 	
+			// later . . .
+			if ( false )
 			$scr->add_help_tab(array(
 				'id'      => 'help_tab_tips',
 				'title'   => __('Tips', 'swfput_l10n'),
@@ -637,7 +625,7 @@ class SWF_put_evh {
 	}
 
 	public function settings_js() {
-		$jsfn = self::$settings_jsname;
+		$jsfn = self::settings_jsname;
 		$j = $this->settings_js;
         wp_enqueue_script($jsfn, $j);
 	}
@@ -695,7 +683,85 @@ class SWF_put_evh {
 			$scr->add_help_tab(array(
 				'id'      => 'help_tab_posts_swfput',
 				'title'   => __('SWFPut Form', 'swfput_l10n'),
-				'content' => '<p>SWFPut Form Help TEST</p>' // $t[1]
+				'content' => self::wt(sprintf(__('<p>
+				If the SWFPut shortcode form. or "metabox,"
+				is not self-explanatory
+				(hopefully, much of it will be), there is more
+				explanation
+				<a href="%s" target="_blank">here (in a new tab)</a>,
+				or as a PDF
+				<a href="%s" target="_blank">here (in a new tab)</a>.
+				</p><p>
+				There is one important restriction on the form\'s
+				text entry fields. The values may not have any
+				ASCII \'&quot;\' (double quote) characters. Hopefully
+				that will not be a problem.
+				</p><p>
+				Two form items (added in version 1.0.4) are probably
+				not self-explanatory:
+				</p><p>
+				<h6>URLs for alternate HTML5 video</h6>
+				This text field accepts alternatives for non-flash
+				browsers, if recent enough to provide HTML5 video.
+				The current state of affairs with HTML5 video will
+				require three transcodings of the material if you
+				want broad browser support; moreover, the supported
+				"container" formats -- .webm, .ogg, and .mp4 --
+				might contain different audio and video types ("codecs")
+				and only some of these will be supported by various
+				browsers.
+				Users not already familiar with this topic will need
+				to do enough research to make the preceding statements
+				clear.
+				</p><p>
+				The text field will accept any number of URLs, which
+				must be separated by \'|\'. Each URL <em>may</em>
+				be appended with a mime-type + codecs argument,
+				separated from the URL by \'?\'. Whitespace around
+				the separators is accepted and stripped-off. Please
+				note that the argument given should <em>not</em>
+				include "type=" or the quotes: give only the
+				statement that should appear within the quotes.
+				For example:</p>
+				<blockquote><code>
+				vids/gato.mp4?video/mp4 | vids/gato.webm ? video/webm; codecs=vp8,vorbis|vids/gato.ogv?video/ogg; codecs=\'theora, vorbis\'
+				</code></blockquote>
+				<p>
+				In the example, where two codecs are specified there is
+				no space after the comma, or the two codecs are
+				enclosed in <em>single</em> quotes.
+				Many online examples
+				show a space after the comma without the quotes,
+				but some older
+				versions of <em>Firefox</em> will reject that
+				usage, so the space after the comma is best left out.
+				</p><p>
+				<h6>Use initial image as non-flash alternate</h6>
+				This checkbox, if enabled (it is, by default) will
+				use the "initial image file" that may be specified
+				for the flash player in an \'img\' element
+				that the visitor\'s browser should display if flash
+				is not available.
+				</p><p>
+				If alternate HTML5 video was specified, that will
+				remain the first alternate display, and the initial
+				image should display if neither flash or HTML5 video
+				are available.
+				</p><p>
+				There is one important consideration for this image:
+				the \'img\' element is given the width and height
+				specified in the form for the flash player, and the
+				visitor\'s browser will scale the image in both
+				dimensions, possibly causing the image to be
+				\'stretched\' or \'squeezed\'. (That is not a problem
+				in the flash player, as it is coded to display the
+				initial image proportionally.) Therefore, it is a
+				good idea to prepare images to have the expected
+				<em>pixel</em> aspect ratio
+				(top/bottom or left/right tranparent
+				areas might be one solution).
+				</p>
+				', 'swfput_l10n'), self::$helphtml, self::$helppdf))
 				// content may be a callback
 				)
 			);
@@ -711,7 +777,7 @@ class SWF_put_evh {
 			||  current_user_can('edit_pages')) ) {
 			$jsfn = 'SWFPut_putswf_video_xed';
 			$pf = self::mk_pluginfile();
-			$t = self::$settings_jsdir . '/' . self::$swfxedjsname;
+			$t = self::settings_jsdir . '/' . self::swfxedjsname;
 			$jsfile = plugins_url($t, $pf);
 	        wp_enqueue_script($jsfn, $jsfile, array('jquery'), 'xed');
 	    }
@@ -1875,21 +1941,21 @@ class SWF_put_evh {
 	// contained in the plugin directory
 	public static function mk_playerdir() {
 		$pd = self::mk_plugindir();
-		return $pd . '/' . self::$swfputdir;
+		return $pd . '/' . self::swfputdir;
 	}
 
 	// help for swf player file path/name; it is
 	// contained in the plugin directory
 	public static function mk_playerfile() {
 		$pd = self::mk_playerdir();
-		return $pd . '/' . self::$swfputphpname;
+		return $pd . '/' . self::swfputphpname;
 	}
 
 	// help for swf player file path/name; it is
 	// contained in the plugin directory
 	public static function mk_playerbinfile() {
 		$pd = self::mk_playerdir();
-		return $pd . '/' . self::$swfputbinname;
+		return $pd . '/' . self::swfputbinname;
 	}
 
 	// can php+ming be used?
@@ -2300,7 +2366,7 @@ class SWF_put_evh {
 	// helper for selecting swf bin near desired bar height
 	public function get_swf_binurl($bh = 48) {
 		$d = self::mk_playerdir();
-		$f = self::$swfputbinname;
+		$f = self::swfputbinname;
 		$a = explode('.', $f);
 		$p = sprintf('/^%s([0-9]+)\.%s$/i', $a[0], $a[1]);
 		$vmin = 65535; $vmax = 0;
@@ -2323,7 +2389,7 @@ class SWF_put_evh {
 		$bh = (int)$bh;
 		$n = count($a);
 		if ( $n === 0 ) {
-			$f = self::$swfputbinname;
+			$f = self::swfputbinname;
 		} else if ( $n === 1 ) {
 			// $vmax will index the only entry in $a
 			$f = $a['' . $vmax];
