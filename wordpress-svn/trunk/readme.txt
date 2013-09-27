@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: video, audio, movies, tube, flash, flash player, graphics, movie, audio-visual, a/v content
 Requires at least: 3.0.2
 Tested up to: 3.6.1
-Stable tag: 1.0.3
+Stable tag: 1.0.4
 Text Domain: swfput_l10n
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -52,9 +52,15 @@ whether it will suit your purpose:
 	(and should) be provided. The setup form provides for
 	this in the same way as described above.
 
-*	SWFPut allows optional HTML5 video fallback
-	(preferably .ogg, or .webm) to be specified
-	in case flash is not supported.
+*	SWFPut, as of version 1.0.4,
+	allows for optional URLs (with optional
+	mime and codec types) that will be placed in
+	an HTML5 video element, as a fallback
+	in case flash is not supported. A tab
+	has been added to the editor screen help (WP 3.3 or greater)
+	with a brief explanation of this text field, but the user
+	will need to understand the state of HTML5 video
+	regarding media types.
 
 *	SWFPut should not interfere with the appearance of
 	a site: a video is presented much like an image
@@ -203,9 +209,28 @@ supported file formats.
 Update 1 August 2013: WordPress 3.6 is released, with HTML5
 video and audio support. That's another reason.
 
+Update for version 1.0.4: there is now a field in the video
+setup forms that can be given URLs (separated by '|' if there is
+more than one) which will appear as SOURCE elements within a
+VIDEO element within the OBJECT element that specifies the
+flash program; so, if flash support is absent, a browser might
+make use of the HTML5 alternative. It remains up to the user
+to understand the the current state of HTML5 regarding
+video formats (uneven and differing support among common
+browsers), how to prepare a set of these video files in
+different formats and specify them in the best order to be
+useful with the greatest number of browsers. Each URL may have
+an optional argument for the type attribute (NOT a whole type
+attribute statement -- only the argument that will appear
+within quotes), separated from the URL by a '?' character.
+
+= Does SWFPut retard hair loss, or increase gas mileage? =
+
+Of course!
+
 = Are you going to anticipate more questions? =
 
-Maybe later.
+Maybe later. Honey, I burned the spaghetti.
 
 == Screenshots ==
 
@@ -228,7 +253,9 @@ Maybe later.
 * Updated swf object element and added optional alternative
 	img and video (html5) nested elements. Removed classid from
 	object, except when MSIE is in user agent string. (inspired
-	bu suggestion from aileenf).
+	by suggestion from aileenf).
+* Added help tabs.
+* Some code cleanups.
 
 = 1.0.3 =
 * Maintenance.

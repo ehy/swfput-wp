@@ -1,13 +1,7 @@
 K 25
 svn:wc:ra_dav:version-url
 V 37
-/!svn/ver/750260/swfput/trunk/mingput
-END
-mingput32.swf
-K 25
-svn:wc:ra_dav:version-url
-V 51
-/!svn/ver/777997/swfput/trunk/mingput/mingput32.swf
+/!svn/ver/777997/swfput/trunk/mingput
 END
 mingput24.swf
 K 25
@@ -39,6 +33,12 @@ svn:wc:ra_dav:version-url
 V 51
 /!svn/ver/777997/swfput/trunk/mingput/mingput36.swf
 END
+default.flv
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/!svn/ver/779413/swfput/trunk/mingput/default.flv
+END
 mingput28.swf
 K 25
 svn:wc:ra_dav:version-url
@@ -56,4 +56,10 @@ K 25
 svn:wc:ra_dav:version-url
 V 51
 /!svn/ver/777997/swfput/trunk/mingput/mingput40.swf
+END
+mingput32.swf
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/!svn/ver/777997/swfput/trunk/mingput/mingput32.swf
 END

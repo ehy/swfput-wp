@@ -21,8 +21,8 @@ POTSRCS = ${PRJSTEM}.php
 
 DOCSD = docs
 JSDIR = js
-JSBIN = $(JSDIR)/formxed.js
-JSSRC = $(JSDIR)/formxed.dev.js
+JSBIN = $(JSDIR)/formxed.js $(JSDIR)/screens.js
+JSSRC = $(JSDIR)/formxed.dev.js $(JSDIR)/screens.dev.js
 LCDIR = locale
 LCDOM = $(PRJSTEM)_l10n
 LCPOT = $(LCDIR)/$(LCDOM).pot
@@ -93,10 +93,11 @@ $(SDIRI)/mingput24.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
 	$(PHPCLI) $(SDIRI)/mingput.php -- BH=24 > $(SDIRI)/mingput24.swf
 
 ${JSBIN}: ${JSSRC}
-	(P=`which perl` && $$P -e 'use JavaScript::Minifier qw(minify);minify(input=>*STDIN,outfile=>*STDOUT)' < ${JSSRC} > ${JSBIN} 2>/dev/null) \
+	O=$@; I=$${O%.*}.dev.js; \
+	(P=`which perl` && $$P -e 'use JavaScript::Minifier qw(minify);minify(input=>*STDIN,outfile=>*STDOUT)' < "$$I" > "$$O" 2>/dev/null) \
 	|| (P=`which perl` && $$P -e \
-		'use JavaScript::Packer;$$p=JavaScript::Packer->init();$$o=join("",<STDIN>);$$p->minify(\$$o,{"compress"=>"clean"});print STDOUT $$o;' < ${JSSRC} > ${JSBIN}) \
-	|| cp -f ${JSSRC} ${JSBIN}
+		'use JavaScript::Packer;$$p=JavaScript::Packer->init();$$o=join("",<STDIN>);$$p->minify(\$$o,{"compress"=>"clean"});print STDOUT $$o;' < "$$I" > "$$O") \
+	|| cp -f "$$I" "$$O"
 
 $(READS): docs/readme.roff
 	(cd docs && make txt tty tt8 pdf html && \

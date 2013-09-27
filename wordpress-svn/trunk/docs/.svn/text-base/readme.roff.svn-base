@@ -280,19 +280,26 @@ URL may be appended with an argument for the
 separated from the URL by a `\f(CR?\fR'
 character (do not include the `\f(CRtype\fR'
 keyword; give only the value that should appear
-between quotes)\**.
+between quotes in the type argument,
+and although many web examples
+show a space after the comma separating the video and
+audio codec names, Firefox up to at least version 16
+will reject the source because of the space, so it should
+be left out)\**.
 .FS
 For example:
 .br
-\f(CRalt.ogv?video/ogg; codecs=dirac, speex|
-alt.webm| alt.mp4?video/mp4\fR.
+\f(CRfoo/alternate.mp4?video/mp4|
+foo/alternate.webm?video/webm; codecs=vp8,vorbis|
+foo/alternate.ogv?video/ogg; codecs=theora,vorbis\fR.
 .FE
-If more than one is given they will appear in order
-and the browser should use the first type
-that it supports (if any). The OGG and WEBM
-types should have wide support; the MP4 type
-is less likely to be supported because that
-format is tainted by patents.
+If more than one is given they will appear in order.
+The browser should use the first type
+that it supports (if any, and some older versions
+of browsers might not consider any source
+but the first to appear). The MP4, WEBM, and OGG
+types have varied support among web browsers,
+so ideally all three formats should be provided.
 .IP \(bu
 \fBPlaypath (rtmp)\fP:
 If the \(lq\fBUrl or media library ID\fP\(rq
