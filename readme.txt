@@ -244,6 +244,8 @@ Maybe later. Honey, I burned the spaghetti.
 
 == Changelog ==
 
+= 1.0.5 =
+
 = 1.0.4 =
 * Fixed duplicated message on settings page update resulting from
 	uneeded settings_errors() call: this call did not cause a dup
@@ -298,6 +300,8 @@ Maybe later. Honey, I burned the spaghetti.
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.0.5 =
 
 = 1.0.4 =
 Now has option to specify fallback HTML5 video sources, and/or use
