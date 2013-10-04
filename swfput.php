@@ -920,8 +920,7 @@ class SWF_put_evh {
 
 		$dom = 'swfput_l10n';
 
-		if ( ! isset($WP_textdomain_done)
-			&& defined(WP_LANG_DIR) ) {
+		if ( ! isset($WP_textdomain_done) && defined('WP_LANG_DIR') ) {
 			$loc = apply_filters('plugin_locale', get_locale(), $dom);
 			// this file path is built in the manner shown at the
 			// URL above -- it does look strange

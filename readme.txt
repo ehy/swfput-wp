@@ -245,6 +245,10 @@ Maybe later. Honey, I burned the spaghetti.
 == Changelog ==
 
 = 1.0.5 =
+* BUG[unimportant]: tested a defined(FOO) (rather than 'FOO'),
+	but it can only matter in the very exceedingly extremely unlikely
+	case that a .mo translation binary for this plugin's
+	text domain has been installed under the WP install's WP_LANG_DIR.
 
 = 1.0.4 =
 * Fixed duplicated message on settings page update resulting from
