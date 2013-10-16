@@ -39,6 +39,12 @@ Text Domain: swfput_l10n
 \**********************************************************************/
 
 
+// check for naughty direct invocation; w/o this we'd soon die
+// from undefined WP functions anyway, but let's check anyway
+if ( basename(__FILE__) == basename($_SERVER['SCRIPT_FILENAME']) ) {
+	die("Oh, you naughty boy||girl||other!\n");
+}
+
 // supporting classes found in files named "${cl}.inc.php"
 // each class must define static method id_token() which returns
 // the correct int, to help avoid name clashes
