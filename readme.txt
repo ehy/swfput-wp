@@ -244,6 +244,8 @@ Maybe later. Honey, I burned the spaghetti.
 
 == Changelog ==
 
+= 1.0.6 =
+
 = 1.0.5 =
 * BUG[unimportant]: tested a defined(FOO) (rather than 'FOO'),
 	but PHP handles that common mistake anyway, and
@@ -307,6 +309,8 @@ Maybe later. Honey, I burned the spaghetti.
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.0.6 =
 
 = 1.0.5 =
 * Confirmed working with WP 3.7.
