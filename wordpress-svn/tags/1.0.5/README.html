@@ -1,0 +1,772 @@
+<!-- Creator     : groff version 1.21 -->
+<!-- CreationDate: Fri Oct 25 08:57:50 2013 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>SWFPut &mdash; Flash Video Player Plugin for WordPress</title>
+
+</head>
+<body>
+
+<h1 align="center">SWFPut &mdash; Flash Video Player Plugin for WordPress</h1>
+
+<a href="#1. What is it?">1. What is it?</a><br>
+<a href="#2. Building From the Source">2. Building From the Source</a><br>
+<a href="#3. Usage">3. Usage</a><br>
+<a href="#3.1. Form Buttons">3.1. Form Buttons</a><br>
+<a href="#3.2. Form Sections">3.2. Form Sections</a><br>
+<a href="#3.2.1. Media">3.2.1. Media</a><br>
+<a href="#3.2.2. Dimensions">3.2.2. Dimensions</a><br>
+<a href="#3.2.3. Behavior">3.2.3. Behavior</a><br>
+<a href="#3.3. The Widget">3.3. The Widget</a><br>
+<a href="#4. License">4. License</a><br>
+
+<hr>
+
+
+<p align="center"><i>Ed Hynan
+&lt;edhynan@gmail.com&gt;</i></p>
+
+<p>This &lsquo;README&rsquo; serves as the main
+documentation for the <b>SWFPut</b> <i>WordPress</i> plugin,
+and as the conventional &lsquo;README&rsquo; as well.</p>
+
+<h2>1. What is it?
+<a name="1. What is it?"></a>
+</h2>
+
+
+<p style="margin-top: 1em"><b>SWFPut</b> is a plugin for
+the popular <i>WordPress</i> weblog software. It provides a
+video player program for the flash plugin and the means to
+configure an instance with a video source and playback
+attributes. There are two separate components: the flash
+video player, and the <i>WordPress</i> plugin proper. The
+video player is delivered to site visitors by the plugin in
+the traditional &lt;object ...&gt; block with the necessary
+arguments. Flash video objects may be placed in posts and
+pages, or in the widget areas supported by your theme (i.e.,
+the plugin includes a widget). Video is placed in posts and
+pages with a <i>shortcode</i>; if you do not know what a
+shortcode is, or do not want to deal with them, that&rsquo;s
+no problem. (In fact, it is preferable that the shortcodes
+<i>not</i> be hand-edited, and they will not be discussed in
+detail here.) The plugin adds to the administrative
+interface a full featured form to setup and add, or edit, or
+delete video objects, so the user does not need to be
+troubled with shortcodes (they will be visible in the
+editor; you will get used to them). The flash video widget
+has a similar full featured form.</p>
+
+<p style="margin-top: 1em">The plugin does not add any
+<i>JavaScript</i> to the pages generated for your visitors,
+which might be helpful if you try to keep your pages useful
+to those who disable JavaScript in their browsers. (Such
+visitors might need to explicitly enable the flash web
+browser plugin, but that is another, unavoidable, issue.)
+JavaScript is used in the administrative interface for the
+forms and manipulation of shortcodes in the editor; but of
+course you must have JavaScript enabled when you log in to
+your <i>WordPress</i> site &mdash; this does not affect your
+visitors.</p>
+
+<p style="margin-top: 1em">(Note that the <b>SWFPut</b>
+video player has been coded to work well with the free
+<i>Gnash</i> web browser plugin, as well as the closed
+binary-only proprietary version in common use. As of this
+writing, <i>Gnash</i> does not handle <b>MP4</b> files well,
+even though it handles H.264 video and AAC audio if they are
+in an FLV container file.)</p>
+
+<h2>2. Building From the Source
+<a name="2. Building From the Source"></a>
+</h2>
+
+
+<p style="margin-top: 1em"><b>SWFPut</b> is distributed as
+a <i>ZIP</i> archive prepared for installation on a
+<i>WordPress</i> site with the &ldquo;Add New&rdquo; item
+under the &ldquo;Plugins&rdquo; menu. Therefore, there is no
+need to build the package before use.</p>
+
+<p style="margin-top: 1em">(You may skip forward to the
+<b>Usage</b> section if you don&rsquo;t intend to modify the
+player or plugin.)</p>
+
+<p style="margin-top: 1em">The actual plugin is composed of
+<i>PHP</i> code, and JavaScript for the administrative
+parts, and neither of those requires compilation or link
+editing. The flash video player is a compiled program, but
+binaries are included in the installable package so that use
+does not require compilation by the user. Of course, the
+source code is included and the binaries may be built if
+necessary (or desired). Compiling the flash program will
+require the <i>Ming</i> PHP extension. See the files
+<tt>Makefile</tt>, <tt>mingtest/mingput.php</tt>, and
+<tt>mingtest/mainact.inc.php</tt> if you wish to learn to
+build the player.</p>
+
+<p style="margin-top: 1em">If you wish to change the
+JavaScript code, edit <tt>js/formxed.dev.js</tt>, rather
+than <tt>js/formxed.js</tt>. The latter is merely a
+&lsquo;minified&rsquo; version of the former; see
+<tt>Makefile</tt>.</p>
+
+<p style="margin-top: 1em">This file (README*) is built
+with the <i>GNU</i> roff <i>groff</i> with <i>ms</i> macros;
+see <tt>docs/Makefile</tt>.</p>
+
+<p style="margin-top: 1em">The Makefiles require a
+<i>Unix</i>-like or <i>POSIX</i> system. The default target
+builds as necessary and then creates the ZIP file.</p>
+
+<h2>3. Usage
+<a name="3. Usage"></a>
+</h2>
+
+
+<p style="margin-top: 1em">A logged in session is
+assumed.</p>
+
+<p style="margin-top: 1em"><b>SWFPut</b> installed will add
+an item under the &ldquo;Settings&rdquo; menu named
+&ldquo;SWFPut Plugin&rdquo;. Selecting that should produce
+the plugin&rsquo;s configuration page. The configuration
+page includes optional verbose help, and so it will not be
+described here.</p>
+
+<p style="margin-top: 1em">When editing posts or pages,
+below the editor the plugin will have placed an interactive
+form with the title &ldquo;SWFPut Flash Video
+Shortcode&rdquo;. Directly under the title is a row of
+buttons. Under the row of buttons, the bulk of the form is
+placed in three sections entitled &ldquo;Media&rdquo;,
+&ldquo;Dimensions&rdquo;, and &ldquo;Behavior&rdquo;. The
+title bar of each section has a button that will hide or
+show that section, which might help if the height of the
+form is greater than that the display.</p>
+
+<h3>3.1. Form Buttons
+<a name="3.1. Form Buttons"></a>
+</h3>
+
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="2%">
+
+
+<p style="margin-top: 1em">&bull;</p></td>
+<td width="8%"></td>
+<td width="80%">
+
+
+<p style="margin-top: 1em"><b>Fill form from editor</b>:
+When the post (or page) already contains a <b>SWFPut</b>
+flash video object (i.e., shortcode), this will find it in
+the editor and fill the form with its details. A post may
+contain any number of <b>SWFPut</b> video objects. If there
+is more than one, then repeatedly using this button will
+cycle through each in turn.</p></td></tr>
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="2%">
+
+
+<p style="margin-top: 1em">&bull;</p></td>
+<td width="8%"></td>
+<td width="80%">
+
+
+<p style="margin-top: 1em"><b>Replace current in
+editor</b>: When the form has been filled with the details
+of a video object using &ldquo;<b>Fill form from
+editor</b>&rdquo; (described above), or if it contains the
+details of a new video object that has just been added, the
+form items may be changed, and this button will edit the
+associated shortcode (video object) with the changes.</p></td></tr>
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="2%">
+
+
+<p style="margin-top: 1em">&bull;</p></td>
+<td width="8%"></td>
+<td width="80%">
+
+
+<p style="margin-top: 1em"><b>Delete current in editor</b>:
+As described above for &ldquo;<b>Replace current in
+editor</b>&rdquo;, except that rather than changing the
+details of the shortcode, it is deleted.</p></td></tr>
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="2%">
+
+
+<p style="margin-top: 1em">&bull;</p></td>
+<td width="8%"></td>
+<td width="80%">
+
+
+<p style="margin-top: 1em"><b>Place new in editor</b>:
+After making sure that the cursor (insertion point) in the
+editor is at the desired position, and setting the form
+items, use this button to add a new shortcode (video).</p></td></tr>
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="2%">
+
+
+<p style="margin-top: 1em">&bull;</p></td>
+<td width="8%"></td>
+<td width="80%">
+
+
+<p style="margin-top: 1em"><b>Reset default values</b>:
+Except for the &ldquo;Caption&rdquo; text field, all form
+items are set to default values, or cleared. It is assumed
+that text typed into the &ldquo;Caption&rdquo; field would
+be better maintained by hand, so that field is not
+cleared.</p> </td></tr>
+</table>
+
+<h3>3.2. Form Sections
+<a name="3.2. Form Sections"></a>
+</h3>
+
+
+<h4>3.2.1. Media
+<a name="3.2.1. Media"></a>
+</h4>
+
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="2%">
+
+
+<p style="margin-top: 1em">&bull;</p></td>
+<td width="8%"></td>
+<td width="80%">
+
+
+<p style="margin-top: 1em"><b>Caption</b>: A video object
+is set in a page as an image would be, with the same border,
+and an optional caption, which may be set here. If this
+field is left blank, there will be no caption.</p></td></tr>
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="2%">
+
+
+<p style="margin-top: 1em">&bull;</p></td>
+<td width="8%"></td>
+<td width="80%">
+
+
+<p style="margin-top: 1em"><b>Url or media library ID</b>:
+A fully qualified URL may be given here, or an ID valid for
+the <i>WordPress</i> database. Or more conveniently, this
+field may be set from the two drop-down lists described
+next. Acceptable protocols are <i>HTTP</i>, <i>HTTPS</i>,
+and <i>RTMP</i>. Support for <i>RTMP</i> is only partial and
+very limited. See &ldquo;<b>Playpath (rtmp)</b>&rdquo;
+below. Acceptable file (media) types are <b>FLV</b>,
+<b>MP4</b> (video), and <b>MP3</b> (audio)
+<small><small>1</small></small> .</p></td></tr>
+</table>
+
+<p style="margin-left:20%; margin-top: 1em"><cite>For
+<b>MP3</b> files, you may try placing a video URL in the
+&ldquo;<b>Playpath (rtmp)</b>&rdquo; field to play along
+with the audio. If the video has an audio stream, that will
+mix in, so it should probably be a video only file. This is
+an experimental and <b>unsupported</b> feature. </cite></p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="2%">
+
+
+<p style="margin-top: 1em">&bull;</p></td>
+<td width="8%"></td>
+<td width="80%">
+
+
+<p style="margin-top: 1em"><b>Url from uploads
+directory</b>: This is a drop-down list from which the
+&ldquo;<b>Url or media library ID</b>&rdquo; field may be
+set. The <i>WordPress</i> <tt>uploads</tt> directory is
+searched recursively for files with the suffixes <b>FLV</b>,
+<b>MP4</b>, and <b>MP3</b>, and for each a URL is placed in
+this list. This has the advantage that it will find files
+added by hand (rather than with the &lsquo;add media&rsquo;
+interface) if they are placed in <tt>uploads</tt> or a
+directory under it.</p></td></tr>
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="2%">
+
+
+<p style="margin-top: 1em">&bull;</p></td>
+<td width="8%"></td>
+<td width="80%">
+
+
+<p style="margin-top: 1em"><b>Select ID from media
+library</b>: This is a drop-down list from which the
+&ldquo;<b>Url or media library ID</b>&rdquo; field may be
+set, as above, with the difference that it searches the
+<i>WordPress</i> media database, and presents the suitable
+filenames their media IDs.</p></td></tr>
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="2%">
+
+
+<p style="margin-top: 1em">&bull;</p></td>
+<td width="8%"></td>
+<td width="80%">
+
+
+<p style="margin-top: 1em"><b>Medium is audio</b>: To
+determine whether to play video or audio, the file suffix of
+the medium is checked. If the file suffix is not known, the
+medium is assumed to be video. If the medium is an mp3 audio
+file, but it does not have the <b>MP3</b> suffix, check
+this.</p> </td></tr>
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="2%">
+
+
+<p style="margin-top: 1em">&bull;</p></td>
+<td width="8%"></td>
+<td width="80%">
+
+
+<p style="margin-top: 1em"><b>URLs for alternate HTML5
+video</b>: An optional series of URLs for an alternate HTML5
+video element that a web browser can try if flash video is
+not available or is not supported. If more than one URL is
+given, they should be separated by the
+&lsquo;<tt>|</tt>&rsquo; (pipe) character. Each individual
+URL may be appended with an argument for the
+&lsquo;<tt>type</tt>&rsquo; attribute of the video element,
+separated from the URL by a &lsquo;<tt>?</tt>&rsquo;
+character (do not include the &lsquo;<tt>type</tt>&rsquo;
+keyword; give only the value that should appear between
+quotes in the type argument, and although many web examples
+show a space after the comma separating the video and audio
+codec names, Firefox up to at least version 16 will reject
+the source because of the space, so it should be left out)
+<small><small>2</small></small> .</p></td></tr>
+</table>
+
+<p style="margin-left:20%; margin-top: 1em"><cite>For
+example: <tt><br>
+foo/alternate.mp4?video/mp4| foo/alternate.webm?video/webm;
+codecs=vp8,vorbis| foo/alternate.ogv?video/ogg;
+codecs=theora,vorbis</tt>. </cite></p>
+
+<p style="margin-left:20%; margin-top: 1em">If more than
+one is given they will appear in order. The browser should
+use the first type that it supports (if any, and some older
+versions of browsers might not consider any source but the
+first to appear). The MP4, WEBM, and OGG types have varied
+support among web browsers, so ideally all three formats
+should be provided.</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="2%">
+
+
+<p style="margin-top: 1em">&bull;</p></td>
+<td width="8%"></td>
+<td width="80%">
+
+
+<p style="margin-top: 1em"><b>Playpath (rtmp)</b>: If the
+&ldquo;<b>Url or media library ID</b>&rdquo; field is given
+an <b>RTMP</b> URL, the &lsquo;playpath&rsquo; is given
+here. Note that only the simplest RTMP connections are
+supported: those requiring only the playpath.</p></td></tr>
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="2%">
+
+
+<p style="margin-top: 1em">&bull;</p></td>
+<td width="8%"></td>
+<td width="80%">
+
+
+<p style="margin-top: 1em"><b>Url of initial image file
+(optional)</b>: An <b>HTTP</b> or <b>HTTPS</b> URL for an
+image file may be placed here. When the player is loaded, if
+it is not set to play on load, this image is displayed until
+the play button is invoked. Accepted image types are
+<b>JPEG</b>, <b>PNG</b>, and <b>GIF</b>, and <b>SWF</b>
+<small><small>3</small></small> .</p></td></tr>
+</table>
+
+
+<p style="margin-left:20%; margin-top: 1em"><cite><b>SWF</b>
+files may be stills or animations. This type is a flash
+<i>program</i> that the flash web browser plugin will be
+executing, so, of course, it must not interfere with the
+<b>SWFPut</b> player. Test thoroughly if this is used.
+</cite></p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="2%">
+
+
+<p style="margin-top: 1em">&bull;</p></td>
+<td width="8%"></td>
+<td width="80%">
+
+
+<p style="margin-top: 1em"><b>Load image from uploads
+directory</b>: This is a drop-down list from which the
+&ldquo;<b>Url of initial image file (optional)</b>&rdquo;
+field may be set. The <i>WordPress</i> <tt>uploads</tt>
+directory is searched recursively for files with the
+suffixes listed as acceptable for that field, and for each a
+URL is placed in this list. This has the advantage that it
+will find files added by hand (rather than with the
+&lsquo;add media&rsquo; interface) if they are placed in
+<tt>uploads</tt> or a directory under it.</p></td></tr>
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="2%">
+
+
+<p style="margin-top: 1em">&bull;</p></td>
+<td width="8%"></td>
+<td width="80%">
+
+
+<p style="margin-top: 1em"><b>Load image ID from media
+library</b>: This is a drop-down list from which the
+&ldquo;<b>Url of initial image file (optional)</b>&rdquo;
+field may be set, as above, with the difference that it
+searches the <i>WordPress</i> media database, and presents
+the suitable filenames their media IDs.</p></td></tr>
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="2%">
+
+
+<p style="margin-top: 1em">&bull;</p></td>
+<td width="8%"></td>
+<td width="80%">
+
+
+<p style="margin-top: 1em"><b>Use initial image as
+non-flash alternate</b>: If an initial image was given, then
+also use it as an alternative display when flash is not
+supported. If optional HTML5 video URLs were given, they
+will remain the first alternate, and the initial image will
+be an alternate to that. This option is on by default.</p></td></tr>
+</table>
+
+<h4>3.2.2. Dimensions
+<a name="3.2.2. Dimensions"></a>
+</h4>
+
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="2%">
+
+
+<p style="margin-top: 1em">&bull;</p></td>
+<td width="8%"></td>
+<td width="80%">
+
+
+<p style="margin-top: 1em"><b>Pixel Width &times;
+Height</b>: set these to the desired size of the
+player&rsquo;s embedded window. This does not need to be the
+same as the display size of the video to be played, but the
+appearance will be best if the <i>aspect</i> of the
+player&rsquo;s display is the same as the display aspect of
+the video. For example, if set for a video with a size of
+400&times;300, then setting these to fields to 320&times;240
+would look good (the width:height ratio is the same). In any
+case, the player will scale the video to fit within its
+display, but it maintains the aspect ratio, so horizontal or
+vertical black (unused) areas will be visible if the aspect
+ratios do not match. It is also important to note that the
+browser will (probably) honor a maximum width for a page
+column set in <i>CSS</i>, and force the browser&rsquo;s
+flash plugin to display at a smaller width than the user
+specified. For example, if you set these fields to
+640&times;480, but the column in which posts appear has a
+width of 600, the display would be at 600&times;480. In such
+a case, you might try 600&times;450 to maintain the aspect
+so that the video matches display size. The above assumes a
+4:3 aspect; you would use the correct numbers, of
+course.</p> </td></tr>
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="2%">
+
+
+<p style="margin-top: 1em">&bull;</p></td>
+<td width="8%"></td>
+<td width="80%">
+
+
+<p style="margin-top: 1em"><b>Auto aspect</b>: This enables
+a feature meant to be helpful when the video to be played
+might have been prepared as DVD-Video (NTSC or PAL) for
+standard (non-widescreen) 4:3 display. Such video has
+non-square pixels; i.e., its actual width&times;height does
+not match its intended display aspect. With this check
+enabled, the video player will force display at 4:3 ratio if
+the video dimensions match one of the DVD-Video pixel sizes.
+This is not suitable for widescreen DVD-Video, which has one
+of the expected DVD-Video pixel sizes, but is meant to be
+displayed with a 16:9 aspect.</p></td></tr>
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="2%">
+
+
+<p style="margin-top: 1em">&bull;</p></td>
+<td width="8%"></td>
+<td width="80%">
+
+
+<p style="margin-top: 1em"><b>Display aspect</b>: Set the
+intended display aspect ratio in this field if you know that
+the video has non-square pixels. A value of 0 (zero)
+disables this field; otherwise, a value may be given as a
+decimal number (e.g., 1.33333333) or as a ratio using
+&lsquo;:&rsquo; or &lsquo;x&rsquo; or &lsquo;/&rsquo; as
+separator (e.g., 4:3, or 16x9, of 20/11, etc.&mdash;several
+other characters will also be accepted as a separator, but
+it&rsquo;s sensible to use those listed here).</p></td></tr>
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="2%">
+
+
+<p style="margin-top: 1em">&bull;</p></td>
+<td width="8%"></td>
+<td width="80%">
+
+
+<p style="margin-top: 1em"><b>Pixel aspect</b>: Similar to
+&ldquo;<b>Display aspect</b>&rdquo; above, but this field
+takes the source (pixel) aspect ratio rather than the
+display aspect in the unlikely event that that value is more
+readily available. For example, video prepared for NTSC DVD
+at 720&times;480 pixels intended for standard (4:3) display
+has a pixel aspect ratio of 8:9, and at 352&times;240 a
+pixel aspect ratio of 10:11. As above, &lsquo;0&rsquo;
+disables this field.</p></td></tr>
+</table>
+
+<h4>3.2.3. Behavior
+<a name="3.2.3. Behavior"></a>
+</h4>
+
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="2%">
+
+
+<p style="margin-top: 1em">&bull;</p></td>
+<td width="8%"></td>
+<td width="80%">
+
+
+<p style="margin-top: 1em"><b>Initial volume</b>: The video
+player has a volume control that visitors can adjust, but
+this field will set a default volume. If the web browser
+flash plugin is permitted to save values locally on a
+visitor&rsquo;s machine, then their adjustment will be
+saved, and will be used rather than the default when they
+visit again (or reload the page).</p></td></tr>
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="2%">
+
+
+<p style="margin-top: 1em">&bull;</p></td>
+<td width="8%"></td>
+<td width="80%">
+
+
+<p style="margin-top: 1em"><b>Play on load</b>: This will
+cause the video (or audio) to begin playing as soon as the
+player program is loaded. When this is not set, the player
+waits for the play button.</p></td></tr>
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="2%">
+
+
+<p style="margin-top: 1em">&bull;</p></td>
+<td width="8%"></td>
+<td width="80%">
+
+
+<p style="margin-top: 1em"><b>Loop play</b>: This will
+cause the medium to play again from the beginning each time
+it ends. When this is not set, the media plays once, and
+then pauses.</p></td></tr>
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="2%">
+
+
+<p style="margin-top: 1em">&bull;</p></td>
+<td width="8%"></td>
+<td width="80%">
+
+
+<p style="margin-top: 1em"><b>Hide control bar
+initially</b>: This will cause the control bar to hide a few
+seconds after the player loads (e.g., so that it does not
+obscure an initial image). Note that this also changes the
+control bar behavior in general: the bar will show whenever
+mouse movement is detected within the embedded window, and
+hide again when there has been no mouse movement for a few
+seconds. When this is not set, the control bar is left
+showing when the player loads, and thereafter is always
+shown when the mouse is within the embedded window, and is
+always hidden when the mouse is <i>detected</i> leaving the
+window (when the mouse is moved out of the player window
+with rapid motion the browser plugin often fails to deliver
+a &lsquo;mouse has left&rsquo; event to the player program,
+so hiding the bar is not always reliable).</p></td></tr>
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="2%">
+
+
+<p style="margin-top: 1em">&bull;</p></td>
+<td width="8%"></td>
+<td width="80%">
+
+
+<p style="margin-top: 1em"><b>Hide and disable control
+bar</b>: Enable this if the media should play through
+without interruption.</p></td></tr>
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="2%">
+
+
+<p style="margin-top: 1em">&bull;</p></td>
+<td width="8%"></td>
+<td width="80%">
+
+
+<p style="margin-top: 1em"><b>Allow full screen</b>: This
+enables a control bar button that will place the video in
+full-screen mode.</p></td></tr>
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="2%">
+
+
+<p style="margin-top: 1em">&bull;</p></td>
+<td width="8%"></td>
+<td width="80%">
+
+
+<p style="margin-top: 1em"><b>Control bar Height
+(20-50)</b>: The control bar height can be adjusted with
+this. Actually, there is a fixed number precompiled sizes in
+the player binaries that are distributed with the package,
+and this field causes the nearest size to be selected. If
+the <i>WordPress</i> host&rsquo;s <i>PHP</i> configuration
+includes the <i>Ming</i> extension, then you may select an
+option on the <b>SWFPut</b> configuration page called
+&ldquo;Dynamic SWF generation&rdquo;. This produces the
+video player on the fly, and in this case the value of this
+field builds the control bar at the requested size rather
+than using a near match.</p></td></tr>
+</table>
+
+<h3>3.3. The Widget
+<a name="3.3. The Widget"></a>
+</h3>
+
+
+<p style="margin-top: 1em">The player can also be used as a
+widget. The &ldquo;Appearance&rdquo; menu
+&ldquo;Widgets&rdquo; item should produce the
+&ldquo;Widgets&rdquo; page which, after installation of
+<b>SWFPut</b>, should show &ldquo;<b>SWFPut Flash
+Video</b>&rdquo; under &ldquo;<b>Available
+Widgets</b>&rdquo;. After dragging this to a widget area the
+setup form should display (click the arrow near the title if
+necessary). The widget&rsquo;s form has the same items
+described under &ldquo;<b>Form Sections</b>&rdquo; above,
+although this form is not displayed in the three separate
+sections and does not have the buttons near the top. There
+is one additional item at the top of the widget form: a text
+field named &ldquo;Widget title&rdquo;. Not surprisingly,
+the contents of that field will be displayed as a title
+above the widget on the pages that include the particular
+widget area used.</p>
+
+<p style="margin-top: 1em">The description under
+&ldquo;<b>Pixel Width &times; Height</b>&rdquo; above
+mentioned the maximum column widths set by the theme&rsquo;s
+CSS, and how the video window width might be limited by the
+those. The same applies to widget areas, but the maximum
+width is likely much less than that in the posts area. These
+fields have defaults in the widget form that have been
+useful with the themes distributed with <i>WordPress</i>,
+but the user should certainly do some testing along with the
+chosen theme.</p>
+
+<h2>4. License
+<a name="4. License"></a>
+</h2>
+
+
+<p style="margin-top: 1em">This program and all files
+included in the distribution archive are under the <b><i>GNU
+GPL</i></b>, version 3. See the file <tt>COPYING</tt>, which
+should be present in the top-level directory of the
+distribution archive; or, see the license at
+<tt>http://www.gnu.org/licenses/</tt>.</p>
+<hr>
+</body>
+</html>
