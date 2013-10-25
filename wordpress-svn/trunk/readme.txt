@@ -3,7 +3,7 @@ Contributors: EdHynan
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4Q2Y8ZUG8HXLC
 Tags: video, audio, movies, tube, flash, flash player, graphics, movie, audio-visual, a/v content
 Requires at least: 3.0.2
-Tested up to: 3.6.1
+Tested up to: 3.7
 Stable tag: 1.0.4
 Text Domain: swfput_l10n
 License: GPLv3 or later
@@ -244,6 +244,15 @@ Maybe later. Honey, I burned the spaghetti.
 
 == Changelog ==
 
+= 1.0.5 =
+* BUG[unimportant]: tested a defined(FOO) (rather than 'FOO'),
+	but PHP handles that common mistake anyway, and
+	it could only matter in the very exceedingly extremely unlikely
+	case that a .mo translation binary for this plugin's
+	text domain has been installed under the WP's WP_LANG_DIR.
+* Added check for naughty direct invocation.
+* Checked (Oct 25 2013) with just-released WP 3.7: OK.
+
 = 1.0.4 =
 * Fixed duplicated message on settings page update resulting from
 	uneeded settings_errors() call: this call did not cause a dup
@@ -299,25 +308,28 @@ Maybe later. Honey, I burned the spaghetti.
 
 == Upgrade Notice ==
 
+= 1.0.5 =
+* Confirmed working with WP 3.7.
+
 = 1.0.4 =
-Now has option to specify fallback HTML5 video sources, and/or use
+* Now has option to specify fallback HTML5 video sources, and/or use
 	the initial (poster) image as display when flash video is
 	not supported.
 
 = 1.0.3 =
-Internationalized (i18n) string handling should now be usable for
+* Internationalized (i18n) string handling should now be usable for
 	anyone interested in making (and contributing) translations;
 	distribution includes a .POT file. Remaining changes are cleanups
 	which should not have a noticeable effect.
 
 = 1.0.2 =
-BUG FIX: URLs with non-8-bit characters would be corrupted in form
+* BUG FIX: URLs with non-8-bit characters would be corrupted in form
 	fields, causing not-found errors in the player: changed
 	JS unescape() to decodeURIComponent(). (Feedback on non-UTF-8
 	charsets would be welcome!)
 
 = 1.0.1 =
-This revision has one important change: a misfeature that would
+* This revision has one important change: a misfeature that would
 	simulate an initial image (if one was not set) by pausing
 	at a random point within first few seconds of the video, but
 	causing an unsolicited download of the medium in order to do so,

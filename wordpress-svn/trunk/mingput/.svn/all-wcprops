@@ -1,13 +1,7 @@
 K 25
 svn:wc:ra_dav:version-url
 V 37
-/!svn/ver/777997/swfput/trunk/mingput
-END
-mingput24.swf
-K 25
-svn:wc:ra_dav:version-url
-V 51
-/!svn/ver/777997/swfput/trunk/mingput/mingput24.swf
+/!svn/ver/779413/swfput/trunk/mingput
 END
 mingput.php
 K 25
@@ -62,4 +56,10 @@ K 25
 svn:wc:ra_dav:version-url
 V 51
 /!svn/ver/777997/swfput/trunk/mingput/mingput32.swf
+END
+mingput24.swf
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/!svn/ver/777997/swfput/trunk/mingput/mingput24.swf
 END

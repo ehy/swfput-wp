@@ -3,7 +3,7 @@
 Plugin Name: SWFPut
 Plugin URI: http://agalena.nfshost.com/b1/?page_id=46
 Description: Add Shockwave Flash video to WordPress posts and widgets, from arbitrary URI's or media library ID's or files in your media upload directory tree (even if not added by WordPress and assigned an ID).
-Version: 1.0.4
+Version: 1.0.5
 Author: Ed Hynan
 Author URI: http://agalena.nfshost.com/b1/
 License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
@@ -38,6 +38,12 @@ Text Domain: swfput_l10n
  *  requirements                                                      *
 \**********************************************************************/
 
+
+// check for naughty direct invocation; w/o this we'd soon die
+// from undefined WP functions anyway, but let's check anyway
+if ( basename(__FILE__) == basename($_SERVER['SCRIPT_FILENAME']) ) {
+	die("Oh, you naughty boy||girl||other!\n");
+}
 
 // supporting classes found in files named "${cl}.inc.php"
 // each class must define static method id_token() which returns
@@ -920,8 +926,7 @@ class SWF_put_evh {
 
 		$dom = 'swfput_l10n';
 
-		if ( ! isset($WP_textdomain_done)
-			&& defined(WP_LANG_DIR) ) {
+		if ( ! isset($WP_textdomain_done) && defined('WP_LANG_DIR') ) {
 			$loc = apply_filters('plugin_locale', get_locale(), $dom);
 			// this file path is built in the manner shown at the
 			// URL above -- it does look strange
