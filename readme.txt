@@ -251,6 +251,7 @@ Maybe later. Honey, I burned the spaghetti.
 	case that a .mo translation binary for this plugin's
 	text domain has been installed under the WP's WP_LANG_DIR.
 * Added check for naughty direct invocation.
+* Checked (Oct 25 2013) with just-released WP 3.7: OK.
 
 = 1.0.4 =
 * Fixed duplicated message on settings page update resulting from
@@ -308,26 +309,27 @@ Maybe later. Honey, I burned the spaghetti.
 == Upgrade Notice ==
 
 = 1.0.5 =
+* Confirmed working with WP 3.7.
 
 = 1.0.4 =
-Now has option to specify fallback HTML5 video sources, and/or use
+* Now has option to specify fallback HTML5 video sources, and/or use
 	the initial (poster) image as display when flash video is
 	not supported.
 
 = 1.0.3 =
-Internationalized (i18n) string handling should now be usable for
+* Internationalized (i18n) string handling should now be usable for
 	anyone interested in making (and contributing) translations;
 	distribution includes a .POT file. Remaining changes are cleanups
 	which should not have a noticeable effect.
 
 = 1.0.2 =
-BUG FIX: URLs with non-8-bit characters would be corrupted in form
+* BUG FIX: URLs with non-8-bit characters would be corrupted in form
 	fields, causing not-found errors in the player: changed
 	JS unescape() to decodeURIComponent(). (Feedback on non-UTF-8
 	charsets would be welcome!)
 
 = 1.0.1 =
-This revision has one important change: a misfeature that would
+* This revision has one important change: a misfeature that would
 	simulate an initial image (if one was not set) by pausing
 	at a random point within first few seconds of the video, but
 	causing an unsolicited download of the medium in order to do so,
