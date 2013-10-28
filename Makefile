@@ -13,7 +13,8 @@ SRCS = ${PRJSTEM}.php \
 	Options_0_0_2b.inc.php \
 	OptField_0_0_2b.inc.php \
 	OptSection_0_0_2b.inc.php \
-	OptPage_0_0_2b.inc.php
+	OptPage_0_0_2b.inc.php \
+	index.php
 
 # The Opt*.php are support classes, not tied to this plugin,
 # so they do not share the text-domain and are not args to xgettext

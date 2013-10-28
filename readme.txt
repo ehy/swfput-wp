@@ -245,6 +245,7 @@ Maybe later. Honey, I burned the spaghetti.
 == Changelog ==
 
 = 1.0.6 =
+* Added do-nothing index.php to prevent directory listing.
 
 = 1.0.5 =
 * BUG[unimportant]: tested a defined(FOO) (rather than 'FOO'),
