@@ -1402,7 +1402,7 @@ class SWF_put_evh {
 		// js function object
 		$job = $id . '_inst';
 		// form buttons format string
-		$bjfmt = '<input type="button" onclick="return %s.%s;" value="%s" />';
+		$bjfmt = '<input type="button" class="button" onclick="return %s.%s;" value="%s" />';
 		// form <select > format string
 		$slfmt = '<select name="%sX%sX" id="%s_%s" style="width:%u%%;" onchange="return %s.%s;">' . "\n";
 		// form <select > <optgroup > format string
@@ -1426,7 +1426,7 @@ class SWF_put_evh {
 		// incr var for sliding divs
 		$ndiv = 0;
 		// button format for sliding divs
-		$dbfmt = '<input type="button" id="%s" value="%s" onclick="%s.%s" />';
+		$dbfmt = '<input type="button" class="button" id="%s" value="%s" onclick="%s.%s" />';
 		// button values for sliding divs
 		$dbvhi = self::wt(__('Hide', 'swfput_l10n'));
 		$dbvsh = self::wt(__('Show', 'swfput_l10n'));
@@ -1438,7 +1438,7 @@ class SWF_put_evh {
 		
 		// begin form
 		?>
-		<!-- form buttons, it seems these *must* be in a table? -->
+		<!-- form buttons, in a table -->
 		<table id="<?php echo $id . '_buttons'; ?>"><tr><td>
 			<span  class="submit">
 			<?php

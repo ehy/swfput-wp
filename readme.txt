@@ -245,7 +245,9 @@ Maybe later. Honey, I burned the spaghetti.
 == Changelog ==
 
 = 1.0.6 =
-* Added do-nothing index.php to prevent directory listing.
+* Added do-nothing index.php to prevent directory listing, as WP does.
+* Added class attribute to shortcode form buttons for consistency.
+* Checked with WP 3.8: OK.
 
 = 1.0.5 =
 * BUG[unimportant]: tested a defined(FOO) (rather than 'FOO'),
