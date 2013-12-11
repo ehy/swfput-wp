@@ -134,6 +134,8 @@ class SWF_put_evh {
 	const opt_group  = '_evh_swfput1_opt_grp';
 	// verbose (helpful?) section descriptions?
 	const optverbose = '_evh_swfput1_verbose';
+	// this is hidden in settings page; used w/ JS for 'screen options'
+	const optscreen1 = 'screen_opts_1';
 	// WP option names/keys
 	// optdisp... -- display areas
 	const optdispmsg = '_evh_swfput1_dmsg'; // posts
@@ -153,6 +155,8 @@ class SWF_put_evh {
 
 	// verbose (helpful?) section descriptions?
 	const defverbose = 'true';
+	// this is hidden in settings page; used w/ JS for 'screen options'
+	const defscreen1 = 'true';
 	// display opts, widget, inline or both
 	 // 1==message | 2==widget | 4==header
 	const defdisplay  = 7;
@@ -297,6 +301,7 @@ class SWF_put_evh {
 	protected static function get_opts_defaults($chkonly = false) {
 		$items = array(
 			self::optverbose => self::defverbose,
+			self::optscreen1 => self::defscreen1,
 			self::optdispmsg =>
 				(self::defdisplay & self::disp_msg) ? 'true' : 'false',
 			self::optdispwdg =>
@@ -993,6 +998,10 @@ class SWF_put_evh {
 			$oo = $a_orig[$k];
 
 			switch ( $k ) {
+				// hidden opts for 'screen options' -- boolean
+				case self::optscreen1:
+					$a_out[$k] = ($ot == 'false') ? 'false' : 'true';
+					break;
 				case self::optverbose:
 				case self::optdispmsg:
 				case self::optdispwdg:
@@ -1051,6 +1060,14 @@ class SWF_put_evh {
 		if ( self::get_verbose_option() !== 'true' ) {
 			return;
 		}
+
+		// coopt this proc to put 'screen options' hidden opt:
+		$eid = self::optscreen1 . '_ini';
+		$val = self::get_screen1_option() == 'true' ? "true" : "false";
+
+		printf('<input id="%s" value="%s" type="hidden">%s',
+			$eid, $val, "\n"
+		);
 
 		$did = 'SWFPut_General_Desc';
 		echo '<div id="' . $did . '">';
@@ -1299,6 +1316,16 @@ class SWF_put_evh {
 		$tt = self::wt(__('Show verbose introductions', 'swfput_l10n'));
 		$k = self::optverbose;
 		$this->put_single_checkbox($a, $k, $tt);
+
+		// coopt this proc to put 'screen options' hidden opt:
+		$group = self::opt_group;
+		$eid = self::optscreen1;
+		$enm = "{$group}[{$eid}]";
+		$val = self::get_screen1_option() == 'true' ? "true" : "false";
+
+		printf('<input id="%s" name="%s" value="%s" type="hidden">%s',
+			$eid, $enm, $val, "\n"
+		);
 	}
 
 	// callback, dynamic use of php+ming?
@@ -2209,6 +2236,11 @@ class SWF_put_evh {
 	// for settings section descriptions
 	public static function get_verbose_option() {
 		return self::opt_by_name(self::optverbose);
+	}
+
+	// for 'screen options' tab: hidden, no form item
+	public static function get_screen1_option() {
+		return self::opt_by_name(self::optscreen1);
 	}
 
 	// option for widget areas

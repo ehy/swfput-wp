@@ -23,14 +23,26 @@
  */
 var evhplg_ctl_screenopt = function (id_chk) {
 	this.chk = document.getElementById(id_chk);
+	this.ihid = document.getElementById('screen_opts_1_ini');
 	this.chk.spbl = this;
 	this.chk.addEventListener('click', this.clk, false);
 };
 evhplg_ctl_screenopt.prototype = {
 	chk : null,
+	// hidden 'input' w/ value for WP db, screen options checkbox
+	hid : null,
+	// hidden 'input' for above, placed in html early enough that this
+	// js sees it when invoked (i for initial); it is outside of the
+	// form so it cannot be used for the WP option
+	ihid : null,
 	all : {},
 	add : function (id) {
 		this.all[id] = document.getElementById(id);
+		if ( this.ihid != null ) {
+			this.chk.checked = this.ihid.value == 'false' ? '' : 'CHECKED';
+			this.tog(this.chk.checked ? false : true);
+		}
+		this.hid = document.getElementById('screen_opts_1');
 	},
 	tog : function (ch) {
 		var dis = ch ? "none" : "block";
@@ -40,6 +52,9 @@ evhplg_ctl_screenopt.prototype = {
 	},
 	clk : function () {
 		this.spbl.tog(this.checked ? false : true);
+		if ( this.spbl.hid != null ) {
+			this.spbl.hid.value = this.checked ? 'true' : 'false';
+		}
 		return false;
 	}
 };

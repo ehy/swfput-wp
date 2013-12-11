@@ -246,7 +246,9 @@ Maybe later. Honey, I burned the spaghetti.
 
 = 1.0.6 =
 * Added do-nothing index.php to prevent directory listing, as WP does.
-* Added class attribute to shortcode form buttons for consistency.
+* Made the "Screen Options" tab -> "Section Introductions" checkbox
+	value persistent, if the "Save Settings" button is clicked.
+* Style tweaks and size tweaks (admin) in response to WP 3.8 changes.
 * Checked with WP 3.8: OK.
 
 = 1.0.5 =
