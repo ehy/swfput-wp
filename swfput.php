@@ -589,9 +589,11 @@ class SWF_put_evh {
 		// from default textdomain (WP core)
 		$tt = self::wt(sprintf(
 			__('<p><strong>%s</strong></p><p>
-			Tips and examples can be found on the
+			More information can be found on the
 			<a href="%s" target="_blank">web page</a>.
-			</p>', 'swfput_l10n'),
+			Please submit feedback or questions as comments
+			on that page.
+			</p>', 'spambl_l10n'),
 			__('For more information:'),
 			self::plugin_webpage
 		));
