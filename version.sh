@@ -1,8 +1,15 @@
 #! /bin/sh
 
-V="1.0.6"
+VMAJOR=1
+VMINOR=0
+RMAJOR=7
+RMINOR=0
+
+V="$VMAJOR.$VMINOR.$RMAJOR"
+test 0 -lt $RMINOR && V="$V.$RMINOR"
 FMT='%s\n'
 test X"$1" = X-s && FMT='"%s"\n'
 # 32 bit int: vmajor<<24|vminor<<16|rmajor<<8|rminor
-test X"$1" = X-i && V="16778752"
+test X"$1" = X-i && \
+  V=$(( VMAJOR*(256*256*256) + VMINOR*(256*256) + RMAJOR*256 + RMINOR ))
 printf "$FMT" "$V"

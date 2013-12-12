@@ -244,6 +244,8 @@ Maybe later. Honey, I burned the spaghetti.
 
 == Changelog ==
 
+= 1.0.7 =
+
 = 1.0.6 =
 * Added do-nothing index.php to prevent directory listing, as WP does.
 * Made the "Screen Options" tab -> "Section Introductions" checkbox
