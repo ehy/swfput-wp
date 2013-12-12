@@ -1,7 +1,7 @@
 #! /usr/bin/make -f
 # License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
 
-PRJVERS = 1.0.5
+PRJVERS = 1.0.6
 PRJSTEM = swfput
 PRJNAME = $(PRJSTEM)-$(PRJVERS)
 
@@ -13,7 +13,8 @@ SRCS = ${PRJSTEM}.php \
 	Options_0_0_2b.inc.php \
 	OptField_0_0_2b.inc.php \
 	OptSection_0_0_2b.inc.php \
-	OptPage_0_0_2b.inc.php
+	OptPage_0_0_2b.inc.php \
+	index.php
 
 # The Opt*.php are support classes, not tied to this plugin,
 # so they do not share the text-domain and are not args to xgettext

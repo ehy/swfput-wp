@@ -3,7 +3,7 @@
 Plugin Name: SWFPut
 Plugin URI: http://agalena.nfshost.com/b1/?page_id=46
 Description: Add Shockwave Flash video to WordPress posts and widgets, from arbitrary URI's or media library ID's or files in your media upload directory tree (even if not added by WordPress and assigned an ID).
-Version: 1.0.5
+Version: 1.0.6
 Author: Ed Hynan
 Author URI: http://agalena.nfshost.com/b1/
 License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
@@ -134,6 +134,8 @@ class SWF_put_evh {
 	const opt_group  = '_evh_swfput1_opt_grp';
 	// verbose (helpful?) section descriptions?
 	const optverbose = '_evh_swfput1_verbose';
+	// this is hidden in settings page; used w/ JS for 'screen options'
+	const optscreen1 = 'screen_opts_1';
 	// WP option names/keys
 	// optdisp... -- display areas
 	const optdispmsg = '_evh_swfput1_dmsg'; // posts
@@ -153,6 +155,8 @@ class SWF_put_evh {
 
 	// verbose (helpful?) section descriptions?
 	const defverbose = 'true';
+	// this is hidden in settings page; used w/ JS for 'screen options'
+	const defscreen1 = 'true';
 	// display opts, widget, inline or both
 	 // 1==message | 2==widget | 4==header
 	const defdisplay  = 7;
@@ -297,6 +301,7 @@ class SWF_put_evh {
 	protected static function get_opts_defaults($chkonly = false) {
 		$items = array(
 			self::optverbose => self::defverbose,
+			self::optscreen1 => self::defscreen1,
 			self::optdispmsg =>
 				(self::defdisplay & self::disp_msg) ? 'true' : 'false',
 			self::optdispwdg =>
@@ -584,9 +589,11 @@ class SWF_put_evh {
 		// from default textdomain (WP core)
 		$tt = self::wt(sprintf(
 			__('<p><strong>%s</strong></p><p>
-			Tips and examples can be found on the
+			More information can be found on the
 			<a href="%s" target="_blank">web page</a>.
-			</p>', 'swfput_l10n'),
+			Please submit feedback or questions as comments
+			on that page.
+			</p>', 'spambl_l10n'),
 			__('For more information:'),
 			self::plugin_webpage
 		));
@@ -993,6 +1000,10 @@ class SWF_put_evh {
 			$oo = $a_orig[$k];
 
 			switch ( $k ) {
+				// hidden opts for 'screen options' -- boolean
+				case self::optscreen1:
+					$a_out[$k] = ($ot == 'false') ? 'false' : 'true';
+					break;
 				case self::optverbose:
 				case self::optdispmsg:
 				case self::optdispwdg:
@@ -1051,6 +1062,14 @@ class SWF_put_evh {
 		if ( self::get_verbose_option() !== 'true' ) {
 			return;
 		}
+
+		// coopt this proc to put 'screen options' hidden opt:
+		$eid = self::optscreen1 . '_ini';
+		$val = self::get_screen1_option() == 'true' ? "true" : "false";
+
+		printf('<input id="%s" value="%s" type="hidden">%s',
+			$eid, $val, "\n"
+		);
 
 		$did = 'SWFPut_General_Desc';
 		echo '<div id="' . $did . '">';
@@ -1299,6 +1318,16 @@ class SWF_put_evh {
 		$tt = self::wt(__('Show verbose introductions', 'swfput_l10n'));
 		$k = self::optverbose;
 		$this->put_single_checkbox($a, $k, $tt);
+
+		// coopt this proc to put 'screen options' hidden opt:
+		$group = self::opt_group;
+		$eid = self::optscreen1;
+		$enm = "{$group}[{$eid}]";
+		$val = self::get_screen1_option() == 'true' ? "true" : "false";
+
+		printf('<input id="%s" name="%s" value="%s" type="hidden">%s',
+			$eid, $enm, $val, "\n"
+		);
 	}
 
 	// callback, dynamic use of php+ming?
@@ -1402,7 +1431,7 @@ class SWF_put_evh {
 		// js function object
 		$job = $id . '_inst';
 		// form buttons format string
-		$bjfmt = '<input type="button" onclick="return %s.%s;" value="%s" />';
+		$bjfmt = '<input type="button" class="button" onclick="return %s.%s;" value="%s" />';
 		// form <select > format string
 		$slfmt = '<select name="%sX%sX" id="%s_%s" style="width:%u%%;" onchange="return %s.%s;">' . "\n";
 		// form <select > <optgroup > format string
@@ -1426,7 +1455,7 @@ class SWF_put_evh {
 		// incr var for sliding divs
 		$ndiv = 0;
 		// button format for sliding divs
-		$dbfmt = '<input type="button" id="%s" value="%s" onclick="%s.%s" />';
+		$dbfmt = '<input type="button" class="button" id="%s" value="%s" onclick="%s.%s" />';
 		// button values for sliding divs
 		$dbvhi = self::wt(__('Hide', 'swfput_l10n'));
 		$dbvsh = self::wt(__('Show', 'swfput_l10n'));
@@ -1438,7 +1467,7 @@ class SWF_put_evh {
 		
 		// begin form
 		?>
-		<!-- form buttons, it seems these *must* be in a table? -->
+		<!-- form buttons, in a table -->
 		<table id="<?php echo $id . '_buttons'; ?>"><tr><td>
 			<span  class="submit">
 			<?php
@@ -2209,6 +2238,11 @@ class SWF_put_evh {
 	// for settings section descriptions
 	public static function get_verbose_option() {
 		return self::opt_by_name(self::optverbose);
+	}
+
+	// for 'screen options' tab: hidden, no form item
+	public static function get_screen1_option() {
+		return self::opt_by_name(self::optscreen1);
 	}
 
 	// option for widget areas
