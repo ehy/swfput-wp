@@ -48,8 +48,8 @@ if ( basename(__FILE__) == basename($_SERVER['SCRIPT_FILENAME']) ) {
 // supporting classes found in files named "${cl}.inc.php"
 // each class must define static method id_token() which returns
 // the correct int, to help avoid name clashes
-if ( ! function_exists( 'swfput_paranoid_require_class' ) ) :
-function swfput_paranoid_require_class ($cl)
+if ( ! function_exists( 'eh_plugin_paranoid_require_class' ) ) :
+function eh_plugin_paranoid_require_class ($cl)
 {
 	$id = 0xED00AA33;
 	$meth = 'id_token';
@@ -67,13 +67,6 @@ function swfput_paranoid_require_class ($cl)
 	}
 }
 endif;
-
-// these support classes are in separate files as they are
-// not specific to this plugin, and may be used in others
-swfput_paranoid_require_class('OptField_0_0_2b');
-swfput_paranoid_require_class('OptSection_0_0_2b');
-swfput_paranoid_require_class('OptPage_0_0_2b');
-swfput_paranoid_require_class('Options_0_0_2b');
 
 
 /**********************************************************************\
@@ -180,8 +173,8 @@ class SWF_put_evh {
 	// string used for (default) shortcode tag
 	const shortcode = 'putswf_video';
 
-	// object of class to handle options under WordPress
-	protected $opt = null;
+	// Settings page object
+	protected $spg = null;
 
 	// swfput program directory
 	const swfputdir = 'mingput';
@@ -292,7 +285,7 @@ class SWF_put_evh {
 	}
 
 	public function __destruct() {
-		$this->opt = null;
+		$this->spg = null;
 	}
 	
 	// get array of defaults for the plugin options; if '$chkonly'
@@ -355,12 +348,18 @@ class SWF_put_evh {
 
 	// initialize options/settings page
 	protected function init_settings_page() {
-		if ( $this->opt ) {
+		if ( $this->spg ) {
 			return;
 		}
 		$items = self::get_opt_group();
 
-		// use Opt* classes for page, sections, and fields
+		// use Opt* classes for page, sections, and fields;
+		// these support classes are in separate files as they are
+		// not specific to this plugin, and may be used in others
+		eh_plugin_paranoid_require_class(self::mk_aclv('OptField'));
+		eh_plugin_paranoid_require_class(self::mk_aclv('OptSection'));
+		eh_plugin_paranoid_require_class(self::mk_aclv('OptPage'));
+		eh_plugin_paranoid_require_class(self::mk_aclv('Options'));
 		
 		// mk_aclv adds a suffix to class names
 		$Cf = self::mk_aclv('OptField');
@@ -518,7 +517,7 @@ class SWF_put_evh {
 			self::wt(__('Save Settings', 'swfput_l10n')));
 		
 		$Co = self::mk_aclv('Options');
-		$this->opt = new $Co($page);
+		$this->spg = new $Co($page);
 	}
 	
 	// filter for wp-admin/includes/screen.php get_column_headers()
@@ -599,7 +598,7 @@ class SWF_put_evh {
 		));
 	
 		// finagle the "Screen Options" tab
-		$h = 'manage_' . $this->opt->get_page_suffix() . '_columns';
+		$h = 'manage_' . $this->spg->get_page_suffix() . '_columns';
 		add_filter($h, array($this, 'screen_options_columns'));
 		$h = 'screen_options_show_screen';
 		add_filter($h, array($this, 'screen_options_show'), 200);
@@ -650,12 +649,12 @@ class SWF_put_evh {
 	// Options::admin_page() -- it is somehow *always* stripped out!
 	// After hours I cannot figure this out; but, having added this
 	// function as the page callback, I can add the anchor after
-	// calling $this->opt->admin_page() (which is Options::admin_page())
+	// calling $this->spg->admin_page() (which is Options::admin_page())
 	// BUT it still does not show in the page if the echo is moved
 	// into Options::admin_page() and placed just before return!
 	// Baffled.
 	public function setting_page_output_callback() {
-		$r = $this->opt->admin_page();
+		$r = $this->spg->admin_page();
 		echo "<a name='aSubmit'/>\n";
 		return $r;
 	}
@@ -1408,7 +1407,7 @@ class SWF_put_evh {
 		$pr = new $pr();
 		extract($pr->getparams());
 
-		$sc = 'putswf_video';
+		$sc = self::shortcode;
 		// file select by ext pattern
 		$mpat = self::get_mfilter_pat();
 		// files array from uploads dirs (empty if none)
