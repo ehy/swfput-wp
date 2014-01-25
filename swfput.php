@@ -1400,7 +1400,6 @@ class SWF_put_evh {
 
 	// put form that with some js will help with shortcodes in
 	// the WP post editor: following example at:
-	// http://bluedogwebservices.com/wordpress-25-shortcodes/
 	public static function put_xed_form() {
 		// cap check is done at registration of this callback
 		$pr = self::swfput_params;
@@ -1450,7 +1449,7 @@ class SWF_put_evh {
 		// js to copy from select/dropdown to text input
 		$jfsl = "form_cpval(this.form,'%s','%s','%s')";
 		// input text widths, wide, narrow
-		$iw = 100; $in = 16;
+		$iw = 100; $in = 8; // was: $in = 16;
 		// incr var for sliding divs
 		$ndiv = 0;
 		// button format for sliding divs
@@ -1565,7 +1564,7 @@ class SWF_put_evh {
 		?>
 		<p>
 		<?php $k = 'audio';
-			$l = self::wt(__('Medium is audio:', 'swfput_l10n'));
+			$l = self::wt(__('Medium is audio: ', 'swfput_l10n'));
 			printf($lbfmt, $id, $k, $l);
 			$ck = $$k == 'true' ? 'checked="checked" ' : '';
 			printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
@@ -1641,7 +1640,7 @@ class SWF_put_evh {
 		?>
 		<p>
 		<?php $k = 'iimgbg';
-			$l = self::wt(__('Use initial image as non-flash alternate:', 'swfput_l10n'));
+			$l = self::wt(__('Use initial image as non-flash alternate: ', 'swfput_l10n'));
 			printf($lbfmt, $id, $k, $l);
 			$ck = $$k == 'true' ? 'checked="checked" ' : '';
 			printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
@@ -1664,15 +1663,17 @@ class SWF_put_evh {
 
 		<?php $els = array(
 			array('width', '<p>', ' &#215; ', $in, 'inp',
-				__('Pixel Width:', 'swfput_l10n')),
+				__('Pixel Width: ', 'swfput_l10n')),
 			array('height', '', '</p>', $in, 'inp',
-				__('Height:', 'swfput_l10n')),
+				__('Height: ', 'swfput_l10n')),
+			array('mobiwidth', '<p>', '</p>', $in, 'inp',
+				__('Max mobile width (0 disables): ', 'swfput_l10n')),
 			array('aspectautoadj', '<p>', '</p>', $in, 'chk',
-				__('Auto aspect (e.g. 360x240 to 4:3):', 'swfput_l10n')),
+				__('Auto aspect (e.g. 360x240 to 4:3): ', 'swfput_l10n')),
 			array('displayaspect', '<p>', '</p>', $in, 'inp',
-				__('Display aspect (e.g. 4:3, precludes Auto):', 'swfput_l10n')),
+				__('Display aspect (e.g. 4:3, precludes Auto): ', 'swfput_l10n')),
 			array('pixelaspect', '<p>', '</p>', $in, 'inp',
-				__('Pixel aspect (e.g. 8:9, precluded by Display):', 'swfput_l10n'))
+				__('Pixel aspect (e.g. 8:9, precluded by Display): ', 'swfput_l10n'))
 			);
 			foreach ( $els as $el ) {
 				$k = $el[0];
@@ -1707,19 +1708,19 @@ class SWF_put_evh {
 		
 		<?php $els = array(
 			array('volume', '<p>', '</p>', $in, 'inp',
-				__('Initial volume (0-100):', 'swfput_l10n')),
+				__('Initial volume (0-100): ', 'swfput_l10n')),
 			array('play', '<p>', '</p>', $in, 'chk',
-				__('Play on load (else waits for play button):', 'swfput_l10n')),
+				__('Play on load (else waits for play button): ', 'swfput_l10n')),
 			array('loop', '<p>', '</p>', $in, 'chk',
-				__('Loop play:', 'swfput_l10n')),
+				__('Loop play: ', 'swfput_l10n')),
 			array('hidebar', '<p>', '</p>', $in, 'chk',
-				__('Hide control bar initially:', 'swfput_l10n')),
+				__('Hide control bar initially: ', 'swfput_l10n')),
 			array('disablebar', '<p>', '</p>', $in, 'chk',
-				__('Hide and disable control bar:', 'swfput_l10n')),
+				__('Hide and disable control bar: ', 'swfput_l10n')),
 			array('allowfull', '<p>', '</p>', $in, 'chk',
-				__('Allow full screen:', 'swfput_l10n')),
+				__('Allow full screen: ', 'swfput_l10n')),
 			array('barheight', '<p>', '</p>', $in, 'inp',
-				__('Control bar Height (20-50):', 'swfput_l10n'))
+				__('Control bar Height (20-50): ', 'swfput_l10n'))
 			);
 			foreach ( $els as $el ) {
 				$k = $el[0];
@@ -1793,10 +1794,15 @@ class SWF_put_evh {
 			$swf = $this->get_swf_binurl($bh);
 		}
 		$dw = $w + 3;
+
+		$rndnum = self::uniq_rand();
+		$divid = sprintf('d_%s_%06u', $code, $rndnum);
+		$objid = sprintf('o_%s_%06u', $code, $rndnum);
+
 		// use no class, but do use deprecated align
-		$dv = '<p><div id="'.$code.'" align="center"';
+		$dv = '<p><div id="'.$divid.'" align="center"';
 		$dv .= ' style="width: '.$dw.'px">';
-		$em = $this->get_swf_tags($swf, $pr);
+		$em = $this->get_swf_tags($swf, $pr, $objid);
 		$c = '';
 		// Note '!=' -- not '!=='
 		if ( $content != null ) {
@@ -1849,17 +1855,103 @@ class SWF_put_evh {
 			$swf = $this->get_swf_binurl($bh);
 		}
 		$dw = $w + 0;
+
+		$rndnum = self::uniq_rand();
+		$divid = sprintf('d_%s_%06u', $code, $rndnum);
+		$objid = sprintf('o_%s_%06u', $code, $rndnum);
+
 		// use class that WP uses for e.g. images
-		$dv = '<div id="'.$code.'" class="wp-caption aligncenter"';
+		$dv = '<div id="'.$divid.'" class="wp-caption aligncenter"';
 		$dv .= ' style="width: '.$dw.'px">';
-		$em = $this->get_swf_tags($swf, $pr);
+		$em = $this->get_swf_tags($swf, $pr, $objid);
 		$c = '';
 		// Note '!=' -- not '!=='
 		if ( $content != null ) {
 			$c = do_shortcode($content);
 			$c = '<p class="wp-caption-text">' . $c . '</p>';
 		}
-		return sprintf('%s%s%s</div>', $dv, $em, $c);
+
+		// post-div
+		$pd = '';
+		// test
+		if ( true ) {
+			$dvf = str_replace(array('-', ' '), '_', $divid);
+			// $obf = str_replace(array('-', ' '), '_', $objid);
+			$pad = 0;
+			$pd = sprintf('
+			<script>
+			var f_%s = function(dv, ob, av, ai, pad) {
+				this.d = document.getElementById(dv);
+				this.o = document.getElementById(ob);
+				this.va_o = document.getElementById(av);
+				this.ia_o = document.getElementById(ai);
+				this.pad = pad;
+				if ( this.d ) {
+					//var p = this.d.style.outlineWidth;
+					var p = this._style(this.d, "padding-left");
+					if ( p )
+						this.pad = Math.max(this.pad, parseInt(p));
+				}
+			};
+			f_%s.prototype = { d : null,
+				o : null, va_o : null, ia_o : null,
+				pad : 0,
+				_style : function (el, sty){
+					// borrowed from:
+					// http://robertnyman.com/2006/04/24/get-the-rendered-style-of-an-element/
+					var v = 0;
+					if(document.defaultView && document.defaultView.getComputedStyle){
+						v = document.defaultView.getComputedStyle(el, "").getPropertyValue(sty);
+						return v;
+					}
+					else if(el.currentStyle){
+						sty = sty.replace(/\-(\w)/g, function (strMatch, p1){
+							return p1.toUpperCase();
+						});
+						v = el.currentStyle[sty];
+						return v;
+					}
+					return v;
+				},
+				_int_rsz : function (o)  {
+					//var wd = this.d.clientWidth;
+					var wd = this.d.offsetWidth;
+					var wo = o.width;
+					var r = wo / o.height;
+					var d = wd - wo;
+
+					if ( d > 0 && d <= (this.pad * 2) )
+						return;
+					var wn = wd - (this.pad * 2);
+					var hn = Math.round(wn / r);
+					o.width = wn;
+					o.height = hn;
+				},
+				resize : function () {
+					if ( ! this.d )
+						return;
+					if ( this.o ) {
+						this._int_rsz(this.o);
+					}
+					if ( this.va_o ) {
+						this._int_rsz(this.va_o);
+					}
+					if ( this.ia_o ) {
+						this._int_rsz(this.ia_o);
+					}
+				}
+			};
+			var ob_%s = new f_%s("%s", "%s", "%s", "%s", %d);
+			ob_%s.resize();
+			</script>
+			',
+			$dvf, $dvf, $dvf, $dvf,
+			$divid, $objid, 'va_' . $objid, 'ia_' . $objid, $pad,
+			$dvf
+			);
+		}
+
+		return sprintf('%s%s%s</div>%s', $dv, $em, $c, $pd);
 	}
 
 	// filter the posts for attachments that can be
@@ -1903,10 +1995,15 @@ class SWF_put_evh {
 				} else if ( ! preg_match($mpat['av'], $url) ) {
 					$out .= $line . $sep;
 				} else {
+					$rndnum = self::uniq_rand();
+					$divid = sprintf('d_%s_%06u', $code, $rndnum);
+					$objid = sprintf('o_%s_%06u', $code, $rndnum);
+
 					$pr->setvalue('url', $url);
 					$s = '<div style="width: '.($w+0).'px" '
+						. 'id="' . $divid . '" '
 						. 'class="wp-caption aligncenter">'
-						. $this->get_swf_tags($swf, $pr)
+						. $this->get_swf_tags($swf, $pr, $objid)
 						// . '<p class="wp-caption-text"></p>'
 						. '</div>'
 						. $sep;
@@ -2102,6 +2199,30 @@ class SWF_put_evh {
 			$is_so = $r ? true : false;
 		}
 		return $is_so;
+	}
+	
+	// get a (almost certainly) unique random number:
+	// **not** for security, just probable uniqueness
+	public static function uniq_rand($maxtries = 2048) {
+		static $rndmap = null;
+		if ( $rndmap === null ) {
+			$rndmap = array();
+		}
+
+		if ( ! is_int($maxtries) || $maxtries < 1 ) {
+			$maxtries = 2048;
+		}
+
+		$rndnum = rand();
+		for ( $i = 0; $i < $maxtries; $i++ ) {
+			if ( $rndnum && ! array_key_exists($rndnum, $rndmap) ) {
+				$rndmap[$rndnum] = 1;
+				break;
+			}
+			$rndnum = rand();
+		}
+
+		return $rndnum;
 	}
 	
 	// error messages; where {wp_}die is not suitable
@@ -2477,15 +2598,20 @@ class SWF_put_evh {
 	}
 
 	// print suitable SWF object/embed tags
-	public function put_swf_tags($uswf, $par, $esc = true) {
-		$s = $this->get_swf_tags($uswf, $par, $esc);
+	public function put_swf_tags($uswf, $par, $id = null) {
+		$s = $this->get_swf_tags($uswf, $par, $id);
 		echo $s;
 	}
 
 	// return a string with suitable SWF object/embed tags
-	public function get_swf_tags($uswf, $par, $esc = true) {
+	public function get_swf_tags($uswf, $par, $id = null) {
 		extract($par->getparams());
 		$ming = self::should_use_ming();
+		$esc = true;
+		
+		if ( $id === null ) {
+			$id = '';
+		}
 
 		if ( ! $uswf ) {
 			if ( $ming ) {
@@ -2547,6 +2673,18 @@ class SWF_put_evh {
 		}
 
 		$w = $width; $h = $height;
+		// Added v. 1.0.7; 2014/01/24:
+		// if wp_is_mobile is a defined function (wp 3.4?), then
+		// honor new param 'mobiwidth' to clamp the dimensions
+		// proportionally for mobile devices
+		// user can set $mobiwidth 0 to disable this
+		if ( $mobiwidth > 0 && function_exists('wp_is_mobile') ) {
+			if ( $mobiwidth < $w && wp_is_mobile() ) {
+				$h = $h * $mobiwidth / $w;
+				$w = $mobiwidth;
+			}
+		}
+
 		if ( $cssurl === '' )
 			$cssurl = $this->get_swf_css_url();
 		$achk = array(
@@ -2617,8 +2755,12 @@ class SWF_put_evh {
 		// alternates
 		$altimg = '';
 		if ( $iimgbg == 'true' && $iimgunesc != '' ) {
-			$fmt = '%s<img src="%s" alt="%s" width="%u" height="%u">';
-			$altimg = sprintf($fmt, "\n\t\t",
+			$viid = '';
+			if ( $id != '' ) {
+				$viid = sprintf(' id="ia_%s"', $id);
+			}
+			$fmt = '%s<img%s src="%s" alt="%s" width="%u" height="%u">';
+			$altimg = sprintf($fmt, "\n\t\t", $viid,
 				self::ht($iimgunesc),
 				self::wt(
 				__('The flash plugin is not available', 'swfput_l10n')
@@ -2626,7 +2768,11 @@ class SWF_put_evh {
 			);
 		}
 		if ( $altvideo != '' ) {
-			$vd = "\n\t\t" . '<video controls preload="none"';
+			$viid = '';
+			if ( $id != '' ) {
+				$viid = sprintf(' id="va_%s"', $id);
+			}
+			$vd = "\n\t\t" . '<video'.$viid.' controls preload="none"';
 			if ( $play == 'true' ) {
 				$vd .= ' autoplay';
 			}
@@ -2680,16 +2826,19 @@ class SWF_put_evh {
 		// self::is_msie()) on the assumption that classid will
 		// be necessary to make that one work
 		$obj = '';
+		if ( $id != '' ) {
+			$id = sprintf(' id="%s"', $id);
+		}
 		if ( self::is_msie() ) { 
 			$obj = sprintf('
-			<object classid="%s" codebase="%s" width="%u" height="%u">
+			<object%s classid="%s" codebase="%s" width="%u" height="%u">
 			<param name="data" value="%s?%s">
-			', $classid, $codebase, $w, $h, $uswf, $pv);
+			', $id, $classid, $codebase, $w, $h, $uswf, $pv);
 		} else {
 			$typ = 'application/x-shockwave-flash';
 			$obj = sprintf('
-			<object data="%s?%s" type="%s" width="%u" height="%u">
-			', $uswf, $pv, $typ, $w, $h);
+			<object%s data="%s?%s" type="%s" width="%u" height="%u">
+			', $id, $uswf, $pv, $typ, $w, $h);
 		}
 		return $obj
 		. sprintf('<param name="play" value="%s">
@@ -2733,6 +2882,7 @@ class SWF_params_evh {
 		'iimage' => '',
 		'width' => '240',
 		'height' => '180',
+		'mobiwidth' => '260',      // width clamp if ( wp_is_mobile() )
 		'audio' => 'false',        // source is audio; (mp3 is detected)
 		'aspectautoadj' => 'true', // adj. common sizes, e.g. 720x480
 		'displayaspect' => '0',    // needed if pixels are not square
@@ -2844,6 +2994,7 @@ class SWF_params_evh {
 			// strings that must present positive integers
 			case 'width':
 			case 'height':
+			case 'mobiwidth':
 			case 'volume':
 			case 'barheight':
 				if ( $k === 'barheight' && $t === 'default' ) {
@@ -3018,9 +3169,13 @@ class SWF_put_widget_evh extends WP_Widget {
 		}
 
 		$code = 'widget-div';
+		$rndnum = $this->plinst->uniq_rand();
+		$divid = sprintf('d_%s_%06u', $code, $rndnum);
+		$objid = sprintf('o_%s_%06u', $code, $rndnum);
+
 		$dw = $w + 3;
 		// use no class, but do use deprecated align
-		$dv = '<div id="'.$code.'" align="center"';
+		$dv = '<div id="'.$divid.'" align="center"';
 		$dv .= ' style="width: '.$dw.'px">';
 
 		extract($args);
@@ -3039,7 +3194,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		}
 
 		echo $dv;
-		$this->plinst->put_swf_tags($uswf, $pr);
+		$this->plinst->put_swf_tags($uswf, $pr, $objid);
 		if ( $cap ) {
 			echo '<p><span align="center">' .$cap. '</span></p>';
 		}
@@ -3101,9 +3256,11 @@ class SWF_put_widget_evh extends WP_Widget {
 		// still leaves room for error; this code assumes UTF-8 presently)
 		$et = 'rawurlencode'; // %XX -- for transfer
 
+		// make data instance
 		$pr = self::swfput_params;
 		$pr = new $pr(array('width' => self::defwidth,
-			'height' => self::defheight));
+			'height' => self::defheight,
+			'mobiwidth' => '0')); // because widgets are small
 		$instance = wp_parse_args((array)$instance, $pr->getparams());
 
 		$val = '';
@@ -3226,7 +3383,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$id = $this->get_field_id('audio');
 		$nm = $this->get_field_name('audio');
 		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
-		$tl = $wt(__('Medium is audio (e.g. *.mp3):', 'swfput_l10n'));
+		$tl = $wt(__('Medium is audio (e.g. *.mp3): ', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -3325,7 +3482,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$id = $this->get_field_id('iimgbg');
 		$nm = $this->get_field_name('iimgbg');
 		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
-		$tl = $wt(__('Use initial image as non-flash alternate:', 'swfput_l10n'));
+		$tl = $wt(__('Use initial image as non-flash alternate: ', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -3336,7 +3493,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $wt($instance['width']);
 		$id = $this->get_field_id('width');
 		$nm = $this->get_field_name('width');
-		$tl = sprintf(__('Width (default %u):', 'swfput_l10n'), self::defwidth);
+		$tl = sprintf(__('Width (default %u): ', 'swfput_l10n'), self::defwidth);
 		$tl = $wt($tl);
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
@@ -3348,8 +3505,19 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $wt($instance['height']);
 		$id = $this->get_field_id('height');
 		$nm = $this->get_field_name('height');
-		$tl = sprintf(__('Height (default %u):', 'swfput_l10n'), self::defheight);
+		$tl = sprintf(__('Height (default %u): ', 'swfput_l10n'), self::defheight);
 		$tl = $wt($tl);
+		?>
+		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
+		<input class="widefat" id="<?php echo $id; ?>"
+			name="<?php echo $nm; ?>" style="width:16%;"
+			type="text" value="<?php echo $val; ?>" /></p>
+
+		<?php
+		$val = $wt($instance['mobiwidth']);
+		$id = $this->get_field_id('mobiwidth');
+		$nm = $this->get_field_name('mobiwidth');
+		$tl = $wt(__('Max mobile width (0 disables) :', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -3361,7 +3529,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$id = $this->get_field_id('aspectautoadj');
 		$nm = $this->get_field_name('aspectautoadj');
 		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
-		$tl = $wt(__('Auto aspect (e.g. 360x240 to 4:3):', 'swfput_l10n'));
+		$tl = $wt(__('Auto aspect (e.g. 360x240 to 4:3): ', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -3372,7 +3540,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $instance['displayaspect'];
 		$id = $this->get_field_id('displayaspect');
 		$nm = $this->get_field_name('displayaspect');
-		$tl = $wt(__('Display aspect (e.g. 4:3, precludes Auto):', 'swfput_l10n'));
+		$tl = $wt(__('Display aspect (e.g. 4:3, precludes Auto): ', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -3383,7 +3551,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $instance['pixelaspect'];
 		$id = $this->get_field_id('pixelaspect');
 		$nm = $this->get_field_name('pixelaspect');
-		$tl = $wt(__('Pixel aspect (e.g. 8:9, precluded by Display):', 'swfput_l10n'));
+		$tl = $wt(__('Pixel aspect (e.g. 8:9, precluded by Display): ', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -3394,7 +3562,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $wt($instance['volume']);
 		$id = $this->get_field_id('volume');
 		$nm = $this->get_field_name('volume');
-		$tl = $wt(__('Initial volume (0-100):', 'swfput_l10n'));
+		$tl = $wt(__('Initial volume (0-100): ', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -3406,7 +3574,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$id = $this->get_field_id('play');
 		$nm = $this->get_field_name('play');
 		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
-		$tl = $wt(__('Play on load (else waits for play button):', 'swfput_l10n'));
+		$tl = $wt(__('Play on load (else waits for play button): ', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -3418,7 +3586,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$id = $this->get_field_id('loop');
 		$nm = $this->get_field_name('loop');
 		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
-		$tl = $wt(__('Loop play:', 'swfput_l10n'));
+		$tl = $wt(__('Loop play: ', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -3430,7 +3598,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$id = $this->get_field_id('hidebar');
 		$nm = $this->get_field_name('hidebar');
 		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
-		$tl = $wt(__('Hide control bar initially:', 'swfput_l10n'));
+		$tl = $wt(__('Hide control bar initially: ', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -3442,7 +3610,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$id = $this->get_field_id('disablebar');
 		$nm = $this->get_field_name('disablebar');
 		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
-		$tl = $wt(__('Hide and disable control bar:', 'swfput_l10n'));
+		$tl = $wt(__('Hide and disable control bar: ', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -3454,7 +3622,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$id = $this->get_field_id('allowfull');
 		$nm = $this->get_field_name('allowfull');
 		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
-		$tl = $wt(__('Allow full screen:', 'swfput_l10n'));
+		$tl = $wt(__('Allow full screen: ', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -3465,7 +3633,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $ht($instance['barheight']);
 		$id = $this->get_field_id('barheight');
 		$nm = $this->get_field_name('barheight');
-		$tl = $wt(__('Control bar Height (20-50):', 'swfput_l10n'));
+		$tl = $wt(__('Control bar Height (20-50): ', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
