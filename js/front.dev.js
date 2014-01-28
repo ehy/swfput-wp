@@ -31,72 +31,13 @@ var SWFPut_putswf_video_getstyle = function (el, sty) {
 	var v = 0;
 	if ( document.defaultView && document.defaultView.getComputedStyle ) {
 		v = document.defaultView.getComputedStyle(el, "").getPropertyValue(sty);
-	}
-	else if ( el.currentStyle ) {
+	} else if ( el.currentStyle ) {
 		sty = sty.replace(/\-(\w)/g, function (m1, p1) {
 			return p1.toUpperCase();
 		});
 		v = el.currentStyle[sty];
 	}
 	return v;
-};
-
-// scale adjust: mobile browsers scale, but poorly with video.
-// the enclosing <div> is scaled, and so its width from
-// 'computed style' is used to adjust video and image
-//
-// dv is enclosing <div>, ob is flash <object>, av is alt. <video>,
-// ai is alt. <img> [all preceding refer to id attribute], and
-// pad is padding to use if computed-style padding fails
-var SWFPut_putswf_video_adj = function(dv, ob, av, ai, pad) {
-	this.d = document.getElementById(dv);
-	this.o = document.getElementById(ob);
-	this.va_o = document.getElementById(av);
-	this.ia_o = document.getElementById(ai);
-	this.pad = pad;
-	if ( this.d ) {
-		var p = this._style(this.d, "padding-left");
-		if ( p )
-			this.pad = Math.max(this.pad, parseInt(p));
-		this.wdiv = this.d.offsetWidth;
-	}
-};
-SWFPut_putswf_video_adj.prototype = {
-	d : null,
-	o : null, va_o : null, ia_o : null,
-	pad : 0, wdiv : null,
-	_style : function (el, sty) {
-		return SWFPut_putswf_video_getstyle(el, sty);
-	},
-	_int_rsz : function (o) {
-		var wd = this.wdiv;
-		if ( wd == null )
-			return;
-		var wo = o.width;
-		var r = wo / o.height;
-		var d = wd - wo;
-		var p2 = this.pad * 2;
-
-		if ( d > 0 && d <= p2 )
-			return;
-		var wn = wd - p2;
-		var hn = Math.round(wn / r);
-		o.width = wn;
-		o.height = hn;
-	},
-	resize : function () {
-		if ( ! this.d )
-			return;
-		if ( this.o ) {
-			this._int_rsz(this.o);
-		}
-		if ( this.va_o ) {
-			this._int_rsz(this.va_o);
-		}
-		if ( this.ia_o ) {
-			this._int_rsz(this.ia_o);
-		}
-	}
 };
 
 // build object element with its children and add to <div>
@@ -136,7 +77,7 @@ SWFPut_putswf_video_bld.prototype = {
 		var p2 = this.pad * 2;
 		var tw = this.wdiv - p2;
 		var r = tw / w;
-		return [tw, h * r];
+		return [tw, Math.round(h * r)];
 	},
 	mk_aimg : function (a) {
 		if ( a == undefined || a == "" ) {
@@ -264,6 +205,128 @@ SWFPut_putswf_video_bld.prototype = {
 				dv.insertBefore(p, dv.lastChild);
 			}
 		}
+	}
+};
+
+// (ugly hack to get resize event: save _adj instances, see below)
+var SWFPut_putswf_video_szhack = [];
+
+// resize adjust:
+// the enclosing <div> is scaled, and so its width from
+// 'computed style' is used to adjust video and image
+//
+// dv is enclosing <div>, ob is flash <object>, av is alt. <video>,
+// ai is alt. <img> [all preceding refer to id attribute], and
+// and these may be 0 or null if the 'bld' arg is not 0 or null,
+// but an instance of SWFPut_putswf_video_bld defined above
+var SWFPut_putswf_video_adj = function(dv, ob, av, ai, bld) {
+	if ( bld ) {
+		this.bld  = bld;
+		this.d    = bld.d;
+		this.o    = bld.o;
+		this.va_o = bld.va_o;
+		this.ia_o = bld.ia_o;
+		this.pad  = bld.pad;
+		this.wdiv = bld.wdiv;
+	} else {
+		this.d    = document.getElementById(dv);
+		this.o    = document.getElementById(ob);
+		this.va_o = document.getElementById(av);
+		this.ia_o = document.getElementById(ai);
+		if ( this.d ) {
+			var p = this._style(this.d, "padding-left");
+			if ( p )
+				this.pad = Math.max(this.pad, parseInt(p));
+			this.wdiv = this.d.offsetWidth;
+		}
+	}
+	if ( this.d ) {
+		// (ugly hack to get resize event: save _adj instances)
+		SWFPut_putswf_video_szhack[SWFPut_putswf_video_szhack.length] = this;
+		this._int_set_resize();
+	}
+};
+SWFPut_putswf_video_adj.prototype = {
+	d : null,
+	o : null, va_o : null, ia_o : null,
+	pad : 0, wdiv : null,
+	bld : null,
+	inresize : 0,
+	_style : function (el, sty) {
+		return SWFPut_putswf_video_getstyle(el, sty);
+	},
+	// (ugly hack to get resize event: the event is
+	// delivered only for certain objects (incl. window))
+	_int_set_resize : function () {
+		if ( window.attachEvent ) { // MSIE 8?
+			window.attachEvent("onresize", this._int_handle_resize);
+		} else {
+			window.addEventListener("resize", this._int_handle_resize, true);
+		}
+	},
+	// (ugly hack to get resize event: use saved _adj instances --
+	// note the timeout: observing FFox 26 the event seems to be
+	// delivered before rather that after changes (?!?) so the
+	// timeout unreliably delays processing until changes can
+	// be detected)
+	_int_handle_resize : function () {
+		setTimeout(function () {
+			var that = null;
+			for ( var i = 0; i < SWFPut_putswf_video_szhack.length; i++ ) {
+				that = SWFPut_putswf_video_szhack[i];
+				that.handle_resize();
+			}
+			if ( that != null ) {
+				that._int_set_resize();
+			}
+		}, 1000);
+	},
+	handle_resize : function () {
+		var that = this;
+		if ( that.inresize != 0 )
+			return;
+		var dv = that.d;
+		var wo = that.wdiv;
+		var wn = dv.offsetWidth;
+		if ( wn == wo )
+			return;
+		that.wdiv = that.bld.wdiv = wn;
+		var p = that._style(dv, "padding-left");
+		if ( p ) {
+			that.pad = that.bld.pad = parseInt(p);
+		}
+		that.resize();
+	},
+	_int_rsz : function (o) {
+		var wd = this.wdiv;
+		if ( wd == null )
+			return;
+		wd -= this.pad * 2;
+		var wo = o.width;
+		if ( (wd - wo) == 0 )
+			return;
+		var r = wo / o.height;
+		if ( false && o.videoWidth ) {
+			o.videoWidth = wd;
+			o.videoHeight = Math.round(wd / r);
+		}
+		o.width = o.pixelWidth = wd;
+		o.height = o.pixelHeight = Math.round(wd / r);
+	},
+	resize : function () {
+		if ( ! this.d )
+			return;
+		this.inresize = 1;
+		if ( this.o ) {
+			this._int_rsz(this.o);
+		}
+		if ( this.va_o ) {
+			this._int_rsz(this.va_o);
+		}
+		if ( this.ia_o ) {
+			this._int_rsz(this.ia_o);
+		}
+		this.inresize = 0;
 	}
 };
 

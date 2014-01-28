@@ -1883,15 +1883,16 @@ class SWF_put_evh {
 		// post-div
 		$em = $this->get_swf_tags($swf, $pr, $objid);
 		$js = '';
+		$opfx = 'SWFPut_putswf_video';
+		$dvf = str_replace(array('-', ' '), '_', $divid);
 		// test
 		if ( true || wp_is_mobile() ) {
 		//if ( false ) {
-			$dvf = str_replace(array('-', ' '), '_', $divid);
 			$pad = 0;
 			$js = sprintf('
-			var ob_%s = new SWFPut_putswf_video_bld("%s", "%s", "%s", "%s", %s);
+			var ob_%s = new %s_adj("%s", 0, 0, 0, new %s_bld("%s", "%s", "%s", "%s", %s));
 			',
-			$dvf,
+			$dvf, $opfx, $divid, $opfx,
 			$divid, $objid, 'va_' . $objid, 'ia_' . $objid,
 			json_encode($em['js'])
 			);
@@ -1903,7 +1904,13 @@ class SWF_put_evh {
 
 		return sprintf('
 			<div %s>%s%s</div>
-		', $dv, $em['el'], $c);
+			<script>
+				var adj_%s = new %s_adj("%s", "%s", "%s", "%s", null);
+			</script>
+		', $dv, $em['el'], $c,
+		$dvf, $opfx,
+		$divid, $objid, 'va_' . $objid, 'ia_' . $objid
+		);
 	}
 
 	// filter the posts for attachments that can be
