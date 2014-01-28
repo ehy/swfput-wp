@@ -22,8 +22,8 @@ POTSRCS = ${PRJSTEM}.php
 
 DOCSD = docs
 JSDIR = js
-JSBIN = $(JSDIR)/formxed.js $(JSDIR)/screens.js
-JSSRC = $(JSDIR)/formxed.dev.js $(JSDIR)/screens.dev.js
+JSBIN = $(JSDIR)/formxed.js $(JSDIR)/screens.js $(JSDIR)/front.js
+JSSRC = $(JSDIR)/formxed.dev.js $(JSDIR)/screens.dev.js $(JSDIR)/front.dev.js
 LCDIR = locale
 LCDOM = $(PRJSTEM)_l10n
 LCPOT = $(LCDIR)/$(LCDOM).pot

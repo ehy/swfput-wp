@@ -215,6 +215,9 @@ class SWF_put_evh {
 	// swfput js shortcode editor helper name
 	const swfxedjsname = 'formxed.js';
 	
+	// swfput js front-end js (e.g. for mobile)
+	const swfadjjsname = 'front.js';
+	
 	// hold an instance
 	private static $instance;
 
@@ -791,7 +794,7 @@ class SWF_put_evh {
 			$pf = self::mk_pluginfile();
 			$t = self::settings_jsdir . '/' . self::swfxedjsname;
 			$jsfile = plugins_url($t, $pf);
-	        wp_enqueue_script($jsfn, $jsfile, array('jquery'), 'xed');
+	        wp_enqueue_script($jsfn, $jsfile, array('jquery'), '1.0.1');
 	    }
 	}
 
@@ -901,7 +904,12 @@ class SWF_put_evh {
 			if ( current_user_can('manage_options') ) {
 				$this->init_settings_page();
 			}
-		} // if ( $adm )
+		} else { // if ( $adm )
+			$jsfn = 'SWFPut_putswf_video_adj';
+			$t = self::settings_jsdir . '/' . self::swfadjjsname;
+			$jsfile = plugins_url($t, $pf);
+	        wp_enqueue_script($jsfn, $jsfile, false, '1.0.7');
+		}
 
 		$aa = array($this, 'post_shortcode');
 		add_shortcode(self::shortcode, $aa);
@@ -1802,7 +1810,8 @@ class SWF_put_evh {
 		// use no class, but do use deprecated align
 		$dv = '<p><div id="'.$divid.'" align="center"';
 		$dv .= ' style="width: '.$dw.'px">';
-		$em = $this->get_swf_tags($swf, $pr, $objid);
+		$emarr = $this->get_swf_tags($swf, $pr, $objid);
+		$em = $emarr['el'];
 		$c = '';
 		// Note '!=' -- not '!=='
 		if ( $content != null ) {
@@ -1861,97 +1870,40 @@ class SWF_put_evh {
 		$objid = sprintf('o_%s_%06u', $code, $rndnum);
 
 		// use class that WP uses for e.g. images
-		$dv = '<div id="'.$divid.'" class="wp-caption aligncenter"';
-		$dv .= ' style="width: '.$dw.'px">';
-		$em = $this->get_swf_tags($swf, $pr, $objid);
+		$dv = 'id="'.$divid.'" class="wp-caption aligncenter"';
+		$dv .= ' style="width: '.$dw.'px"';
 		$c = '';
 		// Note '!=' -- not '!=='
 		if ( $content != null ) {
 			$c = do_shortcode($content);
+			$pr->setvalue('caption', $c);
 			$c = '<p class="wp-caption-text">' . $c . '</p>';
 		}
 
 		// post-div
-		$pd = '';
+		$em = $this->get_swf_tags($swf, $pr, $objid);
+		$js = '';
 		// test
-		if ( true ) {
+		if ( true || wp_is_mobile() ) {
+		//if ( false ) {
 			$dvf = str_replace(array('-', ' '), '_', $divid);
-			// $obf = str_replace(array('-', ' '), '_', $objid);
 			$pad = 0;
-			$pd = sprintf('
-			<script>
-			var f_%s = function(dv, ob, av, ai, pad) {
-				this.d = document.getElementById(dv);
-				this.o = document.getElementById(ob);
-				this.va_o = document.getElementById(av);
-				this.ia_o = document.getElementById(ai);
-				this.pad = pad;
-				if ( this.d ) {
-					//var p = this.d.style.outlineWidth;
-					var p = this._style(this.d, "padding-left");
-					if ( p )
-						this.pad = Math.max(this.pad, parseInt(p));
-				}
-			};
-			f_%s.prototype = { d : null,
-				o : null, va_o : null, ia_o : null,
-				pad : 0,
-				_style : function (el, sty){
-					// borrowed from:
-					// http://robertnyman.com/2006/04/24/get-the-rendered-style-of-an-element/
-					var v = 0;
-					if(document.defaultView && document.defaultView.getComputedStyle){
-						v = document.defaultView.getComputedStyle(el, "").getPropertyValue(sty);
-						return v;
-					}
-					else if(el.currentStyle){
-						sty = sty.replace(/\-(\w)/g, function (strMatch, p1){
-							return p1.toUpperCase();
-						});
-						v = el.currentStyle[sty];
-						return v;
-					}
-					return v;
-				},
-				_int_rsz : function (o)  {
-					//var wd = this.d.clientWidth;
-					var wd = this.d.offsetWidth;
-					var wo = o.width;
-					var r = wo / o.height;
-					var d = wd - wo;
-
-					if ( d > 0 && d <= (this.pad * 2) )
-						return;
-					var wn = wd - (this.pad * 2);
-					var hn = Math.round(wn / r);
-					o.width = wn;
-					o.height = hn;
-				},
-				resize : function () {
-					if ( ! this.d )
-						return;
-					if ( this.o ) {
-						this._int_rsz(this.o);
-					}
-					if ( this.va_o ) {
-						this._int_rsz(this.va_o);
-					}
-					if ( this.ia_o ) {
-						this._int_rsz(this.ia_o);
-					}
-				}
-			};
-			var ob_%s = new f_%s("%s", "%s", "%s", "%s", %d);
-			ob_%s.resize();
-			</script>
+			$js = sprintf('
+			var ob_%s = new SWFPut_putswf_video_bld("%s", "%s", "%s", "%s", %s);
 			',
-			$dvf, $dvf, $dvf, $dvf,
-			$divid, $objid, 'va_' . $objid, 'ia_' . $objid, $pad,
-			$dvf
+			$dvf,
+			$divid, $objid, 'va_' . $objid, 'ia_' . $objid,
+			json_encode($em['js'])
 			);
+
+			return sprintf('
+			<div %s>%s</div><script type="text/javascript">%s</script>
+			', $dv, $c, $js);
 		}
 
-		return sprintf('%s%s%s</div>%s', $dv, $em, $c, $pd);
+		return sprintf('
+			<div %s>%s%s</div>
+		', $dv, $em['el'], $c);
 	}
 
 	// filter the posts for attachments that can be
@@ -1999,11 +1951,13 @@ class SWF_put_evh {
 					$divid = sprintf('d_%s_%06u', $code, $rndnum);
 					$objid = sprintf('o_%s_%06u', $code, $rndnum);
 
+					$emarr = $this->get_swf_tags($swf, $pr, $objid);
+					$em = $emarr['el'];
 					$pr->setvalue('url', $url);
 					$s = '<div style="width: '.($w+0).'px" '
 						. 'id="' . $divid . '" '
 						. 'class="wp-caption aligncenter">'
-						. $this->get_swf_tags($swf, $pr, $objid)
+						. $em
 						// . '<p class="wp-caption-text"></p>'
 						. '</div>'
 						. $sep;
@@ -2599,11 +2553,13 @@ class SWF_put_evh {
 
 	// print suitable SWF object/embed tags
 	public function put_swf_tags($uswf, $par, $id = null) {
-		$s = $this->get_swf_tags($uswf, $par, $id);
+		$a = $this->get_swf_tags($uswf, $par, $id);
+		$s = $a['el'];
 		echo $s;
 	}
 
-	// return a string with suitable SWF object/embed tags
+	// return array with suitable SWF object/embed tags in ['el']
+	// and data for building the elements w/ JS in ['js']
 	public function get_swf_tags($uswf, $par, $id = null) {
 		extract($par->getparams());
 		$ming = self::should_use_ming();
@@ -2752,23 +2708,46 @@ class SWF_put_evh {
 			$fv = &$qv;
 		}
 
+		// 1.0.7, 2014/01/27 -- alongside the elements, also
+		// build an array for JS
+		$jatt = array();
+
 		// alternates
 		$altimg = '';
 		if ( $iimgbg == 'true' && $iimgunesc != '' ) {
 			$viid = '';
+			$jatt['a_img'] = array(
+				'width' => $w, 'height' => $h,
+				'id'    => $id != '' ? ('ia_' . $id) : $id,
+				'src'   => self::ht($iimgunesc),
+				'alt'   => self::wt(
+				  __('The flash plugin is not available', 'swfput_l10n')
+				)
+			);
 			if ( $id != '' ) {
 				$viid = sprintf(' id="ia_%s"', $id);
 			}
 			$fmt = '%s<img%s src="%s" alt="%s" width="%u" height="%u">';
 			$altimg = sprintf($fmt, "\n\t\t", $viid,
-				self::ht($iimgunesc),
-				self::wt(
-				__('The flash plugin is not available', 'swfput_l10n')
-				), $w, $h
+				$jatt['a_img']['src'],
+				$jatt['a_img']['alt'],
+				$w, $h
 			);
+		} else {
+			$jatt['a_img'] = '';
 		}
 		if ( $altvideo != '' ) {
 			$viid = '';
+			$jatt['a_vid'] = array(
+				'width'     => $w, 'height' => $h,
+				'id'        => $id != '' ? ('va_' . $id) : $id,
+				'poster'    => self::ht($iimgunesc),
+				'controls'  => 'true',
+				'preload'   => 'none',
+				'autoplay'  => $play,
+				'loop'      => $loop,
+				'srcs'      => array()
+			);
 			if ( $id != '' ) {
 				$viid = sprintf(' id="va_%s"', $id);
 			}
@@ -2780,7 +2759,7 @@ class SWF_put_evh {
 				$vd .= ' loop';
 			}
 			if ( $iimgunesc != '' ) {
-				$vd .= sprintf(' poster="%s"', self::ht($iimgunesc));
+				$vd .= sprintf(' poster="%s"', $jatt['a_vid']['poster']);
 			}
 			$vd .= sprintf(' width="%u" height="%u">', $w, $h);
 			// format for source elements
@@ -2795,26 +2774,32 @@ class SWF_put_evh {
 				if ( ($src = trim($src, " \t?")) === '' ) {
 					continue;
 				}
+				$jsa = array('type' => '');
 				$tv = explode('?', $src);
 				if ( isset($tv[1]) ) {
 					if ( ($tv[1] = trim($tv[1])) !== '' ) {
-						$typ = sprintf(' type="%s"', self::ht($tv[1]));
+						$jsa['type'] = self::ht($tv[1]);
+						$typ = sprintf(' type="%s"', $jsa['type']);
 					}
 					// leave off src
 					$src = trim($tv[0]);
 				}
-				$vd .= sprintf($fmt, self::ht($src), $typ);
+				$jsa['src'] = self::ht($src);
+				$vd .= sprintf($fmt, $jsa['src'], $typ);
+				$jatt['a_vid']['srcs'][] = $jsa;
 			}
 
 			// place as alt the altimg, or message string
-			$vd .= sprintf("%s\n\t\t</video>",
-				$altimg == '' ?
-				self::wt("\n\t\t" .
+			$jatt['a_vid']['altmsg'] = self::wt("\n\t\t" .
 				__('Flash video is not available, and the alternate <code>video</code> sources were rejected by your browser', 'swfput_l10n')
-				) : $altimg
+			);
+			$vd .= sprintf("%s\n\t\t</video>",
+				$altimg == '' ? $jatt['a_vid']['altmsg'] : $altimg
 			);
 			
 			$altimg = $vd;
+		} else {
+			$jatt['a_vid'] = '';
 		}
 
 		// Update 2013/09/23: update object element, separating
@@ -2826,21 +2811,63 @@ class SWF_put_evh {
 		// self::is_msie()) on the assumption that classid will
 		// be necessary to make that one work
 		$obj = '';
+		$jatt['obj'] = array(
+			'width'     => $w, 'height' => $h,
+			'id'        => $id,
+			'parm'      => array()
+		);
 		if ( $id != '' ) {
 			$id = sprintf(' id="%s"', $id);
 		}
 		if ( self::is_msie() ) { 
+			$jatt['obj']['ie'] = 'true';
 			$obj = sprintf('
 			<object%s classid="%s" codebase="%s" width="%u" height="%u">
 			<param name="data" value="%s?%s">
 			', $id, $classid, $codebase, $w, $h, $uswf, $pv);
+			$jatt['obj']['classid'] = $classid;
+			$jatt['obj']['codebase'] = $codebase;
+			$jatt['obj']['parm'][] = array(
+				'name' => 'data', 'value' => $uswf . '?' . $pv
+			);
 		} else {
+			$jatt['obj']['ie'] = 'false';
 			$typ = 'application/x-shockwave-flash';
 			$obj = sprintf('
 			<object%s data="%s?%s" type="%s" width="%u" height="%u">
 			', $id, $uswf, $pv, $typ, $w, $h);
+			$jatt['obj']['data'] = $uswf . '?' . $pv;
+			$jatt['obj']['type'] = $typ;
 		}
-		return $obj
+		$jatt['obj']['parm'][] = array(
+			'name' => 'play', 'value' => $play
+		);
+		$jatt['obj']['parm'][] = array(
+			'name' => 'quality', 'value' => $quality
+		);
+		$jatt['obj']['parm'][] = array(
+			'name' => 'allowFullScreen', 'value' => $allowfull
+		);
+		$jatt['obj']['parm'][] = array(
+			'name' => 'allowScriptAccess', 'value' => 'sameDomain'
+		);
+		$jatt['obj']['parm'][] = array(
+			'name' => 'flashvars', 'value' => $fv
+		);
+		$jatt['obj']['parm'][] = array(
+			'name' => 'src', 'value' => $uswf . '?' . $pv
+		);
+		$jatt['obj']['parm'][] = array(
+			'name' => 'name', 'value' => 'mingput'
+		);
+		$jatt['obj']['parm'][] = array(
+			'name' => 'bgcolor', 'value' => '#000000'
+		);
+		$jatt['obj']['parm'][] = array(
+			'name' => 'align', 'value' => 'middle'
+		);
+		return array(
+		'el' => $obj
 		. sprintf('<param name="play" value="%s">
 		<param name="quality" value="%s">
 		<param name="allowFullScreen" value="%s">
@@ -2851,7 +2878,8 @@ class SWF_put_evh {
 		<param name="bgcolor" value="#000000">
 		<param name="align" value="middle">%s
 		</object>
-		', $play, $quality, $allowfull, $fv, $uswf, $pv, $altimg);
+		', $play, $quality, $allowfull, $fv, $uswf, $pv, $altimg),
+		'js' => $jatt);
 	}
 } // End class SWF_put_evh
 
