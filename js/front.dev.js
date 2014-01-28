@@ -176,6 +176,7 @@ SWFPut_putswf_video_bld.prototype = {
 			for ( var i = 0; i < a["srcs"].length; i++ ) {
 				var t = a["srcs"][i];
 				if ( o.canPlayType(t["type"]) == "probably" ) {
+					o.type = t["type"];
 					o.src = t["src"];
 					got = true;
 					break;
@@ -186,6 +187,7 @@ SWFPut_putswf_video_bld.prototype = {
 				for ( var i = 0; i < a["srcs"].length; i++ ) {
 					var t = a["srcs"][i];
 					if ( o.canPlayType(t["type"]) == "maybe" ) {
+						o.type = t["type"];
 						o.src = t["src"];
 						got = true;
 						break;
