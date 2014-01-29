@@ -290,10 +290,10 @@ SWFPut_putswf_video_adj.prototype = {
 		var wn = dv.offsetWidth;
 		if ( wn == wo )
 			return;
-		that.wdiv = that.bld.wdiv = wn;
+		that.wdiv = wn;
 		var p = that._style(dv, "padding-left");
 		if ( p ) {
-			that.pad = that.bld.pad = parseInt(p);
+			that.pad = parseInt(p);
 		}
 		that.resize();
 	},

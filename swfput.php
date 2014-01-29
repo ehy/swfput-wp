@@ -1968,8 +1968,7 @@ class SWF_put_evh {
 			',
 			$dvf, $opfx, $divids[0], $opfx,
 			$divids[0], $divids[1], $divids[2], $divids[3],
-			json_encode($vidtags['js'])
-			);
+			json_encode($vidtags['js']));
 
 			return sprintf('
 			<div %s>%s</div><script type="text/javascript">%s</script>
@@ -1980,12 +1979,14 @@ class SWF_put_evh {
 		return sprintf('
 			<div %s>%s%s</div>
 			<script>
-				var adj_%s = new %s_adj("%s", "%s", "%s", "%s", null);
+				var adj_%s = new %s_adj("%s", "%s", "%s", "%s", false);
+				adj_%s.resize();
 			</script>
 			',
 			$dv, $vidtags['el'], $cap,
 			$dvf, $opfx,
-			$divids[0], $divids[1], $divids[2], $divids[3]);
+			$divids[0], $divids[1], $divids[2], $divids[3],
+			$dvf);
 	}
 
 	/**
