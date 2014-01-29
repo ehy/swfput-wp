@@ -279,7 +279,7 @@ SWFPut_putswf_video_adj.prototype = {
 			if ( that != null ) {
 				that._int_set_resize();
 			}
-		}, 1000);
+		}, 100);
 	},
 	handle_resize : function () {
 		var that = this;

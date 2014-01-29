@@ -1795,6 +1795,9 @@ class SWF_put_evh {
 		if ( $code === "" ) {
 			$code = $atts[0];
 		}
+		if ( $code === "" ) {
+			$code = 'swfput_div';
+		}
 		if ( $this->should_use_ming() ) {
 			$swf = $this->get_swf_url('widget', $w, $h);
 		} else {
@@ -1803,22 +1806,18 @@ class SWF_put_evh {
 		}
 		$dw = $w + 3;
 
-		$rndnum = self::uniq_rand();
-		$divid = sprintf('d_%s_%06u', $code, $rndnum);
-		$objid = sprintf('o_%s_%06u', $code, $rndnum);
-
 		// use no class, but do use deprecated align
-		$dv = '<p><div id="'.$divid.'" align="center"';
-		$dv .= ' style="width: '.$dw.'px">';
-		$emarr = $this->get_swf_tags($swf, $pr, $objid);
-		$em = $emarr['el'];
+		$dv = 'align="center" style="width: '.$dw.'px"';
 		$c = '';
 		// Note '!=' -- not '!=='
 		if ( $content != null ) {
 			$c = do_shortcode($content);
 			$c = '</p><p><span align="center">' . $c . '</span></p><p>';
 		}
-		return sprintf('%s%s%s</div></p>', $dv, $em, $c);
+
+		$ids = $this->get_div_ids($code);
+		$em  = $this->get_swf_tags($swf, $pr, $ids[1]);
+		return $this->get_div($ids, $dv, $c, $em);
 	}
 
 	// handler for 'shortcode' tags in posts that will be
@@ -1857,6 +1856,9 @@ class SWF_put_evh {
 		if ( $code === "" ) {
 			$code = $atts[0];
 		}
+		if ( $code === "" ) {
+			$code = 'swfput_div';
+		}
 		if ( $this->should_use_ming() ) {
 			$swf = $this->get_swf_url('post', $w, $h);
 		} else {
@@ -1865,12 +1867,8 @@ class SWF_put_evh {
 		}
 		$dw = $w + 0;
 
-		$rndnum = self::uniq_rand();
-		$divid = sprintf('d_%s_%06u', $code, $rndnum);
-		$objid = sprintf('o_%s_%06u', $code, $rndnum);
-
 		// use class that WP uses for e.g. images
-		$dv = 'id="'.$divid.'" class="wp-caption aligncenter"';
+		$dv = ' class="wp-caption aligncenter"';
 		$dv .= ' style="width: '.$dw.'px"';
 		$c = '';
 		// Note '!=' -- not '!=='
@@ -1880,37 +1878,9 @@ class SWF_put_evh {
 			$c = '<p class="wp-caption-text">' . $c . '</p>';
 		}
 
-		// post-div
-		$em = $this->get_swf_tags($swf, $pr, $objid);
-		$js = '';
-		$opfx = 'SWFPut_putswf_video';
-		$dvf = str_replace(array('-', ' '), '_', $divid);
-		// test
-		if ( true || wp_is_mobile() ) {
-		//if ( false ) {
-			$pad = 0;
-			$js = sprintf('
-			var ob_%s = new %s_adj("%s", 0, 0, 0, new %s_bld("%s", "%s", "%s", "%s", %s));
-			',
-			$dvf, $opfx, $divid, $opfx,
-			$divid, $objid, 'va_' . $objid, 'ia_' . $objid,
-			json_encode($em['js'])
-			);
-
-			return sprintf('
-			<div %s>%s</div><script type="text/javascript">%s</script>
-			', $dv, $c, $js);
-		}
-
-		return sprintf('
-			<div %s>%s%s</div>
-			<script>
-				var adj_%s = new %s_adj("%s", "%s", "%s", "%s", null);
-			</script>
-		', $dv, $em['el'], $c,
-		$dvf, $opfx,
-		$divid, $objid, 'va_' . $objid, 'ia_' . $objid
-		);
+		$ids = $this->get_div_ids($code);
+		$em  = $this->get_swf_tags($swf, $pr, $ids[1]);
+		return $this->get_div($ids, $dv, $c, $em);
 	}
 
 	// filter the posts for attachments that can be
@@ -1946,7 +1916,6 @@ class SWF_put_evh {
 			if ( preg_match($pat, $line, $m, PREG_OFFSET_CAPTURE) ) {
 				$tok = $m[3][0];
 				$id = $m[5][0];
-				//$meta = wp_get_attachment_metadata($id);
 				$url = wp_get_attachment_url($id);
 				if ( is_wp_error($url) ) {
 					$out .= $line . $sep;
@@ -1954,20 +1923,14 @@ class SWF_put_evh {
 				} else if ( ! preg_match($mpat['av'], $url) ) {
 					$out .= $line . $sep;
 				} else {
-					$rndnum = self::uniq_rand();
-					$divid = sprintf('d_%s_%06u', $code, $rndnum);
-					$objid = sprintf('o_%s_%06u', $code, $rndnum);
-
-					$emarr = $this->get_swf_tags($swf, $pr, $objid);
-					$em = $emarr['el'];
 					$pr->setvalue('url', $url);
-					$s = '<div style="width: '.($w+0).'px" '
-						. 'id="' . $divid . '" '
-						. 'class="wp-caption aligncenter">'
-						. $em
-						// . '<p class="wp-caption-text"></p>'
-						. '</div>'
-						. $sep;
+					$ids = $this->get_div_ids('swfput_sed');
+					$em  = $this->get_swf_tags($swf, $pr, $ids[1]);
+
+					$dv = 'style="width: '.($w+0).'px" '
+						. 'class="wp-caption aligncenter"';
+					$code = 'swfput_div';
+					$s = $this->get_div($ids, $dv, '', $em) . $sep;
 					$out .= $s . $line . $sep;
 				}
 			} else {
@@ -1977,6 +1940,54 @@ class SWF_put_evh {
 		return $out;
 	}
 	
+	// get video <div>+<script> id strings
+	// $base is base od <div> id,
+	public function get_div_ids($base) {
+		$rndnum = self::uniq_rand();
+		$divid = sprintf('d_%s_%06u', $base, $rndnum);
+		$objid = sprintf('o_%s_%06u', $base, $rndnum);
+		return array($divid, $objid, 'va_' . $objid, 'ia_' . $objid);
+	}
+	
+	// get video <div>+<script> strings
+	// $divids are returned from get_div_ids($base),
+	// $divatts are appended
+	// to <div> after id, $cap is caption within <div>, and
+	// $vidtags are the array returned by get_swf_tags
+	public function get_div($divids, $divatts, $cap, $vidtags) {
+		$opfx = 'SWFPut_putswf_video';
+
+
+		$dv = sprintf('id="%s" %s', $divids[0], $divatts);
+		$dvf = str_replace(array('-', ' '), '_', $divids[0]);
+
+		if ( wp_is_mobile() ) {
+			$pad = 0;
+			$js = sprintf('
+			var ob_%s = new %s_adj("%s", 0, 0, 0, new %s_bld("%s", "%s", "%s", "%s", %s));
+			',
+			$dvf, $opfx, $divids[0], $opfx,
+			$divids[0], $divids[1], $divids[2], $divids[3],
+			json_encode($vidtags['js'])
+			);
+
+			return sprintf('
+			<div %s>%s</div><script type="text/javascript">%s</script>
+			',
+			$dv, $cap, $js);
+		}
+
+		return sprintf('
+			<div %s>%s%s</div>
+			<script>
+				var adj_%s = new %s_adj("%s", "%s", "%s", "%s", null);
+			</script>
+			',
+			$dv, $vidtags['el'], $cap,
+			$dvf, $opfx,
+			$divids[0], $divids[1], $divids[2], $divids[3]);
+	}
+
 	/**
 	 * Utility and misc. helper procs
 	 */
@@ -2556,13 +2567,6 @@ class SWF_put_evh {
 	// if it exists make a url for it.
 	public function get_swf_default_url() {
 		return $this->swfputvid;
-	}
-
-	// print suitable SWF object/embed tags
-	public function put_swf_tags($uswf, $par, $id = null) {
-		$a = $this->get_swf_tags($uswf, $par, $id);
-		$s = $a['el'];
-		echo $s;
 	}
 
 	// return array with suitable SWF object/embed tags in ['el']
@@ -3203,15 +3207,9 @@ class SWF_put_widget_evh extends WP_Widget {
 			$uswf = $this->plinst->get_swf_binurl($bh);
 		}
 
-		$code = 'widget-div';
-		$rndnum = $this->plinst->uniq_rand();
-		$divid = sprintf('d_%s_%06u', $code, $rndnum);
-		$objid = sprintf('o_%s_%06u', $code, $rndnum);
-
 		$dw = $w + 3;
 		// use no class, but do use deprecated align
-		$dv = '<div id="'.$divid.'" align="center"';
-		$dv .= ' style="width: '.$dw.'px">';
+		$dv = ' align="center" style="width: '.$dw.'px"';
 
 		extract($args);
 
@@ -3228,12 +3226,14 @@ class SWF_put_widget_evh extends WP_Widget {
 			echo $before_title . $title . $after_title;
 		}
 
-		echo $dv;
-		$this->plinst->put_swf_tags($uswf, $pr, $objid);
 		if ( $cap ) {
-			echo '<p><span align="center">' .$cap. '</span></p>';
+			$cap = '<p><span align="center">' .$cap. '</span></p>';
 		}
-		echo '</div>';
+
+		$ids  = $this->plinst->get_div_ids('widget-div');
+		$em   = $this->plinst->get_swf_tags($uswf, $pr, $ids[1]);
+
+		printf('%s', $this->plinst->get_div($ids, $dv, $cap, $em));
 
 		echo $after_widget;
 	}
