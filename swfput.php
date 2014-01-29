@@ -3210,7 +3210,7 @@ class SWF_put_widget_evh extends WP_Widget {
 
 		$dw = $w + 3;
 		// use no class, but do use deprecated align
-		$dv = ' align="center" style="width: '.$dw.'px"';
+		$dv = 'class="widget" align="center" style="width: '.$dw.'px"';
 
 		extract($args);
 
