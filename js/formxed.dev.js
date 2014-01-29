@@ -32,7 +32,7 @@ SWFPut_putswf_video_xed.prototype = {
 		iimage: "",
 		width: "240",
 		height: "180",
-		mobiwidth: "260",
+		mobiwidth: "0",
 		audio: "false",       
 		aspectautoadj: "true",
 		displayaspect: "0",   

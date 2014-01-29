@@ -116,7 +116,7 @@ SWFPut_putswf_video_bld.prototype = {
 			var got = false;
 			for ( var i = 0; i < a["srcs"].length; i++ ) {
 				var t = a["srcs"][i];
-				if ( o.canPlayType(t["type"]) == "probably" ) {
+				if ( t["type"] != "" && o.canPlayType(t["type"]) == "probably" ) {
 					o.type = t["type"];
 					o.src = t["src"];
 					got = true;
@@ -127,11 +127,29 @@ SWFPut_putswf_video_bld.prototype = {
 			if ( got == false ) {
 				for ( var i = 0; i < a["srcs"].length; i++ ) {
 					var t = a["srcs"][i];
-					if ( o.canPlayType(t["type"]) == "maybe" ) {
+					if ( t["type"] != "" && o.canPlayType(t["type"]) == "maybe" ) {
 						o.type = t["type"];
 						o.src = t["src"];
 						got = true;
 						break;
+					}
+				}
+			}
+			// still false; maybe types were absent, but src
+			// URL's OK? IAC, append <source>s and give the
+			// video object a chance to do what it might
+			if ( got == false ) {
+				for ( var i = 0; i < a["srcs"].length; i++ ) {
+					var t = a["srcs"][i];
+					if ( t["type"] != "" ) {
+						continue; // mime types were tested above
+					}
+					var so = document.createElement('source');
+					if ( so ) {
+						//so.type = t["type"];
+						so.src = t["src"];
+						o.appendChild(so);
+						got = true;
 					}
 				}
 			}
@@ -241,6 +259,14 @@ var SWFPut_putswf_video_adj = function(dv, ob, av, ai, bld) {
 		}
 	}
 	if ( this.d ) {
+		// need max-width or browser does not scale div
+		if ( this.d.style == undefined ||
+			 this.d.style.maxWidth == undefined ||
+			 this.d.style.maxWidth == "none" ||
+			 this.d.style.maxWidth == "" ) {
+			//console.log("maxWidth: '" + this.d.style.maxWidth + "'");
+			this.d.style.maxWidth = "100%";
+		}
 		// (ugly hack to get resize event: save _adj instances)
 		SWFPut_putswf_video_szhack[SWFPut_putswf_video_szhack.length] = this;
 		this._int_set_resize();
@@ -306,10 +332,6 @@ SWFPut_putswf_video_adj.prototype = {
 		if ( (wd - wo) == 0 )
 			return;
 		var r = wo / o.height;
-		if ( false && o.videoWidth ) {
-			o.videoWidth = wd;
-			o.videoHeight = Math.round(wd / r);
-		}
 		o.width = o.pixelWidth = wd;
 		o.height = o.pixelHeight = Math.round(wd / r);
 	},

@@ -217,6 +217,8 @@ class SWF_put_evh {
 	
 	// swfput js front-end js (e.g. for mobile)
 	const swfadjjsname = 'front.js';
+	// swfput js front-end js name prefix:
+	const swfadjjsnpfx = 'SWFPut_putswf_video';
 	
 	// hold an instance
 	private static $instance;
@@ -1675,7 +1677,7 @@ class SWF_put_evh {
 			array('height', '', '</p>', $in, 'inp',
 				__('Height: ', 'swfput_l10n')),
 			array('mobiwidth', '<p>', '</p>', $in, 'inp',
-				__('Max mobile width (0 disables): ', 'swfput_l10n')),
+				__('Mobile width (0 disables): ', 'swfput_l10n')),
 			array('aspectautoadj', '<p>', '</p>', $in, 'chk',
 				__('Auto aspect (e.g. 360x240 to 4:3): ', 'swfput_l10n')),
 			array('displayaspect', '<p>', '</p>', $in, 'inp',
@@ -1807,7 +1809,8 @@ class SWF_put_evh {
 		$dw = $w + 3;
 
 		// use no class, but do use deprecated align
-		$dv = 'align="center" style="width: '.$dw.'px"';
+		$dv = 'align="center" style="width: '
+			. $dw . 'px; max-width: 100%"';
 		$c = '';
 		// Note '!=' -- not '!=='
 		if ( $content != null ) {
@@ -1816,7 +1819,7 @@ class SWF_put_evh {
 		}
 
 		$ids = $this->get_div_ids($code);
-		$em  = $this->get_swf_tags($swf, $pr, $ids[1]);
+		$em  = $this->get_swf_tags($swf, $pr, $ids);
 		return $this->get_div($ids, $dv, $c, $em);
 	}
 
@@ -1869,7 +1872,7 @@ class SWF_put_evh {
 
 		// use class that WP uses for e.g. images
 		$dv = ' class="wp-caption aligncenter"';
-		$dv .= ' style="width: '.$dw.'px"';
+		$dv .= ' style="width: '.$dw.'px; max-width: 100%"';
 		$c = '';
 		// Note '!=' -- not '!=='
 		if ( $content != null ) {
@@ -1879,7 +1882,7 @@ class SWF_put_evh {
 		}
 
 		$ids = $this->get_div_ids($code);
-		$em  = $this->get_swf_tags($swf, $pr, $ids[1]);
+		$em  = $this->get_swf_tags($swf, $pr, $ids);
 		return $this->get_div($ids, $dv, $c, $em);
 	}
 
@@ -1925,10 +1928,10 @@ class SWF_put_evh {
 				} else {
 					$pr->setvalue('url', $url);
 					$ids = $this->get_div_ids('swfput_sed');
-					$em  = $this->get_swf_tags($swf, $pr, $ids[1]);
+					$em  = $this->get_swf_tags($swf, $pr, $ids);
 
-					$dv = 'style="width: '.($w+0).'px" '
-						. 'class="wp-caption aligncenter"';
+					$dv = 'style="width: '.($w+0).'px; max-width: 100%"'
+						. ' class="wp-caption aligncenter"';
 					$code = 'swfput_div';
 					$s = $this->get_div($ids, $dv, '', $em) . $sep;
 					$out .= $s . $line . $sep;
@@ -1951,34 +1954,31 @@ class SWF_put_evh {
 	
 	// get video <div>+<script> strings
 	// $divids are returned from get_div_ids($base),
-	// $divatts are appended
-	// to <div> after id, $cap is caption within <div>, and
-	// $vidtags are the array returned by get_swf_tags
+	// $divatts are appended to <div> after id,
+	// $cap is caption within <div> below video, and
+	// $vidtags are the array returned by get_swf_tags()
 	public function get_div($divids, $divatts, $cap, $vidtags) {
-		$opfx = 'SWFPut_putswf_video';
-
+		$opfx = self::swfadjjsnpfx;
 
 		$dv = sprintf('id="%s" %s', $divids[0], $divatts);
 		$dvf = str_replace(array('-', ' '), '_', $divids[0]);
 
-		if ( wp_is_mobile() ) {
-			$pad = 0;
-			$js = sprintf('
+		if ( function_exists('wp_is_mobile') && wp_is_mobile() ) {
+			return sprintf('
+			<div %s>%s</div>
+			<script type="text/javascript">
 			var ob_%s = new %s_adj("%s", 0, 0, 0, new %s_bld("%s", "%s", "%s", "%s", %s));
+			</script>
 			',
+			$dv, $cap,
 			$dvf, $opfx, $divids[0], $opfx,
 			$divids[0], $divids[1], $divids[2], $divids[3],
 			json_encode($vidtags['js']));
-
-			return sprintf('
-			<div %s>%s</div><script type="text/javascript">%s</script>
-			',
-			$dv, $cap, $js);
 		}
 
 		return sprintf('
 			<div %s>%s%s</div>
-			<script>
+			<script type="text/javascript">
 				var adj_%s = new %s_adj("%s", "%s", "%s", "%s", false);
 				adj_%s.resize();
 			</script>
@@ -2572,14 +2572,17 @@ class SWF_put_evh {
 
 	// return array with suitable SWF object/embed tags in ['el']
 	// and data for building the elements w/ JS in ['js']
-	public function get_swf_tags($uswf, $par, $id = null) {
+	public function get_swf_tags($uswf, $par, $ids = null) {
 		extract($par->getparams());
 		$ming = self::should_use_ming();
 		$esc = true;
 		
-		if ( $id === null ) {
-			$id = '';
+		if ( $ids === null ) {
+			$ids  = $this->get_div_ids('SWFPut_vid');
 		}
+		$id   = $ids[1]; // object
+		$idav = $ids[2]; // alternate video
+		$idai = $ids[3]; // alternate img
 
 		if ( ! $uswf ) {
 			if ( $ming ) {
@@ -2643,12 +2646,12 @@ class SWF_put_evh {
 		$w = $width; $h = $height;
 		// Added v. 1.0.7; 2014/01/24:
 		// if wp_is_mobile is a defined function (wp 3.4?), then
-		// honor new param 'mobiwidth' to clamp the dimensions
-		// proportionally for mobile devices
+		// honor new param 'mobiwidth' to set the dimensions
+		// (proportionally to regular WxH) for mobile devices
 		// user can set $mobiwidth 0 to disable this
 		if ( $mobiwidth > 0 && function_exists('wp_is_mobile') ) {
-			if ( $mobiwidth < $w && wp_is_mobile() ) {
-				$h = $h * $mobiwidth / $w;
+			if ( wp_is_mobile() ) {
+				$h = (int)($h * $mobiwidth / $w);
 				$w = $mobiwidth;
 			}
 		}
@@ -2730,14 +2733,14 @@ class SWF_put_evh {
 			$viid = '';
 			$jatt['a_img'] = array(
 				'width' => $w, 'height' => $h,
-				'id'    => $id != '' ? ('ia_' . $id) : $id,
+				'id'    => $idai,
 				'src'   => self::ht($iimgunesc),
 				'alt'   => self::wt(
 				  __('The flash plugin is not available', 'swfput_l10n')
 				)
 			);
-			if ( $id != '' ) {
-				$viid = sprintf(' id="ia_%s"', $id);
+			if ( $idai != '' ) {
+				$viid = sprintf(' id="%s"', $idai);
 			}
 			$fmt = '%s<img%s src="%s" alt="%s" width="%u" height="%u">';
 			$altimg = sprintf($fmt, "\n\t\t", $viid,
@@ -2752,7 +2755,7 @@ class SWF_put_evh {
 			$viid = '';
 			$jatt['a_vid'] = array(
 				'width'     => $w, 'height' => $h,
-				'id'        => $id != '' ? ('va_' . $id) : $id,
+				'id'        => $idav,
 				'poster'    => self::ht($iimgunesc),
 				'controls'  => 'true',
 				'preload'   => 'none',
@@ -2760,8 +2763,8 @@ class SWF_put_evh {
 				'loop'      => $loop,
 				'srcs'      => array()
 			);
-			if ( $id != '' ) {
-				$viid = sprintf(' id="va_%s"', $id);
+			if ( $idav != '' ) {
+				$viid = sprintf(' id="%s"', $idav);
 			}
 			$vd = "\n\t\t" . '<video'.$viid.' controls preload="none"';
 			if ( $play == 'true' ) {
@@ -2878,17 +2881,17 @@ class SWF_put_evh {
 		$jatt['obj']['parm'][] = array(
 			'name' => 'align', 'value' => 'middle'
 		);
+
 		return array(
-		'el' => $obj
-		. sprintf('<param name="play" value="%s">
-		<param name="quality" value="%s">
-		<param name="allowFullScreen" value="%s">
-		<param name="allowScriptAccess" value="sameDomain">
-		<param name="flashvars" value="%s">
-		<param name="src" value="%s?%s">
-		<param name="name" value="mingput">
-		<param name="bgcolor" value="#000000">
-		<param name="align" value="middle">%s
+		'el' => $obj . sprintf('<param name="play" value="%s">
+			<param name="quality" value="%s">
+			<param name="allowFullScreen" value="%s">
+			<param name="allowScriptAccess" value="sameDomain">
+			<param name="flashvars" value="%s">
+			<param name="src" value="%s?%s">
+			<param name="name" value="mingput">
+			<param name="bgcolor" value="#000000">
+			<param name="align" value="middle">%s
 		</object>
 		', $play, $quality, $allowfull, $fv, $uswf, $pv, $altimg),
 		'js' => $jatt);
@@ -2922,7 +2925,7 @@ class SWF_params_evh {
 		'iimage' => '',
 		'width' => '240',
 		'height' => '180',
-		'mobiwidth' => '260',      // width clamp if ( wp_is_mobile() )
+		'mobiwidth' => '0',        // width if ( wp_is_mobile() )
 		'audio' => 'false',        // source is audio; (mp3 is detected)
 		'aspectautoadj' => 'true', // adj. common sizes, e.g. 720x480
 		'displayaspect' => '0',    // needed if pixels are not square
@@ -3201,6 +3204,19 @@ class SWF_put_widget_evh extends WP_Widget {
 		$h = $pr->getvalue('height');
 		$bh = $pr->getvalue('barheight');
 
+		// Added v. 1.0.7; 2014/01/24:
+		// if wp_is_mobile is a defined function (wp 3.4?), then
+		// honor new param 'mobiwidth' to set the dimensions
+		// (proportionally to regular WxH) for mobile devices
+		// user can set $mobiwidth 0 to disable this
+		$mobiwidth = 0 + $pr->getvalue('mobiwidth');
+		if ( $mobiwidth > 0 && function_exists('wp_is_mobile') ) {
+			if ( wp_is_mobile() ) {
+				$h = (int)($h * $mobiwidth / $w);
+				$w = $mobiwidth;
+			}
+		}
+
 		$cap = $this->plinst->wt($pr->getvalue('caption'));
 		if ( $this->plinst->should_use_ming() ) {
 			$uswf = $this->plinst->get_swf_url('widget', $w, $h);
@@ -3210,7 +3226,8 @@ class SWF_put_widget_evh extends WP_Widget {
 
 		$dw = $w + 3;
 		// use no class, but do use deprecated align
-		$dv = 'class="widget" align="center" style="width: '.$dw.'px"';
+		$dv = 'class="widget" align="center" style="width: '
+			. $dw . 'px; max-width: 100%"';
 
 		extract($args);
 
@@ -3232,7 +3249,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		}
 
 		$ids  = $this->plinst->get_div_ids('widget-div');
-		$em   = $this->plinst->get_swf_tags($uswf, $pr, $ids[1]);
+		$em   = $this->plinst->get_swf_tags($uswf, $pr, $ids);
 
 		printf('%s', $this->plinst->get_div($ids, $dv, $cap, $em));
 
@@ -3296,7 +3313,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$pr = self::swfput_params;
 		$pr = new $pr(array('width' => self::defwidth,
 			'height' => self::defheight,
-			'mobiwidth' => '0')); // because widgets are small
+			'mobiwidth' => '0')); // new in 1.0.7
 		$instance = wp_parse_args((array)$instance, $pr->getparams());
 
 		$val = '';
@@ -3553,7 +3570,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $wt($instance['mobiwidth']);
 		$id = $this->get_field_id('mobiwidth');
 		$nm = $this->get_field_name('mobiwidth');
-		$tl = $wt(__('Max mobile width (0 disables) :', 'swfput_l10n'));
+		$tl = $wt(__('Mobile width (0 disables) :', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
