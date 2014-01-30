@@ -36,7 +36,7 @@
 // set this const to false on release
 // (originally had used 'const', not realizing it is new to php 5.3)
 //const develtime = true;
-define( 'develtime', true );
+define( 'develtime', false );
 $i_release = develtime ? 0 : 1;
 
 if ( develtime ) {
