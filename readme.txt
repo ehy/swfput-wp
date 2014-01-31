@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: video, audio, movies, tube, flash, flash player, graphics, movie, audio-visual, a/v content
 Requires at least: 3.0.2
 Tested up to: 3.8
-Stable tag: 1.0.6
+Stable tag: 1.0.7
 Text Domain: swfput_l10n
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -245,6 +245,36 @@ Maybe later. Honey, I burned the spaghetti.
 == Changelog ==
 
 = 1.0.7 =
+* Presentation improvements. Display should be well scaled now,
+	at least for themes that handle scaling; e.g., 'viewport'
+	meta element. This improvement should be particularly
+	appreciable with regard to mobile platforms (on which the
+	display was very poor in previous versions), but desktop/notebook
+	machines benefit too when the window is made small. Video
+	widgets place on sidebar should now be resized to sidebar
+	width regardless of user-set dimensions, but on mobile if
+	secondary content is placed below primary content (i.e.
+	sidebar appears below main area) video object will use
+	available space up up to the dimensions set.
+* The original description through version 1.0.6 stated that
+	"SWFPut does not add any JavaScript." That is no longer
+	the case. Video object size adjustments depend on JavaScript,
+	but on non-mobile platforms the display does not depend on
+	script, and if scripts are disabled the video objects will
+	behave as they have through version 1.0.6. On mobile platforms
+	JavaScript is necessary because on those platforms the plugin now 
+	builds the elements by script rather than putting out HTML
+	directly. (It is probably uncommon and impractical for
+	scripting to be disabled in mobile browsers.)
+* There is a new input field on the setup forms, just below the
+	dimensions fields. This is to provide a width to use only
+	if a mobile browser is detected; the height is automatically
+	proportional, according to the regular dimensions. This might
+	be useful for widgets placed on the sidebar, because the
+	sidebar might be placed below, rather than beside, the main
+	content. In this case more space might be available, and
+	larger display might be suitable. This feature is disabled
+	with a value of '0' which is the default. Experiment.
 
 = 1.0.6 =
 * Added do-nothing index.php to prevent directory listing, as WP does.
@@ -317,7 +347,11 @@ Maybe later. Honey, I burned the spaghetti.
 
 == Upgrade Notice ==
 
+= 1.0.7 =
+* Presentation improvements, especially for small mobile platforms.
+
 = 1.0.6 =
+* Confirmed working with WP 3.8.
 
 = 1.0.5 =
 * Confirmed working with WP 3.7.

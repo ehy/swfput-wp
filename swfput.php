@@ -701,12 +701,12 @@ class SWF_put_evh {
 				'id'      => 'help_tab_posts_swfput',
 				'title'   => __('SWFPut Form', 'swfput_l10n'),
 				'content' => self::wt(sprintf(__('<p>
-				If the SWFPut shortcode form. or "metabox,"
-				is not self-explanatory
-				(hopefully, much of it will be), there is more
-				explanation
+				Hopefully, much of the SWFPut shortcode form,
+				or "metabox," is self-explanatory.
+				There is more detailed documentation
+				as HTML
 				<a href="%s" target="_blank">here (in a new tab)</a>,
-				or as a PDF
+				or as a PDF file
 				<a href="%s" target="_blank">here (in a new tab)</a>.
 				</p><p>
 				There is one important restriction on the form\'s
@@ -714,8 +714,7 @@ class SWF_put_evh {
 				ASCII \'&quot;\' (double quote) characters. Hopefully
 				that will not be a problem.
 				</p><p>
-				Two form items (added in version 1.0.4) are probably
-				not self-explanatory:
+				These form items probably need explanation:
 				</p><p>
 				<h6>URLs for alternate HTML5 video</h6>
 				This text field accepts alternatives for non-flash
@@ -777,6 +776,23 @@ class SWF_put_evh {
 				<em>pixel</em> aspect ratio
 				(top/bottom or left/right tranparent
 				areas might be one solution).
+				</p><p>
+				<h6>Mobile width</h6>
+				This input field appears just below the
+				pixel dimensions fields. If this value is
+				greater than zero, and a mobile browser is
+				detected, then this width will be used with
+				a height proportional according to the
+				regular pixel dimensions. This might be
+				useful when, for example, sidebar content
+				actually appears below main content due to
+				the mobile browser\'s small size (theme support
+				may be necessary to see this behavior). This
+				is probably most useful for video widgets placed
+				on a sidebar, but please experiment.
+				The default value for this field, 0,
+				disables this feature, and it has no effect if
+				a mobile browser is not detected.
 				</p>
 				', 'swfput_l10n'), self::$helphtml, self::$helppdf))
 				// content may be a callback

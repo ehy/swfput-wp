@@ -45,21 +45,13 @@ in the editor; you will get used to them).
 The flash video widget has a similar full
 featured form.
 .PP
-The plugin does not add any \fIJavaScript\fP
-to the pages generated for your visitors,
-which might be helpful if you try to keep your
-pages useful to those who disable JavaScript
-in their browsers. (Such visitors might need
-to explicitly enable the flash
-web browser plugin, but that
-is another, unavoidable, issue.)
-JavaScript is used in the administrative
-interface for the forms and manipulation
-of shortcodes in the editor; but of course
-you must have JavaScript enabled when you
-log in to your \fIWordPress\fP
-site \(em this does not
-affect your visitors.
+The plugin does not require \fIJavaScript\fP
+in non-mobile browsers, although it is used
+for scaling if available. If a mobile browser is
+detected JavaScript is necessary, but this
+is not expected to be a problem as disabling
+scripts in a mobile browser is probably uncommon
+and impractical.
 .PP
 (Note that the \fBSWFPut\fP video player has been
 coded to work well with the free \fIGnash\fP
@@ -86,7 +78,9 @@ to modify the player or plugin.)
 .PP
 The actual plugin is composed of
 \fIPHP\fP code, and JavaScript for
-the administrative parts, and neither of those
+the administrative parts and front-end
+scaling,
+and neither of those
 requires compilation or link editing.
 The flash video player is a compiled program,
 but binaries are included in the installable
@@ -103,9 +97,9 @@ PHP extension. See the files
 if you wish to learn to build the player.
 .PP
 If you wish to change the JavaScript code,
-edit \f(CRjs/formxed\.dev\.js\fR, rather than
-\f(CRjs/formxed\.js\fR.
-The latter is merely a `minified' version
+edit \f(CRjs/*\.dev\.js\fR, rather than
+\f(CRjs/*\.js\fR.
+The latter are merely `minified' versions
 of the former; see \f(CRMakefile\fR.
 .PP
 This file (README*) is built with
@@ -283,7 +277,7 @@ keyword; give only the value that should appear
 between quotes in the type argument,
 and although many web examples
 show a space after the comma separating the video and
-audio codec names, Firefox up to at least version 16
+audio codec names, \fBFirefox\fP up to at least version 16
 will reject the source because of the space, so it should
 be left out)\**.
 .FS
@@ -377,18 +371,22 @@ same). In any case, the player will scale the
 video to fit within its display, but it maintains
 the aspect ratio, so horizontal or vertical
 black (unused) areas will be visible if the
-aspect ratios do not match. It is also important
-to note that the browser will (probably) honor
-a maximum width for a page column set in \fICSS\fP,
-and force the browser's flash plugin to display
-at a smaller width than the user specified.
-For example, if you set these fields to 640\(mu480,
-but the column in which posts appear has a width
-of 600, the display would be at 600\(mu480. In
-such a case, you might try 600\(mu450 to maintain
-the aspect so that the video matches display size.
-The above assumes a 4:3 aspect; you would use
-the correct numbers, of course.
+aspect ratios do not match.
+.IP \(bu
+\fBMobile width\fP:
+This is to provide a width to use only
+if a mobile browser is detected; the height is automatically
+proportional, according to the regular
+\(lq\fBPixel Width \(mu Height\fP\(rq
+dimensions. This might
+be used for widgets placed on the sidebar, because the
+sidebar might be placed below, rather than beside, the main
+content. In this case more space might be available, and
+larger display might be suitable. This feature is disabled
+with a value of '0,' which is the default, and has no effect
+if the browser is not identified as being on a mobile platform.
+(Note that this feature does not override the display scaling
+added in version 1.0.7 of \fBSWFPut\fP.)
 .IP \(bu
 \fBAuto aspect\fP:
 This enables a feature meant to be helpful
@@ -535,21 +533,6 @@ Not surprisingly, the contents of that
 field will be displayed as a title
 above the widget on the pages that
 include the particular widget area used.
-.PP
-The description under
-\(lq\fBPixel Width \(mu Height\fP\(rq above
-mentioned the maximum column widths set by
-the theme's CSS, and how the video window
-width might be limited by the those.
-The same applies to
-widget areas, but the maximum width is
-likely much less than that in the posts
-area. These fields have defaults in the
-widget form that have been useful with
-the themes distributed with
-\fIWordPress\fP, but the user should
-certainly do some testing along with
-the chosen theme.
 \
 .NH 1
 License
