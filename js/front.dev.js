@@ -257,15 +257,29 @@ var SWFPut_putswf_video_szhack_load = function () {
 		SWFPut_putswf_video_szhack[i].resize();
 	}
 };
+// Setup initial resize for both window and document -- with
+// window only the change might be visible in slow environments
+// (like an emulator), while with document alone I'm not certain
+// all loaded objects are really ready. Hopefully, a redundant
+// resize at same dimensions will not be visible.
 if ( window.addEventListener ) {
+	document.addEventListener("load", SWFPut_putswf_video_szhack_load, true);
 	window.addEventListener("load", SWFPut_putswf_video_szhack_load, true);
 } else if ( window.attachEvent ) { // MSIE 8?
+	document.attachEvent("onload", SWFPut_putswf_video_szhack_load);
 	window.attachEvent("onload", SWFPut_putswf_video_szhack_load);
 } else {
-	SWFPut_putswf_video_onldpre = window.onload;
+	SWFPut_putswf_video_onlddpre = document.onload;
+	SWFPut_putswf_video_onldwpre = window.onload;
+	document.onload = function () {
+		if ( typeof SWFPut_putswf_video_onlddpre === 'function' ) {
+			SWFPut_putswf_video_onlddpre();
+		}
+		SWFPut_putswf_video_szhack_load();
+	};
 	window.onload = function () {
-		if ( typeof SWFPut_putswf_video_onldpre === 'function' ) {
-			SWFPut_putswf_video_onldpre();
+		if ( typeof SWFPut_putswf_video_onldwpre === 'function' ) {
+			SWFPut_putswf_video_onldwpre();
 		}
 		SWFPut_putswf_video_szhack_load();
 	};
