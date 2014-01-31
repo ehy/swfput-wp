@@ -1979,14 +1979,12 @@ class SWF_put_evh {
 		return sprintf('
 			<div %s>%s%s</div>
 			<script type="text/javascript">
-				var adj_%s = new %s_adj("%s", "%s", "%s", "%s", false);
-				adj_%s.resize();
+			var adj_%s = new %s_adj("%s", "%s", "%s", "%s", false);
 			</script>
 			',
 			$dv, $vidtags['el'], $cap,
 			$dvf, $opfx,
-			$divids[0], $divids[1], $divids[2], $divids[3],
-			$dvf);
+			$divids[0], $divids[1], $divids[2], $divids[3]);
 	}
 
 	/**
@@ -2742,7 +2740,8 @@ class SWF_put_evh {
 			if ( $idai != '' ) {
 				$viid = sprintf(' id="%s"', $idai);
 			}
-			$fmt = '%s<img%s src="%s" alt="%s" width="%u" height="%u">';
+			$fmt = '%s<img%s src="%s" alt="%s" width="%u" height="%u" '
+				. 'style="margin-left: auto; margin-right: auto;">';
 			$altimg = sprintf($fmt, "\n\t\t", $viid,
 				$jatt['a_img']['src'],
 				$jatt['a_img']['alt'],
@@ -2818,7 +2817,7 @@ class SWF_put_evh {
 		}
 
 		// Update 2013/09/23: update object element, separating
-		// MSIE PITA, so that alternative elements can be added
+		// MSIE, so that alternative elements can be added
 		// for no-flash browsers: previously, with the classid attribute
 		// within the object element, firefox (and others) would
 		// always fall through to the now-removed embed element;

@@ -87,12 +87,36 @@ SWFPut_putswf_video_bld.prototype = {
 		if ( o ) {
 			var dm = this._getdims(a["width"], a["height"]);
 			o.id = a["id"];
-			o.width = dm[0]; o.height = dm[1];
 			o.alt = a["alt"];
-			o.src = a["src"];
+			o.style.marginLeft = o.style.marginRight = "auto";
 			this.ia_o = o;
+
+			o._swfo = this;
+			if ( o.attachEvent ) { // MSIE 8?
+				o.attachEvent("onload", this._imgsz);
+			} else {
+				o.addEventListener("load", this._imgsz, true);
+			}
+			o._swfwidth = dm[0]; o._swfheight = dm[1]; // see handler
+			o.src = a["src"];
 		}
 		return this.ia_o;
+	},
+	_imgsz : function () {
+		// members added here are used in SWFPut_putswf_video_adj
+		var that = this._swfo;
+		var o = that.ia_o;
+		if ( o.naturalWidth == undefined || o.naturalHeight == undefined ) {
+			o.naturalWidth = o.width;
+			o.naturalHeight = o.height;
+		}
+		o._ratio_user = o._swfwidth / o._swfheight;
+		o._ratio_img  = o.width / o.height;
+		o.width = o._swfwidth;
+		o.height = o._swfheight;
+		if ( o.complete == undefined ) {
+			o.complete = true;
+		}
 	},
 	mk_avid : function (a) {
 		if ( a == undefined || a == "" ) {
@@ -228,6 +252,16 @@ SWFPut_putswf_video_bld.prototype = {
 
 // (ugly hack to get resize event: save _adj instances, see below)
 var SWFPut_putswf_video_szhack = [];
+var SWFPut_putswf_video_szhack_load = function () {
+	for ( var i = 0; i < SWFPut_putswf_video_szhack.length; i++ ) {
+		SWFPut_putswf_video_szhack[i].resize();
+	}
+};
+if ( document.attachEvent ) { // MSIE 8?
+	document.attachEvent("onload", SWFPut_putswf_video_szhack_load);
+} else {
+	document.addEventListener("load", SWFPut_putswf_video_szhack_load, true);
+}
 
 // resize adjust:
 // the enclosing <div> is scaled, and so its width from
@@ -259,12 +293,16 @@ var SWFPut_putswf_video_adj = function(dv, ob, av, ai, bld) {
 		}
 	}
 	if ( this.d ) {
+		// proportional image sizing is the trickiest bit here:
+		// we will need to use the ration of the specified dimensions
+		if ( this.ia_o && this.ia_o.width > 1 ) {
+			this.ia_rat = this.ia_o.width / this.ia_o.height;
+		}
 		// need max-width or browser does not scale div
 		if ( this.d.style == undefined ||
 			 this.d.style.maxWidth == undefined ||
 			 this.d.style.maxWidth == "none" ||
 			 this.d.style.maxWidth == "" ) {
-			//console.log("maxWidth: '" + this.d.style.maxWidth + "'");
 			this.d.style.maxWidth = "100%";
 		}
 		// (ugly hack to get resize event: save _adj instances)
@@ -275,6 +313,8 @@ var SWFPut_putswf_video_adj = function(dv, ob, av, ai, bld) {
 SWFPut_putswf_video_adj.prototype = {
 	d : null,
 	o : null, va_o : null, ia_o : null,
+	ia_osz : null, // Image from ia_o.src; to get natural width x height
+	ia_rat : 1,    // ratio of original image size
 	pad : 0, wdiv : null,
 	bld : null,
 	inresize : 0,
@@ -335,6 +375,35 @@ SWFPut_putswf_video_adj.prototype = {
 		o.width = o.pixelWidth = wd;
 		o.height = o.pixelHeight = Math.round(wd / r);
 	},
+	_int_imgrsz : function (o) { // for img: display proportionally
+		if ( o.complete !== undefined && ! o.complete ) {
+			return;
+		}
+		if ( o.naturalWidth === undefined || o.naturalHeight === undefined ) {
+			if ( o._swfo === undefined ) {
+				o.naturalWidth = o.width;
+				o.naturalHeight = o.height;
+			} else {
+				return; // waiting for load: see *_bld above
+			}
+		}
+		if ( o._ratio_user !== undefined ) {
+			this.ia_rat = o._ratio_user;
+		}
+		var wd = this.wdiv;
+		if ( wd == null )
+			return;
+		wd -= this.pad * 2;
+		var rd = this.ia_rat;
+		var ri = o.naturalWidth / o.naturalHeight;
+		if ( rd > ri ) {
+			o.height = Math.round(wd / rd);
+			o.width = Math.round(o.height * ri);
+		} else {
+			o.width = wd;
+			o.height = Math.round(wd / ri);
+		}
+	},
 	resize : function () {
 		if ( ! this.d )
 			return;
@@ -346,7 +415,7 @@ SWFPut_putswf_video_adj.prototype = {
 			this._int_rsz(this.va_o);
 		}
 		if ( this.ia_o ) {
-			this._int_rsz(this.ia_o);
+			this._int_imgrsz(this.ia_o);
 		}
 		this.inresize = 0;
 	}
