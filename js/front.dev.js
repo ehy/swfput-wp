@@ -318,7 +318,7 @@ var SWFPut_putswf_video_adj = function(dv, ob, av, ai, bld) {
 	}
 	if ( this.d ) {
 		// proportional image sizing is the trickiest bit here:
-		// we will need to use the ration of the specified dimensions
+		// we will need to use the ratio of the specified dimensions
 		if ( this.ia_o && this.ia_o.width > 1 ) {
 			this.ia_rat = this.ia_o.width / this.ia_o.height;
 		}
@@ -335,9 +335,9 @@ var SWFPut_putswf_video_adj = function(dv, ob, av, ai, bld) {
 			// handler: only attach with first object because
 			// handler loops over array of all these objects
 			if ( window.attachEvent ) { // MSIE 8?
-				window.attachEvent("onresize", this._int_handle_resize);
+				window.attachEvent("onresize", this._cb_handle_resize);
 			} else {
-				window.addEventListener("resize", this._int_handle_resize, true);
+				window.addEventListener("resize", this._cb_handle_resize, true);
 			}
 		}
 	}
@@ -353,27 +353,26 @@ SWFPut_putswf_video_adj.prototype = {
 		return SWFPut_putswf_video_getstyle(el, sty);
 	},
 	// (ugly hack to get resize event: use saved _adj instances)
-	_int_handle_resize : function () {
+	_cb_handle_resize : function () {
 		for ( var i = 0; i < SWFPut_putswf_video_szhack.length; i++ ) {
 			var that = SWFPut_putswf_video_szhack[i];
 			that.handle_resize();
 		}
 	},
 	handle_resize : function () {
-		var that = this;
-		if ( that.inresize != 0 )
+		if ( this.inresize != 0 )
 			return;
-		var dv = that.d;
-		var wo = that.wdiv;
+		var dv = this.d;
+		var wo = this.wdiv;
 		var wn = dv.offsetWidth;
 		if ( wn == wo )
 			return;
-		that.wdiv = wn;
-		var p = that._style(dv, "padding-left");
+		this.wdiv = wn;
+		var p = this._style(dv, "padding-left");
 		if ( p ) {
-			that.pad = parseInt(p);
+			this.pad = parseInt(p);
 		}
-		that.resize();
+		this.resize();
 	},
 	_int_rsz : function (o) {
 		var wd = this.wdiv;
