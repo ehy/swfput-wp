@@ -1,7 +1,7 @@
 #! /usr/bin/make -f
 # License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
 
-PRJVERS = 1.0.6
+PRJVERS = 1.0.7
 PRJSTEM = swfput
 PRJNAME = $(PRJSTEM)-$(PRJVERS)
 
@@ -22,8 +22,8 @@ POTSRCS = ${PRJSTEM}.php
 
 DOCSD = docs
 JSDIR = js
-JSBIN = $(JSDIR)/formxed.js $(JSDIR)/screens.js
-JSSRC = $(JSDIR)/formxed.dev.js $(JSDIR)/screens.dev.js
+JSBIN = $(JSDIR)/formxed.js $(JSDIR)/screens.js $(JSDIR)/front.js
+JSSRC = $(JSDIR)/formxed.dev.js $(JSDIR)/screens.dev.js $(JSDIR)/front.dev.js
 LCDIR = locale
 LCDOM = $(PRJSTEM)_l10n
 LCPOT = $(LCDIR)/$(LCDOM).pot

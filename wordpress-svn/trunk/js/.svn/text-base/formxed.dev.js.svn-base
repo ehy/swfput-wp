@@ -32,6 +32,7 @@ SWFPut_putswf_video_xed.prototype = {
 		iimage: "",
 		width: "240",
 		height: "180",
+		mobiwidth: "0",
 		audio: "false",       
 		aspectautoadj: "true",
 		displayaspect: "0",   
@@ -91,6 +92,7 @@ SWFPut_putswf_video_xed.prototype = {
 			// strings that must present positive integers
 			case 'width':
 			case 'height':
+			case 'mobiwidth':
 			case 'volume':
 			case 'barheight':
 				if ( k === 'barheight' && t === 'default' ) {
