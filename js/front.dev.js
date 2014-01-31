@@ -257,10 +257,18 @@ var SWFPut_putswf_video_szhack_load = function () {
 		SWFPut_putswf_video_szhack[i].resize();
 	}
 };
-if ( document.attachEvent ) { // MSIE 8?
-	document.attachEvent("onload", SWFPut_putswf_video_szhack_load);
+if ( window.addEventListener ) {
+	window.addEventListener("load", SWFPut_putswf_video_szhack_load, true);
+} else if ( window.attachEvent ) { // MSIE 8?
+	window.attachEvent("onload", SWFPut_putswf_video_szhack_load);
 } else {
-	document.addEventListener("load", SWFPut_putswf_video_szhack_load, true);
+	SWFPut_putswf_video_onldpre = window.onload;
+	window.onload = function () {
+		if ( typeof SWFPut_putswf_video_onldpre === 'function' ) {
+			SWFPut_putswf_video_onldpre();
+		}
+		SWFPut_putswf_video_szhack_load();
+	};
 }
 
 // resize adjust:
@@ -282,10 +290,10 @@ var SWFPut_putswf_video_adj = function(dv, ob, av, ai, bld) {
 		this.wdiv = bld.wdiv;
 	} else {
 		this.d    = document.getElementById(dv);
-		this.o    = document.getElementById(ob);
-		this.va_o = document.getElementById(av);
-		this.ia_o = document.getElementById(ai);
 		if ( this.d ) {
+			this.o    = document.getElementById(ob);
+			this.va_o = document.getElementById(av);
+			this.ia_o = document.getElementById(ai);
 			var p = this._style(this.d, "padding-left");
 			if ( p )
 				this.pad = Math.max(this.pad, parseInt(p));
@@ -307,45 +315,33 @@ var SWFPut_putswf_video_adj = function(dv, ob, av, ai, bld) {
 		}
 		// (ugly hack to get resize event: save _adj instances)
 		SWFPut_putswf_video_szhack[SWFPut_putswf_video_szhack.length] = this;
-		this._int_set_resize();
+		if ( SWFPut_putswf_video_szhack.length === 1 ) {
+			// handler: only attach with first object because
+			// handler loops over array of all these objects
+			if ( window.attachEvent ) { // MSIE 8?
+				window.attachEvent("onresize", this._int_handle_resize);
+			} else {
+				window.addEventListener("resize", this._int_handle_resize, true);
+			}
+		}
 	}
 };
 SWFPut_putswf_video_adj.prototype = {
 	d : null,
 	o : null, va_o : null, ia_o : null,
-	ia_osz : null, // Image from ia_o.src; to get natural width x height
-	ia_rat : 1,    // ratio of original image size
+	ia_rat : 1,    // ratio of original user-set width / height
 	pad : 0, wdiv : null,
 	bld : null,
 	inresize : 0,
 	_style : function (el, sty) {
 		return SWFPut_putswf_video_getstyle(el, sty);
 	},
-	// (ugly hack to get resize event: the event is
-	// delivered only for certain objects (incl. window))
-	_int_set_resize : function () {
-		if ( window.attachEvent ) { // MSIE 8?
-			window.attachEvent("onresize", this._int_handle_resize);
-		} else {
-			window.addEventListener("resize", this._int_handle_resize, true);
-		}
-	},
-	// (ugly hack to get resize event: use saved _adj instances --
-	// note the timeout: observing FFox 26 the event seems to be
-	// delivered before rather that after changes (?!?) so the
-	// timeout unreliably delays processing until changes can
-	// be detected)
+	// (ugly hack to get resize event: use saved _adj instances)
 	_int_handle_resize : function () {
-		setTimeout(function () {
-			var that = null;
-			for ( var i = 0; i < SWFPut_putswf_video_szhack.length; i++ ) {
-				that = SWFPut_putswf_video_szhack[i];
-				that.handle_resize();
-			}
-			if ( that != null ) {
-				that._int_set_resize();
-			}
-		}, 100);
+		for ( var i = 0; i < SWFPut_putswf_video_szhack.length; i++ ) {
+			var that = SWFPut_putswf_video_szhack[i];
+			that.handle_resize();
+		}
 	},
 	handle_resize : function () {
 		var that = this;
@@ -380,7 +376,11 @@ SWFPut_putswf_video_adj.prototype = {
 			return;
 		}
 		if ( o.naturalWidth === undefined || o.naturalHeight === undefined ) {
+			// member _swfo is added by *_bld object (above), which
+			// ensures natural[WH]* are defined; if they're not,
+			// the object "load" handler was not called yet
 			if ( o._swfo === undefined ) {
+				// lacking browser support: add these members
 				o.naturalWidth = o.width;
 				o.naturalHeight = o.height;
 			} else {
