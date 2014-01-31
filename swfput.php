@@ -764,14 +764,18 @@ class SWF_put_evh {
 				image should display if neither flash or HTML5 video
 				are available.
 				</p><p>
-				There is one important consideration for this image:
+				There is one additional consideration for this image:
 				the \'img\' element is given the width and height
 				specified in the form for the flash player, and the
 				visitor\'s browser will scale the image in both
 				dimensions, possibly causing the image to be
 				\'stretched\' or \'squeezed\'. (That is not a problem
 				in the flash player, as it is coded to display the
-				initial image proportionally.) Therefore, it is a
+				initial image proportionally.)
+				The image proportions are restored with
+				<em>JavaScript</em>, but only  if scripts are
+				not disabled in the visitor\'s browser.
+				Therefore, it is a
 				good idea to prepare images to have the expected
 				<em>pixel</em> aspect ratio
 				(top/bottom or left/right tranparent
@@ -782,7 +786,7 @@ class SWF_put_evh {
 				pixel dimensions fields. If this value is
 				greater than zero, and a mobile browser is
 				detected, then this width will be used with
-				a height proportional according to the
+				a proportional height according to the
 				regular pixel dimensions. This might be
 				useful when, for example, sidebar content
 				actually appears below main content due to
@@ -2911,8 +2915,8 @@ class SWF_put_evh {
 			<param name="name" value="mingput">
 			<param name="bgcolor" value="#000000">
 			<param name="align" value="middle">%s
-		</object>
-		', $play, $quality, $allowfull, $fv, $uswf, $pv, $altimg),
+			</object>',
+		$play, $quality, $allowfull, $fv, $uswf, $pv, $altimg),
 		'js' => $jatt);
 	}
 } // End class SWF_put_evh

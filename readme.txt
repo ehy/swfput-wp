@@ -3,7 +3,7 @@ Contributors: EdHynan
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4Q2Y8ZUG8HXLC
 Tags: video, audio, movies, tube, flash, flash player, graphics, movie, audio-visual, a/v content
 Requires at least: 3.0.2
-Tested up to: 3.8
+Tested up to: 3.8.1
 Stable tag: 1.0.7
 Text Domain: swfput_l10n
 License: GPLv3 or later
