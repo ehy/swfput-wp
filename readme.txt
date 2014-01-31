@@ -244,6 +244,8 @@ Maybe later. Honey, I burned the spaghetti.
 
 == Changelog ==
 
+= 1.0.8 =
+
 = 1.0.7 =
 * Presentation improvements. Display should be well scaled now,
 	at least for themes that handle scaling; e.g., 'viewport'
@@ -346,6 +348,8 @@ Maybe later. Honey, I burned the spaghetti.
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.0.8 =
 
 = 1.0.7 =
 * Presentation improvements, especially for small mobile platforms.

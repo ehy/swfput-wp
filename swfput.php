@@ -3,7 +3,7 @@
 Plugin Name: SWFPut
 Plugin URI: http://agalena.nfshost.com/b1/?page_id=46
 Description: Add Shockwave Flash video to WordPress posts and widgets, from arbitrary URI's or media library ID's or files in your media upload directory tree (even if not added by WordPress and assigned an ID).
-Version: 1.0.7
+Version: 1.0.8
 Author: Ed Hynan
 Author URI: http://agalena.nfshost.com/b1/
 License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
