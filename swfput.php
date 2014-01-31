@@ -2163,6 +2163,10 @@ class SWF_put_evh {
 		return (self::wpv_cmp($cv) >= 0) ? true : false;
 	}
 	
+	// WP provides a MSIE test, but use this for more control; also,
+	// recent MSIE no longer have "MSIE" in the agent string which
+	// must be an assertion that it is now compatible and no longer
+	// has special needs, therefore this test need not be comprehensive.
 	protected static function is_msie() {
 		static $is_so = null;
 		if ( $is_so === null ) {
@@ -2722,7 +2726,7 @@ class SWF_put_evh {
 		}
 
 		// 1.0.7, 2014/01/27 -- alongside the elements, also
-		// build an array for JS
+		// build an array for JS (to be json encoded)
 		$jatt = array();
 
 		// alternates

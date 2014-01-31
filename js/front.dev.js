@@ -235,16 +235,16 @@ SWFPut_putswf_video_bld.prototype = {
 			} else if ( oi ) {
 				oo.appendChild(oi);
 			}
-			dv.insertBefore(oo, dv.lastChild);
+			dv.insertBefore(oo, dv.firstChild);
 		} else if ( ov ) {
-			dv.insertBefore(ov, dv.lastChild);
+			dv.insertBefore(ov, dv.firstChild);
 		} else if ( oi ) {
-			dv.insertBefore(oi, dv.lastChild);
+			dv.insertBefore(oi, dv.firstChild);
 		} else {
 			var p = document.createElement('p');
 			if ( p ) {
 				p.innerHTML = "video objects creation failed";
-				dv.insertBefore(p, dv.lastChild);
+				dv.insertBefore(p, dv.firstChild);
 			}
 		}
 	}
@@ -258,10 +258,12 @@ var SWFPut_putswf_video_szhack_load = function () {
 	}
 };
 // Setup initial resize for both window and document -- with
-// window only the change might be visible in slow environments
+// window only, the change might be visible in slow environments
 // (like an emulator), while with document alone I'm not certain
 // all loaded objects are really ready. Hopefully, a redundant
-// resize at same dimensions will not be visible.
+// resize at same dimensions will not be visible (it seems OK).
+// Note that the visible resize using window only was seen with
+// android (4.?) native browser in emulator.
 if ( window.addEventListener ) {
 	document.addEventListener("load", SWFPut_putswf_video_szhack_load, true);
 	window.addEventListener("load", SWFPut_putswf_video_szhack_load, true);
