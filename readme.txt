@@ -103,15 +103,6 @@ whether it will suit your purpose:
 	is written and compiled with the *Ming* PHP extension,
 	and the code is included, so you may modify the player.
 
-*	SWFPut does not add any JavaScript to the pages
-	generated for your visitors, which might be helpful if
-	you try to keep your pages useful to those who disable
-	JavaScript in their browsers. (Such visitors might need to
-	explicitly enable the flash web browser plugin, but that is
-	another, unavoidable, issue.) JavaScript is only used in the
-	administrative interface for the forms and manipulation of
-	shortcodes in the editor.
-
 == Installation ==
 
 SWFPut is installed through the WordPress administrative interface.
