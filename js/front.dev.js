@@ -252,9 +252,13 @@ SWFPut_putswf_video_bld.prototype = {
 
 // (ugly hack to get resize event: save _adj instances, see below)
 var SWFPut_putswf_video_szhack = [];
-var SWFPut_putswf_video_szhack_load = function () {
+var SWFPut_putswf_video_szhack_resize = function (load) {
 	for ( var i = 0; i < SWFPut_putswf_video_szhack.length; i++ ) {
-		SWFPut_putswf_video_szhack[i].resize();
+		if ( load ) {
+			SWFPut_putswf_video_szhack[i].resize();
+		} else {
+			SWFPut_putswf_video_szhack[i].handle_resize();
+		}
 	}
 };
 // Setup initial resize for both window and document -- with
@@ -265,25 +269,32 @@ var SWFPut_putswf_video_szhack_load = function () {
 // Note that the visible resize using window only was seen with
 // android (4.?) native browser in emulator.
 if ( window.addEventListener ) {
-	document.addEventListener("load", SWFPut_putswf_video_szhack_load, true);
-	window.addEventListener("load", SWFPut_putswf_video_szhack_load, true);
-} else if ( window.attachEvent ) { // MSIE 8?
-	document.attachEvent("onload", SWFPut_putswf_video_szhack_load);
-	window.attachEvent("onload", SWFPut_putswf_video_szhack_load);
+	var l = function () { SWFPut_putswf_video_szhack_resize(true); };
+	var r = function () { SWFPut_putswf_video_szhack_resize(false); };
+	document.addEventListener("load", l, true);
+	window.addEventListener("load",   l, true);
+	window.addEventListener("resize", r, true);
 } else {
 	SWFPut_putswf_video_onlddpre = document.onload;
 	SWFPut_putswf_video_onldwpre = window.onload;
+	SWFPut_putswf_video_onszwpre = window.onresize;
 	document.onload = function () {
 		if ( typeof SWFPut_putswf_video_onlddpre === 'function' ) {
 			SWFPut_putswf_video_onlddpre();
 		}
-		SWFPut_putswf_video_szhack_load();
+		SWFPut_putswf_video_szhack_resize(true);
 	};
 	window.onload = function () {
 		if ( typeof SWFPut_putswf_video_onldwpre === 'function' ) {
 			SWFPut_putswf_video_onldwpre();
 		}
-		SWFPut_putswf_video_szhack_load();
+		SWFPut_putswf_video_szhack_resize(true);
+	};
+	window.onresize = function () {
+		if ( typeof SWFPut_putswf_video_onszwpre === 'function' ) {
+			SWFPut_putswf_video_onszwpre();
+		}
+		SWFPut_putswf_video_szhack_resize(false);
 	};
 }
 
@@ -331,15 +342,6 @@ var SWFPut_putswf_video_adj = function(dv, ob, av, ai, bld) {
 		}
 		// (ugly hack to get resize event: save _adj instances)
 		SWFPut_putswf_video_szhack[SWFPut_putswf_video_szhack.length] = this;
-		if ( SWFPut_putswf_video_szhack.length === 1 ) {
-			// handler: only attach with first object because
-			// handler loops over array of all these objects
-			if ( window.attachEvent ) { // MSIE 8?
-				window.attachEvent("onresize", this._cb_handle_resize);
-			} else {
-				window.addEventListener("resize", this._cb_handle_resize, true);
-			}
-		}
 	}
 };
 SWFPut_putswf_video_adj.prototype = {
@@ -352,14 +354,9 @@ SWFPut_putswf_video_adj.prototype = {
 	_style : function (el, sty) {
 		return SWFPut_putswf_video_getstyle(el, sty);
 	},
-	// (ugly hack to get resize event: use saved _adj instances)
-	_cb_handle_resize : function () {
-		for ( var i = 0; i < SWFPut_putswf_video_szhack.length; i++ ) {
-			var that = SWFPut_putswf_video_szhack[i];
-			that.handle_resize();
-		}
-	},
 	handle_resize : function () {
+		if ( this.d === null )
+			return;
 		if ( this.inresize != 0 )
 			return;
 		var dv = this.d;
