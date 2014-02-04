@@ -707,7 +707,7 @@ if ( !isset($pixelaspect) )
 $bchkpolicyfile = "false";
 // a silent video to provide eye candy when playing audio (mp3)
 // URL, or file at SWF URL
-$v4aud = "drop2.flv";
+$v4aud = "default.flv";
 
 // default values and booleans
 $doshowtxt = 'true'; // show text fields for playtime and DL?
