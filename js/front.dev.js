@@ -208,9 +208,9 @@ SWFPut_putswf_video_bld.prototype = {
 					o.appendChild(p);
 				}
 			}
-			this.ia_o = o;
+			this.o = o;
 		}
-		return this.ia_o;
+		return this.o;
 	},
 	mk : function (dv) {
 		var oi = this.mk_aimg(this.a["a_img"]);
