@@ -2459,7 +2459,7 @@ var evhh5v_controller = function(vid, ctlbar, pad) {
 	// need a tick counter
 	this.ntick = 0;
 
-	this._vid.setAttribute("class", "mouseptr_normal");
+	this._vid.setAttribute("class", "evhh5v_mouseptr_normal");
 
 	// optional display aspect ratio, disabled with 0:
 	// allow server code to pass a real number, or user-
@@ -2492,8 +2492,8 @@ evhh5v_controller.prototype = {
 	ptrinterval : 5,
 	barshowincr : 1,
 	barshowmargin : 2,
-	mouse_hide_class : "mouseptr_hidden",
-	mouse_show_class : "mouseptr_normal",
+	mouse_hide_class : "evhh5v_mouseptr_hidden",
+	mouse_show_class : "evhh5v_mouseptr_normal",
 	mk : function() {
 		this.v.evhh5v_controller = this;
 		this.ctlbar.evhh5v_controller = this;
@@ -2591,7 +2591,7 @@ evhh5v_controller.prototype = {
 			this._cnv_poster.src = pstr;
 		}
 
-		this._cnv.setAttribute("class", "mouseptr_normal");
+		this._cnv.setAttribute("class", "evhh5v_mouseptr_normal");
 	},
 	get_canvas_context : function() {
 		if ( this.is_canvas ) {

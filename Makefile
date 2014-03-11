@@ -22,8 +22,11 @@ POTSRCS = ${PRJSTEM}.php
 
 DOCSD = docs
 JSDIR = js
-JSBIN = $(JSDIR)/formxed.js $(JSDIR)/screens.js $(JSDIR)/front.js
-JSSRC = $(JSDIR)/formxed.dev.js $(JSDIR)/screens.dev.js $(JSDIR)/front.dev.js
+JSBIN = $(JSDIR)/formxed.min.js $(JSDIR)/screens.min.js $(H5DIR)/front.min.js
+JSSRC = $(JSDIR)/formxed.js $(JSDIR)/screens.js $(H5DIR)/front.js
+H5DIR = evhh5v
+H5BIN = $(H5DIR)/evhh5v.css $(H5DIR)/ctlbar.svg $(H5DIR)/ctlvol.svg $(H5DIR)/ctrbut.svg $(JSDIR)/front.min.js
+#H5SRC = $(H5DIR)/evhh5v.css $(H5DIR)/ctlbar.svg $(H5DIR)/ctlvol.svg $(H5DIR)/ctrbut.svg $(H5DIR)/ctl.svg $(H5DIR)/front.js
 LCDIR = locale
 LCDOM = $(PRJSTEM)_l10n
 LCPOT = $(LCDIR)/$(LCDOM).pot
@@ -48,7 +51,7 @@ ALSO = Makefile COPYING
 READS= README README.pdf README.html
 ZALL = ${SRCS} ${ALSO} ${READS} readme.txt
 ZSALL = ${SSRCS} ${SBINS}
-ZDIR = $(JSDIR) $(LCDIR) $(DOCSD)
+ZDIR = $(H5DIR) $(JSDIR) $(LCDIR) $(DOCSD)
 BINALL = ${SBINS} ${JSBIN}
 PRJDIR = ${PRJNAME}
 PRJSDIR = ${PRJNAME}/${SDIRO}
@@ -60,7 +63,7 @@ PHPCLI = php -f
 
 all: ${PRJZIP}
 
-${PRJZIP}: ${SBINS} ${JSBIN} ${ZALL} ${LCFPO}
+${PRJZIP}: ${SBINS} ${H5BIN} ${JSBIN} ${ZALL} ${LCFPO}
 	test -e ttd && rm -rf ttd; test -e ${PRJDIR} && mv ${PRJDIR} ttd; \
 	mkdir ${PRJDIR} ${PRJSDIR} && \
 	cp -r -p ${ZALL} ${ZDIR} ${PRJDIR} && \
@@ -94,11 +97,14 @@ $(SDIRI)/mingput24.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
 	$(PHPCLI) $(SDIRI)/mingput.php -- BH=24 > $(SDIRI)/mingput24.swf
 
 ${JSBIN}: ${JSSRC}
-	O=$@; I=$${O%.*}.dev.js; \
+	O=$@; I=$${O%%.*}.js; echo $$I to $$O; \
 	(P=`which perl` && $$P -e 'use JavaScript::Minifier qw(minify);minify(input=>*STDIN,outfile=>*STDOUT)' < "$$I" > "$$O" 2>/dev/null) \
 	|| (P=`which perl` && $$P -e \
 		'use JavaScript::Packer;$$p=JavaScript::Packer->init();$$o=join("",<STDIN>);$$p->minify(\$$o,{"compress"=>"clean"});print STDOUT $$o;' < "$$I" > "$$O") \
 	|| cp -f "$$I" "$$O"
+
+${H5BIN} : ${H5SRC}
+	exit 0
 
 $(READS): docs/readme.roff
 	(cd docs && make txt tty tt8 pdf html && \
