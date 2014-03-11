@@ -219,19 +219,21 @@ class SWF_put_evh {
 	const swfxedjsname = 'formxed.min.js';
 	
 	// html5 video front-end js
-	const swfadjjsdir  = 'evhh5v';
-	const swfadjjsname = 'front.min.js';
+	const evhv5vjsdir  = 'evhh5v';
+	const evhv5vjsname = 'front.min.js';
 	// swfput js front-end js name prefix:
-	const swfadjjsnpfx = 'evhh5v';
+	const evhv5vjsnpfx = 'evhh5v';
 	// html5 video front-end css
-	const swfadjcssdir  = 'evhh5v';
-	const swfadjcssname = 'evhh5v.css';
-	const swfadjcssnpfx = 'evhh5v';
+	const evhv5vcssdir  = 'evhh5v';
+	const evhv5vcssname = 'evhh5v.css';
+	const evhv5vcssnpfx = 'evhh5v';
 	// html5 video front-end svg files
-	const swfadjsvgdir  = 'evhh5v';
-	const swfadjsvg_bar = 'ctlbar.svg';
-	const swfadjsvg_vol = 'ctlvol.svg';
-	const swfadjsvg_but = 'ctrbut.svg';
+	const evhv5vsvgdir  = 'evhh5v';
+	const evhv5vsvg_bar = 'ctlbar.svg';
+	const evhv5vsvg_vol = 'ctlvol.svg';
+	const evhv5vsvg_but = 'ctrbut.svg';
+	// set to map of svg file names -> URL
+	protected $evhv5v_svgs;
 	
 	// hold an instance
 	private static $instance;
@@ -940,17 +942,27 @@ class SWF_put_evh {
 				$this->init_settings_page();
 			}
 		} else { // if ( $adm )
-			$jsfn = self::swfadjjsnpfx . '_js_script';
-			$t = self::swfadjjsdir . '/' . self::swfadjjsname;
+			$jsfn = self::evhv5vjsnpfx . '_js_script';
+			$t = self::evhv5vjsdir . '/' . self::evhv5vjsname;
 			$jsfile = plugins_url($t, $pf);
 			$t = self::plugin_version;
 	        wp_enqueue_script($jsfn, $jsfile, false, $t);
 
-			$stfn = self::swfadjcssnpfx . '_css_script';
-			$t = self::swfadjcssdir . '/' . self::swfadjcssname;
+			$stfn = self::evhv5vcssnpfx . '_css_script';
+			$t = self::evhv5vcssdir . '/' . self::evhv5vcssname;
 			$stfile = plugins_url($t, $pf);
 			$t = self::plugin_version;
 			wp_enqueue_style($stfn, $stfile, false, $t);
+
+			$t = self::evhv5vsvgdir;
+			$this->evhv5v_svgs = array(
+				self::evhv5vsvg_bar =>
+					plugins_url($t . '/' . self::evhv5vsvg_bar, $pf),
+				self::evhv5vsvg_vol =>
+					plugins_url($t . '/' . self::evhv5vsvg_vol, $pf),
+				self::evhv5vsvg_but =>
+					plugins_url($t . '/' . self::evhv5vsvg_but, $pf)
+			);
 		}
 
 		$aa = array($this, 'post_shortcode');
@@ -1998,7 +2010,7 @@ class SWF_put_evh {
 	// $cap is caption within <div> below video, and
 	// $vidtags are the array returned by get_swf_tags()
 	public function get_div($divids, $divatts, $cap, $vidtags) {
-		$opfx = self::swfadjjsnpfx;
+		$opfx = self::evhv5vjsnpfx;
 
 		$dv = sprintf('id="%s" %s', $divids[0], $divatts);
 		$dvf = str_replace(array('-', ' '), '_', $divids[0]);
