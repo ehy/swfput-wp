@@ -115,6 +115,9 @@ class SWF_put_evh {
 	// web page as of release
 	const plugin_webpage = 'http://agalena.nfshost.com/b1/?page_id=46';
 	
+	// this version
+	const plugin_version = '1.0.8';
+	
 	// the widget class name
 	const swfput_widget = 'SWF_put_widget_evh';
 	// parameter helper class name
@@ -198,7 +201,7 @@ class SWF_put_evh {
 	// settings js subdirectory
 	const settings_jsdir = 'js';
 	// settings js shortcode editor helper name
-	const settings_jsname = 'screens.js';
+	const settings_jsname = 'screens.min.js';
 	// settings program js path
 	protected $settings_js;
 	// JS: name of class to control textare/button pairs
@@ -213,12 +216,22 @@ class SWF_put_evh {
 	protected static $helppdf = null;
 
 	// swfput js shortcode editor helper name
-	const swfxedjsname = 'formxed.js';
+	const swfxedjsname = 'formxed.min.js';
 	
-	// swfput js front-end js (e.g. for mobile)
-	const swfadjjsname = 'front.js';
+	// html5 video front-end js
+	const swfadjjsdir  = 'evhh5v';
+	const swfadjjsname = 'front.min.js';
 	// swfput js front-end js name prefix:
-	const swfadjjsnpfx = 'SWFPut_putswf_video';
+	const swfadjjsnpfx = 'evhh5v';
+	// html5 video front-end css
+	const swfadjcssdir  = 'evhh5v';
+	const swfadjcssname = 'evhh5v.css';
+	const swfadjcssnpfx = 'evhh5v';
+	// html5 video front-end svg files
+	const swfadjsvgdir  = 'evhh5v';
+	const swfadjsvg_bar = 'ctlbar.svg';
+	const swfadjsvg_vol = 'ctlvol.svg';
+	const swfadjsvg_but = 'ctrbut.svg';
 	
 	// hold an instance
 	private static $instance;
@@ -927,10 +940,17 @@ class SWF_put_evh {
 				$this->init_settings_page();
 			}
 		} else { // if ( $adm )
-			$jsfn = 'SWFPut_putswf_video_adj';
-			$t = self::settings_jsdir . '/' . self::swfadjjsname;
+			$jsfn = self::swfadjjsnpfx . '_js_script';
+			$t = self::swfadjjsdir . '/' . self::swfadjjsname;
 			$jsfile = plugins_url($t, $pf);
-	        wp_enqueue_script($jsfn, $jsfile, false, '1.0.7');
+			$t = self::plugin_version;
+	        wp_enqueue_script($jsfn, $jsfile, false, $t);
+
+			$stfn = self::swfadjcssnpfx . '_css_script';
+			$t = self::swfadjcssdir . '/' . self::swfadjcssname;
+			$stfile = plugins_url($t, $pf);
+			$t = self::plugin_version;
+			wp_enqueue_style($stfn, $stfile, false, $t);
 		}
 
 		$aa = array($this, 'post_shortcode');
@@ -1983,6 +2003,7 @@ class SWF_put_evh {
 		$dv = sprintf('id="%s" %s', $divids[0], $divatts);
 		$dvf = str_replace(array('-', ' '), '_', $divids[0]);
 
+		/* TODO: remove this
 		if ( function_exists('wp_is_mobile') && wp_is_mobile() ) {
 			return sprintf('
 			<div %s>%s</div>
@@ -1995,15 +2016,15 @@ class SWF_put_evh {
 			$divids[0], $divids[1], $divids[2], $divids[3],
 			json_encode($vidtags['js']));
 		}
+		*/
 
 		return sprintf('
 			<div %s>%s%s</div>
 			<script type="text/javascript">
-			var adj_%s = new %s_adj("%s", "%s", "%s", "%s", false);
-			</script>
-			',
+			new %s_sizer("%s", "%s", "%s", "%s", false);
+			</script>',
 			$dv, $vidtags['el'], $cap,
-			$dvf, $opfx,
+			$opfx,
 			$divids[0], $divids[1], $divids[2], $divids[3]);
 	}
 
