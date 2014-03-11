@@ -1,0 +1,117 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" class="cbarsvg"
+	 id="svg_ctlbar" visibility="hidden">
+	<![CDATA[
+	<!-- Template, mostly empty, to make video control bar;
+		 populated with JavaScript in top document.
+	-->
+	]]>
+	<script type="text/javascript">
+	<![CDATA[
+		// FFox returns HTMLCollection, chromium/webkit returns NodeList
+		function getparams () {
+			var parms = {};
+			// As usual MSIE is n.g.: it cannot grok this . . .
+			if ( document.defaultView.frameElement && document.defaultView.frameElement.getElementsByTagName ) {
+				var t = document.defaultView.frameElement.getElementsByTagName("param");
+				for ( var i = 0; i < t.length; i++ ) {
+					var nd = t.item(i);
+					parms[nd.name] = nd.value;
+				}
+			// . . . but luckily this is understood; it's from a
+			// query string on the svg URL, so obviously the using
+			// document code gets an extra complication too.
+			} else if ( document.defaultView.location.href ) {
+				var q = document.defaultView.location.href.split('?')[1].split('&');
+				for ( var i = 0; i < q.length; i++ ) {
+					var u = q[i].split('=');
+					parms[u[0]] = u[1];
+				}
+			} else {
+				top.console.log("cannot get object params in svg script; browser is obsolete or broken");
+			}
+			parms.root_svg = document.getElementById("svg_ctlbar");
+			parms.docu_svg = document;
+			return parms;
+		}
+
+		// put the params for this in data structure maintained in
+		// top document, where it is hooked up as needed
+		var params = getparams();
+		if ( params && (typeof top.evhh5v_put_ctlbarmap) == "function" ) {
+			top.evhh5v_put_ctlbarmap(params);
+		}
+
+		// these must be passed back to top; things like
+		// setAttribute() don't work in this context
+		function setvisi(id, typ) {
+			return top.evhh5v_setvisi(document.getElementById(id), typ);
+		};
+		function svg_click(obj) {
+			return top.evhh5v_svg_click(obj, params);
+		};
+	]]>
+	</script>
+	<style type="text/css">
+	<![CDATA[
+		/* .label { font-size:12pt; font-family:Verdana } */
+		.bgrect { fill: rgb(20,20,25); stroke:none;
+			opacity: 0.55;
+		}
+		.btn, .svgbutt { cursor: pointer; }
+		.btn, .btn2 { fill:rgb(30,10,15); stroke:none; stroke-width:0px;
+			opacity: 0.31;
+			visibility: inherit;
+		}
+		.btnstroke { fill:none; stroke:rgb(0,0,0); stroke-width:2%;
+			opacity: 0.94;
+		}
+		.btnhighl { fill:none; stroke:rgb(220,220,240); stroke-width:7%;
+			opacity: 0.667;
+		}
+		.ico { fill:rgb(240,240,255); stroke:none;
+			opacity: 0.667;
+		}
+		.icoline { fill:none; stroke:rgb(240,240,255);
+			stroke-width:1px;
+			stroke-linecap:round;
+			stroke-linejoin:round;
+			opacity: 0.667;
+		}
+		.icostroke { fill:none; stroke:rgb(0,0,0);
+			stroke-width:1px;
+			stroke-linecap:round;
+			stroke-linejoin:round;
+			opacity: 0.0;
+		}
+		.progseek, .progload { stroke: none;
+			opacity: 0.47;
+		}
+		.progseekfg { fill: rgb(245,210,215); }
+		.progloadfg { fill: rgb(215,210,245); }
+		.progloadfgdl { fill: url(#progloadgr); }
+		.progseekbg, .progloadbg { fill: rgb(20,0,5); }
+		.progseekfg, .progseekbg { cursor: pointer; }
+	]]>
+	</style>
+	<defs>
+		<filter id="blur_dis" filterUnits="userSpaceOnUse" x="0" y="0">
+			<desc> Indicates button disabled by blurring icon. </desc>
+			<feGaussianBlur stdDeviation="1.25" in="SourceGraphic" result="blur"/>
+		</filter>
+		<radialGradient id="progloadgr" cx="50%" cy="50%" fx="50%" fy="50%" gradientUnits="userSpaceOnUse">
+			<stop offset="0%" style="stop-color:rgb(15,10,45);stop-opacity:0.47"/>
+			<stop offset="25%" style="stop-color:rgb(215,210,245);stop-opacity:0.47"/>
+			<stop offset="75%" style="stop-color:rgb(215,210,245);stop-opacity:0.47"/>
+			<stop offset="100%" style="stop-color:rgb(15,10,45);stop-opacity:0.47"/>
+			<animate attributeName="cx" values="50%; 90%; 50%; 10%; 50%" dur="16s" repeatCount="indefinite"/>
+		</radialGradient>
+	</defs>
+	<g id="g_all_g">
+		<g class="bgrect" id="ctlbar_bg"></g>
+		<g id="g_button_1"></g>
+		<g class="progseek" id="prog_seek"></g>
+		<g class="progload" id="prog_load"></g>
+	</g>
+</svg>
