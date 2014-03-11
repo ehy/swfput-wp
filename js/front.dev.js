@@ -40,6 +40,10 @@ var SWFPut_putswf_video_getstyle = function (el, sty) {
 	return v;
 };
 
+var SWFPut_putswf_video_get_ua = function (el, sty) {
+	return "SWFPut -- " + navigator["userAgent"];
+};
+
 // build object element with its children and add to <div>
 //
 // dv is enclosing <div> id attribute,

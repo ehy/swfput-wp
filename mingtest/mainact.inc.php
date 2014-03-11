@@ -366,7 +366,10 @@ end commented cases
 // decimal string of at least length 2, left zero padded
 function n02(n) {
 	var t = "" + n;
-	return t.length < 2 ? "0" + t : t;
+	while ( t.length < 2 ) {
+		t = "0" + t;
+	}
+	return t;
 }
 
 // make HH:MM:SS from seconds (MM:SS if < hour)
@@ -387,6 +390,58 @@ function add_filter(item, filter) {
 	t.push(filter);
 	item.filters = t;
 }
+
+// If there is a direct way to get browser user agent string in
+// flash, I haven't found it, so try an external JS function;
+// this might be unreliable, so caller should expect false return.
+function get_ua_string() {
+	if ( _level0._evh_ua_string !== undefined ) {
+		return _level0._evh_ua_string;
+	}
+
+	_level0._evh_ua_string = false;
+
+	try {
+		var xi;
+		xi = flash.external.ExternalInterface === undefined
+			? false : true;
+		if ( xi ) {
+			var f = "navigator.userAgent.valueOf";
+			xi = flash.external.ExternalInterface.call(f);
+			if ( typeof (xi) == "string" ) {
+				_level0._evh_ua_string = xi;
+			}
+		}
+	} catch ( e ) {
+	}; // ming requires terminated try/catch
+
+	return _level0._evh_ua_string;
+}
+
+// is the browser, or 'user agent', mobile?
+// [lifted from JS code, which was lifted from WordPress php]
+function ua_is_mobile() {
+	if ( _level0._evh_ua_is_mobile_bool !== undefined ) {
+		return _level0._evh_ua_is_mobile_bool;
+	}
+
+	_level0._evh_ua_is_mobile_bool = false;
+	var ua = get_ua_string();
+	
+	if ( typeof (ua) == "string" )
+	if (   ua.indexOf('Mobile') >= 0 // many mobile devices (all iPhone, iPad, etc.)
+		|| ua.indexOf('Android') >= 0
+		|| ua.indexOf('Silk/') >= 0
+		|| ua.indexOf('Kindle') >= 0
+		|| ua.indexOf('BlackBerry') >= 0
+		|| ua.indexOf('Opera Mini') >= 0
+		|| ua.indexOf('Opera Mobi') >= 0 ) {
+		document._evh_ua_is_mobile_bool = true;
+	}
+
+	return _level0._evh_ua_is_mobile_bool;
+};
+
 
 ///
 /// end utility function section
@@ -462,6 +517,11 @@ if ( guardinit == undefined ) {
 				if ( b_release == undefined || b_release == false ) {
 					bbar.dbg._visible = ! bbar.dbg._visible;
 					if ( bbar.dbg._visible ) {
+						var xi = get_ua_string();
+						if ( xi ) {
+							adddbgtext("User agent == '"+xi+"'\n");
+							adddbgtext("Is mobile == '"+ua_is_mobile()+"'\n");
+						}
 						adddbgtext("isrunning=="+isrunning+"\n");
 					}
 				}
