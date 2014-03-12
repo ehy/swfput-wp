@@ -915,7 +915,7 @@ class SWF_put_evh {
 		$cl = __CLASS__;
 
 		if ( $adm ) {
-		// keep it clean: {de,}activation
+			// keep it clean: {de,}activation
 			if ( current_user_can('activate_plugins') ) {
 				$aa = array($cl, 'on_deactivate');
 				register_deactivation_hook($pf, $aa);
@@ -942,17 +942,17 @@ class SWF_put_evh {
 				$this->init_settings_page();
 			}
 		} else { // if ( $adm )
-			$jsfn = self::evhv5vjsnpfx . '_js_script';
-			$t = self::evhv5vjsdir . '/' . self::evhv5vjsname;
-			$jsfile = plugins_url($t, $pf);
-			$t = self::plugin_version;
-	        wp_enqueue_script($jsfn, $jsfile, false, $t);
-
-			$stfn = self::evhv5vcssnpfx . '_css_script';
+			$stfn = self::evhv5vcssnpfx . '_css';
 			$t = self::evhv5vcssdir . '/' . self::evhv5vcssname;
 			$stfile = plugins_url($t, $pf);
 			$t = self::plugin_version;
 			wp_enqueue_style($stfn, $stfile, false, $t);
+
+			$jsfn = self::evhv5vjsnpfx . '_js';
+			$t = self::evhv5vjsdir . '/' . self::evhv5vjsname;
+			$jsfile = plugins_url($t, $pf);
+			$t = self::plugin_version;
+	        wp_enqueue_script($jsfn, $jsfile, false, $t);
 
 			$t = self::evhv5vsvgdir;
 			$this->evhv5v_svgs = array(
@@ -2001,7 +2001,9 @@ class SWF_put_evh {
 		$rndnum = self::uniq_rand();
 		$divid = sprintf('d_%s_%06u', $base, $rndnum);
 		$objid = sprintf('o_%s_%06u', $base, $rndnum);
-		return array($divid, $objid, 'va_' . $objid, 'ia_' . $objid);
+		return array(
+			$divid, $objid, 'va_' . $objid, 'ia_' . $objid, $rndnum
+		);
 	}
 	
 	// get video <div>+<script> strings
@@ -2013,9 +2015,9 @@ class SWF_put_evh {
 		$opfx = self::evhv5vjsnpfx;
 
 		$dv = sprintf('id="%s" %s', $divids[0], $divatts);
-		$dvf = str_replace(array('-', ' '), '_', $divids[0]);
 
 		/* TODO: remove this
+		$dvf = str_replace(array('-', ' '), '_', $divids[0]);
 		if ( function_exists('wp_is_mobile') && wp_is_mobile() ) {
 			return sprintf('
 			<div %s>%s</div>
@@ -2809,20 +2811,32 @@ class SWF_put_evh {
 		}
 		if ( $altvideo != '' ) {
 			$viid = '';
+			$vdid = '';
 			$jatt['a_vid'] = array(
 				'width'     => $w, 'height' => $h,
 				'id'        => $idav,
 				'poster'    => self::ht($iimgunesc),
 				'controls'  => 'true',
 				'preload'   => 'none',
-				'autoplay'  => $play,
+				'autoplay'  => $play, // CHECK for h5v player
 				'loop'      => $loop,
-				'srcs'      => array()
+				'srcs'      => array(),
+				// added in 1.0.8 for new h5 video program
+				'uniq'		=> ''.$ids[4],
+				'parentdiv'	=> $ids[0],
+				'barheight'	=> $barheight,
+				'barwidth'	=> $w,
+				'aspect'	=> $displayaspect,
+				'altmsg'	=> 'Control bar load failed.'
 			);
 			if ( $idav != '' ) {
 				$viid = sprintf(' id="%s"', $idav);
+				$vdid = sprintf(' id="aux_%s"', $idav);
 			}
-			$vd = "\n\t\t" . '<video'.$viid.' controls preload="none"';
+			// div added in 1.0.8 for new h5 video program
+			// TODO: move css classname to class-constant
+			$vd = "\n\t\t" . '<div'.$vdid.' class="evhh5v_vidobjdiv">';
+			$vd += "\n\t\t" . '<video'.$viid.' controls preload="none"';
 			if ( $play == 'true' ) {
 				$vd .= ' autoplay';
 			}
@@ -2864,8 +2878,9 @@ class SWF_put_evh {
 			$jatt['a_vid']['altmsg'] = self::wt("\n\t\t" .
 				__('Flash video is not available, and the alternate <code>video</code> sources were rejected by your browser', 'swfput_l10n')
 			);
-			$vd .= sprintf("%s\n\t\t</video>",
-				$altimg == '' ? $jatt['a_vid']['altmsg'] : $altimg
+			$vd .= sprintf("%s\n\t\t</video>\n\t\t</div>%s",
+				$altimg == '' ? $jatt['a_vid']['altmsg'] : $altimg,
+				$this->get_h5vjs_tags($jatt['a_vid'])
 			);
 			
 			$altimg = $vd;
@@ -2951,6 +2966,43 @@ class SWF_put_evh {
 			</object>',
 		$play, $quality, $allowfull, $fv, $uswf, $pv, $altimg),
 		'js' => $jatt);
+	}
+
+	// return array with suitable SWF object/embed tags in ['el']
+	// and data for building the elements w/ JS in ['js']
+	public function get_h5vjs_tags($atts) {
+		$bar = $this->evhv5v_svgs[self::evhv5vsvg_bar];
+		$vol = $this->evhv5v_svgs[self::evhv5vsvg_vol];
+		$but = $this->evhv5v_svgs[self::evhv5vsvg_but];
+	/*
+	 * assemble parameters for control bar builder:
+	 * "iparm" are generally needed parameters
+	 * "oparm" are for <param> children of <object>
+	 * some items may be repeated to keep the JS simple and orderly
+	 * * OPTIONAL fields do not appear here;
+	 * * see JS evhh5v_controlbar_elements
+	 */
+	$iparm = array("uniq" => $atts['uniq'],
+		"barurl" => $bar, "buturl" => $but, "volurl" => $vol,
+		"divclass" => "evhh5v_cbardiv", "vidid" => $atts['id'],
+		"parentdiv" => $atts['parentdiv'], "auxdiv" => 'aux_' . $atts['id'],
+		"width" => $atts['width'], "barheight" => $atts['barheight'],
+		"altmsg" => "<span id=\"span_objerr_".$atts['uniq']."\" class=\"evhh5v_cbardiv\">".$atts['altmsg']."</span>"
+	);
+	$oparm = array(
+		// these must be appended with uniq id
+		"uniq" => array("id" => "evhh5v_ctlbar_"),
+		// these must *not* be appended with uniq id
+		"std" => array(
+		  "barheight" => $atts['barheight'], "barwidth" => $atts['barwidth'], "aspect" => $atts['aspect'])
+	);
+	$parms = array("iparm" => $iparm, "oparm" => $oparm);
+
+		return = sprintf('
+		<script type="text/javascript">
+			evhh5v_controlbar_elements(%s);
+		</script>', json_encode($parms)
+		);
 	}
 } // End class SWF_put_evh
 
