@@ -296,7 +296,7 @@ function evhh5v_ua_is_mobile() {
 function evhh5v_controlbar_elements(parms) {
 	var ip = parms["iparm"];
 	var num = ip["uniq"];
-	var ivid = ip["vidid"] + num;
+	var ivid = ip["vidid"];
 
 	// <video> we're associated with must be OK, or it's all pointless
 	var vidobj = document.getElementById(ivid);
@@ -316,9 +316,9 @@ function evhh5v_controlbar_elements(parms) {
 		// are existing elements referred to here
 		"parentdiv" : ip["parentdiv"], "auxdiv" : ip["auxdiv"],
 		// these args can be provided defaults
-		"id" : ip["id"] ? ip["id"] : "evhh5v_ctlbar_svg_",
-		"ctlbardiv" : ip["bardivid"] ? ip["bardivid"] : "evhh5v_ctlbar_div_",
-		"parent" : ip["barobjid"] ? ip["barobjid"] : "evhh5v_ctlbar_obj_",
+		"id" : ip["id"] ? ip["id"] : "evhh5v_ctlbar_svg_" + num,
+		"ctlbardiv" : ip["bardivid"] ? ip["bardivid"] : "evhh5v_ctlbar_div_" + num,
+		"parent" : ip["barobjid"] ? ip["barobjid"] : "evhh5v_ctlbar_obj_" + num,
 		"role" : ip["role"] ? ip["role"] : "bar"
 	};
 	var op = parms["oparm"];
@@ -332,23 +332,23 @@ function evhh5v_controlbar_elements(parms) {
 	}
 
 	var url = ip["barurl"]; // also, a query is needed for MSIE
-	var pdiv = op["uniq"]["parentdiv"] + num;
-	var adiv = op["uniq"]["auxdiv"] + num;
+	var pdiv = op["uniq"]["parentdiv"];
+	var adiv = op["uniq"]["auxdiv"];
 
 	var bardiv = document.createElement('div');
-	bardiv.setAttribute('id', op["uniq"]["ctlbardiv"] + num);
+	bardiv.setAttribute('id', op["uniq"]["ctlbardiv"]);
 	bardiv.setAttribute('class', ip["divclass"]);
 	bardiv.style.width = "" + ip["width"] + "px";
 
 	var barobj = document.createElement('object');
-	barobj.setAttribute('id', op["uniq"]["parent"] + num);
+	barobj.setAttribute('id', op["uniq"]["parent"]);
 	barobj.setAttribute('class', ip["divclass"]);
 
 	var p, v, sep = "?", q = "";
 
 	for ( var i in op ) {
 		for ( var k in op[i] ) {
-			v = "" + op[i][k] + (i === "uniq" ? num : "");
+			v = "" + op[i][k];
 			q += sep + k + "=" + v; // MSIE
 			p = document.createElement('param');
 			p.setAttribute('name', k);
@@ -379,11 +379,11 @@ function evhh5v_controlbar_elements(parms) {
 	url = ip["buturl"];
 
 	bardiv = document.createElement('div');
-	bardiv.setAttribute('id', "b_" + op["uniq"]["ctlbardiv"] + num);
+	bardiv.setAttribute('id', "b_" + op["uniq"]["ctlbardiv"]);
 	bardiv.setAttribute('class', ip["divclass"]);
 
 	barobj = document.createElement('object');
-	barobj.setAttribute('id', "b_" + op["uniq"]["parent"] + num);
+	barobj.setAttribute('id', "b_" + op["uniq"]["parent"]);
 	barobj.setAttribute('class', ip["divclass"]);
 
 	q = "?" + "parentdiv=" + pdiv; // MSIE
@@ -391,15 +391,15 @@ function evhh5v_controlbar_elements(parms) {
 	p.setAttribute('name', "parentdiv");
 	p.setAttribute('value', pdiv);
 	barobj.appendChild(p);
-	q += "&" + "parent=" + "b_" + op["uniq"]["parent"] + num; // MSIE
+	q += "&" + "parent=" + "b_" + op["uniq"]["parent"]; // MSIE
 	p = document.createElement('param');
 	p.setAttribute('name', "parent");
-	p.setAttribute('value', "b_" + op["uniq"]["parent"] + num);
+	p.setAttribute('value', "b_" + op["uniq"]["parent"]);
 	barobj.appendChild(p);
-	q += "&" + "ctlbardiv=" + "b_" + op["uniq"]["ctlbardiv"] + num; // MSIE
+	q += "&" + "ctlbardiv=" + "b_" + op["uniq"]["ctlbardiv"]; // MSIE
 	p = document.createElement('param');
 	p.setAttribute('name', "ctlbardiv");
-	p.setAttribute('value', "b_" + op["uniq"]["ctlbardiv"] + num);
+	p.setAttribute('value', "b_" + op["uniq"]["ctlbardiv"]);
 	barobj.appendChild(p);
 	q += "&" + "role=1st"; // MSIE
 	p = document.createElement('param');
@@ -418,11 +418,11 @@ function evhh5v_controlbar_elements(parms) {
 	url = ip["volurl"];
 
 	bardiv = document.createElement('div');
-	bardiv.setAttribute('id', "v_" + op["uniq"]["ctlbardiv"] + num);
+	bardiv.setAttribute('id', "v_" + op["uniq"]["ctlbardiv"]);
 	bardiv.setAttribute('class', ip["divclass"]);
 
 	barobj = document.createElement('object');
-	barobj.setAttribute('id', "v_" + op["uniq"]["parent"] + num);
+	barobj.setAttribute('id', "v_" + op["uniq"]["parent"]);
 	barobj.setAttribute('class', ip["divclass"]);
 
 	q = "?" + "parentdiv=" + pdiv; // MSIE
@@ -430,15 +430,15 @@ function evhh5v_controlbar_elements(parms) {
 	p.setAttribute('name', "parentdiv");
 	p.setAttribute('value', pdiv);
 	barobj.appendChild(p);
-	q += "&" + "parent=" + "v_" + op["uniq"]["parent"] + num; // MSIE
+	q += "&" + "parent=" + "v_" + op["uniq"]["parent"]; // MSIE
 	p = document.createElement('param');
 	p.setAttribute('name', "parent");
-	p.setAttribute('value', "v_" + op["uniq"]["parent"] + num);
+	p.setAttribute('value', "v_" + op["uniq"]["parent"]);
 	barobj.appendChild(p);
-	q += "&" + "ctlbardiv=" + "v_" + op["uniq"]["ctlbardiv"] + num; // MSIE
+	q += "&" + "ctlbardiv=" + "v_" + op["uniq"]["ctlbardiv"]; // MSIE
 	p = document.createElement('param');
 	p.setAttribute('name', "ctlbardiv");
-	p.setAttribute('value', "v_" + op["uniq"]["ctlbardiv"] + num);
+	p.setAttribute('value', "v_" + op["uniq"]["ctlbardiv"]);
 	barobj.appendChild(p);
 	q += "&" + "role=vol"; // MSIE
 	p = document.createElement('param');

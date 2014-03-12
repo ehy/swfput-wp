@@ -2836,7 +2836,7 @@ class SWF_put_evh {
 			// div added in 1.0.8 for new h5 video program
 			// TODO: move css classname to class-constant
 			$vd = "\n\t\t" . '<div'.$vdid.' class="evhh5v_vidobjdiv">';
-			$vd += "\n\t\t" . '<video'.$viid.' controls preload="none"';
+			$vd .= "\n\t\t" . '<video'.$viid.' controls preload="none"';
 			if ( $play == 'true' ) {
 				$vd .= ' autoplay';
 			}
@@ -2878,7 +2878,7 @@ class SWF_put_evh {
 			$jatt['a_vid']['altmsg'] = self::wt("\n\t\t" .
 				__('Flash video is not available, and the alternate <code>video</code> sources were rejected by your browser', 'swfput_l10n')
 			);
-			$vd .= sprintf("%s\n\t\t</video>\n\t\t</div>%s",
+			$vd .= sprintf("%s\n\t\t</video>%s\n\t\t</div>",
 				$altimg == '' ? $jatt['a_vid']['altmsg'] : $altimg,
 				$this->get_h5vjs_tags($jatt['a_vid'])
 			);
@@ -2974,31 +2974,32 @@ class SWF_put_evh {
 		$bar = $this->evhv5v_svgs[self::evhv5vsvg_bar];
 		$vol = $this->evhv5v_svgs[self::evhv5vsvg_vol];
 		$but = $this->evhv5v_svgs[self::evhv5vsvg_but];
-	/*
-	 * assemble parameters for control bar builder:
-	 * "iparm" are generally needed parameters
-	 * "oparm" are for <param> children of <object>
-	 * some items may be repeated to keep the JS simple and orderly
-	 * * OPTIONAL fields do not appear here;
-	 * * see JS evhh5v_controlbar_elements
-	 */
-	$iparm = array("uniq" => $atts['uniq'],
-		"barurl" => $bar, "buturl" => $but, "volurl" => $vol,
-		"divclass" => "evhh5v_cbardiv", "vidid" => $atts['id'],
-		"parentdiv" => $atts['parentdiv'], "auxdiv" => 'aux_' . $atts['id'],
-		"width" => $atts['width'], "barheight" => $atts['barheight'],
-		"altmsg" => "<span id=\"span_objerr_".$atts['uniq']."\" class=\"evhh5v_cbardiv\">".$atts['altmsg']."</span>"
-	);
-	$oparm = array(
-		// these must be appended with uniq id
-		"uniq" => array("id" => "evhh5v_ctlbar_"),
-		// these must *not* be appended with uniq id
-		"std" => array(
-		  "barheight" => $atts['barheight'], "barwidth" => $atts['barwidth'], "aspect" => $atts['aspect'])
-	);
-	$parms = array("iparm" => $iparm, "oparm" => $oparm);
 
-		return = sprintf('
+		/*
+		 * assemble parameters for control bar builder:
+		 * "iparm" are generally needed parameters
+		 * "oparm" are for <param> children of <object>
+		 * some items may be repeated to keep the JS simple and orderly
+		 * * OPTIONAL fields do not appear here;
+		 * * see JS evhh5v_controlbar_elements
+		 */
+		$iparm = array("uniq" => $atts['uniq'],
+			"barurl" => $bar, "buturl" => $but, "volurl" => $vol,
+			"divclass" => "evhh5v_cbardiv", "vidid" => $atts['id'],
+			"parentdiv" => $atts['parentdiv'], "auxdiv" => 'aux_' . $atts['id'],
+			"width" => $atts['width'], "barheight" => $atts['barheight'],
+			"altmsg" => "<span id=\"span_objerr_".$atts['uniq']."\" class=\"evhh5v_cbardiv\">".$atts['altmsg']."</span>"
+		);
+		$oparm = array(
+			// these must be appended with uniq id
+			"uniq" => array("id" => "evhh5v_ctlbar_" . $atts['uniq']),
+			// these must *not* be appended with uniq id
+			"std" => array(
+			  "barheight" => $atts['barheight'], "barwidth" => $atts['barwidth'], "aspect" => $atts['aspect'])
+		);
+		$parms = array("iparm" => $iparm, "oparm" => $oparm);
+	
+		return sprintf('
 		<script type="text/javascript">
 			evhh5v_controlbar_elements(%s);
 		</script>', json_encode($parms)
