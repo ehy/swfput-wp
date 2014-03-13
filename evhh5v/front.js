@@ -290,10 +290,32 @@ function evhh5v_ua_is_mobile() {
 	return document.evhh5v_ua_is_mobile_bool;
 };
 
+// Unfortunately some browser brokenness must be handled under
+// some circumstances; e.g., a not-current Opera under FreeBSD
+// tested fine with all this until it was integrated with the
+// the SWFPut WordPress plugin, in which context the outer <div>
+// was not adjusting its height properly (seemingly confused that
+// the first fallback element under the flash <object> was a <div>
+// because in earlier versions of the plugin there was no problem:
+// the div is the most obvious difference).
+// So, corrective measures may be added here as needed.
+function evhh5v_fixup_elements(parms) {
+	var ip = parms["iparm"];
+
+	if ( /Opera/i.test(navigator["userAgent"]) ) {
+		var t = document.getElementById(ip["auxdiv"]);
+		if ( t && t.parentNode && t.parentNode.nodeName.toLowerCase() === "object" ) {
+			var p = t.parentNode;
+			var d = p.parentNode;
+			d.replaceChild(t, p);
+		}
+	}
+}
+
 // build and add to DOM the elements needed for the svg control bar
 // of the html5 video player; arg is a map[*] of map,
 // ready for literal use. [* map as in assoc. array]
-function evhh5v_controlbar_elements(parms) {
+function evhh5v_controlbar_elements(parms, fixups) {
 	var ip = parms["iparm"];
 	var num = ip["uniq"];
 	var ivid = ip["vidid"];
@@ -452,6 +474,11 @@ function evhh5v_controlbar_elements(parms) {
 
 	bardiv.appendChild(barobj);
 	alldiv.appendChild(bardiv);
+
+	// finally, optional fixups; comment at definition
+	if ( fixups !== undefined && fixups == true ) {
+		evhh5v_fixup_elements(parms);
+	}
 };
 
 // (ugly hack to get resize event: save _adj instances, see below)
@@ -2804,6 +2831,7 @@ evhh5v_controller.prototype = {
 		this.hide_volctl();
 		this.set_width = v;
 		var t;
+
 		t = document.getElementById(this.ctlbar["parent"]);
 		t.style.width = v + "px";
 		t = this.auxdiv;
@@ -2814,6 +2842,7 @@ evhh5v_controller.prototype = {
 			this.ctlbar.evhh5v_controlbar.resize_bar(v, this.barheight);
 			this.play_progress_update();
 		}
+
 		t = this.bardiv;
 		t.style.width = v + "px";
 		t.style.left = this.pad + "px";
@@ -2825,16 +2854,20 @@ evhh5v_controller.prototype = {
 	},
 	put_height : function(v) {
 		this.hide_volctl();
-		var diff = v - this.height;
-		this.set_height = v;
-		var bh = this.barheight;
 		var t;
-		t = document.getElementById(this.ctlbar["parent"]);
-		t.style.height = bh + "px";
+		var diff = v - this.height;
+
 		t = this.auxdiv;
 		t.style.left = "0px"; t.style.top = "0px"; t.style.height = "" + v + "px";
 
+		this.set_height = v;
+
+		var bh = this.barheight;
+		t = document.getElementById(this.ctlbar["parent"]);
+		t.style.height = bh + "px";
+
 		this.setup_aspect_factors(); this.put_canvas_poster();
+
 		t = this.bardiv;
 		t.style.height = bh + "px";
 		this.bar_y += diff; this.yshowpos += diff;

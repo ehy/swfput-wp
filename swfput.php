@@ -2880,7 +2880,7 @@ class SWF_put_evh {
 			);
 			$vd .= sprintf("%s\n\t\t</video>%s\n\t\t</div>",
 				$altimg == '' ? $jatt['a_vid']['altmsg'] : $altimg,
-				$this->get_h5vjs_tags($jatt['a_vid'])
+				$this->get_h5vjs_tags($jatt['a_vid'], $ids[1])
 			);
 			
 			$altimg = $vd;
@@ -2889,8 +2889,8 @@ class SWF_put_evh {
 		}
 
 		// Update 2013/09/23: update object element, separating
-		// MSIE, so that alternative elements can be added
-		// for no-flash browsers: previously, with the classid attribute
+		// MSIE, so that alternative elements can be added for
+		// no-flash browsers: previously, with the classid attribute
 		// within the object element, firefox (and others) would
 		// always fall through to the now-removed embed element;
 		// therefore, browser ID is attempted to find MSIE (in
@@ -2920,8 +2920,8 @@ class SWF_put_evh {
 			$jatt['obj']['ie'] = 'false';
 			$typ = 'application/x-shockwave-flash';
 			$obj = sprintf('
-			<object%s data="%s?%s" type="%s" width="%u" height="%u">
-			', $id, $uswf, $pv, $typ, $w, $h);
+			<object%s data="%s?%s" type="%s" %s width="%u" height="%u">
+			', $id, $uswf, $pv, $typ, "typemustmatch", $w, $h);
 			$jatt['obj']['data'] = $uswf . '?' . $pv;
 			$jatt['obj']['type'] = $typ;
 		}
@@ -2970,7 +2970,7 @@ class SWF_put_evh {
 
 	// return array with suitable SWF object/embed tags in ['el']
 	// and data for building the elements w/ JS in ['js']
-	public function get_h5vjs_tags($atts) {
+	public function get_h5vjs_tags($atts, $flashid = null) {
 		$bar = $this->evhv5v_svgs[self::evhv5vsvg_bar];
 		$vol = $this->evhv5v_svgs[self::evhv5vsvg_vol];
 		$but = $this->evhv5v_svgs[self::evhv5vsvg_but];
@@ -2998,11 +2998,20 @@ class SWF_put_evh {
 			  "barheight" => $atts['barheight'], "barwidth" => $atts['barwidth'], "aspect" => $atts['aspect'])
 		);
 		$parms = array("iparm" => $iparm, "oparm" => $oparm);
-	
+
+		// This is depressing . . . the test should be whether the
+		// outer <object> is exposed (showing, used) or the inner
+		// fallback content is exposed, regardless of the <object>
+		// content type; but, after ridiculous time searching, I
+		// cannot find any way to simply determine whether primary
+		// or fallback elements will be used. The plugin check will
+		// be less reliable.
 		return sprintf('
 		<script type="text/javascript">
-			evhh5v_controlbar_elements(%s);
-		</script>', json_encode($parms)
+			if ( ! navigator.plugins["Shockwave Flash"] || ! document["%s"] ) {
+				evhh5v_controlbar_elements(%s, true);
+			}
+		</script>', $flashid, json_encode($parms)
 		);
 	}
 } // End class SWF_put_evh
