@@ -96,12 +96,27 @@ $(SDIRI)/mingput28.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
 $(SDIRI)/mingput24.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
 	$(PHPCLI) $(SDIRI)/mingput.php -- BH=24 > $(SDIRI)/mingput24.swf
 
+# After JavaScript::Packer failed with front.js (see below)  I found
+# that JavaScript::Minifier is no longer on my main system (so it is
+# moved last, and it is untried currently -- watch for errors) --
+# the JavaScript::Minifier::XS has just been tried and is working
+# so far
 ${JSBIN}: ${JSSRC}
 	O=$@; I=$${O%%.*}.js; echo $$I to $$O; \
+	(P=`which perl` && $$P -e 'use JavaScript::Minifier::XS qw(minify); $$f = join("", <>); print minify($$f)' < "$$I" > "$$O" ) \
+	|| \
 	(P=`which perl` && $$P -e 'use JavaScript::Minifier qw(minify);minify(input=>*STDIN,outfile=>*STDOUT)' < "$$I" > "$$O" 2>/dev/null) \
-	|| (P=`which perl` && $$P -e \
-		'use JavaScript::Packer;$$p=JavaScript::Packer->init();$$o=join("",<STDIN>);$$p->minify(\$$o,{"compress"=>"clean"});print STDOUT $$o;' < "$$I" > "$$O") \
 	|| cp -f "$$I" "$$O"
+
+# NOTE: The non-trivial front.js is broken by perl 'JavaScript::Packer'
+# these rules are saved for reference in case Packer warrants another
+# try some day
+#${JSBIN}: ${JSSRC}
+#	O=$@; I=$${O%%.*}.js; echo $$I to $$O; \
+#	(P=`which perl` && $$P -e 'use JavaScript::Minifier qw(minify);minify(input=>*STDIN,outfile=>*STDOUT)' < "$$I" > "$$O" 2>/dev/null) \
+#	|| (P=`which perl` && $$P -e \
+#		'use JavaScript::Packer;$$p=JavaScript::Packer->init();$$o=join("",<STDIN>);$$p->minify(\$$o,{"compress"=>"clean"});print STDOUT $$o;' < "$$I" > "$$O") \
+#	|| cp -f "$$I" "$$O"
 
 ${H5BIN} : ${H5SRC}
 	exit 0
