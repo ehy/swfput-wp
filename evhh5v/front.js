@@ -307,6 +307,7 @@ function evhh5v_fixup_elements(parms) {
 		if ( t && t.parentNode && t.parentNode.nodeName.toLowerCase() === "object" ) {
 			var p = t.parentNode;
 			var d = p.parentNode;
+			p.removeChild(t);
 			d.replaceChild(t, p);
 		}
 	}
@@ -2593,9 +2594,28 @@ evhh5v_controller.prototype = {
 	// hack, and if future time and motivation permit, try detecting
 	// whether CSS can do the trick and switch to that approach if so.
 	setup_canvas : function() {
-		if ( this.aspect <= 0 || Math.abs(this.aspect - this.width / this.height) < this.aspect_min ) {
-			return;
+		// Normally, use the canvas hack only when aspect must be
+		// adjusted.  This Opera test was made necessary by a series
+		// of Opera on Unix bugs: 1st, when this code is used
+		// as fallback under an object element (as in SWFPut plugin)
+		// an older (FreeBSD) version would not size the parent <div>
+		// properly. That was solved with a hack elsewhere that
+		// reparents our auxiliary div from the <object> to the
+		// enclosing <div>, which worked on the older FBSD version.
+		// Next, testing with current Opera on GNU/Linux, found that
+		// the video frames would not show on play (audio OK) until
+		// playback was paused and then restarted. Sheesh! Don't know
+		// if this bug is excited by the reparenting that squashed the
+		// 1st bug, but IAC the display on canvas seems fine, so
+		// force the canvas hack for Opera. (Whew.)
+		if ( ! /Opera/i.test(navigator["userAgent"]) ) {
+			if ( this.aspect <= 0
+				|| Math.abs(this.aspect - this.width / this.height)
+					< this.aspect_min ) {
+				return;
+			}
 		}
+
 		var cw = this.width, ch = this.height;
 		this._cnv = document.createElement('canvas');
 		var pt = this._vid.parentNode;
