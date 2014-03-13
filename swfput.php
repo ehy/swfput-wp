@@ -3008,10 +3008,10 @@ class SWF_put_evh {
 		// be less reliable.
 		return sprintf('
 		<script type="text/javascript">
-			if ( ! navigator.plugins["Shockwave Flash"] || ! document["%s"] ) {
+			if ( ! navigator.plugins["Shockwave Flash"] ) {
 				evhh5v_controlbar_elements(%s, true);
 			}
-		</script>', $flashid, json_encode($parms)
+		</script>', json_encode($parms)
 		);
 	}
 } // End class SWF_put_evh
