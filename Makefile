@@ -102,11 +102,11 @@ $(SDIRI)/mingput24.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
 # the JavaScript::Minifier::XS has just been tried and is working
 # so far
 ${JSBIN}: ${JSSRC}
-	O=$@; I=$${O%%.*}.js; echo $$I to $$O; \
-	(P=`which perl` && $$P -e 'use JavaScript::Minifier::XS qw(minify); $$f = join("", <>); print minify($$f)' < "$$I" > "$$O" ) \
+	O=$@; I=$${O%%.*}.js; \
+	(P=`which perl` && $$P -e 'use JavaScript::Minifier::XS qw(minify); print minify(join("",<>))' < "$$I" > "$$O" ) \
 	|| \
 	(P=`which perl` && $$P -e 'use JavaScript::Minifier qw(minify);minify(input=>*STDIN,outfile=>*STDOUT)' < "$$I" > "$$O" 2>/dev/null) \
-	|| cp -f "$$I" "$$O"
+	|| { cp -f "$$I" "$$O" && echo UN-MINIFIED $$I to $$O; }
 
 # NOTE: The non-trivial front.js is broken by perl 'JavaScript::Packer'
 # these rules are saved for reference in case Packer warrants another
