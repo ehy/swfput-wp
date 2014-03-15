@@ -64,7 +64,6 @@
 			stroke-linejoin:round;
 			opacity: 0.863;
 		}
-		.ico_clearbg { fill:rgb(0,0,0); stroke:none; opacity: 0.0; }
 		.fgslide { fill: rgb(245,210,215); }
 		.bgslide { fill: rgb(20,0,5); }
 		.fgslide, .bgslide { cursor: pointer;

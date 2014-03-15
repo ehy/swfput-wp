@@ -1786,9 +1786,33 @@ mk_volctl : function(parentobj, doc) {
 
 	// relay event handler
 	var that = this;
-	var hdl = function(e) {
+	var hdlmd = function(e) {
+		//var t = this;
+		that.volctl_mousedown = 1;
+		return false;
+	};
+	var hdlmu = function(e) {
+		if ( that.volctl_mousedown ) {
+			var t = this;
+			that.hdl_volctl(e, t);
+		}
+		that.volctl_mousedown = 0;
+		return false;
+	};
+	var hdlmm = function(e) {
+		if ( that.volctl_mousedown ) {
+			var t = this;
+			that.hdl_volctl(e, t);
+		}
+		return false;
+	};
+	var hdlbg = function(e) {
+		that.volctl_mousedown = 0;
+	};
+	var hdl   = function(e) {
 		var t = this;
-		return that.hdl_volctl(e, t);
+		that.hdl_volctl(e, t);
+		return false;
 	};
 
 	// saving these values will simplify placement
@@ -1818,6 +1842,7 @@ mk_volctl : function(parentobj, doc) {
 		]);
 	}
 	btn.appendChild(t);
+	t.addEventListener("mouseover", hdlbg, false); // cancel mouse
 	this.vol_bgarea = t;
 
 	var bx = horz ? volbarwid : volbarwid / 2.0;
@@ -1825,7 +1850,9 @@ mk_volctl : function(parentobj, doc) {
 	var bw = horz ? volbarlen : volbarwid;
 	var bh = horz ? volbarwid : volbarlen;
 	t = this.mk_rect("bgslide", "vol_bgslide", bx, by, bw, bh, doc);
-	t.addEventListener("click", hdl, false);
+	t.addEventListener("mousedown", hdlmd, false);
+	t.addEventListener("mouseup", hdlmu, false);
+	t.addEventListener("mousemove", hdlmm, false);
 	t.addEventListener("wheel", hdl, false);
 	// do not do "touchstart","touchend" -- whacks android browser(?) --
 	// get by with "touchmove" alone
@@ -1834,7 +1861,9 @@ mk_volctl : function(parentobj, doc) {
 	this.vol_bgslide = t;
 
 	t = this.mk_rect("fgslide", "vol_fgslide", bx, by, bw, bh, doc);
-	t.addEventListener("click", hdl, false);
+	t.addEventListener("mousedown", hdlmd, false);
+	t.addEventListener("mouseup", hdlmu, false);
+	t.addEventListener("mousemove", hdlmm, false);
 	t.addEventListener("wheel", hdl, false);
 	t.addEventListener("touchmove", hdl, false);
 	btn.appendChild(t);
@@ -2310,9 +2339,9 @@ mk : function() {
 			var cur = t - this.vol_touchstart;
 			v = fh - cur;
 			this.vol_touchstart = t;
-		} else if ( horz ) { // click
+		} else if ( horz ) { // mouse{down,up,move}
 			v = e.clientX - bt;
-		} else { // click
+		} else { // mouse{down,up,move}
 			v = bh - (e.clientY - bt);
 		}
 
