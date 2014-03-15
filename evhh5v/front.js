@@ -3239,7 +3239,9 @@ evhh5v_controller.prototype = {
 				// different browsers. or different versions of the
 				// same, are not consistent with the pause state
 				// on end.
-				this.pause();
+				if ( ! this._vid.paused ) {
+					this.pause();
+				}
 			}
 
 			this.end_canvas_frame();
