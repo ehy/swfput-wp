@@ -1784,7 +1784,7 @@ mk_volctl : function(parentobj, doc) {
 	var len_all = volbarlen + sw;
 	var horz = this.vol_horz;
 
-	// relay event handler
+	// event handlers; drag-like action
 	var that = this;
 	var hdlmd = function(e) {
 		//var t = this;
@@ -2614,13 +2614,30 @@ evhh5v_controller.prototype = {
 			var v = that._vid;
 			if ( v.volume !== undefined ) {
 				pct = Math.max(0, Math.min(1, pct));
-				v.volume = pct;
+				v.volume = that.init_vol = pct;
 				// no, use volumechanged handler
 				//that.bar.scale_volctl(pct);
 			}
 		}
 		this.bar.scale_volctl(1);
 	},
+	// onit on metadata event
+	on_metadata : function () {
+		if ( this.init_vol === undefined ) {
+			if ( this.params['volume'] !== undefined ) {
+				this.init_vol = parseFloat(this.params['volume']);
+				if ( ! isFinite(this.init_vol) ) {
+					this.init_vol = 100.0;
+				}
+			} else {
+				this.init_vol = 100.0;
+			}
+			var t = this.init_vol / 100.0;
+			this.init_vol = Math.max(0, Math.min(1, t));
+		}
+		this._vid.volume = this.init_vol;
+	},
+
 	// H5 video spec to date (02-2014) does not provide the means
 	// to adjust display aspect and always uses intrinsic pixel
 	// dimensions (CSS3 may partially help, see below), but the media
@@ -3172,6 +3189,7 @@ evhh5v_controller.prototype = {
 		}, false);
 		this.addEventListener(["loadedmetadata", "resize"], function(e) {
 			if ( e.type === "loadedmetadata" ) {
+				this.on_metadata();
 				this.gotmetadata = true;
 			} else if ( e.type === "resize" ) {
 				// NOTE: the resize event is *not* for changed page
