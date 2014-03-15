@@ -1986,8 +1986,15 @@ init_volctl : function() {
 	return true;
 },
 
+is_mobile : function() {
+	if ( this.parms['mob'] !== undefined ) {
+		return (this.parms['mob'] == 'true');
+	}
+	return evhh5v_ua_is_mobile();
+},
+
 mk : function() {
-	var mobi = evhh5v_ua_is_mobile();
+	var mobi = this.is_mobile();
 	var mnot = ! mobi;
 	var svg = this.svg;
 	var doc = this.doc;
@@ -2472,8 +2479,15 @@ var evhh5v_controller = function(vid, ctlbar, pad) {
 	this.tickinterval_divisor = 1000 / this.tickinterval;
 	this.ptrtickmax = this.tickinterval_divisor * this.ptrinterval;
 	this.ptrtick = 0;
-	this.doshowbartime = false; //true;
+	this.doshowbartime = false;
+	if ( this.params['hidebar'] && this.params['hidebar'] == 'true' ) {
+		this.doshowbartime = true;
+	}
 	this.doshowbar     = true;
+	if ( this.params['disablebar'] && this.params['disablebar'] == 'true' ) {
+		this.disablebar = true;
+		this.doshowbar = false;
+	}
 
 	this.barpadding = 2;
 	this.yshowpos = this.bar_y = this.height - this.barheight;
@@ -2522,6 +2536,12 @@ evhh5v_controller.prototype = {
 	barshowmargin : 2,
 	mouse_hide_class : "evhh5v_mouseptr_hidden",
 	mouse_show_class : "evhh5v_mouseptr_normal",
+
+	// hack: this member should have been called 'params' rather
+	// than 'ctlbar'; replacement will be arduous, so use this
+	// getter as a "params" alias until the member name is changed
+	get params() { return this.ctlbar; },
+
 	mk : function() {
 		this.v.evhh5v_controller = this;
 		this.ctlbar.evhh5v_controller = this;
@@ -2594,6 +2614,38 @@ evhh5v_controller.prototype = {
 	// hack, and if future time and motivation permit, try detecting
 	// whether CSS can do the trick and switch to that approach if so.
 	setup_canvas : function() {
+		var params = this.params;
+		var force = false;
+
+		// consider parameters pertaining to display aspect,
+		// but only if display aspect was not specified because
+		// that overrides the others
+		if ( this.aspect <= 0 ) {
+			var t;
+			// "pixelaspect" is used if values for video data
+			// are available (but intended display is not)
+			t = params["pixelaspect"];
+			if ( t !== undefined ) {
+				var r;
+				r = /\b(-?[0-9]+)[^0-9\.](-?[0-9]+)\b/.exec(""+t);
+				r = r ? (r[1] / r[2]) : parseFloat(t);
+				r = isFinite(r) ? r : 0;
+				// disallow unreasonable values ('reasonable' is arbitrary)
+				if ( ! (Math.abs(r) < 0.5 || Math.abs(r) > 10) ) {
+					// For now, ignore negatives
+					this.pixelaspect = Math.abs(r);
+				}
+			}
+			// "aspectautoadj" is a helper to set 4:3 display aspect
+			// if video intrinsic dimensions suggest DVD source
+			if ( ! this.pixelaspect && params["aspectautoadj"] !== undefined ) {
+				t = (params["aspectautoadj"] == 'true');
+				this.aspectautoadj = t;
+			}
+		}
+		
+		force = (this.pixelaspect || this.aspectautoadj);
+
 		// Normally, use the canvas hack only when aspect must be
 		// adjusted.  This Opera test was made necessary by a series
 		// of Opera on Unix bugs: 1st, when this code is used
@@ -2608,7 +2660,11 @@ evhh5v_controller.prototype = {
 		// if this bug is excited by the reparenting that squashed the
 		// 1st bug, but IAC the display on canvas seems fine, so
 		// force the canvas hack for Opera. (Whew.)
-		if ( ! /Opera/i.test(navigator["userAgent"]) ) {
+		if ( /Opera/i.test(navigator["userAgent"]) ) {
+			force = true;
+		}
+
+		if ( ! force ) {
 			if ( this.aspect <= 0
 				|| Math.abs(this.aspect - this.width / this.height)
 					< this.aspect_min ) {
@@ -2630,7 +2686,6 @@ evhh5v_controller.prototype = {
 		var that = this;
 		var pstr = this._vid.getAttribute("poster");
 		if ( pstr && pstr != '' ) {
-			//this._cnv_poster = new Image();
 			this._cnv_poster = document.createElement('img');
 			this._cnv_poster.onload = function () {
 				that.put_canvas_poster();
@@ -2685,16 +2740,43 @@ evhh5v_controller.prototype = {
 	// canvas hack is all about display aspect so figure it out and
 	// store the factors and offsets on the video object
 	setup_aspect_factors : function() {
+		var video = this._vid;
 		var cw = this.width, ch = this.height;
+
 		if ( ! this.gotmetadata ) {
 			// width & height setters call this, so do the setting
 			this.v.width = cw;
 			this.v.height = ch;
 			return;
+		} else if ( this.pixelaspect && this.aspect <= 0 ) {
+			// NOTE: pixelaspect (& aspectautoadj below) will not
+			// work for sources with aspect metadata because the
+			// 'intrinsic' dimensions are adjusted for that; but
+			// pixelaspect will work for broken metadata if a
+			// a suitable value is given, e.g. pixelaspect 8:9
+			// given for 720x480 4:3 video with aspect metadata that
+			// claims 1.5 (720:480).
+			var w = video.videoWidth;
+			var h = video.videoHeight;
+			this.aspect = (w * this.pixelaspect) / h;
+		} else if ( this.aspectautoadj && this.aspect <= 0 ) {
+			var w = video.videoWidth;
+			var h = video.videoHeight;
+			// common sizes; cannot handle every possibility
+			if ( w == 720 || w == 704 ) {
+				if ( h == 480 || h == 576 ) {
+					this.aspect = 4.0 / 3.0;
+				}
+			}
+			if ( w == 360 || w == 352 ) {
+				// handle 360x240? is it common w/ square pixels?
+				if ( h == 288 || h == 240 ) {
+					this.aspect = 4.0 / 3.0;
+				}
+			}
 		}
 
 		this.origaspect = cw / ch;
-		var video = this._vid;
 		var vw = video.videoWidth;
 		var vh = video.videoHeight;
 		var aspectW =
@@ -3059,8 +3141,23 @@ evhh5v_controller.prototype = {
 		this.addEventListener(["loadedmetadata", "loadeddata", "emptied"], function(e) {
 			this.bar.show_dl_inactive();
 		}, false);
-		this.addEventListener("loadedmetadata", function(e) {
-			this.gotmetadata = true;
+		this.addEventListener(["loadedmetadata", "resize"], function(e) {
+			if ( e.type === "loadedmetadata" ) {
+				this.gotmetadata = true;
+			} else if ( e.type === "resize" ) {
+				// NOTE: the resize event is *not* for changed page
+				// display size; it's for changed 'intrinsic' dimensions
+				// videoWidth & videoHeight, e.g. change in src or even
+				// within current src. I have no single source that
+				// triggers this and as yet have not set up a test
+				// with src changes, but it should work in principle
+				// if this.setup_aspect_factors() has correct data
+				// (*aspect and such will likely be invalid after a
+				// src change; as yet this code does not support such).
+				console.log("Got RESIZE: w == " + 
+					this._vid.videoWidth + ", h == " +
+					this._vid.videoHeight);
+			}
 			// a little brute force display adjustment to metadata
 			this.setup_aspect_factors();
 			var h = this.height, w = this.width;
@@ -3138,7 +3235,13 @@ evhh5v_controller.prototype = {
 				} catch ( ex ) {
 					// do nothing, fall through, hope . . .
 				}
+			} else if ( e.type === "ended" ) {
+				// different browsers. or different versions of the
+				// same, are not consistent with the pause state
+				// on end.
+				this.pause();
 			}
+
 			this.end_canvas_frame();
 			this.playing = false;
 			this.bar.stopbtn_disab();

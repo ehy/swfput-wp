@@ -856,7 +856,7 @@ stream_onMetaData = function(info) {
 			var w = stream_width; var h = stream_height;
 			// common sizes; cannot handle every possibility
 			if ( w == 720 || w == 704 ) {
-				if ( h == 480 || h == 576 ){
+				if ( h == 480 || h == 576 ) {
 					stream_displayWidth = 640;
 					stream_displayHeight = 480;
 				}
@@ -864,7 +864,7 @@ stream_onMetaData = function(info) {
 			if ( w == 360 || w == 352 ) {
 				// handle 360x240? is it common w/ square pixels?
 				//if ( h == 288 || (h == 240 && w == 352) ){
-				if ( h == 288 || h == 240 ){
+				if ( h == 288 || h == 240 ) {
 					stream_displayWidth = 320;
 					stream_displayHeight = 240;
 				}

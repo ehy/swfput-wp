@@ -2640,6 +2640,7 @@ class SWF_put_evh {
 		$id   = $ids[1]; // object
 		$idav = $ids[2]; // alternate video
 		$idai = $ids[3]; // alternate img
+		$vadd = array(); // addl. params for alternate video
 
 		if ( ! $uswf ) {
 			if ( $ming ) {
@@ -2710,6 +2711,7 @@ class SWF_put_evh {
 			if ( wp_is_mobile() ) {
 				$h = (int)($h * $mobiwidth / $w);
 				$w = $mobiwidth;
+				$vadd['mob'] = 'true';
 			}
 		}
 
@@ -2810,6 +2812,19 @@ class SWF_put_evh {
 			$jatt['a_img'] = '';
 		}
 		if ( $altvideo != '' ) {
+			// vars for alternate h5 video
+			$vadd['play'] = $play;
+			$vadd['loop'] = $loop;
+			$vadd['volume'] = $volume;
+			$vadd['hidebar'] = $hidebar;
+			$vadd['disablebar'] = $disablebar;
+			$vadd['aspectautoadj'] = $aspectautoadj;
+			$vadd['aspect'] = $displayaspect;
+			$vadd['displayaspect'] = $displayaspect;
+			$vadd['pixelaspect'] = $pixelaspect;
+			$vadd['barheight'] = $barheight;
+			$vadd['barwidth'] = $w;
+	
 			$viid = '';
 			$vdid = '';
 			$jatt['a_vid'] = array(
@@ -2827,7 +2842,8 @@ class SWF_put_evh {
 				'barheight'	=> $barheight,
 				'barwidth'	=> $w,
 				'aspect'	=> $displayaspect,
-				'altmsg'	=> 'Control bar load failed.'
+				'altmsg'	=> 'Control bar load failed.',
+				'std'		=> $vadd
 			);
 			if ( $idav != '' ) {
 				$viid = sprintf(' id="%s"', $idav);
@@ -2994,9 +3010,11 @@ class SWF_put_evh {
 			// these must be appended with uniq id
 			"uniq" => array("id" => "evhh5v_ctlbar_" . $atts['uniq']),
 			// these must *not* be appended with uniq id
-			"std" => array(
-			  "barheight" => $atts['barheight'], "barwidth" => $atts['barwidth'], "aspect" => $atts['aspect'])
+			//"std" => array(
+			//  "barheight" => $atts['barheight'], "barwidth" => $atts['barwidth'], "aspect" => $atts['aspect'])
+			"std" => $atts["std"]
 		);
+		
 		$parms = array("iparm" => $iparm, "oparm" => $oparm);
 
 		// This is depressing . . . the test should be whether the
