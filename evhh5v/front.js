@@ -2563,6 +2563,7 @@ evhh5v_controller.prototype = {
 	ptrinterval : 5,
 	barshowincr : 1,
 	barshowmargin : 2,
+	default_init_vol : 50, // 0-100
 	mouse_hide_class : "evhh5v_mouseptr_hidden",
 	mouse_show_class : "evhh5v_mouseptr_normal",
 
@@ -2592,11 +2593,26 @@ evhh5v_controller.prototype = {
 
 		this.install_handlers();
 
+		var that = this;
+
+		this.bar.controller_handle_volume = function(pct) {
+			if ( ! isFinite(pct) ) {
+				return;
+			}
+			var v = that._vid;
+			if ( v.volume !== undefined ) {
+				pct = Math.max(0, Math.min(1, pct));
+				// volumechanged handler updates indicator
+				v.volume = that.init_vol = pct;
+			}
+		}
+
+		this.bar.scale_volctl(1);
+
 		// initial play button: this continues with a recursive
 		// timer, which will adjust for size changes albeit with
 		// a lag, until play() has been done once (and is then
 		// never seen again)
-		var that = this;
 		var f = function() {
 			if ( that.has_been_played ) {
 				that.bar.hide_inibut();
@@ -2607,35 +2623,38 @@ evhh5v_controller.prototype = {
 		};
 		f();
 
-		this.bar.controller_handle_volume = function(pct) {
-			if ( ! isFinite(pct) ) {
-				return;
-			}
-			var v = that._vid;
-			if ( v.volume !== undefined ) {
-				pct = Math.max(0, Math.min(1, pct));
-				v.volume = that.init_vol = pct;
-				// no, use volumechanged handler
-				//that.bar.scale_volctl(pct);
+		// the play param, like the autoplay attribute
+		if ( this.params['play'] !== undefined ) {
+			if ( this.params['play'] == 'true' ) {
+				// trigger a play() at loadedmetadata
+				this.play_pending = true;
+				this._vid.setAttribute("preload", "metadata");
+				this._vid.load();
 			}
 		}
-		this.bar.scale_volctl(1);
 	},
 	// onit on metadata event
 	on_metadata : function () {
 		if ( this.init_vol === undefined ) {
-			if ( this.params['volume'] !== undefined ) {
-				this.init_vol = parseFloat(this.params['volume']);
-				if ( ! isFinite(this.init_vol) ) {
-					this.init_vol = 100.0;
-				}
-			} else {
-				this.init_vol = 100.0;
+			var t = this.params['volume'] !== undefined
+				? parseFloat(this.params['volume'])
+				: this.default_init_vol;
+			if ( ! isFinite(t) ) {
+				t = this.default_init_vol;
 			}
-			var t = this.init_vol / 100.0;
-			this.init_vol = Math.max(0, Math.min(1, t));
+			this.init_vol = Math.max(0, Math.min(1, t / 100.0));
 		}
 		this._vid.volume = this.init_vol;
+
+		console.log("this.play_pending = " + this.play_pending);
+		// LAST -- auto-play?
+		if ( this.play_pending ) {
+			this.play_pending = false;
+			if ( ! this.playing ) {
+			console.log("PLAY() this.play_pending = " + this.play_pending);
+				this.play();
+			}
+		}
 	},
 
 	// H5 video spec to date (02-2014) does not provide the means
@@ -2684,9 +2703,9 @@ evhh5v_controller.prototype = {
 			}
 			// "aspectautoadj" is a helper to set 4:3 display aspect
 			// if video intrinsic dimensions suggest DVD source
-			if ( ! this.pixelaspect && params["aspectautoadj"] !== undefined ) {
-				t = (params["aspectautoadj"] == 'true');
-				this.aspectautoadj = t;
+			t = params["aspectautoadj"];
+			if ( ! this.pixelaspect && t !== undefined ) {
+				this.aspectautoadj = (t == 'true');
 			}
 		}
 		
@@ -2783,8 +2802,8 @@ evhh5v_controller.prototype = {
 			ctx.fillRect(0, 0, this.width, this.height);
 		}
 	},
-	// canvas hack is all about display aspect so figure it out and
-	// store the factors and offsets on the video object
+	// canvas hack is all(-ish) about display aspect so figure it out
+	// and store the factors and offsets for frame painting
 	setup_aspect_factors : function() {
 		var video = this._vid;
 		var cw = this.width, ch = this.height;
@@ -2800,8 +2819,8 @@ evhh5v_controller.prototype = {
 			// 'intrinsic' dimensions are adjusted for that; but
 			// pixelaspect will work for broken metadata if a
 			// a suitable value is given, e.g. pixelaspect 8:9
-			// given for 720x480 4:3 video with aspect metadata that
-			// claims 1.5 (720:480).
+			// given for 720x480 4:3 video with display aspect metadata
+			// that claims 1.5 (720:480).
 			var w = video.videoWidth;
 			var h = video.videoHeight;
 			this.aspect = (w * this.pixelaspect) / h;
@@ -2826,7 +2845,8 @@ evhh5v_controller.prototype = {
 		var vw = video.videoWidth;
 		var vh = video.videoHeight;
 		var aspectW =
-			(( this.aspect <= 0 || Math.abs(this.aspect - this.width / this.height) < this.aspect_min )
+			(( this.aspect <= 0 ||
+			Math.abs(this.aspect - this.width / this.height) < this.aspect_min )
 			? (vw / vh) : this.aspect) * vh / vw;
 
 		vw *= aspectW;
@@ -3248,8 +3268,8 @@ evhh5v_controller.prototype = {
 						case MediaError.MEDIA_ERR_NETWORK:
 							// notify and stop
 							alert(
-							"An unknown network error stopped the media " +
-							"fetch; try again when network is working"
+							"A network error stopped the media fetch; "
+							+ "try again when the network is working"
 							);
 							// intentional fallthough
 						case MediaError.MEDIA_ERR_ABORTED:
@@ -3284,8 +3304,7 @@ evhh5v_controller.prototype = {
 				}
 			} else if ( e.type === "ended" ) {
 				// different browsers. or different versions of the
-				// same, are not consistent with the pause state
-				// on end.
+				// same, are not consistent with the pause state on end.
 				if ( ! this._vid.paused ) {
 					this.pause();
 				}

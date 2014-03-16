@@ -2707,11 +2707,11 @@ class SWF_put_evh {
 		// honor new param 'mobiwidth' to set the dimensions
 		// (proportionally to regular WxH) for mobile devices
 		// user can set $mobiwidth 0 to disable this
-		if ( $mobiwidth > 0 && function_exists('wp_is_mobile') ) {
-			if ( wp_is_mobile() ) {
+		if ( function_exists('wp_is_mobile') && wp_is_mobile() ) {
+			$vadd['mob'] = 'true';
+			if ( $mobiwidth > 0 ) {
 				$h = (int)($h * $mobiwidth / $w);
 				$w = $mobiwidth;
-				$vadd['mob'] = 'true';
 			}
 		}
 
