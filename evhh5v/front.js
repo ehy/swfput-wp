@@ -2619,7 +2619,8 @@ evhh5v_controller.prototype = {
 		this.bar.scale_volctl(1);
 
 		if ( this.autoplay ) {
-			//this.play();
+			// this.play() will be invoked in the
+			// loadedmetadata event handler
 			this._vid.setAttribute("preload", "metadata");
 		} else {
 			// initial play button: this continues with a recursive
