@@ -456,8 +456,13 @@ if ( guardinit == undefined ) {
 	// prepare and add listeners
 	ctl1M = {
 		onMouseDown: function () {
+			x_mousedown = _xmouse;
+			y_mousedown = _ymouse;
 		},
 		onMouseUp: function () {
+			if ( x_mousedown === _xmouse && y_mousedown === _ymouse ) {
+				initialbutHit();
+			}
 		},
 		onMouseMove: function () {
 			var bwid = barshowmargin;
@@ -2182,6 +2187,7 @@ if ( brtmp || initpause ) {
 	inibut._visible = false;
 	inibut.initialimg = null;
 	inibut = null;
+	loadonload = true;
 }
 
 // start the movie, but . . .

@@ -332,10 +332,6 @@ function evhh5v_controlbar_elements(parms, fixups) {
 	// luck, it will not even have been visible (It can be
 	// on slow machines, that's something that must be accepted).
 	vidobj.removeAttribute("controls");
-	// also remove "autoplay" -- if that was set then
-	// parms["oparm"]["std"]["play"] should be "true" and
-	// the video controller will do auto play
-	vidobj.removeAttribute("autoplay");
 
 	// defaults for object parameters
 	var pdefs = {
@@ -2582,6 +2578,15 @@ evhh5v_controller.prototype = {
 		this.height = this.v.height;
 		this.width = this.v.width;
 	
+		// the play param, implies the autoplay attribute
+		if ( this.params['play'] !== undefined ) {
+			if ( this.params['play'] == 'true' ) {
+				this.autoplay = true;
+			}
+		} else {
+			this.autoplay = false;
+		}
+		
 		if ( evhh5v_fullscreen_ok() ) {
 			this.bar.unblur_fullscreen();
 		} else {
@@ -2613,23 +2618,9 @@ evhh5v_controller.prototype = {
 
 		this.bar.scale_volctl(1);
 
-		// the play param, like the autoplay attribute
-		if ( this.params['play'] !== undefined ) {
-			if ( this.params['play'] == 'true' ) {
-				// trigger a play() on loadedmetadata event --
-				// cannot invoke play() here: browser might not be
-				// ready so it might not be effective -- instead, set
-				// a flag to be seen in metadata event handler and
-				// invoke play() there -- use double barrel shot
-				// with preload="metadata" and load().
-				this.play_pending = true;
-				this._vid.setAttribute("preload", "metadata");
-				this._vid.load();
-			}
-		}
-		
-		// If auto play was not just set up . . .
-		if ( ! this.play_pending ) {
+		if ( this.autoplay ) {
+			this.play();
+		} else {
 			// initial play button: this continues with a recursive
 			// timer, which will adjust for size changes albeit with
 			// a lag, until play() has been done once (and is then
@@ -2657,14 +2648,6 @@ evhh5v_controller.prototype = {
 			this.init_vol = Math.max(0, Math.min(1, t / 100.0));
 		}
 		this._vid.volume = this.init_vol;
-
-		// LAST -- auto-play? (set up in mk() for this.params['play'])
-		if ( this.play_pending ) {
-			this.play_pending = false;
-			if ( ! this.playing ) {
-				this.play();
-			}
-		}
 	},
 
 	// H5 video spec to date (02-2014) does not provide the means

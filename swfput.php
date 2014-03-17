@@ -2853,7 +2853,17 @@ class SWF_put_evh {
 			// TODO: move css classname to class-constant
 			$vd = "\n\t\t" . '<div'.$vdid.' class="evhh5v_vidobjdiv">';
 			$vd .= "\n\t\t" . '<video'.$viid.' controls preload="none"';
-			if ( $play == 'true' ) {
+			// cannot use autoplay attr.: video will be played, even
+			// <video> is placed as fallback content and flash is
+			// loaded in the primary <object>! In fact, fallback content
+			// is not disabled at all, it merely is not shown; so,
+			// with autoplay the audio is heard even though the video
+			// is not shown; Auto play behavior will be implemented
+			// in the JS video controller added in 1.0.8, with the loss
+			// that where JS is disabled and flash is not available
+			// the <video>, in native mode, will not autoplay even
+			// if user set that option.
+			if ( false && $play == 'true' ) {
 				$vd .= ' autoplay';
 			}
 			if ( $loop == 'true' ) {
