@@ -332,6 +332,10 @@ function evhh5v_controlbar_elements(parms, fixups) {
 	// luck, it will not even have been visible (It can be
 	// on slow machines, that's something that must be accepted).
 	vidobj.removeAttribute("controls");
+	// also remove "autoplay" -- if that was set then
+	// parms["oparm"]["std"]["play"] should be "true" and
+	// the video controller will do auto play
+	vidobj.removeAttribute("autoplay");
 
 	// defaults for object parameters
 	var pdefs = {
@@ -2609,31 +2613,39 @@ evhh5v_controller.prototype = {
 
 		this.bar.scale_volctl(1);
 
-		// initial play button: this continues with a recursive
-		// timer, which will adjust for size changes albeit with
-		// a lag, until play() has been done once (and is then
-		// never seen again)
-		var f = function() {
-			if ( that.has_been_played ) {
-				that.bar.hide_inibut();
-				return;
-			}
-			that.bar.show_inibut(that.width / 2, that.height / 2);
-			setTimeout(f, 1000);
-		};
-		f();
-
 		// the play param, like the autoplay attribute
 		if ( this.params['play'] !== undefined ) {
 			if ( this.params['play'] == 'true' ) {
-				// trigger a play() at loadedmetadata
+				// trigger a play() on loadedmetadata event --
+				// cannot invoke play() here: browser might not be
+				// ready so it might not be effective -- instead, set
+				// a flag to be seen in metadata event handler and
+				// invoke play() there -- use double barrel shot
+				// with preload="metadata" and load().
 				this.play_pending = true;
 				this._vid.setAttribute("preload", "metadata");
 				this._vid.load();
 			}
 		}
+		
+		// If auto play was not just set up . . .
+		if ( ! this.play_pending ) {
+			// initial play button: this continues with a recursive
+			// timer, which will adjust for size changes albeit with
+			// a lag, until play() has been done once (and is then
+			// never seen again)
+			var f = function() {
+				if ( that.has_been_played ) {
+					that.bar.hide_inibut();
+					return;
+				}
+				that.bar.show_inibut(that.width / 2, that.height / 2);
+				setTimeout(f, 1000);
+			};
+			f();
+		}
 	},
-	// onit on metadata event
+	// init on metadata event
 	on_metadata : function () {
 		if ( this.init_vol === undefined ) {
 			var t = this.params['volume'] !== undefined
@@ -2646,12 +2658,10 @@ evhh5v_controller.prototype = {
 		}
 		this._vid.volume = this.init_vol;
 
-		console.log("this.play_pending = " + this.play_pending);
-		// LAST -- auto-play?
+		// LAST -- auto-play? (set up in mk() for this.params['play'])
 		if ( this.play_pending ) {
 			this.play_pending = false;
 			if ( ! this.playing ) {
-			console.log("PLAY() this.play_pending = " + this.play_pending);
 				this.play();
 			}
 		}
@@ -3153,7 +3163,7 @@ evhh5v_controller.prototype = {
 			this.show_wait();
 			//console.log("WAIT SPINNER START: " + e.type);
 		}, false);
-		this.addEventListener(["canplaythrough", "canplay", "playing", "seeked", "loadeddata", "ended"], function(e) {
+		this.addEventListener(["canplaythrough", "canplay", "playing", "seeked", "loadeddata", "suspend", "progress", "ended"], function(e) {
 			this.hide_wait();
 			//console.log("WAIT SPINNER STOP: " + e.type);
 		}, false);
@@ -3856,21 +3866,33 @@ evhh5v_controller.prototype = {
 		if ( ! this.wait_showing && ! this.stop_forced && this.has_been_played ) {
 			var that = this;
 			this.show_wait_handle = setTimeout(function() {
-				that.bar.show_waitanim(that.width / 2, that.height / 2);
+				if ( that.show_wait_handle !== false ) { // cancelled?
+					that.bar.show_waitanim(that.width / 2, that.height / 2);
+				}
 				that.show_wait_handle = false;
-			}, 500);
+			}, 400);
 			this.wait_showing = true;
 		}
 	},
 	hide_wait : function() {
-		if ( this.wait_showing !== undefined && this.wait_showing ) {
-			if ( this.show_wait_handle ) {
-				clearTimeout(this.show_wait_handle);
-				this.show_wait_handle = false;
+		// Like show_wait(), use a timeout to hide. It seemes that on
+		// occasion an asynchronous event to cause hiding is delivered
+		// so quickly that 'this.wait_showing = true;' has not
+		// executed yet, and so wait indicator is not cancelled,
+		// because it does not test true.
+		// Using a timeout should let the bool be set and the
+		// test be valid; the period might need tuning.
+		var that = this;
+		setTimeout(function() {
+			if ( that.wait_showing !== undefined && that.wait_showing ) {
+				if ( that.show_wait_handle ) {
+					clearTimeout(that.show_wait_handle);
+					that.show_wait_handle = false;
+				}
+				that.bar.hide_waitanim();
+				that.wait_showing = false;
 			}
-			this.bar.hide_waitanim();
-			this.wait_showing = false;
-		}
+		}, 500);
 	},
 
 	// handle control bar click per object.id

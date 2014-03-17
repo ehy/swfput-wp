@@ -3010,8 +3010,6 @@ class SWF_put_evh {
 			// these must be appended with uniq id
 			"uniq" => array("id" => "evhh5v_ctlbar_" . $atts['uniq']),
 			// these must *not* be appended with uniq id
-			//"std" => array(
-			//  "barheight" => $atts['barheight'], "barwidth" => $atts['barwidth'], "aspect" => $atts['aspect'])
 			"std" => $atts["std"]
 		);
 		
