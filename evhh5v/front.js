@@ -2619,7 +2619,8 @@ evhh5v_controller.prototype = {
 		this.bar.scale_volctl(1);
 
 		if ( this.autoplay ) {
-			this.play();
+			//this.play();
+			this._vid.setAttribute("preload", "metadata");
 		} else {
 			// initial play button: this continues with a recursive
 			// timer, which will adjust for size changes albeit with
@@ -2648,6 +2649,10 @@ evhh5v_controller.prototype = {
 			this.init_vol = Math.max(0, Math.min(1, t / 100.0));
 		}
 		this._vid.volume = this.init_vol;
+
+		if ( this.autoplay ) {
+			this.play();
+		}
 	},
 
 	// H5 video spec to date (02-2014) does not provide the means
