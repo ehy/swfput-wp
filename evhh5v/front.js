@@ -3281,15 +3281,15 @@ evhh5v_controller.prototype = {
 							return;
 						case MediaError.MEDIA_ERR_DECODE:
 							alert(
-							"An  error occured in media playback, " +
-							"kindly contact browser vendor or " +
-							"server administrator"
+							"A media decoding error occured. " +
+							"Contact the web browser vendor or " +
+							"the server administrator"
 							);
 							break;
 						case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
 							alert(
 							"The current media is not supported by " +
-							"the browser's player"
+							"the browser's media player"
 							);
 							break;
 						default:

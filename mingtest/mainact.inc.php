@@ -216,7 +216,10 @@ var last_ct = 0;
 /// utility function section
 ///
 
-function null_proc () {}
+function null_proc () {
+	// mark event so default will leave it alone
+	mouse_taken = true;
+}
 
 // Encode elements of a path.  The closed flash plugin is flexible
 // regarding URLs and paths, but GNash requires encoding as necessary.
@@ -455,15 +458,22 @@ function ua_is_mobile() {
 if ( guardinit == undefined ) {
 	// prepare and add listeners
 	ctl1M = {
-		onMouseDown: function () {
-			x_mousedown = _xmouse;
-			y_mousedown = _ymouse;
-		},
-		onMouseUp: function () {
-			if ( x_mousedown === _xmouse && y_mousedown === _ymouse ) {
-				initialbutHit();
+		/*
+		onMouseDown = function () {
+			if ( ! mouse_taken ) {
+				x_mousedown = _xmouse;
+				y_mousedown = _ymouse;
 			}
 		},
+		onMouseUp = function () {
+			if ( ! mouse_taken ) {
+				if ( x_mousedown === _xmouse && y_mousedown === _ymouse ) {
+					togglepause();
+				}
+			}
+			mouse_taken = false;
+		},
+		*/
 		onMouseMove: function () {
 			var bwid = barshowmargin;
 			var x = _xmouse;
@@ -507,9 +517,7 @@ if ( guardinit == undefined ) {
 			if ( curkey == 32 ) {
 				// space
 				if ( ! brtmp ) {
-					//togglepause();
-					//togglepauseVideo();
-					initialbutHit();
+					togglepause();
 				}
 			} else if ( curkey == 81 || curkey == 113 ) {
 				// Q,q
@@ -582,6 +590,15 @@ if ( guardinit == undefined ) {
 			var sw = Stage.width;
 			var sh = Stage.height;
 			var sa = sw / sh;
+			
+			// bg click handler
+			if ( bghndlr ) {
+				var bgo;
+				bgo = bghndlr;
+				bgo._x = bgo._y = 0;
+				bgo._xscale = sw * 100;
+				bgo._yscale = sh * 100;
+			}
 
 			// allow natural scale or not
 			if ( vw < sw && vh < sh ) {
@@ -1407,23 +1424,15 @@ var inibut_resize = function () {
 function ctlpanelHit () {
 	volgadget._visible = false;
 	hideinfohtml();
+	// mark event so default will leave it alone
+	mouse_taken = true;
 }
 
 // click callback for initial play button
 function initialbutHit () {
-	if ( inibut !== null ) {
-		//inibut.gotoAndStop(1);
-		inibut.stop();
-		inibut.initialbut.enabled = inibut.initialimg.enabled = false;
-		inibut.initialbut._visible = inibut.initialimg._visible = false;
-		inibut.enabled = false;
-		inibut._visible = false;
-		delete inibut.initialimg.imld;
-		inibut.initialimg = null;
-		inibut = null;
-	}
-
 	togglepause();
+	// mark event so default will leave it alone
+	mouse_taken = true;
 }
 
 // click callback for timeline progress bar
@@ -1449,6 +1458,9 @@ function plprogHit () {
 		var off = px > (bbar.progpb._width / 2) ? 30 : -30;
 		stream.seek(stream.time + off);
 	}
+
+	// mark event so default will leave it alone
+	mouse_taken = true;
 }
 
 function showhideBar(bshow) {
@@ -1468,6 +1480,9 @@ obj_onMouseUp   = function() { this.mousedown = false; };
 
 function doVolumeCtl() {
 	volgadget._visible = ! volgadget._visible;
+
+	// mark event so default will leave it alone
+	mouse_taken = true;
 }
 
 // this must be assigned to MovieClip; N.F. for Button
@@ -1484,6 +1499,9 @@ volbar_onMouseMove = function() {
 function doVolumeAdjust() {
 	var m = volgadget.vbarbut._xmouse;
 	setVolumeAdjust(m);
+
+	// mark event so default will leave it alone
+	mouse_taken = true;
 }
 
 function setVolumeAdjust(scale) {
@@ -1549,6 +1567,9 @@ function toggleFullscreen() {
 	} else {
 		Stage.displayState = "fullScreen";
 	}
+
+	// mark event so default will leave it alone
+	mouse_taken = true;
 }
 
 function toggleDoScale() {
@@ -1559,6 +1580,10 @@ function toggleDoScale() {
 		bbar.dosclbut._visible = true;
 		bbar.nosclbut._visible = false;
 	}
+
+	// mark event so default will leave it alone
+	mouse_taken = true;
+
 	ctl1S.onResize();
 }
 
@@ -1612,7 +1637,20 @@ function togglepauseVideo() {
 	}
 }
 
-togglepause = function() { togglepauseAudio(); togglepauseVideo(); };
+togglepause = function() {
+	if ( inibut !== null ) {
+		//inibut.gotoAndStop(1);
+		inibut.stop();
+		inibut.initialbut.enabled = inibut.initialimg.enabled = false;
+		inibut.initialbut._visible = inibut.initialimg._visible = false;
+		inibut.enabled = false;
+		inibut._visible = false;
+		delete inibut.initialimg.imld;
+		inibut.initialimg = null;
+		inibut = null;
+	}
+	togglepauseAudio(); togglepauseVideo();
+};
 
 function stopVideo() {
 	isrunning = false;
@@ -1657,6 +1695,9 @@ function stopVideo() {
 	bbar.tmtxt._visible = false;
 	bbar.dltxt._visible = false;
 	isrunning = false;
+
+	// mark event so default will leave it alone
+	mouse_taken = true;
 }
 
 function startVideo() {
@@ -1670,6 +1711,9 @@ function startVideo() {
 
 	bbar.fullscrbut._visible = checkFullScreen() ? false : true;
 	bbar.windscrbut._visible = ! bbar.fullscrbut._visible;
+
+	// mark event so default will leave it alone
+	mouse_taken = true;
 
 	try {
 		connection = new NetConnection();
@@ -2188,6 +2232,19 @@ if ( brtmp || initpause ) {
 	inibut.initialimg = null;
 	inibut = null;
 	loadonload = true;
+}
+
+// background click handler; initial sizw is 1x1, so maintain scale
+if ( bghndlr ) {
+	var bgo;
+	var sw = Stage.width;
+	var sh = Stage.height;
+	bgo = bghndlr;
+	bgo._x = bgo._y = 0;
+	bgo._xscale = sw * 100;
+	bgo._yscale = sh * 100;
+	bgo.tabEnabled = false;
+	bgo.useHandCursor = false;
 }
 
 // start the movie, but . . .

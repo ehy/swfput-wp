@@ -855,7 +855,6 @@ $movie->setRate($movierate);
 //$movie->setDimension($wndlength, $wndheight);
 $movie->setBackground(0, 0, 0);
 
-
 //
 // make the shapes for interface objects
 //
@@ -1163,7 +1162,6 @@ $t->addShape($playshape,
 	SWFBUTTON_UP | SWFBUTTON_DOWN | SWFBUTTON_OVER);
 $t->addShape($buthighlightshape, SWFBUTTON_OVER);
 // make action 'initialbutHit' to dismiss initial button as necessary
-//$t->setAction(makeSWFAction("_root.togglepause();"));
 $t->setAction(makeSWFAction("_root.initialbutHit();"));
 add_panel_obj($t, "playbut", $tx, $ty);
 // pause
@@ -1482,9 +1480,24 @@ add_child_obj($initialmovie, $initialimg, "initialimg", 0, 0);
 add_child_obj($initialmovie, $initialbut, "initialbut", 0, 0);
 $initialmovie->nextFrame();
 
+// invisible background, just for unused clicks
+$bghndlrbut = new SWFButton();
+$t = new_shape_atts(0, 0, 0, 0, 0, 0, 0, 0, 0);
+$t->movePenTo(0, 0);
+// dimensions sized internally
+mingshape_drawrect($t, 0, 0, 1, 1, 0);
+$bghndlrbut->addShape($t, SWFBUTTON_HIT);
+$bghndlrbut->addAction(makeSWFAction("_root.togglepause();"),
+	SWFBUTTON_HIT);
+
+
 // Control panel 'movie' complete now: set current state as a 'frame'
 // by advancing to next frame; without this nothing will display
 $ctlpanel->nextFrame();
+
+// add the invisible background button/image movie to the movie
+// invisible background, just for unused clicks
+add_movie_obj($bghndlrbut, "bghndlr", 0, 0);
 
 // ming video stream
 add_movie_obj(new SWFVideoStream(), "video", 0, 0);

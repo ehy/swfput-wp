@@ -2854,7 +2854,7 @@ class SWF_put_evh {
 			$vd = "\n\t\t" . '<div'.$vdid.' class="evhh5v_vidobjdiv">';
 			$vd .= "\n\t\t" . '<video'.$viid.' controls preload="none"';
 			// cannot use autoplay attr.: video will be played, even
-			// <video> is placed as fallback content and flash is
+			// when <video> is placed as fallback content and flash is
 			// loaded in the primary <object>! In fact, fallback content
 			// is not disabled at all, it merely is not shown; so,
 			// with autoplay the audio is heard even though the video
