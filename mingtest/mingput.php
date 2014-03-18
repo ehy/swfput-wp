@@ -710,7 +710,8 @@ $bchkpolicyfile = "false";
 $v4aud = "default.flv";
 
 // default values and booleans
-$doshowtxt = 'true'; // show text fields for playtime and DL?
+// 18.03.2014 -- doshowtxt set false
+$doshowtxt = 'false'; //'true'; // show text fields for playtime and DL?
 $barshowmargin = 2; // must enter Stage by this many pixels to show bar
 $barshowincr = 2;  // controlbar slides on/off screen this many pixels
 $tickinterval = 50; // ms arg to setInterval(); check ticker() in ascr

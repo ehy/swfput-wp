@@ -216,10 +216,7 @@ var last_ct = 0;
 /// utility function section
 ///
 
-function null_proc () {
-	// mark event so default will leave it alone
-	mouse_taken = true;
-}
+function null_proc () {}
 
 // Encode elements of a path.  The closed flash plugin is flexible
 // regarding URLs and paths, but GNash requires encoding as necessary.
@@ -423,7 +420,12 @@ function get_ua_string() {
 
 // is the browser, or 'user agent', mobile?
 // [lifted from JS code, which was lifted from WordPress php]
+//var test_ua_is_mobile = true;
 function ua_is_mobile() {
+	if ( test_ua_is_mobile !== undefined ) {
+		return test_ua_is_mobile;
+	}
+
 	if ( _level0._evh_ua_is_mobile_bool !== undefined ) {
 		return _level0._evh_ua_is_mobile_bool;
 	}
@@ -460,18 +462,8 @@ if ( guardinit == undefined ) {
 	ctl1M = {
 		/*
 		onMouseDown = function () {
-			if ( ! mouse_taken ) {
-				x_mousedown = _xmouse;
-				y_mousedown = _ymouse;
-			}
 		},
 		onMouseUp = function () {
-			if ( ! mouse_taken ) {
-				if ( x_mousedown === _xmouse && y_mousedown === _ymouse ) {
-					togglepause();
-				}
-			}
-			mouse_taken = false;
 		},
 		*/
 		onMouseMove: function () {
@@ -1302,7 +1294,19 @@ function resizeFace() {
 	bbar.resize();
 
 	// some gadgets are relative to bar yhome
-	volgadget._y = bbar.yhome - volbarwid * 2;
+	if ( ua_is_mobile() ) { // horizontal
+		var x, y;
+		y = bbar.yhome - 3 - volbarwid * 2;
+		x = rtmbut._x - volbarlen + (butwidth - volbarwid) / 2;
+		volgadget._y = y;
+		volgadget._x = x;
+	} else { // rotated -90 -- vertical
+		var x, y;
+		y = bbar.yhome - 3; //- volbarwid * 2;
+		x = rtmbut._x + (butwidth - volbarwid) / 2;
+		volgadget._y = y;
+		volgadget._x = x;
+	}
 }
 
 var bbar_resize = function () {
@@ -1424,15 +1428,11 @@ var inibut_resize = function () {
 function ctlpanelHit () {
 	volgadget._visible = false;
 	hideinfohtml();
-	// mark event so default will leave it alone
-	mouse_taken = true;
 }
 
 // click callback for initial play button
 function initialbutHit () {
 	togglepause();
-	// mark event so default will leave it alone
-	mouse_taken = true;
 }
 
 // click callback for timeline progress bar
@@ -1458,9 +1458,6 @@ function plprogHit () {
 		var off = px > (bbar.progpb._width / 2) ? 30 : -30;
 		stream.seek(stream.time + off);
 	}
-
-	// mark event so default will leave it alone
-	mouse_taken = true;
 }
 
 function showhideBar(bshow) {
@@ -1480,9 +1477,6 @@ obj_onMouseUp   = function() { this.mousedown = false; };
 
 function doVolumeCtl() {
 	volgadget._visible = ! volgadget._visible;
-
-	// mark event so default will leave it alone
-	mouse_taken = true;
 }
 
 // this must be assigned to MovieClip; N.F. for Button
@@ -1499,9 +1493,6 @@ volbar_onMouseMove = function() {
 function doVolumeAdjust() {
 	var m = volgadget.vbarbut._xmouse;
 	setVolumeAdjust(m);
-
-	// mark event so default will leave it alone
-	mouse_taken = true;
 }
 
 function setVolumeAdjust(scale) {
@@ -1567,9 +1558,6 @@ function toggleFullscreen() {
 	} else {
 		Stage.displayState = "fullScreen";
 	}
-
-	// mark event so default will leave it alone
-	mouse_taken = true;
 }
 
 function toggleDoScale() {
@@ -1580,9 +1568,6 @@ function toggleDoScale() {
 		bbar.dosclbut._visible = true;
 		bbar.nosclbut._visible = false;
 	}
-
-	// mark event so default will leave it alone
-	mouse_taken = true;
 
 	ctl1S.onResize();
 }
@@ -1695,9 +1680,6 @@ function stopVideo() {
 	bbar.tmtxt._visible = false;
 	bbar.dltxt._visible = false;
 	isrunning = false;
-
-	// mark event so default will leave it alone
-	mouse_taken = true;
 }
 
 function startVideo() {
@@ -1711,9 +1693,6 @@ function startVideo() {
 
 	bbar.fullscrbut._visible = checkFullScreen() ? false : true;
 	bbar.windscrbut._visible = ! bbar.fullscrbut._visible;
-
-	// mark event so default will leave it alone
-	mouse_taken = true;
 
 	try {
 		connection = new NetConnection();
@@ -2109,7 +2088,48 @@ if ( audb ) {
 	adddbgtext(" v4aud: '" + v4aud + "'\n");
 }
 
-// initial size interface items by stage size
+// initial interface and size setup
+// mobile adjustments
+if ( ua_is_mobile() ) {
+	volgadget._rotation = 0;
+
+	var offs;
+	offs = 0.25;
+	bbar.playbut._x = butwidth * offs;
+	bbar.pausebut._x = butwidth * offs;
+	bbar.pausebutdisable._x = butwidth * offs;
+	offs += 1.75;
+	bbar.stopbut._x = butwidth * offs;
+	bbar.stopbutdisable._x = butwidth * offs;
+	offs += 1.75;
+	bbar.spkrbut._x = butwidth * offs;
+	bbar.spkrmsw._x = butwidth * offs;
+	
+	// surprisingly difficult to get rid of buttons: some of
+	// this ugly junk could be removed, time permitting, but
+	// for now, shotgun.
+	var e = ["onDragOut","onDragOver","onKeyUp","onKillFocus",
+		"onPress","onRelease","onReleaseOutside","onRollOut",
+		"onRollOver","onSetFocus"];
+	var b = [bbar.dosclbut, bbar.nosclbut, bbar.nosclbutdisable,
+		bbar.fullscrbut, bbar.windscrbut];
+	offs = bbar.spkrbut._x + butwidth;
+	for ( var i in b ) {
+		var c = b[i];
+		c._x = offs;
+		c._xscale = 0;
+		c._yscale = 0;
+		for ( var j in e ) {
+			c[e[j]] = null;
+		}
+		c._visible = false;
+		c.enabled = false;
+		delete c;
+	}
+} else {
+	volgadget._rotation = -90;
+}
+
 resizeFace();
 
 // get client 'SharedObject' data if available
