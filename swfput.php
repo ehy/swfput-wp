@@ -134,6 +134,7 @@ class SWF_put_evh {
 	const optscreen1 = 'screen_opts_1';
 	// WP option names/keys
 	// optdisp... -- display areas
+	const opth5vprim = '_evh_swfput1_h5pr'; // posts
 	const optdispmsg = '_evh_swfput1_dmsg'; // posts
 	const optdispwdg = '_evh_swfput1_dwdg'; // widgets no-admin
 	const optdisphdr = '_evh_swfput1_dhdr'; // header area
@@ -153,6 +154,8 @@ class SWF_put_evh {
 	const defverbose = 'true';
 	// this is hidden in settings page; used w/ JS for 'screen options'
 	const defscreen1 = 'true';
+	// put html5 video alternate as primary content?
+	const defh5vprim = 'false';
 	// display opts, widget, inline or both
 	 // 1==message | 2==widget | 4==header
 	const defdisplay  = 7;
@@ -315,6 +318,7 @@ class SWF_put_evh {
 		$items = array(
 			self::optverbose => self::defverbose,
 			self::optscreen1 => self::defscreen1,
+			self::opth5vprim => self::defh5vprim,
 			self::optdispmsg =>
 				(self::defdisplay & self::disp_msg) ? 'true' : 'false',
 			self::optdispwdg =>
@@ -417,6 +421,11 @@ class SWF_put_evh {
 		// placement section: (posts, sidebar, header)
 		$nf = 0;
 		$fields = array();
+		$fields[$nf++] = new $Cf(self::opth5vprim,
+				self::wt(__('HTML5 video primary:', 'swfput_l10n')),
+				self::opth5vprim,
+				$items[self::opth5vprim],
+				array($this, 'put_h5vprim_opt'));
 		$fields[$nf++] = new $Cf(self::optdispmsg,
 				self::wt(__('Place in posts:', 'swfput_l10n')),
 				self::optdispmsg,
@@ -1066,6 +1075,7 @@ class SWF_put_evh {
 					$a_out[$k] = ($ot == 'false') ? 'false' : 'true';
 					break;
 				case self::optverbose:
+				case self::opth5vprim:
 				case self::optdispmsg:
 				case self::optdispwdg:
 				case self::optdisphdr:
@@ -1184,14 +1194,24 @@ class SWF_put_evh {
 
 		$t = self::wt(__('Introduction:', 'swfput_l10n'));
 		printf('<p><strong>%s</strong>%s</p>', $t, "\n");
-		$t = self::wt(__('These options enable or completely disable
-			placing video in posts or widgets. If the placement
+		$t = self::wt(__('These options control video placement.
+			</p><p>
+			The first option, "Place HTML5 video first,"
+			lets the alternate HTML5 video that may optionally be
+			specified in the shortcode setup form be placed as
+			primary (rather than fallback) content. If this
+			is selected then the flash video video player
+			will be placed as fallback content.
+			</p><p>
+			The next two options allow the video content
+			to be completely disabled.
+			If the placement
 			of video must be switched on or off, for either
 			posts (and pages) or widgets
 			or both, these are the options to use.
 			</p><p>
-			When the plugin shortcode is disabled the flash
-			video player that would have been displayed is
+			When the plugin shortcode is disabled the
+			video elements that would have been placed are
 			replaced by a notice with the form
 			"[A/V content &lt;caption&gt; disabled],"
 			where "&lt;caption&gt;"
@@ -1411,6 +1431,13 @@ class SWF_put_evh {
 	public function put_widget_opt($a) {
 		$tt = self::wt(__('Enable widget or shortcode', 'swfput_l10n'));
 		$k = self::optdispwdg;
+		$this->put_single_checkbox($a, $k, $tt);
+	}
+
+	// callback, place "alternate" HTML <video> as primary content?
+	public function put_h5vprim_opt($a) {
+		$tt = self::wt(__('Place HTML5 "alternate" video as primary content', 'swfput_l10n'));
+		$k = self::opth5vprim;
 		$this->put_single_checkbox($a, $k, $tt);
 	}
 
@@ -2414,6 +2441,11 @@ class SWF_put_evh {
 		return self::opt_by_name(self::optcodewdg);
 	}
 
+	// get the HTML video as primary option
+	public static function get_h5vprim_option() {
+		return self::opt_by_name(self::opth5vprim);
+	}
+
 	// get the do messages (place in posts) option
 	public static function get_message_option() {
 		return self::opt_by_name(self::optdispmsg);
@@ -2795,7 +2827,7 @@ class SWF_put_evh {
 				'id'    => $idai,
 				'src'   => self::ht($iimgunesc),
 				'alt'   => self::wt(
-				  __('The flash plugin is not available', 'swfput_l10n')
+				  __('Video playback is not available', 'swfput_l10n')
 				)
 			);
 			if ( $idai != '' ) {
@@ -2803,7 +2835,7 @@ class SWF_put_evh {
 			}
 			$fmt = '%s<img%s src="%s" alt="%s" width="%u" height="%u" '
 				. 'style="margin-left: auto; margin-right: auto;">';
-			$altimg = sprintf($fmt, "\n\t\t", $viid,
+			$altimg = sprintf($fmt, "\n\t\t\t", $viid,
 				$jatt['a_img']['src'],
 				$jatt['a_img']['alt'],
 				$w, $h
@@ -2811,6 +2843,11 @@ class SWF_put_evh {
 		} else {
 			$jatt['a_img'] = '';
 		}
+
+		// v. 1.0.8, H5V as primary content is an option:
+		$h5v_fallback = self::get_h5vprim_option() == 'false'
+			? true : false;
+		$h5v = $h5vclose = '';
 		if ( $altvideo != '' ) {
 			// vars for alternate h5 video
 			$vadd['play'] = $play;
@@ -2837,6 +2874,7 @@ class SWF_put_evh {
 				'loop'      => $loop,
 				'srcs'      => array(),
 				// added in 1.0.8 for new h5 video program
+				'fallback'	=> $h5v_fallback ? 'true' : 'false',
 				'uniq'		=> ''.$ids[4],
 				'parentdiv'	=> $ids[0],
 				'barheight'	=> $barheight,
@@ -2851,8 +2889,8 @@ class SWF_put_evh {
 			}
 			// div added in 1.0.8 for new h5 video program
 			// TODO: move css classname to class-constant
-			$vd = "\n\t\t" . '<div'.$vdid.' class="evhh5v_vidobjdiv">';
-			$vd .= "\n\t\t" . '<video'.$viid.' controls preload="none"';
+			$vd = "\n\t\t\t".'<div'.$vdid.' class="evhh5v_vidobjdiv">';
+			$vd .= "\n\t\t\t".'<video'.$viid.' controls preload="none"';
 			// cannot use autoplay attr.: video will be played, even
 			// when <video> is placed as fallback content and flash is
 			// loaded in the primary <object>! In fact, fallback content
@@ -2874,7 +2912,7 @@ class SWF_put_evh {
 			}
 			$vd .= sprintf(' width="%u" height="%u">', $w, $h);
 			// format for source elements
-			$fmt = "\n\t\t" . '<source src="%s"%s>';
+			$fmt = "\n\t\t\t" . '<source src="%s"%s>';
 			// allow multiple video src, separated by pipe
 			$altvideo = trim($altvideo, " \t|");
 			$av = explode('|', $altvideo);
@@ -2899,17 +2937,21 @@ class SWF_put_evh {
 				$vd .= sprintf($fmt, $jsa['src'], $typ);
 				$jatt['a_vid']['srcs'][] = $jsa;
 			}
+			
+			$h5v = $vd;
 
 			// place as alt the altimg, or message string
 			$jatt['a_vid']['altmsg'] = self::wt("\n\t\t" .
-				__('Flash video is not available, and the alternate <code>video</code> sources were rejected by your browser', 'swfput_l10n')
-			);
-			$vd .= sprintf("%s\n\t\t</video>%s\n\t\t</div>",
-				$altimg == '' ? $jatt['a_vid']['altmsg'] : $altimg,
-				$this->get_h5vjs_tags($jatt['a_vid'], $ids[1])
+				__('Video playback is not available.', 'swfput_l10n')
 			);
 			
-			$altimg = $vd;
+			if ( $altimg == '' ) {
+				$altimg = $jatt['a_vid']['altmsg'];
+			}
+
+			$h5vclose = sprintf("\n\t\t\t</video>\t%s\n\t\t\t</div>",
+				$this->get_h5vjs_tags($jatt['a_vid'], $ids[1])
+			);
 		} else {
 			$jatt['a_vid'] = '';
 		}
@@ -2979,8 +3021,7 @@ class SWF_put_evh {
 			'name' => 'align', 'value' => 'middle'
 		);
 
-		return array(
-		'el' => $obj . sprintf('<param name="play" value="%s">
+		$obj .= sprintf('<param name="play" value="%s">
 			<param name="quality" value="%s">
 			<param name="allowFullScreen" value="%s">
 			<param name="allowScriptAccess" value="sameDomain">
@@ -2988,10 +3029,22 @@ class SWF_put_evh {
 			<param name="src" value="%s?%s">
 			<param name="name" value="mingput">
 			<param name="bgcolor" value="#000000">
-			<param name="align" value="middle">%s
+			<param name="align" value="middle">',
+			$play, $quality, $allowfull, $fv, $uswf, $pv);
+
+		$aret = array('js' => $jatt);
+
+		if ( $h5v_fallback ) {
+			$aret['el'] =  sprintf('%s%s%s%s
 			</object>',
-		$play, $quality, $allowfull, $fv, $uswf, $pv, $altimg),
-		'js' => $jatt);
+				$obj, $h5v, $altimg, $h5vclose);
+		} else {
+			$aret['el'] =  sprintf('%s%s%s
+			</object>%s',
+				$h5v, $obj, $altimg, $h5vclose);
+		}
+		
+		return $aret;
 	}
 
 	// return array with suitable SWF object/embed tags in ['el']
@@ -3033,11 +3086,13 @@ class SWF_put_evh {
 		// or fallback elements will be used. The plugin check will
 		// be less reliable.
 		return sprintf('
-		<script type="text/javascript">
-			if ( ! navigator.plugins["Shockwave Flash"] ) {
-				evhh5v_controlbar_elements(%s, true);
-			}
-		</script>', json_encode($parms)
+			<script type="text/javascript">
+				if ( %s || ! navigator.plugins["Shockwave Flash"] ) {
+					evhh5v_controlbar_elements(%s, true);
+				}
+			</script>',
+			$atts['fallback'] === 'false' ? 'true' : 'false',
+			json_encode($parms)
 		);
 	}
 } // End class SWF_put_evh
