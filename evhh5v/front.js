@@ -676,6 +676,9 @@ var evhh5v_controlbar = function(params) {
 	this.ns    = this.svg.getAttribute("xmlns");
 	this.rszo  = []; // assigned objects subject to resize
 
+	// future option: dark clear background for initial button
+	this.inibut_use_clearbg = false;
+
 	// for handler for play progress bar click
 	this.prog_pl_click_cb = [];
 	// volume slider horizontal, or vertical?
@@ -1550,10 +1553,11 @@ mk_inibut : function(parentobj, doc) {
 	var btn = this.mk_button("svgbutt", "inibut",
 		0, 0, butwidth, butheight, doc);
 	btn.setAttribute("onclick", "svg_click(this);");
-	//t = this.mk_circle("ico_clearbg", "but_clearbg", "50%", "50%", r, doc);
-	t = this.mk_circle("ico_transbg", "but_clearbg", "50%", "50%", r, doc);
-	btn.appendChild(t);
-	this.but_clearbg = t;
+	if ( this.inibut_use_clearbg ) {
+		t = this.mk_circle("ico_transbg", "but_clearbg", "50%", "50%", r, doc);
+		btn.appendChild(t);
+		this.but_clearbg = t;
+	}
 	t = this.mk_circle("icoline", "but_circle", "50%", "50%", r, doc);
 	btn.appendChild(t);
 	this.but_circle = t;
@@ -1948,7 +1952,8 @@ mk : function() {
 		var svg = this.b_parms.root_svg;
 		svg.setAttribute("visibility", "visible");
 		this.inibut.setAttribute("visibility", "visible");
-		this.but_clearbg.setAttribute("visibility", "visible");
+		if ( this.but_clearbg )
+			this.but_clearbg.setAttribute("visibility", "visible");
 		this.but_circle.setAttribute("visibility", "visible");
 		this.but_arrow.setAttribute("visibility", "visible");
 
@@ -1966,7 +1971,8 @@ mk : function() {
 		var svg = this.b_parms.root_svg;
 		svg.setAttribute("visibility", "hidden");
 		this.inibut.setAttribute("visibility", "hidden");
-		this.but_clearbg.setAttribute("visibility", "hidden");
+		if ( this.but_clearbg )
+			this.but_clearbg.setAttribute("visibility", "hidden");
 		this.but_circle.setAttribute("visibility", "hidden");
 		this.but_arrow.setAttribute("visibility", "hidden");
 

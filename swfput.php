@@ -764,14 +764,13 @@ class SWF_put_evh {
 				statement that should appear within the quotes.
 				For example:</p>
 				<blockquote><code>
-				vids/gato.mp4?video/mp4 | vids/gato.webm ? video/webm; codecs=vp8,vorbis|vids/gato.ogv?video/ogg; codecs=\'theora, vorbis\'
+				vids/gato.mp4 ? video/mp4 | vids/gato.webm ? video/webm; codecs=vp8,vorbis | vids/gato.ogv?video/ogg; codecs=theora,vorbis
 				</code></blockquote>
 				<p>
 				In the example, where two codecs are specified there is
-				no space after the comma, or the two codecs are
-				enclosed in <em>single</em> quotes.
-				Many online examples
-				show a space after the comma without the quotes,
+				no space after the comma.
+				Some online examples
+				show a space after the comma,
 				but some older
 				versions of <em>Firefox</em> will reject that
 				usage, so the space after the comma is best left out.
@@ -1196,12 +1195,29 @@ class SWF_put_evh {
 		printf('<p><strong>%s</strong>%s</p>', $t, "\n");
 		$t = self::wt(__('These options control video placement.
 			</p><p>
-			The first option, "Place HTML5 video first,"
+			The first option, "HTML5 video primary,"
 			lets the alternate HTML5 video that may optionally be
 			specified in the shortcode setup form be placed as
 			primary (rather than fallback) content. If this
-			is selected then the flash video video player
-			will be placed as fallback content.
+			is selected then the flash video player
+			will be placed as fallback content. Be aware that
+			if the web browser cannot play any of the video
+			types specified as "alternate HTML5 video"
+			in the shortcode setup form, it probably will
+			<em>not</em> fallback to flash video. That is,
+			placing flash video as fallback is only useful
+			for browsers that do not support the video
+			element. At this time the major graphical browsers
+			support HTML5 video fairly well, so using this
+			option is effectively disabling the flash video.
+			</p><p>
+			Note that at present the major graphical browsers
+			do <em>not</em> all support the same set of video
+			types. To use HTML5 video reliably as primary content,
+			you will need to prepare the video in .MP4, .OGG (.OGV),
+			and .WEBM container formats with suitable codecs.
+			(The posts/pages editor page has a help tab which
+			should have a "SWFPut Form" item with more explanation.)
 			</p><p>
 			The next two options allow the video content
 			to be completely disabled.
