@@ -583,15 +583,6 @@ if ( guardinit == undefined ) {
 			var sh = Stage.height;
 			var sa = sw / sh;
 			
-			// bg click handler
-			if ( bghndlr ) {
-				var bgo;
-				bgo = bghndlr;
-				bgo._x = bgo._y = 0;
-				bgo._xscale = sw * 100;
-				bgo._yscale = sh * 100;
-			}
-
 			// allow natural scale or not
 			if ( vw < sw && vh < sh ) {
 				bbar.nosclbutdisable._visible = false;
@@ -1275,15 +1266,28 @@ function startWait() {
 // can be simplified to use relative values from Stage difference,
 // init must handle any start size
 function resizeFace() {
+	var sw = Stage.width;
+	var sh = Stage.height;
+
 	// informational text adjustment
-	itxt._width = Stage.width / 2.0;
-	itxt._height = Stage.height * 3.0 / 4.0;
-	itxt._x = Stage.width / 4.0;
-	itxt._y = Stage.height / 8.0;
+	itxt._width = sw / 2.0;
+	itxt._height = sh * 3.0 / 4.0;
+	itxt._x = sw / 4.0;
+	itxt._y = sh / 8.0;
+
+	// background click handler; initial sizw is 1x1, so maintain scale
+	if ( bghndlr ) {
+		var bgo = bghndlr;
+		bgo._x = bgo._y = 0;
+		bgo._xscale = sw * 100;
+		bgo._yscale = sh * 100;
+		bgo.tabEnabled = false;
+		bgo.useHandCursor = false;
+	}
 
 	// wait movie adjustment
-	wait._x = Stage.width / 2;
-	wait._y = Stage.height / 2;
+	wait._x = sw / 2;
+	wait._y = sh / 2;
 
 	// initial button/image adjustment (if not started yet)
 	if ( inibut !== null ) {
@@ -2134,14 +2138,30 @@ if ( ua_is_mobile() ) {
 	volgadget._rotation = -90;
 }
 
+if ( _level0.DB != undefined && _level0.DB != '' ) {
+	disablebar = _level0.DB == 'true' ? true : false;
+	adddbgtext(" DB: '" + _level0.DB + "'\n");
+}
+if ( disablebar == true ) {
+	bbar.enabled = false;
+	bbar._visible = false;
+}
+
 resizeFace();
 
 // get client 'SharedObject' data if available
 volclient = SharedObject.getLocal("volume");
-if ( volclient.data.volume == undefined ) {
+if ( volclient.data.volume == undefined || disablebar ) {
 	if ( _level0.VL != undefined && _level0.VL != '' ) {
 		initvolume = Math.max(0, Math.min(100, 0 + parseInt(_level0.VL)));
 		adddbgtext(" VL: '" + _level0.VL + "'\n");
+	}
+	if ( volclient == undefined ) {
+		volclient = {};
+		volclient.flush = function(){};
+	}
+	if ( volclient.data == undefined ) {
+		volclient.data = {};
 	}
 	volclient.data.volume = initvolume;
 }
@@ -2161,15 +2181,6 @@ if ( _level0.HB != undefined && _level0.HB != '' ) {
 if ( _level0.LP != undefined && _level0.LP != '' ) {
 	doloop = _level0.LP == 'true' ? true : false;
 	adddbgtext(" LP: '" + _level0.LP + "'\n");
-}
-
-if ( _level0.DB != undefined && _level0.DB != '' ) {
-	disablebar = _level0.DB == 'true' ? true : false;
-	adddbgtext(" DB: '" + _level0.DB + "'\n");
-}
-if ( disablebar == true ) {
-	bbar.enabled = false;
-	bbar._visible = false;
 }
 
 if ( _level0.AA != undefined && _level0.AA != '' ) {
@@ -2256,19 +2267,6 @@ if ( brtmp || initpause ) {
 	inibut.initialimg = null;
 	inibut = null;
 	loadonload = true;
-}
-
-// background click handler; initial sizw is 1x1, so maintain scale
-if ( bghndlr ) {
-	var bgo;
-	var sw = Stage.width;
-	var sh = Stage.height;
-	bgo = bghndlr;
-	bgo._x = bgo._y = 0;
-	bgo._xscale = sw * 100;
-	bgo._yscale = sh * 100;
-	bgo.tabEnabled = false;
-	bgo.useHandCursor = false;
 }
 
 // start the movie, but . . .

@@ -2516,6 +2516,7 @@ var evhh5v_controller = function(vid, ctlbar, pad) {
 	if ( this.params['disablebar'] && this.params['disablebar'] == 'true' ) {
 		this.disablebar = true;
 		this.doshowbar = false;
+		this.doshowbartime = false;
 	}
 
 	this.barpadding = 2;
@@ -2561,7 +2562,7 @@ evhh5v_controller.prototype = {
 	aspect_min : 0.0, // minimum aspect difference for canvas hack
 	tickinterval : 50, // alt 100,
 	ptrinterval : 5,
-	barshowincr : 1,
+	barshowincr : 2, //1,
 	barshowmargin : 2,
 	default_init_vol : 50, // 0-100
 	mouse_hide_class : "evhh5v_mouseptr_hidden",
@@ -2593,12 +2594,16 @@ evhh5v_controller.prototype = {
 			this.bar.blur_fullscreen();
 		}
 
-		this.set_bar_y(this.bar_y);
+		if ( this.disablebar ) {
+			this.bar.set_bar_visibility("hidden");
+			this.showhideBar(this.doshowbar = false);
+		} else {
+			this.set_bar_y(this.bar_y);
+			this.bar.set_bar_visibility("visible");
+		}
 
 		// set use of canvas as needed; see comment at func def
 		this.setup_canvas();
-
-		this.bar.set_bar_visibility("visible");
 
 		this.install_handlers();
 
@@ -3591,14 +3596,15 @@ evhh5v_controller.prototype = {
 		var hide = show + h + this.barpadding * 2;
 		var p = bshow ? show : hide;
 	
-		if ( bshow && this.bar_y >= p ) {
+		if ( this.disablebar ) {
+			this.yshowpos = hide;
+			this.set_bar_y(hide);
+			this.hide_volctl();
+		} else if ( bshow && this.bar_y >= p ) {
 			this.yshowpos = p;
 		} else if ( ! bshow && this.bar_y <= p ) {
 			this.yshowpos = p;
 		}
-		
-		//if ( ! bshow )
-		//	this.hide_volctl();
 	},
 	set_bar_y : function(y) {
 		var t = document.getElementById(this.ctlbar["ctlbardiv"]);
