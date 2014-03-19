@@ -3170,7 +3170,7 @@ evhh5v_controller.prototype = {
 			this.playing = false;
 			this.bar.show_playico();
 			this.bar.stopbtn_enab();
-			this.showhideBar(this.doshowbar = true);
+			//this.showhideBar(this.doshowbar = true);
 			this.hide_wait();
 		}, false);
 
@@ -3315,7 +3315,7 @@ evhh5v_controller.prototype = {
 			this.bar.show_playico();
 			this.bar.progress_pl(1);
 			this.bar.show_dl_inactive();
-			this.showhideBar(this.doshowbar = true);
+			//this.showhideBar(this.doshowbar = true);
 		}, false);
 
 		var msevt = [

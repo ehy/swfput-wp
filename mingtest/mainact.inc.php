@@ -1578,8 +1578,9 @@ function pauseAudio(bpause) {
 	}
 	if ( ! bpause ) {
 		sound.start(audcurtime);
+		showhideBar(doshowbar = false);
 		return;
-	} // else
+	}
 	audcurtime = Math.floor(sound.position / adiv);
 	sound.stop();
 }
@@ -1590,10 +1591,13 @@ function pauseVideo(bpause) {
 	if ( bpause ) {
 		stopWait();
 	} else if ( initshowoffset > 0 ) {
-		// unapusing from initial show-frame; seek to 0
+		// unpausing from initial show-frame; seek to 0
 		stream.seek(0);
 		initshowoffset = 0;
 		last_ct = 0;
+	}
+	if ( ! bpause ) {
+		showhideBar(doshowbar = false);
 	}
 	stream.pause(bpause);
 }
