@@ -1209,7 +1209,9 @@ class SWF_put_evh {
 			for browsers that do not support the video
 			element. At this time the major graphical browsers
 			support HTML5 video fairly well, so using this
-			option is effectively disabling the flash video.
+			option is effectively disabling the flash video,
+			unless alternate HTML5 video was not specified, in
+			which case the flash video object is placed as usual.
 			</p><p>
 			Note that at present the major graphical browsers
 			do <em>not</em> all support the same set of video
