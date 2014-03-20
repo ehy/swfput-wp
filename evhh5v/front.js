@@ -2960,8 +2960,12 @@ evhh5v_controller.prototype = {
 		}, false);
 
 		this.addEventListener("play", function(e) {
+			this.has_been_played = true;
+			this.stop_forced = false;
 			this.playing = true;
+			this.bar.hide_inibut();
 			this.get_canvas_context();
+			this.canvas_clear();
 			this.put_canvas_frame();
 			this.bar.show_pauseico();
 			this.bar.stopbtn_enab();
@@ -3441,10 +3445,6 @@ evhh5v_controller.prototype = {
 
 	// std acts
 	play : function() {
-		this.has_been_played = true;
-		this.stop_forced = false;
-		this.bar.hide_inibut();
-		this.canvas_clear();
 		this._vid.play();
 	},
 	pause : function() {
