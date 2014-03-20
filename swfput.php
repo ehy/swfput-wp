@@ -2688,7 +2688,6 @@ class SWF_put_evh {
 		$id   = $ids[1]; // object
 		$idav = $ids[2]; // alternate video
 		$idai = $ids[3]; // alternate img
-		$vadd = array(); // addl. params for alternate video
 
 		if ( ! $uswf ) {
 			if ( $ming ) {
@@ -2755,8 +2754,9 @@ class SWF_put_evh {
 		// honor new param 'mobiwidth' to set the dimensions
 		// (proportionally to regular WxH) for mobile devices
 		// user can set $mobiwidth 0 to disable this
+		$mob = 'false';
 		if ( function_exists('wp_is_mobile') && wp_is_mobile() ) {
-			$vadd['mob'] = 'true';
+			$mob = 'true';
 			if ( $mobiwidth > 0 ) {
 				$h = (int)($h * $mobiwidth / $w);
 				$w = $mobiwidth;
@@ -2866,18 +2866,16 @@ class SWF_put_evh {
 		$h5v = $h5vclose = '';
 		if ( $altvideo != '' ) {
 			// vars for alternate h5 video
-			$vadd['play'] = $play;
-			$vadd['loop'] = $loop;
-			$vadd['volume'] = $volume;
-			$vadd['hidebar'] = $hidebar;
-			$vadd['disablebar'] = $disablebar;
-			$vadd['aspectautoadj'] = $aspectautoadj;
-			$vadd['aspect'] = $displayaspect;
-			$vadd['displayaspect'] = $displayaspect;
-			$vadd['pixelaspect'] = $pixelaspect;
-			$vadd['barheight'] = $barheight;
-			$vadd['barwidth'] = $w;
-	
+			$aspect = $displayaspect;
+			$barwidth = $w;
+			$vstd = compact("play", "loop", "volume",
+				"hidebar", "disablebar",
+				"aspectautoadj", "aspect",
+				"displayaspect", "pixelaspect",
+				"barheight", "barwidth",
+				"allowfull", "mob"
+			);
+
 			$viid = '';
 			$vdid = '';
 			$jatt['a_vid'] = array(
@@ -2894,10 +2892,10 @@ class SWF_put_evh {
 				'uniq'		=> ''.$ids[4],
 				'parentdiv'	=> $ids[0],
 				'barheight'	=> $barheight,
-				'barwidth'	=> $w,
+				'barwidth'	=> $barwidth,
 				'aspect'	=> $displayaspect,
 				'altmsg'	=> 'Control bar load failed.',
-				'std'		=> $vadd
+				'std'		=> $vstd
 			);
 			if ( $idav != '' ) {
 				$viid = sprintf(' id="%s"', $idav);
