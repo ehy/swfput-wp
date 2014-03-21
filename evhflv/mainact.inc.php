@@ -21,7 +21,7 @@
 
 /*
 * Description: SWF video app with PHP/Ming, main A/S include
-* Version: 0.1.0
+* Version: 1.0.8
 * Author: Ed Hynan
 * License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
 */
@@ -77,8 +77,12 @@ var disablebar = tf(false, "$disablebar", $disablebar);
 var showdeblockingitems = tf(false, "$showdeblockingitems", $showdeblockingitems);
 var barpadding = tf(1, "$barpadding", $barpadding);
 var barsubtr = tf(barpadding + 2, "$barsubtr", $barsubtr);
-var barheight = tf(26, "$barheight", $barheight);
+var barheight = tf(100, "$barheight", $barheight);
 var barlength = tf(240 - barsubtr, "$barlength", $barlength);
+var origbarheight = barheight, origbarlength = barlength;
+// these are set below after parameter parsing
+//var bscl = barheight / origbarheight;
+//var iscl = 1.0 / bscl;
 var butwidthfactor = tf(0.60, "$butwidthfactor", $butwidthfactor);
 var butwidth = tf(barheight * butwidthfactor + 1, "$butwidth", $butwidth);
 var butheight = butwidth;
@@ -1261,10 +1265,7 @@ function startWait() {
 	waittimer = setTimeout(real_startWait, 500, null);
 }
 
-// resize interface items, when Stage size changes, and on init
-// TODO: make separate initsizeFace() and resizeFace(); resize...
-// can be simplified to use relative values from Stage difference,
-// init must handle any start size
+// resize interface items, when Stage size changes
 function resizeFace() {
 	var sw = Stage.width;
 	var sh = Stage.height;
@@ -1298,6 +1299,8 @@ function resizeFace() {
 	bbar.resize();
 
 	// some gadgets are relative to bar yhome
+	volgadget._xscale = 100;
+	volgadget._yscale = 100;
 	if ( ua_is_mobile() ) { // horizontal
 		var x, y;
 		y = bbar.yhome - 3 - volbarwid * 2;
@@ -1311,18 +1314,30 @@ function resizeFace() {
 		volgadget._y = y;
 		volgadget._x = x;
 	}
+	volgadget._xscale = bscl * 100;
+	volgadget._yscale = bscl * 100;
 }
 
 var bbar_resize = function () {
-	this._x = 0 + barpadding;
-	this.ctlpanel._x = 0 + barpadding;
+	this._xscale = 100;
+	this._yscale = 100;
 
 	barlength = Stage.width - barsubtr;
 	butwidth =  barheight * butwidthfactor;
 	butheight = butwidth;
 
+	var lscl = iscl;
+	var blen = barlength * lscl;
+
+	this._x = 0 + barpadding;
+	this.ctlpanel._x = 0 + barpadding;
+	this._x *= lscl;
+	this.ctlpanel._x *= lscl;
+
 	progressbarlength = barlength - (progressbaroffs * 2);
 	progressbarxoffs = (barlength - progressbarlength) / 2;
+	progressbarlength *= lscl;
+	progressbarxoffs  *= lscl;
 
 	// control bar y placement accounts for hiding offscreen --
 	// 'yhome' is the base y position
@@ -1330,7 +1345,7 @@ var bbar_resize = function () {
 	var t = y - this.yhome;
 	this.yhome = y;
 	this.yshowpos += t;
-	this._y += t;
+	this._y += t; // * iscl;
 
 	// order of width changes is important; textfield
 	// width is not based on Stage width ( but _x is )
@@ -1348,9 +1363,9 @@ var bbar_resize = function () {
 
 	// order of width changes is important; if Stage is now wider,
 	// then bar should be widened before its children, and vice versa
-	if ( barlength > this._width ) {
-		this._width = barlength;
-		this.ctlpanel._width = barlength;
+	if ( blen > this._width ) {
+		this._width = blen;
+		this.ctlpanel._width = blen;
 	}
 
 	// progress bar adjustment here,
@@ -1369,9 +1384,9 @@ var bbar_resize = function () {
 	this.dltxt._x = this.tmtxt._x;
 
 	// see comment above at "if ( barlength > this._width )"
-	if ( barlength < this._width ) {
-		this.ctlpanel._width = barlength;
-		this._width = barlength;
+	if ( blen < this._width ) {
+		this.ctlpanel._width = blen;
+		this._width = blen;
 	}
 
 	// hide the playback and download text fields if
@@ -1393,8 +1408,16 @@ var bbar_resize = function () {
 	// code that could interfere with ctlpanel so I believe it's
 	// a flash plugin bug.
 	// Re-diddling, as below, has been working.
+	this._x = 0 + barpadding;
+	this._width = blen;
 	this.ctlpanel._x = 0 + barpadding;
-	this.ctlpanel._width = barlength;
+	this.ctlpanel._width = blen;
+	this._x *= lscl;
+	this.ctlpanel._x *= lscl;
+
+	// scale from ming-build barheight to display bar height
+	this._xscale = bscl * 100;
+	this._yscale = bscl * 100;
 };
 
 var inibut_resize = function () {
@@ -1468,10 +1491,11 @@ function showhideBar(bshow) {
 	var show = Stage.height - bbar._height - barpadding;
 	var hide = show + bbar._height + barpadding * 2;
 	var p = bshow ? show : hide;
+	var y = bbar._y;
 
-	if ( bshow && bbar._y >= p ) {
+	if ( bshow && y >= p ) {
 		bbar.yshowpos = p;
-	} else if ( ! bshow && bbar._y <= p ) {
+	} else if ( ! bshow && y <= p ) {
 		bbar.yshowpos = p;
 	}
 };
@@ -1891,23 +1915,21 @@ function ticker () {
 		}
 	}
 
-	if ( bbar.yshowpos > bbar._y ) {
-		bbar._y = Math.min(bbar._y + barshowincr, bbar.yshowpos);
+	var y = bbar._y;
+	if ( bbar.yshowpos > y ) {
+		bbar._y = Math.min(y + barshowincr, bbar.yshowpos);
 		// when bar is fully hidden also hide sound volume gadget
-		if ( bbar.yshowpos == bbar._y ) {
+		if ( bbar.yshowpos == y ) {
 			volgadget._visible = false;
 		}
-	} else if ( bbar.yshowpos < bbar._y ) {
-		bbar._y = Math.max(bbar._y - barshowincr, bbar.yshowpos);
+	} else if ( bbar.yshowpos < y ) {
+		bbar._y = Math.max(y - barshowincr, bbar.yshowpos);
 	}
 }
 
 ///
 /// initial execution: roughly equivalent to main()
 ///
-
-// setup timer function
-setInterval(this, "ticker", tickinterval);
 
 // externals: loading, etc..
 obj_css.onLoad = function(ok) {
@@ -1950,7 +1972,8 @@ video.smoothing = true;
 
 // other setup
 bbar.resize = bbar_resize;
-bbar.yhome = bbar.yshowpos = bbar._y;
+bbar.yhome = bbar.yshowpos = bbar._y; // * origbarheight / barheight;
+// bbar._y *= origbarheight / barheight;
 add_filter(bbar.stopbutdisable, new flash.filters.BlurFilter(3, 3, 3));
 bbar.stopbutdisable.useHandCursor = false;
 bbar.stopbutdisable.enabled = false;
@@ -2138,6 +2161,14 @@ if ( ua_is_mobile() ) {
 	volgadget._rotation = -90;
 }
 
+if ( _level0.BH != undefined && _level0.BH != '' ) {
+	barheight = parseFloat(_level0.BH);
+	adddbgtext(" BH: '" + barheight + "'\n");
+}
+// these are used throughout for resizing
+var bscl = barheight / origbarheight;
+var iscl = 1.0 / bscl;
+
 if ( _level0.DB != undefined && _level0.DB != '' ) {
 	disablebar = _level0.DB == 'true' ? true : false;
 	adddbgtext(" DB: '" + _level0.DB + "'\n");
@@ -2268,6 +2299,9 @@ if ( brtmp || initpause ) {
 	inibut = null;
 	loadonload = true;
 }
+
+// setup timer function
+setInterval(this, "ticker", tickinterval);
 
 // start the movie, but . . .
 // initial pause is handled elsewhere except for rtmp which does not

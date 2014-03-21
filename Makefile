@@ -41,12 +41,12 @@ MINGC = obj.css
 SSRCS = $(SDIRI)/$(MINGS) $(SDIRI)/$(MINGA) $(SDIRI)/$(MINGC)
 SBINS = \
 	$(SDIRI)/$(MNAME).swf \
-	$(SDIRI)/$(MNAME)44.swf \
-	$(SDIRI)/$(MNAME)40.swf \
-	$(SDIRI)/$(MNAME)36.swf \
-	$(SDIRI)/$(MNAME)32.swf \
-	$(SDIRI)/$(MNAME)28.swf \
-	$(SDIRI)/$(MNAME)24.swf
+	#$(SDIRI)/$(MNAME)44.swf \
+	#$(SDIRI)/$(MNAME)40.swf \
+	#$(SDIRI)/$(MNAME)36.swf \
+	#$(SDIRI)/$(MNAME)32.swf \
+	#$(SDIRI)/$(MNAME)28.swf \
+	#$(SDIRI)/$(MNAME)24.swf
 SDEFS = $(SDIRI)/default.flv \
 
 ALSO = Makefile COPYING version.sh
@@ -76,7 +76,7 @@ ${PRJZIP}: ${SBINS} ${SDEFS} ${H5BIN} ${JSBIN} ${ZALL} ${LCFPO}
 	(test -e ttd && mv ttd ${PRJDIR}; ls -l ${PRJZIP})
 
 $(SDIRI)/$(MNAME).swf: $(SDIRI)/$(MINGS) $(SDIRI)/$(MINGA)
-	$(PHPCLI) $(SDIRI)/$(MINGS) > $@
+	$(PHPCLI) $(SDIRI)/$(MINGS) -- BH=100 > $@
 
 $(SDIRI)/$(MNAME)44.swf: $(SDIRI)/$(MINGS) $(SDIRI)/$(MINGA)
 	$(PHPCLI) $(SDIRI)/$(MINGS) -- BH=44 > $@
@@ -98,9 +98,10 @@ $(SDIRI)/$(MNAME)24.swf: $(SDIRI)/$(MINGS) $(SDIRI)/$(MINGA)
 
 # After JavaScript::Packer failed with front.js (see below)  I found
 # that JavaScript::Minifier is no longer on my main system (so it is
-# moved last, and it is untried currently -- watch for errors) --
+# moved last, and it is untried currently* -- watch for errors) --
 # the JavaScript::Minifier::XS has just been tried and is working
 # so far
+# *JavaScript::Minifier tried on OpenBSD system -- still works.
 ${JSBIN}: ${JSSRC}
 	O=$@; I=$${O%%.*}.js; \
 	(P=`which perl` && $$P -e 'use JavaScript::Minifier::XS qw(minify); print minify(join("",<>))' < "$$I" > "$$O" 2>/dev/null ) \

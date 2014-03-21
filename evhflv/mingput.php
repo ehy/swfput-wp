@@ -21,7 +21,7 @@
 
 /*
 * Description: build SWF video app with PHP/Ming, put on stdout
-* Version: 0.1.0
+* Version: 1.0.8
 * Author: Ed Hynan
 * License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
 */
@@ -659,7 +659,7 @@ foreach ( $av as $k => $v ) {
 			break;
 		case 'BH':
 			if ( $v && $v !== 'default' ) {
-				$t = round(max(20, min(80, 0 + $v)));
+				$t = round(max(20, min(280, 0 + $v)));
 				$barheight = $t;
 			}
 			break;
@@ -737,7 +737,7 @@ $initshowtimemax  =  5;  // max for above if random, but . . .
 // . . . doomed to fail if > $streambuftime
 $initshowtime = min($initshowtime, $streambuftime);
 $initshowtimemax = min($initshowtimemax, $streambuftime);
-$barheightlg = 40;
+$barheightlg = 60;
 $barheightsm = 26;
 $barheightthreshhold = 360;
 // wait movie arrow shaft: straight rect or fancy?

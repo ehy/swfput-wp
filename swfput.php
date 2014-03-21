@@ -1916,7 +1916,7 @@ class SWF_put_evh {
 		}
 
 		$ids = $this->get_div_ids($code);
-		$em  = $this->get_swf_tags($swf, $pr, $ids);
+		$em  = $this->get_player_elements($swf, $pr, $ids);
 		return $this->get_div($ids, $dv, $c, $em);
 	}
 
@@ -1979,7 +1979,7 @@ class SWF_put_evh {
 		}
 
 		$ids = $this->get_div_ids($code);
-		$em  = $this->get_swf_tags($swf, $pr, $ids);
+		$em  = $this->get_player_elements($swf, $pr, $ids);
 		return $this->get_div($ids, $dv, $c, $em);
 	}
 
@@ -2025,7 +2025,7 @@ class SWF_put_evh {
 				} else {
 					$pr->setvalue('url', $url);
 					$ids = $this->get_div_ids('swfput_sed');
-					$em  = $this->get_swf_tags($swf, $pr, $ids);
+					$em  = $this->get_player_elements($swf, $pr, $ids);
 
 					$dv = 'style="width: '.($w+0).'px; max-width: 100%"'
 						. ' class="wp-caption aligncenter"';
@@ -2055,7 +2055,7 @@ class SWF_put_evh {
 	// $divids are returned from get_div_ids($base),
 	// $divatts are appended to <div> after id,
 	// $cap is caption within <div> below video, and
-	// $vidtags are the array returned by get_swf_tags()
+	// $vidtags are the array returned by get_player_elements()
 	public function get_div($divids, $divatts, $cap, $vidtags) {
 		$opfx = self::evhv5vjsnpfx;
 
@@ -2587,63 +2587,7 @@ class SWF_put_evh {
 
 	// helper for selecting swf bin near desired bar height
 	public function get_swf_binurl($bh = 48) {
-		$d = self::mk_playerdir();
-		$f = self::swfputbinname;
-		$a = explode('.', $f);
-		$p = sprintf('/^%s([0-9]+)\.%s$/i', $a[0], $a[1]);
-		$vmin = 65535; $vmax = 0;
-
-		$a = array();
-		foreach ( scandir($d) as $e ) {
-			$t = $d . '/' . $e;
-			if ( ! is_file($t) )
-				continue;
-			if ( ! is_readable($t) )
-				continue;
-			if ( ! preg_match($p, $e, $m) )
-				continue;
-			$a[$m[1]] = $e;
-			$n = (int)$m[1];
-			$vmin = min($vmin, $n);
-			$vmax = max($vmax, $n);
-		}
-
-		$bh = (int)$bh;
-		$n = count($a);
-		if ( $n === 0 ) {
-			$f = self::swfputbinname;
-		} else if ( $n === 1 ) {
-			// $vmax will index the only entry in $a
-			$f = $a['' . $vmax];
-		} else if ( $bh >= $vmax ) {
-			$f = $a['' . $vmax];
-		} else if ( $bh <= $vmin ) {
-			$f = $a['' . $vmin];
-		} else {
-			$ak = array_keys($a);
-			sort($ak, SORT_NUMERIC);
-			$lk = (int)$ak[0];
-			for ( $n = 1; $n < count($ak); $n++ ) {
-				$k = (int)$ak[$n];
-				// $bh must be found < $k within this loop
-				// due to above test 'if ( $bh >== $vmax )'
-				if ( $bh > $k ) {
-					$lk = (int)$ak[$n];
-					continue;
-				}
-				if ( ($bh - $lk) < ($k - $bh) ) {
-					$n--;
-				}
-				break;
-			}
-			if ( $n >= count($ak) ) {
-				die('broken logic in ' . __FUNCTION__);
-			}
-			$f = $a[$ak[$n]];
-		}
-
-		$t = dirname($this->swfputbin);
-		return $t . '/' . $f;
+		return $this->swfputbin;
 	}
 
 	// helper for getting swf css (internal use)) url
@@ -2660,9 +2604,8 @@ class SWF_put_evh {
 		return $this->swfputvid;
 	}
 
-	// return array with suitable SWF object/embed tags in ['el']
-	// and data for building the elements w/ JS in ['js']
-	public function get_swf_tags($uswf, $par, $ids = null) {
+	// return array with media elements in ['el']
+	public function get_player_elements($uswf, $par, $ids = null) {
 		extract($par->getparams());
 		$ming = self::should_use_ming();
 		$esc = true;
@@ -2964,21 +2907,33 @@ class SWF_put_evh {
 		// therefore, browser ID is attempted to find MSIE (in
 		// self::is_msie()) on the assumption that classid will
 		// be necessary to make that one work
+		// UPDATE: versions of MSIE calling themselves 'Trident'
+		// handle <object> w/o classid (frankly, I do not have
+		// a good picture of its necessity); the self::is_msie()
+		// call does not test 'Trident' and returns false, and
+		// so far so good.
 		$obj = '';
+		
+		/* $jatt['obj'] was used in 1.0.7 for JS creation, removed 1.0.8
+		 * TODO: use or remove $jatt['obj']
+		 */
 		$jatt['obj'] = array(
 			'width'     => $w, 'height' => $h,
 			'id'        => $id,
 			'parm'      => array()
 		);
+
 		if ( $id != '' ) {
 			$id = sprintf(' id="%s"', $id);
 		}
 		if ( self::is_msie() ) { 
 			$jatt['obj']['ie'] = 'true';
+
 			$obj = sprintf('
 			<object%s classid="%s" codebase="%s" width="%u" height="%u">
 			<param name="data" value="%s?%s">
 			', $id, $classid, $codebase, $w, $h, $uswf, $pv);
+
 			$jatt['obj']['classid'] = $classid;
 			$jatt['obj']['codebase'] = $codebase;
 			$jatt['obj']['parm'][] = array(
@@ -2987,9 +2942,11 @@ class SWF_put_evh {
 		} else {
 			$jatt['obj']['ie'] = 'false';
 			$typ = 'application/x-shockwave-flash';
+
 			$obj = sprintf('
 			<object%s data="%s?%s" type="%s" %s width="%u" height="%u">
 			', $id, $uswf, $pv, $typ, "typemustmatch", $w, $h);
+
 			$jatt['obj']['data'] = $uswf . '?' . $pv;
 			$jatt['obj']['type'] = $typ;
 		}
@@ -3463,7 +3420,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		}
 
 		$ids  = $this->plinst->get_div_ids('widget-div');
-		$em   = $this->plinst->get_swf_tags($uswf, $pr, $ids);
+		$em   = $this->plinst->get_player_elements($uswf, $pr, $ids);
 
 		printf('%s', $this->plinst->get_div($ids, $dv, $cap, $em));
 
