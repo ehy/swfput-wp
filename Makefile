@@ -26,7 +26,6 @@ JSBIN = $(JSDIR)/formxed.min.js $(JSDIR)/screens.min.js $(H5DIR)/front.min.js
 JSSRC = $(JSDIR)/formxed.js $(JSDIR)/screens.js $(H5DIR)/front.js
 H5DIR = evhh5v
 H5BIN = $(H5DIR)/evhh5v.css $(H5DIR)/ctlbar.svg $(H5DIR)/ctlvol.svg $(H5DIR)/ctrbut.svg $(JSDIR)/front.min.js
-#H5SRC = $(H5DIR)/evhh5v.css $(H5DIR)/ctlbar.svg $(H5DIR)/ctlvol.svg $(H5DIR)/ctrbut.svg $(H5DIR)/ctl.svg $(H5DIR)/front.js
 LCDIR = locale
 LCDOM = $(PRJSTEM)_l10n
 LCPOT = $(LCDIR)/$(LCDOM).pot
@@ -34,67 +33,67 @@ LCFPO = $(LCDIR)/$(LCDOM)-en_US.mo
 LC_SH = $(LCDIR)/pot2en_US.sh
 LCSRC = $(LCPOT)
 LCALL = $(LC_SH) $(LCFPO) $(LCSRC)
-SDIRI = mingtest
-SDIRO = mingput
-SSRCS = $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php $(SDIRI)/obj.css
+MNAME = evhflv
+SDIRI = $(MNAME)
+MINGS = mingput.php
+MINGA = mainact.inc.php
+MINGC = obj.css
+SSRCS = $(SDIRI)/$(MINGS) $(SDIRI)/$(MINGA) $(SDIRI)/$(MINGC)
 SBINS = $(SDIRI)/default.flv \
-	$(SDIRI)/mingput.swf \
-	$(SDIRI)/mingput44.swf \
-	$(SDIRI)/mingput40.swf \
-	$(SDIRI)/mingput36.swf \
-	$(SDIRI)/mingput32.swf \
-	$(SDIRI)/mingput28.swf \
-	$(SDIRI)/mingput24.swf
+	$(SDIRI)/$(MNAME).swf \
+	$(SDIRI)/$(MNAME)44.swf \
+	$(SDIRI)/$(MNAME)40.swf \
+	$(SDIRI)/$(MNAME)36.swf \
+	$(SDIRI)/$(MNAME)32.swf \
+	$(SDIRI)/$(MNAME)28.swf \
+	$(SDIRI)/$(MNAME)24.swf
 
-ALSO = Makefile COPYING
+ALSO = Makefile COPYING version.sh
 #READS= README README.tty README.tt8 README.pdf README.html
 READS= README README.pdf README.html
 ZALL = ${SRCS} ${ALSO} ${READS} readme.txt
-ZSALL = ${SSRCS} ${SBINS}
-ZDIR = $(H5DIR) $(JSDIR) $(LCDIR) $(DOCSD)
+ZSALL = ${SSRCS} #${SBINS}
+ZDIR = $(H5DIR) $(SDIRI) $(JSDIR) $(LCDIR) $(DOCSD)
 BINALL = ${SBINS} ${JSBIN}
 PRJDIR = ${PRJNAME}
-PRJSDIR = ${PRJNAME}/${SDIRO}
 PRJZIP = ${PRJNAME}.zip
 
 XGETTEXT = xgettext
 ZIP = zip -r -9 -v -T -X
+ZXL = -x \*/.git/\* \*/.git\*
 PHPCLI = php -f
 
 all: ${PRJZIP}
 
 ${PRJZIP}: ${SBINS} ${H5BIN} ${JSBIN} ${ZALL} ${LCFPO}
 	test -e ttd && rm -rf ttd; test -e ${PRJDIR} && mv ${PRJDIR} ttd; \
-	mkdir ${PRJDIR} ${PRJSDIR} && \
+	mkdir ${PRJDIR} && \
 	cp -r -p ${ZALL} ${ZDIR} ${PRJDIR} && \
 	( cd ${PRJDIR}/${DOCSD} && make clean; true ) && \
-	cp -r -p ${ZSALL} ${PRJSDIR} && rm -f ${PRJZIP} && \
-	$(ZIP) ${PRJZIP} ${PRJDIR} && rm -rf ${PRJDIR} && \
+	rm -f ${PRJZIP} && \
+	$(ZIP) ${PRJZIP} ${PRJDIR} ${ZXL} && rm -rf ${PRJDIR} && \
 	(test -e ttd && mv ttd ${PRJDIR}; ls -l ${PRJZIP})
 
-$(SDIRI)/default.flv: $(SDIRI)/droptest.flv
-	ln $(SDIRI)/droptest.flv $(SDIRI)/default.flv
+$(SDIRI)/$(MNAME).swf: $(SDIRI)/$(MINGS) $(SDIRI)/$(MINGA)
+	$(PHPCLI) $(SDIRI)/$(MINGS) > $@
 
-$(SDIRI)/mingput.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
-	$(PHPCLI) $(SDIRI)/mingput.php > $(SDIRI)/mingput.swf
+$(SDIRI)/$(MNAME)44.swf: $(SDIRI)/$(MINGS) $(SDIRI)/$(MINGA)
+	$(PHPCLI) $(SDIRI)/$(MINGS) -- BH=44 > $@
 
-$(SDIRI)/mingput44.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
-	$(PHPCLI) $(SDIRI)/mingput.php -- BH=44 > $(SDIRI)/mingput44.swf
+$(SDIRI)/$(MNAME)40.swf: $(SDIRI)/$(MINGS) $(SDIRI)/$(MINGA)
+	$(PHPCLI) $(SDIRI)/$(MINGS) -- BH=40 > $@
 
-$(SDIRI)/mingput40.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
-	$(PHPCLI) $(SDIRI)/mingput.php -- BH=40 > $(SDIRI)/mingput40.swf
+$(SDIRI)/$(MNAME)36.swf: $(SDIRI)/$(MINGS) $(SDIRI)/$(MINGA)
+	$(PHPCLI) $(SDIRI)/$(MINGS) -- BH=36 > $@
 
-$(SDIRI)/mingput36.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
-	$(PHPCLI) $(SDIRI)/mingput.php -- BH=36 > $(SDIRI)/mingput36.swf
+$(SDIRI)/$(MNAME)32.swf: $(SDIRI)/$(MINGS) $(SDIRI)/$(MINGA)
+	$(PHPCLI) $(SDIRI)/$(MINGS) -- BH=32 > $@
 
-$(SDIRI)/mingput32.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
-	$(PHPCLI) $(SDIRI)/mingput.php -- BH=32 > $(SDIRI)/mingput32.swf
+$(SDIRI)/$(MNAME)28.swf: $(SDIRI)/$(MINGS) $(SDIRI)/$(MINGA)
+	$(PHPCLI) $(SDIRI)/$(MINGS) -- BH=28 > $@
 
-$(SDIRI)/mingput28.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
-	$(PHPCLI) $(SDIRI)/mingput.php -- BH=28 > $(SDIRI)/mingput28.swf
-
-$(SDIRI)/mingput24.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
-	$(PHPCLI) $(SDIRI)/mingput.php -- BH=24 > $(SDIRI)/mingput24.swf
+$(SDIRI)/$(MNAME)24.swf: $(SDIRI)/$(MINGS) $(SDIRI)/$(MINGA)
+	$(PHPCLI) $(SDIRI)/$(MINGS) -- BH=24 > $@
 
 # After JavaScript::Packer failed with front.js (see below)  I found
 # that JavaScript::Minifier is no longer on my main system (so it is

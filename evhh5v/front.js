@@ -3652,8 +3652,8 @@ evhh5v_controller.prototype = {
 		}
 	},
 	show_wait : function() {
-		// Unfortunate set of conditions resulting from from misc.
-		// lame-brainednesses; e.g., "stalled" event issued on
+		// Unfortunate set of conditions resulting from from
+		// misc. oddities; e.g., "stalled" event issued on
 		// page load before video has been play()ed
 		if ( ! this.wait_showing && ! this.stop_forced && this.has_been_played ) {
 			var that = this;

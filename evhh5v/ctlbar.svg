@@ -56,9 +56,9 @@
 	<style type="text/css">
 	<![CDATA[
 		/* .label { font-size:12pt; font-family:Verdana } */
-		.bgrect { fill: rgb(20,20,25); stroke:none;
-			opacity: 0.55;
+		.bgrect { fill: rgb(20,20,25); stroke:none; opacity: 0.55;
 		}
+		.bgrect_clear { fill: rgb(0,0,0); stroke:none; opacity: 0.0; }
 		.btn, .svgbutt { cursor: pointer; }
 		.btn, .btn2 { fill:rgb(30,10,15); stroke:none; stroke-width:0px;
 			opacity: 0.31;

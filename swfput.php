@@ -183,9 +183,9 @@ class SWF_put_evh {
 	protected $spg = null;
 
 	// swfput program directory
-	const swfputdir = 'mingput';
+	const swfputdir = 'evhflv';
 	// swfput program binary name
-	const swfputbinname = 'mingput.swf';
+	const swfputbinname = 'evhflv.swf';
 	// swfput program php+ming script name
 	const swfputphpname = 'mingput.php';
 	// swfput program css name
@@ -2061,30 +2061,14 @@ class SWF_put_evh {
 
 		$dv = sprintf('id="%s" %s', $divids[0], $divatts);
 
-		/* TODO: remove this
-		$dvf = str_replace(array('-', ' '), '_', $divids[0]);
-		if ( function_exists('wp_is_mobile') && wp_is_mobile() ) {
-			return sprintf('
-			<div %s>%s</div>
-			<script type="text/javascript">
-			var ob_%s = new %s_adj("%s", 0, 0, 0, new %s_bld("%s", "%s", "%s", "%s", %s));
-			</script>
-			',
-			$dv, $cap,
-			$dvf, $opfx, $divids[0], $opfx,
-			$divids[0], $divids[1], $divids[2], $divids[3],
-			json_encode($vidtags['js']));
-		}
-		*/
-
 		return sprintf('
-			<div %s>%s%s</div>
+			<div %s>%s%s
+			</div><!-- %s -->
 			<script type="text/javascript">
-			new %s_sizer("%s", "%s", "%s", "%s", false);
+				new %s_sizer("%s", "%s", "%s", "%s", false);
 			</script>',
-			$dv, $vidtags['el'], $cap,
-			$opfx,
-			$divids[0], $divids[1], $divids[2], $divids[3]);
+			$dv, $vidtags['el'], $cap, $divids[0],
+			$opfx, $divids[0], $divids[1], $divids[2], $divids[3]);
 	}
 
 	/**
@@ -2120,12 +2104,11 @@ class SWF_put_evh {
 			$pf = rtrim(plugin_dir_path($pf), '/');
 		}
 		
-		// store and return corrected file path
 		return $pf;
 	}
 	
 	// help for plugin file path/name; __FILE__ alone
-	// is not good enough -- see comment in body
+	// is not good enough -- see comment in body of mk_plugindir()
 	public static function mk_pluginfile() {
 		if ( self::$pluginfile !== null ) {
 			return self::$pluginfile;
@@ -2965,8 +2948,9 @@ class SWF_put_evh {
 				$altimg = $jatt['a_vid']['altmsg'];
 			}
 
-			$h5vclose = sprintf("\n\t\t\t</video>\t%s\n\t\t\t</div>",
-				$this->get_h5vjs_tags($jatt['a_vid'], $ids[1])
+			$h5vclose = sprintf("\n\t\t\t</video>\t%s\n\t\t\t</div>%s",
+				$this->get_h5vjs_tags($jatt['a_vid'], $ids[1]),
+				"<!-- aux -->\n\t\t\t"
 			);
 		} else {
 			$jatt['a_vid'] = '';
@@ -3009,6 +2993,10 @@ class SWF_put_evh {
 			$jatt['obj']['data'] = $uswf . '?' . $pv;
 			$jatt['obj']['type'] = $typ;
 		}
+
+		/* $jatt['obj']['parm'] is not being used; left in
+		 * place temporarily --
+		 * TODO: use or remove
 		$jatt['obj']['parm'][] = array(
 			'name' => 'play', 'value' => $play
 		);
@@ -3028,7 +3016,7 @@ class SWF_put_evh {
 			'name' => 'src', 'value' => $uswf . '?' . $pv
 		);
 		$jatt['obj']['parm'][] = array(
-			'name' => 'name', 'value' => 'mingput'
+			'name' => 'name', 'value' => self::swfputdir
 		);
 		$jatt['obj']['parm'][] = array(
 			'name' => 'bgcolor', 'value' => '#000000'
@@ -3037,13 +3025,24 @@ class SWF_put_evh {
 			'name' => 'align', 'value' => 'middle'
 		);
 
+		$ind = '';
+		foreach ( $jatt['obj']['parm'] as $v ) {
+			$obj .= sprintf('%s<param name="%s" value="%s">',
+				$ind, $v['name'], $v['value']);
+			$ind = "\n\t\t\t";
+		}
+		*/
+
+		/* $jatt['obj']['parm'] is not being used; comment
+		 * or remove this if it is put to use
+		 */
 		$obj .= sprintf('<param name="play" value="%s">
 			<param name="quality" value="%s">
 			<param name="allowFullScreen" value="%s">
 			<param name="allowScriptAccess" value="sameDomain">
 			<param name="flashvars" value="%s">
 			<param name="src" value="%s?%s">
-			<param name="name" value="mingput">
+			<param name="name" value="' . self::swfputdir . '">
 			<param name="bgcolor" value="#000000">
 			<param name="align" value="middle">',
 			$play, $quality, $allowfull, $fv, $uswf, $pv);
