@@ -39,7 +39,7 @@ MINGS = mingput.php
 MINGA = mainact.inc.php
 MINGC = obj.css
 SSRCS = $(SDIRI)/$(MINGS) $(SDIRI)/$(MINGA) $(SDIRI)/$(MINGC)
-SBINS = $(SDIRI)/default.flv \
+SBINS = \
 	$(SDIRI)/$(MNAME).swf \
 	$(SDIRI)/$(MNAME)44.swf \
 	$(SDIRI)/$(MNAME)40.swf \
@@ -47,6 +47,7 @@ SBINS = $(SDIRI)/default.flv \
 	$(SDIRI)/$(MNAME)32.swf \
 	$(SDIRI)/$(MNAME)28.swf \
 	$(SDIRI)/$(MNAME)24.swf
+SDEFS = $(SDIRI)/default.flv \
 
 ALSO = Makefile COPYING version.sh
 #READS= README README.tty README.tt8 README.pdf README.html
@@ -65,7 +66,7 @@ PHPCLI = php -f
 
 all: ${PRJZIP}
 
-${PRJZIP}: ${SBINS} ${H5BIN} ${JSBIN} ${ZALL} ${LCFPO}
+${PRJZIP}: ${SBINS} ${SDEFS} ${H5BIN} ${JSBIN} ${ZALL} ${LCFPO}
 	test -e ttd && rm -rf ttd; test -e ${PRJDIR} && mv ${PRJDIR} ttd; \
 	mkdir ${PRJDIR} && \
 	cp -r -p ${ZALL} ${ZDIR} ${PRJDIR} && \
