@@ -1448,9 +1448,9 @@ mk_waitanim : function(parentobj, doc) {
 	gmain.setAttribute("id", "waitgmain");
 	gmain.setAttribute("transform", "translate(" + (sidelen / 2) + "," + (sidelen / 2) + ")");
 
-	// data object for spinner animation
-	this.wait_anim_dat = {};
-	var adat = this.wait_anim_dat;
+	// object for spinner animation
+	this.wait_anim_obj = {};
+	var adat = this.wait_anim_obj;
 	adat.transform_obj = btn;
 	adat.transform_grp = gmain;
 	adat.transform_idx = 0;
@@ -1903,7 +1903,7 @@ mk : function() {
 		wa.setAttribute("visibility", "visible");
 		this.wait_group.setAttribute("visibility", "visible");
 
-		this.wait_anim_dat.start();
+		this.wait_anim_obj.start();
 
 		return true;
 	},
@@ -1926,7 +1926,7 @@ mk : function() {
 		d.style.left = "" + (-w) + "px";
 		d.style.top  = "0px";
 
-		this.wait_anim_dat.stop();
+		this.wait_anim_obj.stop();
 
 		return true;
 	},
@@ -1997,6 +1997,10 @@ mk : function() {
 		x = this.button_volume.x.baseVal.valueInSpecifiedUnits;
 
 		this.button_volume.width.baseVal.convertToSpecifiedUnits(
+			this.button_volume.width.baseVal.SVG_LENGTHTYPE_PX);
+		var bw = this.button_volume.width.baseVal.valueInSpecifiedUnits;
+
+		this.button_volume.width.baseVal.convertToSpecifiedUnits(
 			this.volctl.height.baseVal.SVG_LENGTHTYPE_PX);
 		var bw = this.button_volume.width.baseVal.valueInSpecifiedUnits;
 
@@ -2033,6 +2037,14 @@ mk : function() {
 		var d = document.getElementById(this.v_parms["ctlbardiv"]);
 		var l = x;// + ();
 		var t = bottom - this.vol_height;
+		var scl = 1;
+
+		if ( t < 0 ) {
+			scl = (t + this.vol_height) / this.vol_height;
+			t = 0;
+		}
+		this.volctl.setAttribute("transform", "scale(" + scl + ")");
+
 		d.style.left = "" + l + "px";
 		d.style.top  = "" + t + "px";
 
