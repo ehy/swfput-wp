@@ -425,7 +425,7 @@ function get_ua_string() {
 
 // is the browser, or 'user agent', mobile?
 // [lifted from JS code, which was lifted from WordPress php]
-var test_ua_is_mobile = true;
+//var test_ua_is_mobile = true;
 function ua_is_mobile() {
 	if ( test_ua_is_mobile !== undefined ) {
 		return test_ua_is_mobile;
@@ -1306,12 +1306,14 @@ function resizeFace() {
 	if ( ua_is_mobile() ) { // horizontal
 		y = bbar.yhome - 3 - volbarwid * 2;
 		x = refx - volbarlen + (butwidth - volbarwid) / 2;
+		volgadget._y = Math.max(y, volbarwid);
+		volgadget._x = Math.max(x, volbarwid);
 	} else { // rotated -90 -- vertical
 		y = bbar.yhome - 3;
 		x = refx + (butwidth - volbarwid) / 2;
+		volgadget._y = Math.max(y, volbarlen + volbarwid * 2);
+		volgadget._x = Math.max(x, volbarwid);
 	}
-	volgadget._y = Math.max(y, 0);
-	volgadget._x = Math.max(x, 0);
 
 	volgadget._xscale = bscl * 100;
 	volgadget._yscale = bscl * 100;
