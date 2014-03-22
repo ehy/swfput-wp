@@ -659,7 +659,7 @@ foreach ( $av as $k => $v ) {
 			break;
 		case 'BH':
 			if ( $v && $v !== 'default' ) {
-				$t = round(max(20, min(280, 0 + $v)));
+				$t = round(max(5, min(360, 0 + $v)));
 				$barheight = $t;
 			}
 			break;

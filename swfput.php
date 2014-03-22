@@ -1897,12 +1897,9 @@ class SWF_put_evh {
 		if ( $code === "" ) {
 			$code = 'swfput_div';
 		}
-		if ( $this->should_use_ming() ) {
-			$swf = $this->get_swf_url('widget', $w, $h);
-		} else {
-			$bh = $pr->getvalue('barheight');
-			$swf = $this->get_swf_binurl($bh);
-		}
+		
+		$swf = $this->get_swf_url();
+
 		$dw = $w + 3;
 
 		// use no class, but do use deprecated align
@@ -1959,12 +1956,9 @@ class SWF_put_evh {
 		if ( $code === "" ) {
 			$code = 'swfput_div';
 		}
-		if ( $this->should_use_ming() ) {
-			$swf = $this->get_swf_url('post', $w, $h);
-		} else {
-			$bh = $pr->getvalue('barheight');
-			$swf = $this->get_swf_binurl($bh);
-		}
+		
+		$swf = $this->get_swf_url();
+
 		$dw = $w + 0;
 
 		// use class that WP uses for e.g. images
@@ -1994,12 +1988,8 @@ class SWF_put_evh {
 		$pr = new $pr();
 		$pr->setvalue('width', $w);
 		$pr->setvalue('height', $h);
-		if ( $this->should_use_ming() ) {
-			$swf = $this->get_swf_url('post_sed', $w, $h);
-		} else {
-			$bh = $pr->getvalue('barheight');
-			$swf = $this->get_swf_binurl($bh);
-		}
+		
+		$swf = $this->get_swf_url();
 		
 		// accumulate in $out
 		$out = '';
@@ -2565,46 +2555,38 @@ class SWF_put_evh {
 		return $ourl;
 	}
 
-	// helper for selecting swf type (bin||script)) url
-	// arg $sel should be caller tag: 'widget',
-	// 'post' (shortcodes in posts), 'post_sed' (attachment_id filter),
-	// 'head' -- it might be used in future
-	public function get_swf_url($sel, $wi = 640, $hi = 480) {
-		$useming = self::should_use_ming();
-
-		if ( $useming === true ) {
-			$t = $this->swfputphp;
-		} else {
-			$n = floor((int)$hi / 10);
-			if ( $sel === 'widget' ) {
-				$n = 24;
-			}
-			$t = $this->get_swf_binurl($n);
-		}
-
-		return $t;
+	// return ming+php script address for server w/ ming module
+	public function get_swf_srcurl() {
+		return $this->swfputphp;
 	}
 
-	// helper for selecting swf bin near desired bar height
-	public function get_swf_binurl($bh = 48) {
+	// return compiled .swf program address
+	public function get_swf_binurl() {
 		return $this->swfputbin;
 	}
 
-	// helper for getting swf css (internal use)) url
-	// arg $sel should be caller tag: 'widget',
-	// 'post' (shortcodes in posts), 'post_sed' (attachment_id filter),
-	// 'head' -- it might be used in future
-	public function get_swf_css_url($sel = '') {
+	// return one or the other of the two above
+	public function get_swf_url() {
+		if ( self::should_use_ming() ) {
+			return $this->get_swf_srcurl();
+		}
+
+		return $this->get_swf_binurl();
+	}
+
+	// the swf player use a small bit of css for e.g. net error
+	// reporting; get its address
+	public function get_swf_css_url() {
 		return $this->swfputcss;
 	}
 
-	// The swf player directory should have a small default video file;
-	// if it exists make a url for it.
-	public function get_swf_default_url() {
+	// the swf player directory should have a small default video file;
+	// get its address
+	public function get_swf_default_video_url() {
 		return $this->swfputvid;
 	}
 
-	// return array with media elements in ['el']
+	// return array with media elements as string in ['el']
 	public function get_player_elements($uswf, $par, $ids = null) {
 		extract($par->getparams());
 		$ming = self::should_use_ming();
@@ -2618,11 +2600,7 @@ class SWF_put_evh {
 		$idai = $ids[3]; // alternate img
 
 		if ( ! $uswf ) {
-			if ( $ming ) {
-				$uswf = $this->get_swf_url('post', $width, $height);
-			} else {
-				$uswf = $this->get_swf_binurl($barheight);
-			}
+			$uswf = $this->get_swf_url();
 		}
 
 		$fesc = 'rawurlencode';
@@ -2640,7 +2618,7 @@ class SWF_put_evh {
 		if ( $url === '' ) {
 			$url = $defaulturl;
 			if ( $url === 'default' ) {
-				$url = $this->get_swf_default_url();
+				$url = $this->get_swf_default_video_url();
 			}
 		}
 		if ( $url === '' ) {
@@ -3370,10 +3348,10 @@ class SWF_put_widget_evh extends WP_Widget {
 		if ( ! $pr->getvalue('height') ) {
 			$pr->setvalue('height', self::defheight);
 		}
+
 		$pr->sanitize();
 		$w = $pr->getvalue('width');
 		$h = $pr->getvalue('height');
-		$bh = $pr->getvalue('barheight');
 
 		// Added v. 1.0.7; 2014/01/24:
 		// if wp_is_mobile is a defined function (wp 3.4?), then
@@ -3389,11 +3367,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		}
 
 		$cap = $this->plinst->wt($pr->getvalue('caption'));
-		if ( $this->plinst->should_use_ming() ) {
-			$uswf = $this->plinst->get_swf_url('widget', $w, $h);
-		} else {
-			$uswf = $this->plinst->get_swf_binurl($bh);
-		}
+		$uswf = $this->plinst->get_swf_url();
 
 		$dw = $w + 3;
 		// use no class, but do use deprecated align
