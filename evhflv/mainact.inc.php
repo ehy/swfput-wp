@@ -68,7 +68,7 @@ var b_release = $i_release ? true : false;
 var bchkpolicyfile = $bchkpolicyfile;
 // temp func to help assignment from enclosing PHP
 tf = function (def, str, isok) {
-	return str.length > 0 && isok != null ? isok : def;
+	return (str.length > 0 && isok !== undefined) ? isok : def;
 };
 var swfvs = tf(8, "$swfvs", $swfvs);
 var initvolume = tf(50, "$initvolume", $initvolume);
@@ -76,6 +76,7 @@ var doloop = tf(false, "$doloop", $doloop);
 var disablebar = tf(false, "$disablebar", $disablebar);
 var showdeblockingitems = tf(false, "$showdeblockingitems", $showdeblockingitems);
 var barpadding = tf(1, "$barpadding", $barpadding);
+var barypadding = 2;
 var barsubtr = tf(barpadding + 2, "$barsubtr", $barsubtr);
 var barheight = tf(100, "$barheight", $barheight);
 var barlength = tf(240 - barsubtr, "$barlength", $barlength);
@@ -424,7 +425,7 @@ function get_ua_string() {
 
 // is the browser, or 'user agent', mobile?
 // [lifted from JS code, which was lifted from WordPress php]
-//var test_ua_is_mobile = true;
+var test_ua_is_mobile = true;
 function ua_is_mobile() {
 	if ( test_ua_is_mobile !== undefined ) {
 		return test_ua_is_mobile;
@@ -1301,19 +1302,17 @@ function resizeFace() {
 	// some gadgets are relative to bar yhome
 	volgadget._xscale = 100;
 	volgadget._yscale = 100;
+	var x, y, refx = rtmbut._x * bscl;
 	if ( ua_is_mobile() ) { // horizontal
-		var x, y;
 		y = bbar.yhome - 3 - volbarwid * 2;
-		x = rtmbut._x - volbarlen + (butwidth - volbarwid) / 2;
-		volgadget._y = y;
-		volgadget._x = x;
+		x = refx - volbarlen + (butwidth - volbarwid) / 2;
 	} else { // rotated -90 -- vertical
-		var x, y;
-		y = bbar.yhome - 3; //- volbarwid * 2;
-		x = rtmbut._x + (butwidth - volbarwid) / 2;
-		volgadget._y = y;
-		volgadget._x = x;
+		y = bbar.yhome - 3;
+		x = refx + (butwidth - volbarwid) / 2;
 	}
+	volgadget._y = Math.max(y, 0);
+	volgadget._x = Math.max(x, 0);
+
 	volgadget._xscale = bscl * 100;
 	volgadget._yscale = bscl * 100;
 }
@@ -1341,11 +1340,11 @@ var bbar_resize = function () {
 
 	// control bar y placement accounts for hiding offscreen --
 	// 'yhome' is the base y position
-	var y = Stage.height - barheight - barpadding;
+	var y = Stage.height - barheight - barypadding; // - barpadding;
 	var t = y - this.yhome;
 	this.yhome = y;
 	this.yshowpos += t;
-	this._y += t; // * iscl;
+	this._y += t;
 
 	// order of width changes is important; textfield
 	// width is not based on Stage width ( but _x is )
@@ -1488,8 +1487,8 @@ function plprogHit () {
 }
 
 function showhideBar(bshow) {
-	var show = Stage.height - bbar._height - barpadding;
-	var hide = show + bbar._height + barpadding * 2;
+	var show = Stage.height - bbar._height - barypadding; //barpadding;
+	var hide = show + bbar._height + barypadding * 2; //barpadding * 2;
 	var p = bshow ? show : hide;
 	var y = bbar._y;
 
@@ -1790,7 +1789,8 @@ function ConnectedStartVideo() {
 		v = sound.getVolume();
 		// note constant const_vbar_len not used here, as
 		// gadget might be resized
-		volgadget.vbarind._width = Math.round(volbarlen * v / 100);
+		//volgadget.vbarind._width = Math.round(volbarlen * v / 100);
+		volgadget.vbarind._width = Math.round(const_vbar_len * v / 100);
 	}
 
 	// initial pause state according to boolean dopause
@@ -1919,7 +1919,7 @@ function ticker () {
 	if ( bbar.yshowpos > y ) {
 		bbar._y = Math.min(y + barshowincr, bbar.yshowpos);
 		// when bar is fully hidden also hide sound volume gadget
-		if ( bbar.yshowpos == y ) {
+		if ( bbar.yshowpos == bbar._y ) {
 			volgadget._visible = false;
 		}
 	} else if ( bbar.yshowpos < y ) {
@@ -2168,6 +2168,9 @@ if ( _level0.BH != undefined && _level0.BH != '' ) {
 // these are used throughout for resizing
 var bscl = barheight / origbarheight;
 var iscl = 1.0 / bscl;
+// volbar{wid,len} were init'd based on unscaled bar, so scale
+volbarwid *= bscl;
+volbarlen *= bscl;
 
 if ( _level0.DB != undefined && _level0.DB != '' ) {
 	disablebar = _level0.DB == 'true' ? true : false;

@@ -787,7 +787,7 @@ $progpbR =  20; $progpbG =  0; $progpbB =  5; $progpbA = 120;
 \**********************************************************************/
 
 // Dimensions, loci and such that are not modified by args
-$barpadding = 0; // pad at controlbar edges
+$barpadding = 0; // pad at controlbar edges: LEAVE AT 0, set in A/S
 $barpadding = max(0, $barpadding); // positive only
 $barsubtr = $barpadding * 2;
 if ( !isset($barheight) ) {

@@ -3028,6 +3028,13 @@ class SWF_put_evh {
 		
 		$parms = array("iparm" => $iparm, "oparm" => $oparm);
 
+		if ( $atts['fallback'] === 'false' ) {
+			return sprintf('
+			<script type="text/javascript">
+				evhh5v_controlbar_elements(%s, true);
+			</script>', json_encode($parms));
+		}
+		
 		// This is depressing . . . the test should be whether the
 		// outer <object> is exposed (showing, used) or the inner
 		// fallback content is exposed, regardless of the <object>
@@ -3037,13 +3044,10 @@ class SWF_put_evh {
 		// be less reliable.
 		return sprintf('
 			<script type="text/javascript">
-				if ( %s || ! navigator.plugins["Shockwave Flash"] ) {
+				if ( ! navigator.plugins["Shockwave Flash"] ) {
 					evhh5v_controlbar_elements(%s, true);
 				}
-			</script>',
-			$atts['fallback'] === 'false' ? 'true' : 'false',
-			json_encode($parms)
-		);
+			</script>', json_encode($parms));
 	}
 } // End class SWF_put_evh
 
