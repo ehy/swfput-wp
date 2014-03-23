@@ -1806,6 +1806,8 @@ init_volctl : function() {
 	var doc = this.v_parms.docu_svg;
 	var but = doc.getElementById("g_slider");
 	this.volctl = this.mk_volctl(but, doc);
+	this.volctlg = but;          // webkit needs group for transforms
+	this.volctl.scalefactor = 1; // scaling for display size changes
 
 	return true;
 },
@@ -2049,19 +2051,24 @@ mk : function() {
 		var scl = 1;
 
 		if ( horz && l < 0 ) {
-			scl = (l + this.vol_width) / this.vol_width;
-			l = 0;
-			if ( (this.vol_width * scl) > width ) {
+			l = this.vol_width; // temporary reuse
+			if ( this.vol_width > width ) {
 				scl *= width / this.vol_width;
-			}
+				l *= scl;
+			} else
+			l = 0; //(width - l) / 2;
 		} else if ( ! horz && t < 0 ) {
-			scl = (t + this.vol_height) / this.vol_height;
-			t = 0;
-			if ( (this.vol_height * scl) > bottom ) {
+			t = this.vol_height; // temporary reuse
+			if ( this.vol_height > bottom ) {
 				scl *= bottom / this.vol_height;
+				t *= scl;
 			}
+			t = (bottom - t) / 2;
 		}
-		this.volctl.setAttribute("transform", "scale(" + scl + ")");
+		// NOTE use volctlg -- webkit does not apply transform
+		// to this.volctl (an svg) directly (volctlg ia a 'g')
+		this.volctlg.setAttribute("transform", "scale(" + scl + ")");
+		this.volctl.scalefactor = scl;
 
 		d.style.left = "" + l + "px";
 		d.style.top  = "" + t + "px";
@@ -2164,12 +2171,12 @@ mk : function() {
 				this.vol_touchstart = 0;
 			}
 			var cur = t - this.vol_touchstart;
-			v = fh - cur;
+			v = (fh - cur) / this.volctl.scalefactor;
 			this.vol_touchstart = t;
 		} else if ( horz ) { // mouse{down,up,move}
-			v = e.clientX - bt;
+			v = e.clientX / this.volctl.scalefactor - bt;
 		} else { // mouse{down,up,move}
-			v = bh - (e.clientY - bt);
+			v = bh - (e.clientY / this.volctl.scalefactor - bt);
 		}
 
 		this.controller_handle_volume(v / bh);
