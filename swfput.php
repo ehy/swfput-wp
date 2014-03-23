@@ -2997,8 +2997,7 @@ class SWF_put_evh {
 		return $aret;
 	}
 
-	// return array with suitable SWF object/embed tags in ['el']
-	// and data for building the elements w/ JS in ['js']
+	// get a script element string for H5 video JS setup
 	public function get_h5vjs_tags($atts, $flashid = null) {
 		$bar = $this->evhv5v_svgs[self::evhv5vsvg_bar];
 		$vol = $this->evhv5v_svgs[self::evhv5vsvg_vol];
@@ -3040,7 +3039,7 @@ class SWF_put_evh {
 		// fallback content is exposed, regardless of the <object>
 		// content type; but, after ridiculous time searching, I
 		// cannot find any way to simply determine whether primary
-		// or fallback elements will be used. The plugin check will
+		// or fallback elements will be exposed. The plugin check will
 		// be less reliable.
 		return sprintf('
 			<script type="text/javascript">

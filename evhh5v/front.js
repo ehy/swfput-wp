@@ -1984,7 +1984,7 @@ mk : function() {
 	},
 
 	// show volume slider with bottom at bottom, over vol button
-	show_volctl : function(bottom) {
+	show_volctl : function(bottom, width) {
 		if ( ! this.init_volctl() ) {
 			return false;
 		}
@@ -2000,9 +2000,14 @@ mk : function() {
 			this.button_volume.width.baseVal.SVG_LENGTHTYPE_PX);
 		var bw = this.button_volume.width.baseVal.valueInSpecifiedUnits;
 
-		this.button_volume.width.baseVal.convertToSpecifiedUnits(
+		/*
+		this.volctl.height.baseVal.convertToSpecifiedUnits(
 			this.volctl.height.baseVal.SVG_LENGTHTYPE_PX);
-		var bw = this.button_volume.width.baseVal.valueInSpecifiedUnits;
+		var vh = this.volctl.height.baseVal.valueInSpecifiedUnits;
+		this.volctl.width.baseVal.convertToSpecifiedUnits(
+			this.volctl.width.baseVal.SVG_LENGTHTYPE_PX);
+		var vw = this.volctl.width.baseVal.valueInSpecifiedUnits;
+		*/
 
 		var fact;
 		// LOUSINESS: older browsers, e.g. Chromium 22.xx, might
@@ -2032,16 +2037,29 @@ mk : function() {
 
 		x  *= fact;
 		bw *= fact;
-		x  += bw - this.vol_width;
+		if ( horz ) {
+			x  += (bw - this.vol_width);
+		} else {
+			x  += (bw - this.vol_width) / 2.0;
+		}
 
 		var d = document.getElementById(this.v_parms["ctlbardiv"]);
-		var l = x;// + ();
+		var l = x;
 		var t = bottom - this.vol_height;
 		var scl = 1;
 
-		if ( t < 0 ) {
+		if ( horz && l < 0 ) {
+			scl = (l + this.vol_width) / this.vol_width;
+			l = 0;
+			if ( (this.vol_width * scl) > width ) {
+				scl *= width / this.vol_width;
+			}
+		} else if ( ! horz && t < 0 ) {
 			scl = (t + this.vol_height) / this.vol_height;
 			t = 0;
+			if ( (this.vol_height * scl) > bottom ) {
+				scl *= bottom / this.vol_height;
+			}
 		}
 		this.volctl.setAttribute("transform", "scale(" + scl + ")");
 
@@ -3643,7 +3661,7 @@ evhh5v_controller.prototype = {
 			if ( bot == undefined )
 				bot = this.height - this.barheight - 3;
 			this.volctl_showing = true;
-			this.bar.show_volctl(bot);
+			this.bar.show_volctl(bot, this.width);
 		}
 	},
 	hide_volctl : function() {
