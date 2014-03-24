@@ -228,7 +228,7 @@ function evhh5v_controlbar_elements(parms, fixups) {
 	barobj.setAttribute("data", url + (evhh5v_need_svg_query() ? "" : q));
 
 	bardiv.appendChild(barobj);
-	alldiv.insertBefore(bardiv, topdiv);
+	alldiv.appendChild(bardiv);
 
 	// volume slide control
 	url = ip["volurl"];
