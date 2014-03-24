@@ -555,11 +555,11 @@ SWFPut_putswf_video_xed.prototype = {
 				var k = this.name.substring(len, this.name.length - 1);
 				if ( k == to ) {
 					var t = that.trim(this.value);
-					if ( t.length > 0 ) {
+					var u = that.trim(decodeURIComponent(v));
+					if ( t.length > 0 && u.length > 0 ) {
 						t += ' | ';
 					}
-					t += decodeURIComponent(v);
-					this.value = t;
+					this.value = t + u;
 					return false;
 				}
 			}
