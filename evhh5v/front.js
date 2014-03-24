@@ -2045,19 +2045,16 @@ mk : function() {
 			x  += (bw - this.vol_width) / 2.0;
 		}
 
-		var d = document.getElementById(this.v_parms["ctlbardiv"]);
 		var l = x;
 		var t = bottom - this.vol_height;
 		var scl = 1;
 
-		if ( horz && l < 0 ) {
-			l = this.vol_width; // temporary reuse
+		if ( horz && (l < 0 || this.vol_width > width) ) {
 			if ( this.vol_width > width ) {
 				scl *= width / this.vol_width;
-				l *= scl;
-			} else
-			l = 0; //(width - l) / 2;
-		} else if ( ! horz && t < 0 ) {
+			}
+			l = 0;
+		} else if ( ! horz && (t < 0 || this.vol_height > bottom) ) {
 			t = this.vol_height; // temporary reuse
 			if ( this.vol_height > bottom ) {
 				scl *= bottom / this.vol_height;
@@ -2070,6 +2067,7 @@ mk : function() {
 		this.volctlg.setAttribute("transform", "scale(" + scl + ")");
 		this.volctl.scalefactor = scl;
 
+		var d = document.getElementById(this.v_parms["ctlbardiv"]);
 		d.style.left = "" + l + "px";
 		d.style.top  = "" + t + "px";
 

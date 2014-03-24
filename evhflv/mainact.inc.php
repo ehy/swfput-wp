@@ -1302,21 +1302,33 @@ function resizeFace() {
 	// some gadgets are relative to bar yhome
 	volgadget._xscale = 100;
 	volgadget._yscale = 100;
-	var x, y, refx = rtmbut._x * bscl;
-	if ( ua_is_mobile() ) { // horizontal
+
+	var mob = ua_is_mobile();
+	var vlen = volbarlen + volbarwid * 2;
+	var scl = bscl;
+	var x, y, refx = rtmbut._x * scl;
+
+	if ( mob ) { // horizontal
+		// this is not quite right, but works well enough
 		y = bbar.yhome - 3 - volbarwid * 2;
 		x = refx - volbarlen + (butwidth - volbarwid) / 2;
+		if ( vlen > sw ) {
+			scl *= sw / vlen;
+		}
 		volgadget._y = Math.max(y, volbarwid);
-		volgadget._x = Math.max(x, volbarwid);
+		volgadget._x = Math.max(x, 0);
 	} else { // rotated -90 -- vertical
 		y = bbar.yhome - 3;
 		x = refx + (butwidth - volbarwid) / 2;
-		volgadget._y = Math.max(y, volbarlen + volbarwid * 2);
-		volgadget._x = Math.max(x, volbarwid);
+		if ( vlen > y ) {
+			scl *= y / vlen;
+		}
+		volgadget._y = Math.max(y, vlen * scl);
+		volgadget._x = Math.max(x, 0);
 	}
 
-	volgadget._xscale = bscl * 100;
-	volgadget._yscale = bscl * 100;
+	volgadget._xscale = scl * 100;
+	volgadget._yscale = scl * 100;
 }
 
 var bbar_resize = function () {
