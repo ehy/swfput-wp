@@ -158,8 +158,9 @@ function evhh5v_controlbar_elements(parms, fixups) {
 	barobj.setAttribute('id', op["uniq"]["parent"]);
 	barobj.setAttribute('class', ip["divclass"]);
 
-	var p, v, sep = "?", q = "";
+	var p, v, sep, q = "";
 
+	sep = "?";
 	for ( var i in op ) {
 		for ( var k in op[i] ) {
 			v = "" + op[i][k];
@@ -185,6 +186,7 @@ function evhh5v_controlbar_elements(parms, fixups) {
 
 	bardiv.appendChild(barobj);
 	var alldiv = document.getElementById(adiv);
+	var topdiv = bardiv; // keep ref for insertBefore()
 	alldiv.appendChild(bardiv);
 
 	// main bar svg done, now for the additional elements:
@@ -226,7 +228,7 @@ function evhh5v_controlbar_elements(parms, fixups) {
 	barobj.setAttribute("data", url + (evhh5v_need_svg_query() ? "" : q));
 
 	bardiv.appendChild(barobj);
-	alldiv.appendChild(bardiv);
+	alldiv.insertBefore(bardiv, topdiv);
 
 	// volume slide control
 	url = ip["volurl"];
@@ -265,7 +267,7 @@ function evhh5v_controlbar_elements(parms, fixups) {
 	barobj.setAttribute("data", url + (evhh5v_need_svg_query() ? "" : q));
 
 	bardiv.appendChild(barobj);
-	alldiv.appendChild(bardiv);
+	alldiv.insertBefore(bardiv, topdiv);
 
 	// finally, optional fixups; comment at definition
 	if ( fixups !== undefined && fixups == true ) {
@@ -2003,13 +2005,13 @@ mk : function() {
 		var bw = this.button_volume.width.baseVal.valueInSpecifiedUnits;
 
 		/*
+		*/
 		this.volctl.height.baseVal.convertToSpecifiedUnits(
 			this.volctl.height.baseVal.SVG_LENGTHTYPE_PX);
 		var vh = this.volctl.height.baseVal.valueInSpecifiedUnits;
 		this.volctl.width.baseVal.convertToSpecifiedUnits(
 			this.volctl.width.baseVal.SVG_LENGTHTYPE_PX);
 		var vw = this.volctl.width.baseVal.valueInSpecifiedUnits;
-		*/
 
 		var fact;
 		// LOUSINESS: older browsers, e.g. Chromium 22.xx, might
@@ -2070,6 +2072,8 @@ mk : function() {
 		var d = document.getElementById(this.v_parms["ctlbardiv"]);
 		d.style.left = "" + l + "px";
 		d.style.top  = "" + t + "px";
+		d.style.width  = "" + (vw * scl) + "px";
+		d.style.height = "" + (vh * scl) + "px";
 
 		var svg = this.v_parms.root_svg;
 		svg.setAttribute("visibility", "visible");
@@ -2985,11 +2989,12 @@ evhh5v_controller.prototype = {
 		}
 
 		// set that hopefully works for the wait indicator
-		this.addEventListener(["stalled", "waiting", "seeking"], function(e) {
+		// (removed: "seeking" "seeked")
+		this.addEventListener(["stalled", "waiting"], function(e) {
 			this.show_wait();
 			//console.log("WAIT SPINNER START: " + e.type);
 		}, false);
-		this.addEventListener(["canplaythrough", "canplay", "playing", "seeked", "loadeddata", "suspend", "progress", "ended"], function(e) {
+		this.addEventListener(["canplaythrough", "canplay", "playing", "loadeddata", "suspend", "progress", "ended"], function(e) {
 			this.hide_wait();
 			//console.log("WAIT SPINNER STOP: " + e.type);
 		}, false);
@@ -3719,7 +3724,7 @@ evhh5v_controller.prototype = {
 				that.bar.hide_waitanim();
 				that.wait_showing = false;
 			}
-		}, 500);
+		}, 200);
 	},
 
 	// handle control bar click per object.id
