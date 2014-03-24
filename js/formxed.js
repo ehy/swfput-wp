@@ -23,8 +23,11 @@
  * 	http://bluedogwebservices.com/wordpress-25-shortcodes/
  */
 
-var SWFPut_putswf_video_xed = function () {};
-
+var SWFPut_putswf_video_xed = function () {
+	this.map = {};
+	this.last_from = 0;
+	this.last_match = '';
+};
 SWFPut_putswf_video_xed.prototype = {
 	defs : {
 		url: "",
@@ -53,9 +56,6 @@ SWFPut_putswf_video_xed.prototype = {
 		classid: "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000",
 		codebase: "http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,115,0"
 	},
-	map : {},
-	last_from : 0,
-	last_match : '',
 	ltrim : function(s, ch) {
 		var c = (ch === undefined) ? " " : ch;
 		while ( s.charAt(0) === c )
@@ -526,6 +526,40 @@ SWFPut_putswf_video_xed.prototype = {
 					// EH: 2013/08/10 -- had unsuitable unescape(),
 					// changed to decodeURIComponent()
 					this.value = decodeURIComponent(v);
+					return false;
+				}
+			}
+		});
+		return false;
+	},
+	form_apval : function(f, id, fr, to) {
+		var len = id.length + 1;
+		var v = null;
+		var pat = "*[id^=" + id + "]";
+		var all = jQuery(f).find(pat);
+		var that = this;
+		all.each(function () {
+			if ( this.name != undefined ) {
+				var k = this.name.substring(len, this.name.length - 1);
+				if ( k == fr ) {
+					v = this.value;
+					return false;
+				}
+			}
+		});
+		if ( v == null ) {
+			return false;
+		}
+		all.each(function () {
+			if ( this.name != undefined ) {
+				var k = this.name.substring(len, this.name.length - 1);
+				if ( k == to ) {
+					var t = that.trim(this.value);
+					if ( t.length > 0 ) {
+						t += ' | ';
+					}
+					t += decodeURIComponent(v);
+					this.value = t;
 					return false;
 				}
 			}

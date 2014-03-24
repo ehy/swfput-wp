@@ -1518,9 +1518,9 @@ class SWF_put_evh {
 		$mpat = self::get_mfilter_pat();
 		// files array from uploads dirs (empty if none)
 		$rhu = self::r_find_uploads($mpat['m'], true);
-		$af = &$rhu['rf'];
-		$au = &$rhu['wu'];
-		$aa = &$rhu['at'];
+		$af = &$rhu['uploadfiles'];
+		$au = &$rhu['uploadsdir'];
+		$aa = &$rhu['medialib'];
 		// url base for upload dirs files
 		$ub = rtrim($au['baseurl'], '/') . '/';
 		// directory base for upload dirs files
@@ -1555,6 +1555,8 @@ class SWF_put_evh {
 		$jfud = "rmsc_xed(this.form,'{$id}','caption','{$sc}')";
 		// js to copy from select/dropdown to text input
 		$jfsl = "form_cpval(this.form,'%s','%s','%s')";
+		// js to append from select/dropdown to text input
+		$jfap = "form_apval(this.form,'%s','%s','%s')";
 		// input text widths, wide, narrow
 		$iw = 100; $in = 8; // was: $in = 16;
 		// incr var for sliding divs
@@ -1576,15 +1578,15 @@ class SWF_put_evh {
 		<table id="<?php echo $id . '_buttons'; ?>"><tr><td>
 			<span  class="submit">
 			<?php
-				$l = self::wt(__('Fill form from editor', 'swfput_l10n'));
+				$l = self::wt(__('Fill from post', 'swfput_l10n'));
 				printf($bjfmt, $job, $jfuf, $l);
-				$l = self::wt(__('Replace current in editor', 'swfput_l10n'));
+				$l = self::wt(__('Replace current in post', 'swfput_l10n'));
 				printf($bjfmt, $job, $jfuc, $l);
-				$l = self::wt(__('Delete current in editor', 'swfput_l10n'));
+				$l = self::wt(__('Delete current in post', 'swfput_l10n'));
 				printf($bjfmt, $job, $jfud, $l);
-				$l = self::wt(__('Place new in editor', 'swfput_l10n'));
+				$l = self::wt(__('Place new in post', 'swfput_l10n'));
 				printf($bjfmt, $job, $jfu, $l);
-				$l = self::wt(__('Reset default values', 'swfput_l10n'));
+				$l = self::wt(__('Reset defaults', 'swfput_l10n'));
 				printf($bjfmt, $job, $jfur, $l);
 			?>
 			</span>
@@ -1611,7 +1613,7 @@ class SWF_put_evh {
 			printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
 		</p><p>
 		<?php $k = 'url';
-			$l = self::wt(__('Url or media library ID:', 'swfput_l10n'));
+			$l = self::wt(__('Url or media library ID for flash video:', 'swfput_l10n'));
 			printf($lbfmt, $id, $k, $l);
 			printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
 		</p>
@@ -1622,7 +1624,7 @@ class SWF_put_evh {
 				echo "<p>\n";
 				$k = 'files';
 				$jfcp = sprintf($jfsl, $id, $k, $kl);
-				$l = self::wt(__('Url from uploads directory:', 'swfput_l10n'));
+				$l = self::wt(__('Url for flash video from uploads directory:', 'swfput_l10n'));
 				printf($lbfmt, $id, $k, $l);
 				// <select>
 				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfcp);
@@ -1651,7 +1653,7 @@ class SWF_put_evh {
 				echo "<p>\n";
 				$k = 'atch';
 				$jfcp = sprintf($jfsl, $id, $k, $kl);
-				$l = self::wt(__('Select ID from media library:', 'swfput_l10n'));
+				$l = self::wt(__('Select ID for flash video from media library:', 'swfput_l10n'));
 				printf($lbfmt, $id, $k, $l);
 				// <select>
 				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfcp);
@@ -1670,17 +1672,72 @@ class SWF_put_evh {
 			} // end if there are upload files
 		?>
 		<p>
-		<?php $k = 'audio';
+		<?php /* Remove MP3 audio (v. 1.0.8) $k = 'audio';
 			$l = self::wt(__('Medium is audio: ', 'swfput_l10n'));
 			printf($lbfmt, $id, $k, $l);
 			$ck = $$k == 'true' ? 'checked="checked" ' : '';
 			printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
 		</p><p>
-		<?php $k = 'altvideo'; 
-			$l = self::wt(__('URLs for alternate HTML5 video (optional: .mp4, .webm, .ogv):', 'swfput_l10n'));
+		<?php */ $k = 'altvideo'; 
+			$l = self::wt(__('URLs for HTML5 video (optional: .mp4, .webm, .ogv):', 'swfput_l10n'));
 			printf($lbfmt, $id, $k, $l);
 			printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
-		</p><p>
+		</p>
+		<?php
+			// if there are upload files, print <select >
+			$kl = $k;
+			if ( count($af) > 0 ) {
+				echo "<p>\n";
+				$k = 'h5files';
+				$jfcp = sprintf($jfap, $id, $k, $kl);
+				$l = self::wt(__('Url for HTML5 video from uploads directory (appends):', 'swfput_l10n'));
+				printf($lbfmt, $id, $k, $l);
+				// <select>
+				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfcp);
+				// <options>
+				printf($sofmt, '', self::wt(__('none', 'swfput_l10n')));
+				foreach ( $af as $d => $e ) {
+					$hit = array();
+					for ( $i = 0; $i < count($e); $i++ )
+						if ( preg_match($mpat['h5av'], $e[$i]) )
+							$hit[] = &$af[$d][$i];
+					if ( empty($hit) )
+						continue;
+					printf($sgfmt, self::ht($d));
+					foreach ( $hit as $fv ) {
+						$tu = rtrim($ub, '/') . '/' . $d . '/' . $fv;
+						$fv = self::ht($fv);
+						printf($sofmt, self::et($tu), $fv);
+					}
+					echo "</optgroup>\n";
+				}
+				// end select
+				echo "</select><br />\n";
+				echo "</p>\n";
+			} // end if there are upload files
+			if ( ! empty($aa) ) {
+				echo "<p>\n";
+				$k = 'h5atch';
+				$jfcp = sprintf($jfap, $id, $k, $kl);
+				$l = self::wt(__('Select ID for HTML5 video from media library (appends):', 'swfput_l10n'));
+				printf($lbfmt, $id, $k, $l);
+				// <select>
+				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfcp);
+				// <options>
+				printf($sofmt, '', self::wt(__('none', 'swfput_l10n')));
+				foreach ( $aa as $fn => $fi ) {
+					$m = basename($fn);
+					if ( ! preg_match($mpat['h5av'], $m) )
+						continue;
+					$ts = $m . " (" . $fi . ")";
+					printf($sofmt, self::et($fi), self::ht($ts));
+				}
+				// end select
+				echo "</select><br />\n";
+				echo "</p>\n";
+			} // end if there are upload files
+		?>
+		<p>
 		<?php $k = 'playpath'; 
 			$l = self::wt(__('Playpath (rtmp):', 'swfput_l10n'));
 			printf($lbfmt, $id, $k, $l);
@@ -1827,7 +1884,7 @@ class SWF_put_evh {
 			array('allowfull', '<p>', '</p>', $in, 'chk',
 				__('Allow full screen: ', 'swfput_l10n')),
 			array('barheight', '<p>', '</p>', $in, 'inp',
-				__('Control bar Height (20-50): ', 'swfput_l10n'))
+				__('Control bar Height (30-60): ', 'swfput_l10n'))
 			);
 			foreach ( $els as $el ) {
 				$k = $el[0];
@@ -2152,10 +2209,13 @@ class SWF_put_evh {
 
 	// return preg_match() pattern for media filter by file extension
 	public static function get_mfilter_pat() {
+		// 1.0.8 -- remove mp3: 'av' =>'/.*\.(flv|f4v|m4v|mp4|mp3)$/i'
+		// 'm' => '/.*\.(flv|f4v|m4v|mp4|mp3|swf|png|jpg|jpeg|gif)$/i'
 		// TODO: build from extensions option
-		return array('av' =>'/.*\.(flv|f4v|m4v|mp4|mp3)$/i',
-			'i' => '/.*\.(swf|png|jpg|jpeg|gif)$/i',
-			'm' => '/.*\.(flv|f4v|m4v|mp4|mp3|swf|png|jpg|jpeg|gif)$/i'
+		return array('av' =>'/.*\.(flv|f4v|m4v|mp4)$/i',
+			'h5av' =>'/.*\.(m4v|mp4|og[gv]|webm)$/i',
+			'i' => '/.*\.(png|jpg|jpeg|gif)$/i',
+			'm' => '/.*\.(flv|f4v|m4v|mp4|og[gv]|webm|png|jpg|jpeg|gif)$/i'
 			);
 	}
 
@@ -2332,8 +2392,6 @@ class SWF_put_evh {
 	                if ( ! is_readable($t) )
 	                        continue;
 	                if ( is_dir($t) ) {
-	                        // array_merge should *not* overwrite
-	                        // numeric keys, but rather append
 	                        $at = self::r_find_files($t, $pat, $follow);
 	                        if ( count($at) > 0 ) {
 	                                $ao = array_merge($ao, $at);
@@ -2374,15 +2432,17 @@ class SWF_put_evh {
 
 		$ao = array();
 		$au = wp_upload_dir();
-		if ( ! $au )
-			return array('rf' => $ao, 'wu' => $au, 'at' => $aa);
 		$cdir = getcwd();
-		if ( ! chdir($au['basedir']) ) {
-			return array('rf' => $ao, 'wu' => $au, 'at' => $aa);
+		if ( $au && chdir($au['basedir']) ) {
+			$ao = self::r_find_files('.', $pat, $follow);
+			chdir($cdir);
 		}
-		$ao = self::r_find_files('.', $pat, $follow);
-		chdir($cdir);
-		return array('rf' => $ao, 'wu' => $au, 'at' => $aa);
+
+		return array(
+			'uploadfiles' => $ao,
+			'uploadsdir' => $au,
+			'medialib' => $aa
+		);
 	}
 
 	/**
@@ -2586,6 +2646,38 @@ class SWF_put_evh {
 		return $this->swfputvid;
 	}
 
+	// expand and check user input URL arg from setup form, return
+	// false if n.g.
+	public function check_expand_video_url($url, $defaulturl = 'default') {
+		if ( preg_match('/^0*[1-9][0-9]*$/', $url) ) {
+			// expand WP media lib ID
+			$url = wp_get_attachment_url(ltrim($url, '0'));
+			if ( ! $url ) {
+				$url = '';
+				self::errlog('rejected video url media ID');
+			}
+		}
+		if ( $url === '' ) {
+			$url = $defaulturl;
+			if ( $url === 'default' ) {
+				$url = $this->get_swf_default_video_url();
+			}
+		}
+		if ( $url === '' ) {
+			return false;
+		}
+		
+		$achk = array(
+			'requirehost' => false, // can use orig host
+			'requirepath' => true,
+			'rejfrag' => true,
+			// no, don't try to match extension; who knows?
+			//'rxpath' => '/.*\.(flv|f4v|mp4|m4v|mp3)$/i',
+			'rxproto' => '/^(https?|rtmp[a-z]{0,2})$/'
+			);
+		return self::check_url($url, $achk);
+	}
+
 	// return array with media elements as string in ['el']
 	public function get_player_elements($uswf, $par, $ids = null) {
 		extract($par->getparams());
@@ -2608,39 +2700,16 @@ class SWF_put_evh {
 			$fesc = 'urlencode';
 		}
 
-		if ( preg_match('/^0*[1-9][0-9]*$/', $url) ) {
-			$url = wp_get_attachment_url(ltrim($url, '0'));
-			if ( ! $url ) {
-				$url = '';
-				self::errlog('rejected video url media ID');
-			}
-		}
-		if ( $url === '' ) {
-			$url = $defaulturl;
-			if ( $url === 'default' ) {
-				$url = $this->get_swf_default_video_url();
-			}
-		}
-		if ( $url === '' ) {
-			$url = $defrtmpurl;
-			$playpath = $defaultplaypath;
-		}
 		
-		$achk = array(
-			'requirehost' => false, // can use orig host
-			'requirepath' => true,
-			'rejfrag' => true,
-			// no, don't try to match extension; who knows?
-			//'rxpath' => '/.*\.(flv|f4v|mp4|m4v|mp3)$/i',
-			'rxproto' => '/^(https?|rtmp[a-z]{0,2})$/'
-			);
-		$ut = self::check_url($url, $achk);
+		$ut = $this->check_expand_video_url($url, $defaulturl);
 		if ( ! $ut ) {
 			self::errlog('rejected URL: "' . $url . '"');
 			return '<!-- SWF embedding declined:  URL displeasing -->';
 		}
+
 		// escaping: note url used here is itself a query arg
 		$url = ($esc == true) ? $fesc($ut) : $ut;
+
 		// Hack: double escaped URL. This is to releive the swf
 		// player of the need to escape URL with the simplistic
 		// ActionScript escape(), the need for which arises from
@@ -2649,6 +2718,14 @@ class SWF_put_evh {
 		// URL args to a/v objects -- escaping is doubled because
 		// flashvars are always unescaped by the plugin, making
 		// a 2nd level necessary.
+		$achk = array(
+			'requirehost' => false, // can use orig host
+			'requirepath' => true,
+			'rejfrag' => true,
+			// no, don't try to match extension; who knows?
+			//'rxpath' => '/.*\.(flv|f4v|mp4|m4v|mp3)$/i',
+			'rxproto' => '/^(https?|rtmp[a-z]{0,2})$/'
+			);
 		$e2url = self::check_url($ut, $achk, 'rawurlencode');
 		if ( $esc == true ) {
 			$e2url = $fesc($e2url);
@@ -2671,7 +2748,7 @@ class SWF_put_evh {
 
 		if ( $cssurl === '' )
 			$cssurl = $this->get_swf_css_url();
-		$achk = array(
+		/* $achk = array(
 			'requirehost' => false, // can use orig host
 			'requirepath' => true,
 			'rejuser' => true,
@@ -2680,7 +2757,12 @@ class SWF_put_evh {
 			'rxpath' => '/.*\.css$/i',
 			'rxproto' => '/^https?$/'
 			);
-		$ut = self::check_url($cssurl, $achk);
+		$ut = self::check_url($cssurl, $achk); */
+		$ut = $this->check_expand_video_url($cssurl, false);
+		if ( ! $ut ) {
+			self::errlog('rejected URL: "' . $url . '"');
+			return '<!-- SWF embedding declined:  URL displeasing -->';
+		}
 		if ( ! $ut ) {
 			self::errlog('rejected css URL: "' . $cssurl . '"');
 			$ut = '';
@@ -2853,7 +2935,12 @@ class SWF_put_evh {
 					// leave off src
 					$src = trim($tv[0]);
 				}
-				$jsa['src'] = self::ht($src);
+				$ut = $this->check_expand_video_url($src, false);
+				if ( ! $ut ) {
+					self::errlog('rejected HTML video URL: "' . $src . '"');
+					continue;
+				}
+				$jsa['src'] = self::ht($ut);
 				$vd .= sprintf($fmt, $jsa['src'], $typ);
 				$jatt['a_vid']['srcs'][] = $jsa;
 			}
@@ -2919,7 +3006,7 @@ class SWF_put_evh {
 			);
 		} else {
 			$jatt['obj']['ie'] = 'false';
-			$typ = 'application/x-shockwave-flash';
+			$typ = $mtype ? $mtype :'application/x-shockwave-flash';
 
 			$obj = sprintf('
 			<object%s data="%s?%s" type="%s" %s width="%u" height="%u">
@@ -3097,7 +3184,7 @@ class SWF_params_evh {
 		'playpath' => '',
 		// alternative <video> within object
 		'altvideo' => '',
-		'defaultplaypath' => 'CSPAN2@14846',
+		'defaultplaypath' => '',
 		// <object>
 		'classid' => 'clsid:d27cdb6e-ae6d-11cf-96b8-444553540000',
 		'codebase' => 'http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,115,0'
@@ -3476,9 +3563,9 @@ class SWF_put_widget_evh extends WP_Widget {
 		$mpat = $this->plinst->get_mfilter_pat();
 		// files array from uploads dirs (empty if none)
 		$rhu = $this->plinst->r_find_uploads($mpat['m'], true);
-		$af = &$rhu['rf'];
-		$au = &$rhu['wu'];
-		$aa = &$rhu['at'];
+		$af = &$rhu['uploadfiles'];
+		$au = &$rhu['uploadsdir'];
+		$aa = &$rhu['medialib'];
 		// url base for upload dirs files
 		$ub = rtrim($au['baseurl'], '/') . '/';
 		// directory base for upload dirs files
@@ -3487,14 +3574,18 @@ class SWF_put_widget_evh extends WP_Widget {
 			'<select class="widefat" name="%s" id="%s" onchange="%s">';
 		$sgfmt = '<optgroup label="%s">' . "\n";
 		$sofmt = '<option value="%s">%s</option>' . "\n";
-		// expect jQuery to be loaded by WP (tried $() invocation
-		// but N.G. w/ MSIE. Sheesh.)
+		// expect jQuery to be loaded by WP
 		$jsfmt = "jQuery('[id=%s]').val";
 		// BAD
 		//$jsfmt .= '(unescape(this.options[selectedIndex].value))';
 		// better
 		$jsfmt .= '(decodeURIComponent(this.options[selectedIndex].value))';
-		$jsfmt .= '; return false;';
+		$jsfmt .= ';return false;';
+
+		$jafmt = "var t=jQuery('[id=%s]'),t1=t.val(),t2=";
+		$jafmt .= 'decodeURIComponent(this.options[selectedIndex].value);';
+		$jafmt .= "t1+=(t1.length>0&&t2.length>0)?' | ':'';t.val(t1+t2);";
+		$jafmt .= 'return false;';
 
 		?>
 
@@ -3518,7 +3609,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $instance['url'];
 		$id = $this->get_field_id('url');
 		$nm = $this->get_field_name('url');
-		$tl = $wt(__('Url or media library ID:', 'swfput_l10n'));
+		$tl = $wt(__('Url or media library ID for flash video:', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -3533,7 +3624,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		if ( count($af) > 0 ) {
 			$id = $this->get_field_id('files');
 			$k = $this->get_field_name('files');
-			$tl = $wt(__('Url from uploads directory:', 'swfput_l10n'));
+			$tl = $wt(__('Url for flash video from uploads directory:', 'swfput_l10n'));
 			printf('<p><label for="%s">%s</label>' . "\n", $id, $tl);
 			// <select>
 			printf($slfmt . "\n", $k, $id, $js);
@@ -3560,7 +3651,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		if ( ! empty($aa) ) {
 			$id = $this->get_field_id('atch');
 			$k = $this->get_field_name('atch');
-			$tl = $wt(__('Select ID from media library:', 'swfput_l10n'));
+			$tl = $wt(__('Select ID from media library for flash video:', 'swfput_l10n'));
 			printf('<p><label for="%s">%s</label>' . "\n", $id, $tl);
 			// <select>
 			printf($slfmt . "\n", $k, $id, $js);
@@ -3578,7 +3669,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		} // end if there are upload files
 		?>
 
-		<?php
+		<?php /*
 		// audio checkbox
 		$val = $instance['audio'];
 		$id = $this->get_field_id('audio');
@@ -3591,16 +3682,69 @@ class SWF_put_widget_evh extends WP_Widget {
 			name="<?php echo $nm; ?>" style="width:16%;" type="checkbox"
 			value="<?php echo $val; ?>"<?php echo $ck; ?> /></p>
 
-		<?php
+		<?php */
 		$val = $instance['altvideo'];
 		$id = $this->get_field_id('altvideo');
 		$nm = $this->get_field_name('altvideo');
-		$tl = $wt(__('URLs for alternate HTML5 video (optional: .mp4, .webm, .ogv):', 'swfput_l10n'));
+		$tl = $wt(__('URLs for HTML5 video (optional: .mp4, .webm, .ogv):', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
 			name="<?php echo $nm; ?>"
 			type="text" value="<?php echo $val; ?>" /></p>
+
+		<?php // selects for URLs and attachment id's
+		// escape url field id for jQuery selector
+		$id = $this->plinst->esc_jqsel($id);
+		$js = sprintf($jafmt, $id);
+		// optional print <select >
+		if ( count($af) > 0 ) {
+			$id = $this->get_field_id('h5files');
+			$k = $this->get_field_name('h5files');
+			$tl = $wt(__('Url for HTML5 video from uploads directory (appends):', 'swfput_l10n'));
+			printf('<p><label for="%s">%s</label>' . "\n", $id, $tl);
+			// <select>
+			printf($slfmt . "\n", $k, $id, $js);
+			// <options>
+			printf($sofmt, '', $wt(__('none', 'swfput_l10n')));
+			foreach ( $af as $d => $e ) {
+				$hit = array();
+				for ( $i = 0; $i < count($e); $i++ )
+					if ( preg_match($mpat['h5av'], $e[$i]) )
+						$hit[] = &$af[$d][$i];
+				if ( empty($hit) )
+					continue;
+				printf($sgfmt, $ht($d));
+				foreach ( $hit as $fv ) {
+					$tu = rtrim($ub, '/') . '/' . $d . '/' . $fv;
+					$fv = $ht($fv);
+					printf($sofmt, $et($tu), $fv);
+				}
+				echo "</optgroup>\n";
+			}
+			// end select
+			echo "</select></td></tr>\n";
+		} // end if there are upload files
+		if ( ! empty($aa) ) {
+			$id = $this->get_field_id('h5atch');
+			$k = $this->get_field_name('h5atch');
+			$tl = $wt(__('Select ID from media library for HTML5 video (appends):', 'swfput_l10n'));
+			printf('<p><label for="%s">%s</label>' . "\n", $id, $tl);
+			// <select>
+			printf($slfmt . "\n", $k, $id, $js);
+			// <options>
+			printf($sofmt, '', $wt(__('none', 'swfput_l10n')));
+			foreach ( $aa as $fn => $fi ) {
+				$m = basename($fn);
+				if ( ! preg_match($mpat['h5av'], $m) )
+					continue;
+				$ts = $m . " (" . $fi . ")";
+				printf($sofmt, $et($fi), $ht($ts));
+			}
+			// end select
+			echo "</select></td></tr>\n";
+		} // end if there are upload files
+		?>
 
 		<?php
 		$val = $instance['playpath'];
@@ -3834,7 +3978,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $ht($instance['barheight']);
 		$id = $this->get_field_id('barheight');
 		$nm = $this->get_field_name('barheight');
-		$tl = $wt(__('Control bar Height (20-50): ', 'swfput_l10n'));
+		$tl = $wt(__('Control bar Height (30-60): ', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
