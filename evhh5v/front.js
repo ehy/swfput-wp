@@ -1934,12 +1934,12 @@ mk : function() {
 			wa.width.baseVal.SVG_LENGTHTYPE_PX);
 		var w = wa.width.baseVal.valueInSpecifiedUnits;
 
+		var d = document.getElementById(this.b_parms["ctlbardiv"]);
 		var svg = this.b_parms.root_svg;
 		svg.setAttribute("visibility", "hidden");
 		wa.setAttribute("visibility", "hidden");
 		this.wait_group.setAttribute("visibility", "hidden");
 
-		var d = document.getElementById(this.b_parms["ctlbardiv"]);
 		d.style.left = "" + (-w) + "px";
 		d.style.top  = "0px";
 
@@ -3025,29 +3025,39 @@ evhh5v_controller.prototype = {
 		// "waiting" even when it has insufficient data and display
 		// is stalled (this is w/ 76.8kbs rate limit). This will
 		// have to do, there is no more time now.
+		// MSIE 11: sometimes fires waiting, but then closes with
+		// seeked rather than playing; also occasionally raises stalled,
+		// but not regularly and apparently w/o balanced resume event.
+		// Opera on MSW: webkit. Horrible. No wonder sites like
+		// YouTube have not simply switched to HTML5 video.
 		//
 		// [*] whatwg says, re. "waiting":
 		//		Playback has stopped because the next frame
 		//		is not available, but the user agent expects
 		//		that frame to become available in due course.
 		// Sounds just right -- but it is delivered only sparingly.
-		// (testing: "seeking" "seeked", , "suspend", "progress", "canplay", )
-		this.addEventListener(["stalled", "waiting"], function(e) {
+		// (testing: "seeking" "seeked", , "suspend", "progress", "canplay", "stalled", )
+		var wait_ev = ["waiting"];
+		if ( /Chrom(e|ium)\/([0-2][0-9]|3[0-2])\./i.test(navigator["userAgent"]) ) {
+			wait_ev.push("seeking");
+		}
+		this.addEventListener(wait_ev, function(e) {
 			this.show_wait();
-			//console.log("WAIT SPINNER START: " + e.type);
+			console.log("WAIT SPINNER START: " + e.type);
 		}, false);
-		this.addEventListener(["canplaythrough", "playing", "loadeddata", "ended"], function(e) {
+		this.addEventListener(["seeked", "canplaythrough", "playing", "loadeddata", "ended"], function(e) {
 			this.hide_wait();
-			//console.log("WAIT SPINNER STOP: " + e.type);
+			console.log("WAIT SPINNER STOP: " + e.type);
 		}, false);
 
 		this.addEventListener("play", function(e) {
+			console.log("Event: " + e.type);
+			this.get_canvas_context();
+			this.canvas_clear();
 			this.has_been_played = true;
 			this.stop_forced = false;
 			this.playing = true;
 			this.bar.hide_inibut();
-			this.get_canvas_context();
-			this.canvas_clear();
 			this.put_canvas_frame();
 			this.bar.show_pauseico();
 			this.bar.stopbtn_enab();
@@ -3733,11 +3743,36 @@ evhh5v_controller.prototype = {
 			}
 		}
 	},
+	show_wait_ok : function() {
+		// Sigh. Chrom(e|ium)/33.* has broken display re-draw when
+		// parent div of wait indicator is moved into place.
+		// Earlier Chrom* were fine (in this regard). Note that
+		// I mean the Chrom* component that is used in Opera too,
+		// the exact same bug is seen there with latest version
+		// and it too reports /33.* in its UA string.
+		// I spent hours looking for a workaround but found
+		// nothing, except to disable the spinner.
+		// Per Murphy's law, this occurs just as I am on the point
+		// of releasing this; just in time to make *my* player
+		// look bad. Thanks chromium guys.
+		if ( this.chrome_show_wait_bad === undefined ) {
+			this.chrome_show_wait_bad =
+			this.params['chromium_force_show_wait'] ?
+			false :
+			/Chrom(e|ium)\/([4-9][0-9]|3[3-9])\./i.test(navigator["userAgent"]);
+		}
+		if ( this.chrome_show_wait_bad ) {
+			return false;
+		}
+
+		if ( this.wait_showing || this.stop_forced || ! this.has_been_played ) {
+			return false;
+		}
+		
+		return true;
+	},
 	show_wait : function() {
-		// Unfortunate set of conditions resulting from from
-		// misc. oddities; e.g., "stalled" event issued on
-		// page load before video has been play()ed
-		if ( ! this.wait_showing && ! this.stop_forced && this.has_been_played ) {
+		if ( this.show_wait_ok() ) {
 			this.wait_showing = true;
 			var that = this;
 			this.show_wait_handle = setTimeout(function() {
@@ -3767,6 +3802,18 @@ evhh5v_controller.prototype = {
 				that.wait_showing = false;
 			}
 		}, 100);
+	},
+	show_wait_now : function() {
+		if ( ! this.wait_showing && ! this.stop_forced && this.has_been_played ) {
+			this.wait_showing = true;
+			this.bar.show_waitanim(this.width / 2, this.height / 2);
+		}
+	},
+	hide_wait_now : function() {
+		if ( this.wait_showing !== undefined && this.wait_showing ) {
+			this.bar.hide_waitanim();
+			this.wait_showing = false;
+		}
 	},
 
 	// handle control bar click per object.id
