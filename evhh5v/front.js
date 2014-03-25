@@ -186,17 +186,16 @@ function evhh5v_controlbar_elements(parms, fixups) {
 
 	bardiv.appendChild(barobj);
 	var alldiv = document.getElementById(adiv);
-	var topdiv = bardiv; // keep ref for insertBefore()
-	alldiv.appendChild(bardiv);
 
 	// main bar svg done, now for the additional elements:
 
 	// initial button
 	url = ip["buturl"];
+	var butdiv;
 
-	bardiv = document.createElement('div');
-	bardiv.setAttribute('id', "b_" + op["uniq"]["ctlbardiv"]);
-	bardiv.setAttribute('class', ip["divclass"]);
+	butdiv = document.createElement('div');
+	butdiv.setAttribute('id', "b_" + op["uniq"]["ctlbardiv"]);
+	butdiv.setAttribute('class', ip["divclass"]);
 
 	barobj = document.createElement('object');
 	barobj.setAttribute('id', "b_" + op["uniq"]["parent"]);
@@ -227,15 +226,15 @@ function evhh5v_controlbar_elements(parms, fixups) {
 	barobj.setAttribute('type', "image/svg+xml");
 	barobj.setAttribute("data", url + (evhh5v_need_svg_query() ? "" : q));
 
-	bardiv.appendChild(barobj);
-	alldiv.appendChild(bardiv);
+	butdiv.appendChild(barobj);
 
 	// volume slide control
 	url = ip["volurl"];
+	var voldiv;
 
-	bardiv = document.createElement('div');
-	bardiv.setAttribute('id', "v_" + op["uniq"]["ctlbardiv"]);
-	bardiv.setAttribute('class', ip["divclass"]);
+	voldiv = document.createElement('div');
+	voldiv.setAttribute('id', "v_" + op["uniq"]["ctlbardiv"]);
+	voldiv.setAttribute('class', ip["divclass"]);
 
 	barobj = document.createElement('object');
 	barobj.setAttribute('id', "v_" + op["uniq"]["parent"]);
@@ -266,8 +265,19 @@ function evhh5v_controlbar_elements(parms, fixups) {
 	barobj.setAttribute('type', "image/svg+xml");
 	barobj.setAttribute("data", url + (evhh5v_need_svg_query() ? "" : q));
 
-	bardiv.appendChild(barobj);
-	alldiv.insertBefore(bardiv, topdiv);
+	voldiv.appendChild(barobj);
+
+	// vol slider is appended before bar, leaving bar above so
+	// it gets mouse events first -- an issue when vol ctl is scaled
+	// small, when it still interferes with button events even
+	// though it visually does not cover the bar -- but not if
+	// the bar div is above
+	alldiv.appendChild(voldiv);
+	// the bar div should be below the button/wait div, and
+	// above the volume slider div
+	alldiv.appendChild(bardiv);
+	// button/wait-spinner is appended, ultimately topmost
+	alldiv.appendChild(butdiv);
 
 	// finally, optional fixups; comment at definition
 	if ( fixups !== undefined && fixups == true ) {
@@ -678,8 +688,8 @@ var evhh5v_controlbar = function(params) {
 	this.ns    = this.svg.getAttribute("xmlns");
 	this.rszo  = []; // assigned objects subject to resize
 
-	// future option: dark clear background for initial button
-	this.inibut_use_clearbg = false;
+	// clear background for initial button for clicks
+	this.inibut_use_clearbg = true;
 
 	// for handler for play progress bar click
 	this.prog_pl_click_cb = [];
@@ -1556,7 +1566,10 @@ mk_inibut : function(parentobj, doc) {
 		0, 0, butwidth, butheight, doc);
 	btn.setAttribute("onclick", "svg_click(this);");
 	if ( this.inibut_use_clearbg ) {
-		t = this.mk_circle("ico_transbg", "but_clearbg", "50%", "50%", r, doc);
+		// "ico_transbg" is very transparent, but visible,
+		// "ico_clearbg" has 0 opacity, it's invisible
+		var clss = false ? "ico_transbg" : "ico_clearbg";
+		t = this.mk_circle(clss, "but_clearbg", "50%", "50%", r, doc);
 		btn.appendChild(t);
 		this.but_clearbg = t;
 	}
@@ -2988,13 +3001,42 @@ evhh5v_controller.prototype = {
 			this.handlermap = {}; // clear from old vid
 		}
 
-		// set that hopefully works for the wait indicator
-		// (removed: "seeking" "seeked")
+		// It's proven difficult (maybe impossible with current state
+		// of h5v implementations) to get the behavior of a buffering
+		// wait indicator, working in the customary way.
+		// In a flash program this is easy: there is a NetStream
+		// event "onStatus" which fires with balanced codes
+		// "NetStream.Buffer.Empty" and "NetStream.Buffer.Full"
+		// and these suffice for the bulk of the wait behavior.
+		//
+		// My first hope was that HTML video would have equivalents,
+		// and whatwg docs *seemed* to suggest "waiting"/"playing"[*]
+		// might do, but no, "waiting" is not delivered when expected
+		// in all browsers.
+		// Testing with various rate limits, several events have been
+		// tried, and the magic combo still eludes me.
+		// By its name, "stalled" might seem pertinent, but apparently
+		// it is not. Let's not even fall into the per-browser bog,
+		// in which e.g. "suspend" and "progress" are radically
+		// different between FFox and Chromium.
+		//
+		// 25.03.2014 I have the behavior I want in FFox (28.0), in at
+		// least the current testing; but, Chromium is not delivering
+		// "waiting" even when it has insufficient data and display
+		// is stalled (this is w/ 76.8kbs rate limit). This will
+		// have to do, there is no more time now.
+		//
+		// [*] whatwg says, re. "waiting":
+		//		Playback has stopped because the next frame
+		//		is not available, but the user agent expects
+		//		that frame to become available in due course.
+		// Sounds just right -- but it is delivered only sparingly.
+		// (testing: "seeking" "seeked", , "suspend", "progress", "canplay", )
 		this.addEventListener(["stalled", "waiting"], function(e) {
 			this.show_wait();
 			//console.log("WAIT SPINNER START: " + e.type);
 		}, false);
-		this.addEventListener(["canplaythrough", "canplay", "playing", "loadeddata", "suspend", "progress", "ended"], function(e) {
+		this.addEventListener(["canplaythrough", "playing", "loadeddata", "ended"], function(e) {
 			this.hide_wait();
 			//console.log("WAIT SPINNER STOP: " + e.type);
 		}, false);
@@ -3024,7 +3066,7 @@ evhh5v_controller.prototype = {
 			this.playing = true;
 			// repeat the next two for Opera which, after ended,
 			// if played again, the icons are not updated, as if
-			// play event is not set
+			// play event is not sent
 			this.bar.show_pauseico();
 			this.bar.stopbtn_enab();
 		}, false);
@@ -3696,21 +3738,21 @@ evhh5v_controller.prototype = {
 		// misc. oddities; e.g., "stalled" event issued on
 		// page load before video has been play()ed
 		if ( ! this.wait_showing && ! this.stop_forced && this.has_been_played ) {
+			this.wait_showing = true;
 			var that = this;
 			this.show_wait_handle = setTimeout(function() {
 				if ( that.show_wait_handle !== false ) { // cancelled?
 					that.bar.show_waitanim(that.width / 2, that.height / 2);
 				}
 				that.show_wait_handle = false;
-			}, 400);
-			this.wait_showing = true;
+			}, 125);
 		}
 	},
 	hide_wait : function() {
-		// Like show_wait(), use a timeout to hide. It seemes that on
+		// Like show_wait(), use a timeout to hide. It seems that on
 		// occasion an asynchronous event to cause hiding is delivered
-		// so quickly that 'this.wait_showing = true;' has not
-		// executed yet, and so wait indicator is not cancelled,
+		// so quickly that 'this.wait_showing = true;' (in show_wait())
+		// has not executed yet, and so wait indicator is not cancelled,
 		// because it does not test true.
 		// Using a timeout should let the bool be set and the
 		// test be valid; the period might need tuning.
@@ -3724,7 +3766,7 @@ evhh5v_controller.prototype = {
 				that.bar.hide_waitanim();
 				that.wait_showing = false;
 			}
-		}, 200);
+		}, 100);
 	},
 
 	// handle control bar click per object.id
