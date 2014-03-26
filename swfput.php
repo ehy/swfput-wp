@@ -2,7 +2,7 @@
 /*
 Plugin Name: SWFPut
 Plugin URI: http://agalena.nfshost.com/b1/?page_id=46
-Description: Add Shockwave Flash video to WordPress posts and widgets, from arbitrary URI's or media library ID's or files in your media upload directory tree (even if not added by WordPress and assigned an ID).
+Description: Add Flash and HTML5 video to WordPress posts, pages, and widgets, from arbitrary URI's or media library ID's or files in your media upload directory tree (including uplaods not in the WordPress media library).
 Version: 1.0.8
 Author: Ed Hynan
 Author URI: http://agalena.nfshost.com/b1/
@@ -108,7 +108,7 @@ endif;
 
 
 /**
- * class providing flash video for WP pages
+ * main class flash/HTML5 video for WP pages
  */
 if ( ! class_exists('SWF_put_evh') ) :
 class SWF_put_evh {
@@ -696,12 +696,15 @@ class SWF_put_evh {
 	public static function hook_admin_menu() {
 		$cl = __CLASS__;
 		$id = 'SWFPut_putswf_video';
-		$tl = __('SWFPut Flash Video Shortcode', 'swfput_l10n');
+		$tl = __('SWFPut Video ("Help" above has a tab for this)', 'swfput_l10n');
+		$tl = self::wt($tl);
 		$fn = 'put_xed_form';
-		if ( current_user_can('edit_posts') )
+		if ( current_user_can('edit_posts') ) {
 			add_meta_box($id, $tl, array($cl, $fn), 'post', 'normal');
-		if ( current_user_can('edit_pages') )
+		}
+		if ( current_user_can('edit_pages') ) {
 			add_meta_box($id, $tl, array($cl, $fn), 'page', 'normal');
+		}
 	}
 
 	// add a help tab in the post-related pages
@@ -723,7 +726,7 @@ class SWF_put_evh {
 			||  current_user_can('edit_pages')) ) {
 			$scr->add_help_tab(array(
 				'id'      => 'help_tab_posts_swfput',
-				'title'   => __('SWFPut Form', 'swfput_l10n'),
+				'title'   => __('SWFPut Video Form', 'swfput_l10n'),
 				'content' => self::wt(sprintf(__('<p>
 				Hopefully, much of the SWFPut shortcode form,
 				or "metabox," is self-explanatory.
@@ -738,29 +741,89 @@ class SWF_put_evh {
 				ASCII \'&quot;\' (double quote) characters. Hopefully
 				that will not be a problem.
 				</p><p>
-				These form items probably need explanation:
+				The following items probably need explanation:
 				</p><p>
-				<h6>URLs for alternate HTML5 video</h6>
-				This text field accepts alternatives for non-flash
-				browsers, if recent enough to provide HTML5 video.
+				<h6>Flash or HTML5 video URLs or media library IDs</h6>
+				Near the top of the form, after the "Caption" field,
+				a text entry field named
+				"Flash video URL or media library ID" appears.
+				This is for the video file that the flash player
+				will use. You may enter a URL by hand (which may
+				be off-site), or make a selection from the next
+				two items,
+				"Select flash video URL from uploads directory" and
+				"Select ID for flash video from media library."
+				The first of these two holds a selection of files
+				found under your <code>wp-content/uploads</code>
+				directory with a FLV or MP4 extension. Files
+				are placed under this directory when you use the
+				<em>WordPress</em> media library, but you may also
+				place files there \'by hand\' using, for example,
+				ftp or ssh or any suitable utility (placing files
+				in a subdirectory is a good idea).
+				In fact, uploading video files \'by hand\' might
+				be the easiest way to bypass size limits that
+				reject large video file uploads through the
+				media library interface. The next field
+				has a selection of media files with a
+				<em>WordPress</em> \'attachment id\' and so it
+				provides only those files uploaded to the media
+				library (with a FLV or MP4 extension).
+				</p><p>
+				After those three fields for flash video, there is
+				"HTML5 video URLs or media library IDs" which,
+				like the flash text entry, is followed by selections
+				of files and \'attachment id\'s. These show files
+				with MP4 or OGG or OGV or WEBM extensions. As the
+				field names suggest, these are for the HTML5 video
+				player. An important difference is that when you
+				make a selection, the entry field is appended,
+				rather than replaced, with a \'|\' separator.
+				The HTML5 video entry field can take more than one
+				value, as explained below.
+				</p><p>
+				It is not necessary to fill both the flash and HTML5
+				video URL fields, but it is a good idea to do so
+				if you can prepare the video in the needed formats.
+				If you specify only one type, the other type of
+				video player is not produced in the page code.
+				If you do specify URLs for both flash and HTML5 video,
+				then the page code will have one as primary content,
+				and the other as "fallback" content. Fallback content
+				is shown by the web-browser only when the primary
+				content cannot be shown. For example, if flash is
+				primary content, but you have specified HTML5 content
+				too, then a visitor to your site who does not
+				have a flash plugin would see the HTML5 video player
+				if the browser supports it.
+				(Mobile browsers are less likely to have a flash
+				plugin than desktop-type browsers.)
+				</p><p>
+				By default, flash is made primary content with
+				HTML5 as fallback. You may make HTML5 be primary
+				and flash be fallback with the "HTML5 video primary"
+				option on the settings page. (Go to the "Settings"
+				menu and select "SWFPut Plugin" for the settings page.)
+				</p><p>
 				The current state of affairs with HTML5 video will
-				require three transcodings of the material if you
+				require three transcodings of the video if you
 				want broad browser support; moreover, the supported
-				"container" formats -- .webm, .ogg, and .mp4 --
+				"container" formats -- .webm, .ogg/.ogv, and .mp4 --
 				might contain different audio and video types ("codecs")
 				and only some of these will be supported by various
 				browsers.
-				Users not already familiar with this topic will need
-				to do enough research to make the preceding statements
+				Users not already familiar with this topic should
+				do enough research to make the preceding statements
 				clear.
 				</p><p>
-				The text field will accept any number of URLs, which
+				The "HTML5 video URLs" field
+				will accept any number of URLs, which
 				must be separated by \'|\'. Each URL <em>may</em>
 				be appended with a mime-type + codecs argument,
 				separated from the URL by \'?\'. Whitespace around
 				the separators is accepted and stripped-off. Please
 				note that the argument given should <em>not</em>
-				include "type=" or the quotes: give only the
+				include "type=" or quotes: give only the
 				statement that should appear within the quotes.
 				For example:</p>
 				<blockquote><code>
@@ -775,28 +838,21 @@ class SWF_put_evh {
 				versions of <em>Firefox</em> will reject that
 				usage, so the space after the comma is best left out.
 				</p><p>
-				<h6>Use initial image as non-flash alternate</h6>
+				<h6>Use initial image as no-video alternate</h6>
 				This checkbox, if enabled (it is, by default) will
 				use the "initial image file" that may be specified
-				for the flash player in an \'img\' element
-				that the visitor\'s browser should display if flash
+				for the video player in an \'img\' element
+				that the visitor\'s browser might display if video
 				is not available.
-				</p><p>
-				If alternate HTML5 video was specified, that will
-				remain the first alternate display, and the initial
-				image should display if neither flash or HTML5 video
-				are available.
 				</p><p>
 				There is one additional consideration for this image:
 				the \'img\' element is given the width and height
 				specified in the form for the flash player, and the
 				visitor\'s browser will scale the image in both
 				dimensions, possibly causing the image to be
-				\'stretched\' or \'squeezed\'. (That is not a problem
-				in the flash player, as it is coded to display the
-				initial image proportionally.)
+				\'stretched\' or \'squeezed\'.
 				The image proportions are restored with
-				<em>JavaScript</em>, but only  if scripts are
+				<em>JavaScript</em>, but only if scripts are
 				not disabled in the visitor\'s browser.
 				Therefore, it is a
 				good idea to prepare images to have the expected
@@ -820,8 +876,7 @@ class SWF_put_evh {
 				The default value for this field, 0,
 				disables this feature, and it has no effect if
 				a mobile browser is not detected.
-				</p>
-				', 'swfput_l10n'), self::$helphtml, self::$helppdf))
+				</p>', 'swfput_l10n'), self::$helphtml, self::$helppdf))
 				// content may be a callback
 				)
 			);
@@ -1196,30 +1251,49 @@ class SWF_put_evh {
 		$t = self::wt(__('These options control video placement.
 			</p><p>
 			The first option, "HTML5 video primary,"
-			lets the alternate HTML5 video that may optionally be
-			specified in the shortcode setup form be placed as
+			makes HTML5 video be placed as
 			primary (rather than fallback) content. If this
-			is selected then the flash video player
-			will be placed as fallback content. Be aware that
-			if the web browser cannot play any of the video
-			types specified as "alternate HTML5 video"
-			in the shortcode setup form, it probably will
+			is selected then flash video
+			will be placed as fallback content when both
+			types have been specified.
+			Be aware that if the web browser supports HTML5 video
+			but cannot play any of the video
+			types specified, it probably will
 			<em>not</em> fallback to flash video. That is,
 			placing flash video as fallback is only useful
 			for browsers that do not support the video
 			element. At this time the major graphical browsers
-			support HTML5 video fairly well, so using this
-			option is effectively disabling the flash video,
-			unless alternate HTML5 video was not specified, in
-			which case the flash video object is placed as usual.
+			all support the HTML5 video element, so using this
+			option is effectively disabling the flash video
+			(except when HTML5 video was not specified at all).
+			</p><p>
+			By default flash is primary and HTML5 video
+			is fallback content. The flash plugin seems to be
+			losing favor (although it remains a more consistent
+			and simple engine for a video player), and for some
+			platforms the plugin is not available. Even where available,
+			flash might be disabled by default by some browsers, or
+			the browser might
+			require user approval before flash is allowed to run.
 			</p><p>
 			Note that at present the major graphical browsers
 			do <em>not</em> all support the same set of video
-			types. To use HTML5 video reliably as primary content,
+			types for their HTML5 video players.
+			To reliably use HTML5 video as primary content,
 			you will need to prepare the video in .MP4, .OGG (.OGV),
 			and .WEBM container formats with suitable codecs.
-			(The posts/pages editor page has a help tab which
-			should have a "SWFPut Form" item with more explanation.)
+			(The posts/pages editor page has a help button which
+			should have a "SWFPut Video Form" tab
+			with more explanation.)
+			</p><p>
+			Generally, if you can provide the several formats needed
+			for good HTML5 support, using the "HTML5 video primary"
+			option should be a good idea. An MP4 will be among
+			those files, and that can be used for flash too (although
+			if you wish to be compatible with the free/open source
+			<em>Gnash</em> flash plugin you should use FLV).
+			If you cannot provide
+			all the formats, it might be better not to use this option.
 			</p><p>
 			The next two options allow the video content
 			to be completely disabled.
@@ -1267,11 +1341,15 @@ class SWF_put_evh {
 		$t = self::wt(__('Introduction:', 'swfput_l10n'));
 		printf('<p><strong>%s</strong>%s</p>', $t, "\n");
 
-		$t = self::wt(__('These options select 
-			how flash video (or audio) may be placed in posts or pages.
+		$t = self::wt(__('
+			<strong>These options are deprecated and will be
+			removed in a future release. Do not use these.</strong>
+			</p><p>
+			These options select 
+			how video may be placed in posts or pages.
 			Use shortcodes for any new posts (and preferably
 			for existing posts) that should include
-			the flash media player of this plugin.
+			the video players of this plugin.
 			Shortcodes are an efficient method provided by the
 			<em>WordPress</em> API. When shortcodes are enabled,
 			a form for parameters will appear in the post (and page)
@@ -1319,8 +1397,12 @@ class SWF_put_evh {
 		$t = self::wt(__('Introduction:', 'swfput_l10n'));
 		printf('<p><strong>%s</strong>%s</p>', $t, "\n");
 
-		$t = self::wt(__('These options select 
-			how flash video (or audio) may be placed in widget areas.
+		$t = self::wt(__('
+			<strong>These options are deprecated and will be
+			removed in a future release. Do not use these.</strong>
+			</p><p>
+			These options select 
+			how video may be placed in widget areas.
 			The first option selects use of the included multi-widget.
 			This widget is configured in the
 			Appearance-&gt;Widgets page, just
@@ -1613,7 +1695,7 @@ class SWF_put_evh {
 			printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
 		</p><p>
 		<?php $k = 'url';
-			$l = self::wt(__('Url or media library ID for flash video:', 'swfput_l10n'));
+			$l = self::wt(__('Flash video URL or media library ID (.flv or .mp4):', 'swfput_l10n'));
 			printf($lbfmt, $id, $k, $l);
 			printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
 		</p>
@@ -1624,7 +1706,7 @@ class SWF_put_evh {
 				echo "<p>\n";
 				$k = 'files';
 				$jfcp = sprintf($jfsl, $id, $k, $kl);
-				$l = self::wt(__('Url for flash video from uploads directory:', 'swfput_l10n'));
+				$l = self::wt(__('Select flash video URL from uploads directory:', 'swfput_l10n'));
 				printf($lbfmt, $id, $k, $l);
 				// <select>
 				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfcp);
@@ -1679,7 +1761,7 @@ class SWF_put_evh {
 			printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
 		</p><p>
 		<?php */ $k = 'altvideo'; 
-			$l = self::wt(__('URLs for HTML5 video (optional: .mp4, .webm, .ogv):', 'swfput_l10n'));
+			$l = self::wt(__('HTML5 video URLs or media library IDs (.mp4, .webm, .ogv):', 'swfput_l10n'));
 			printf($lbfmt, $id, $k, $l);
 			printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
 		</p>
@@ -1690,7 +1772,7 @@ class SWF_put_evh {
 				echo "<p>\n";
 				$k = 'h5files';
 				$jfcp = sprintf($jfap, $id, $k, $kl);
-				$l = self::wt(__('Url for HTML5 video from uploads directory (appends):', 'swfput_l10n'));
+				$l = self::wt(__('Select HTML5 video URL from uploads directory (appends):', 'swfput_l10n'));
 				printf($lbfmt, $id, $k, $l);
 				// <select>
 				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfcp);
@@ -1804,7 +1886,7 @@ class SWF_put_evh {
 		?>
 		<p>
 		<?php $k = 'iimgbg';
-			$l = self::wt(__('Use initial image as non-flash alternate: ', 'swfput_l10n'));
+			$l = self::wt(__('Use initial image as no-video alternate: ', 'swfput_l10n'));
 			printf($lbfmt, $id, $k, $l);
 			$ck = $$k == 'true' ? 'checked="checked" ' : '';
 			printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
@@ -1926,8 +2008,8 @@ class SWF_put_evh {
 			$c = '';
 			// TRANSLATORS the '[]' are meant to indicate strongly
 			// that this is not normal, expected text display,
-			// because this text takes the place of a Flash program
-			// when disabled by a plugin option.
+			// because this text takes the place of the video program
+			// when disabled by a plugin option or not supported.
 			// 'A/V' is understood in US (all English language???)
 			// as 'Audio/Visual' e.g., film, sound.
 			// '%s' is any caption provided for a/v, if any,
@@ -1985,8 +2067,8 @@ class SWF_put_evh {
 			$c = '';
 			// TRANSLATORS the '[]' are meant to indicate strongly
 			// that this is not normal, expected text display,
-			// because this text takes the place of a Flash program
-			// when disabled by a plugin option.
+			// because this text takes the place of a video program
+			// when disabled by a plugin option or not supported.
 			// 'A/V' is understood in US (all English language???)
 			// as 'Audio/Visual' e.g., film, sound.
 			// '%s' is any caption provided for a/v, if any,
@@ -2297,10 +2379,13 @@ class SWF_put_evh {
 	}
 	
 	// WP provides a MSIE test, but use this for more control; also,
-	// recent MSIE no longer have "MSIE" in the agent string which
+	// recent MSIE no longer have "MSIE" in the agent string[*] which
 	// must be an assertion that it is now compatible and no longer
 	// has special needs, therefore this test need not be comprehensive.
-	protected static function is_msie() {
+	// [*] ``Trident'' is being used, and some MS dev page I found while
+	// web-searching explained it as being indeed to defeat MSIE
+	// identification, so let 'em have it their way.
+	public static function is_msie() {
 		static $is_so = null;
 		if ( $is_so === null ) {
 			$r = preg_match('/\bMSIE\b/', $_SERVER['HTTP_USER_AGENT']);
@@ -2309,8 +2394,13 @@ class SWF_put_evh {
 		return $is_so;
 	}
 	
-	// get a (almost certainly) unique random number:
-	// **not** for security, just probable uniqueness
+	// Get a (almost certainly) unique random number:
+	// **NOT** for security, only probable uniqueness
+	// for e.g., element id attributes.
+	// Note PHP has uniqid(), but docs example says:
+	// ``[...] the more_entropy parameter, which is 
+	// required on some systems[...]'' which makes me
+	// just uncertain enough to want to use this instead.
 	public static function uniq_rand($maxtries = 2048) {
 		static $rndmap = null;
 		if ( $rndmap === null ) {
@@ -3389,12 +3479,15 @@ class SWF_put_widget_evh extends WP_Widget {
 	
 	// default width should not be wider than sidebar, but
 	// widgets may be placed elsewhere, e.g. near bottom
-	// 216x138 is suggest minimum size in Adobe docs,
+	// 216x138 is suggested minimum size in Adobe docs,
 	// because flash user settings dialog is clipped if 
 	// window is smaller; AFAIK recent plugins refuse to map
 	// the context menu rather than let it be clipped.
 	// 216 is a bit wide for a sidebar (in some themes),
 	// consider 200x150
+	// Update: included JS now sizes the display if enclosing
+	// div is sized smaller than its style.width; this is a
+	// good thing.
 	const defwidth  = 200; // is 4:3 aspect
 	const defheight = 150; //
 
@@ -3404,9 +3497,9 @@ class SWF_put_widget_evh extends WP_Widget {
 	
 		$cl = __CLASS__;
 		// Label shown on widgets page
-		$lb =  __('SWFPut Flash Video', 'swfput_l10n');
+		$lb =  __('SWFPut Video Player', 'swfput_l10n');
 		// Description shown under label shown on widgets page
-		$desc = __('Flash video (with HTML5 video fallback option) for your widget areas', 'swfput_l10n');
+		$desc = __('Flash and HTML5 video for your widget areas', 'swfput_l10n');
 		$opts = array('classname' => $cl, 'description' => $desc);
 
 		// control opts width affects the parameters form,
@@ -3827,7 +3920,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$id = $this->get_field_id('iimgbg');
 		$nm = $this->get_field_name('iimgbg');
 		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
-		$tl = $wt(__('Use initial image as non-flash alternate: ', 'swfput_l10n'));
+		$tl = $wt(__('Use initial image as no-video alternate: ', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
