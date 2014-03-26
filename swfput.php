@@ -1308,11 +1308,7 @@ class SWF_put_evh {
 			"[A/V content &lt;caption&gt; disabled],"
 			where "&lt;caption&gt;"
 			is any caption that was included with the shortcode,
-			or empty if there was no caption.
-			</p><p>
-			Note that in the two following sections,
-			"Video In Posts" and "Video In Widget Areas,"
-			the options are effective only if enabled here.'
+			or empty if there was no caption.'
 			, 'swfput_l10n'));
 		printf('<p>%s</p>%s', $t, "\n");
 
