@@ -1,7 +1,7 @@
 #! /usr/bin/make -f
 # License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
 
-PRJVERS = 1.0.8
+PRJVERS = 1.0.9
 PRJSTEM = swfput
 PRJNAME = $(PRJSTEM)-$(PRJVERS)
 
