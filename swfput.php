@@ -2,7 +2,7 @@
 /*
 Plugin Name: SWFPut
 Plugin URI: http://agalena.nfshost.com/b1/?page_id=46
-Description: Add Flash and HTML5 video to WordPress posts, pages, and widgets, from arbitrary URI's or media library ID's or files in your media upload directory tree (including uplaods not in the WordPress media library).
+Description: Add Flash and HTML5 video to WordPress posts, pages, and widgets, from arbitrary URI's or media library ID's or files in your media upload directory tree (including uploads not in the WordPress media library).
 Version: 1.0.8
 Author: Ed Hynan
 Author URI: http://agalena.nfshost.com/b1/
