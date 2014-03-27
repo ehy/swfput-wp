@@ -1,41 +1,29 @@
 K 25
 svn:wc:ra_dav:version-url
 V 32
-/!svn/ver/849094/swfput/trunk/js
+/!svn/ver/883056/swfput/trunk/js
 END
-formxed.js
-K 25
-svn:wc:ra_dav:version-url
-V 43
-/!svn/ver/849094/swfput/trunk/js/formxed.js
-END
-front.dev.js
-K 25
-svn:wc:ra_dav:version-url
-V 45
-/!svn/ver/849094/swfput/trunk/js/front.dev.js
-END
-front.js
-K 25
-svn:wc:ra_dav:version-url
-V 41
-/!svn/ver/849094/swfput/trunk/js/front.js
-END
-screens.dev.js
+formxed.min.js
 K 25
 svn:wc:ra_dav:version-url
 V 47
-/!svn/ver/820339/swfput/trunk/js/screens.dev.js
-END
-formxed.dev.js
-K 25
-svn:wc:ra_dav:version-url
-V 47
-/!svn/ver/849094/swfput/trunk/js/formxed.dev.js
+/!svn/ver/883056/swfput/trunk/js/formxed.min.js
 END
 screens.js
 K 25
 svn:wc:ra_dav:version-url
 V 43
-/!svn/ver/820339/swfput/trunk/js/screens.js
+/!svn/ver/883056/swfput/trunk/js/screens.js
+END
+formxed.js
+K 25
+svn:wc:ra_dav:version-url
+V 43
+/!svn/ver/883056/swfput/trunk/js/formxed.js
+END
+screens.min.js
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/!svn/ver/883056/swfput/trunk/js/screens.min.js
 END

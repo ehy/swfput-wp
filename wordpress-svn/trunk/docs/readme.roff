@@ -2,7 +2,7 @@
 .nr PORPHANS 3
 .nr HORPHANS 3
 .TL
-SWFPut \(em Flash Video Player Plugin for WordPress
+SWFPut \(em Flash and HTML5 Video Plugin for WordPress
 .AU
 Ed Hynan <edhynan@gmail.com>
 .AB no
@@ -15,18 +15,28 @@ as the conventional `README' as well.
 What is it?
 .PP
 \fBSWFPut\fP is a plugin for
-the popular \fIWordPress\fP
-weblog
-software. It provides a video player program
-for the flash plugin and the means to configure
-an instance with a video source and playback
+\fIWordPress\fP.
+It provides video player programs
+for the flash plugin and and the HTML video
+element,
+and the means to configure
+the players with video sources and playback
 attributes.
 There are two separate components:
-the flash video player, and the \fIWordPress\fP
+the video players, and the \fIWordPress\fP
 plugin proper.
-The video player is delivered to site visitors
-by the plugin in the traditional <object ...>
-block with the necessary arguments. Flash video
+The video players are delivered to site visitors
+by the plugin in either an <object ...>
+block with a nested <video ...> element as
+fallback content, or inversely as a primary
+<video ...> with a nested <object ...>
+for flash fallback. The former arrangement
+is the default at present, and there is an
+option to enable the latter arrangement.
+It is not necessary to provide for both
+types, one or the other type may be left out.
+.PP
+Video
 objects may be placed in posts and pages, or in
 the widget areas supported by your theme (i.e.,
 the plugin includes a widget).
@@ -37,98 +47,94 @@ that's no problem.
 (In fact, it is preferable that the shortcodes
 \fInot\fP be hand-edited, and they will not
 be discussed in detail here.) The plugin adds to
-the administrative interface a full featured
+the post/page editor interfaces a full featured
 form to setup and add, or edit, or delete
 video objects, so the user does not need
 to be troubled with shortcodes (they will be visible
 in the editor; you will get used to them).
-The flash video widget has a similar full
+The video widget has a similar full
 featured form.
 .PP
-The plugin does not require \fIJavaScript\fP
-in non-mobile browsers, although it is used
-for scaling if available. If a mobile browser is
-detected JavaScript is necessary, but this
-is not expected to be a problem as disabling
-scripts in a mobile browser is probably uncommon
-and impractical.
+The plugin does not depend on \fIJavaScript\fP,
+although it is used for the HTML5 video player,
+and for proper resizing of the video display area.
+If \fIJavaScript\fP is not available, HTML5
+video will have the interface provided by the
+web browser, and the flash video will be
+largely unaffected (it only uses \fIJavaScript\fP
+to check whether it is running on a mobile platform).
+Display resizing will not be possible if
+\fIJavaScript\fP is not available, so reasonable
+dimensions should be given in the setup form.
 .PP
-(Note that the \fBSWFPut\fP video player has been
+The \fBSWFPut\fP flash video player has been
 coded to work well with the free \fIGnash\fP
 web browser plugin, as well as the closed
 binary-only proprietary version in common use.
 As of this writing, \fIGnash\fP
 does not handle \fBMP4\fP files well, even though
 it handles H\.264 video and AAC audio if they
-are in an FLV container file.)
+are in an FLV container file. Therefore, it is
+a good idea to prepare FLV files for flash if
+you can.
 \
 .NH 1
 Building From the Source
 .PP
-\fBSWFPut\fP is distributed as a \fIZIP\fP
-archive prepared for installation on a
-\fIWordPress\fP site with the \(lqAdd New\(rq
-item under the \(lqPlugins\(rq menu.
+\fBSWFPut\fP is distributed from the
+\fIWordPress\fP plugin repository
+as a \fIZIP\fP
+archive ready for installation on a
+\fIWordPress\fP site.
 Therefore, there is no need to build the
-package before use.
+plugin before use.
 .PP
 (You may skip forward to the
 \fBUsage\fP section if you don't intend
 to modify the player or plugin.)
 .PP
+All necessary sources are included in the
+distributed archive, but the necessary
+build tools are not. The plugin is maintained
+with a POSIX makefile, which in turn
+expects a POSIX Bourne shell. Additionally,
+the \fIPHP\fP commandline interface with the
+\fIMing\fP extension
+to build the flash video player,
+\fIPERL\fP packages to minify \fIJavaScript\fP,
+\fIGNU\fP gettext for localization sources,
+\fIGNU\fP groff (and a small C program) to
+make the forms of this document, the portable
+\fIInfo-ZIP\fP zip command to make the archive,
+and various POSIX tools such as sed.
+.PP
 The actual plugin is composed of
-\fIPHP\fP code, and JavaScript for
-the administrative parts and front-end
-scaling,
-and neither of those
-requires compilation or link editing.
+\fIPHP\fP code, and does not
+require compilation or link editing.
 The flash video player is a compiled program,
-but binaries are included in the installable
+but a binary is included in the installable
 package so that use does not require
-compilation by the user. Of course,
-the source code is included and the
-binaries may be built if necessary
-(or desired). Compiling the flash
-program will require the \fIMing\fP
-PHP extension. See the files
-\f(CRMakefile\fR,
-\f(CRmingtest/mingput\.php\fR, and
-\f(CRmingtest/mainact\.inc\.php\fR
-if you wish to learn to build the player.
+compilation by the user.
 .PP
-If you wish to change the JavaScript code,
-edit \f(CRjs/*\.dev\.js\fR, rather than
-\f(CRjs/*\.js\fR.
-The latter are merely `minified' versions
-of the former; see \f(CRMakefile\fR.
-.PP
-This file (README*) is built with
-the \fIGNU\fP roff
-\fIgroff\fP with \fIms\fP macros;
-see \f(CRdocs/Makefile\fR.
-.PP
-The Makefiles require a \fIUnix\fP-like or
-\fIPOSIX\fP system. The default target
+The Makefile default target
 builds as necessary and then creates the
 ZIP file.
+The Makefile is the build documentation.
 \
 .NH 1
 Usage
 .PP
-A logged in session is assumed.
-.PP
-\fBSWFPut\fP installed will add an item
+\fBSWFPut\fP installs an item
 under the \(lqSettings\(rq menu named
 \(lqSWFPut Plugin\(rq. Selecting that should
 produce the plugin's configuration page.
 The configuration page includes optional verbose
 help, and so it will not be described here.
 .PP
-When editing posts or pages,
-below the editor
-the plugin will have placed an interactive
-form with the title
-\(lqSWFPut Flash Video Shortcode\(rq.
+In the post and page editors,
+the plugin adds an interactive
+form in a new metabox with the title
+\(lqSWFPut Video\(rq.
 Directly under the title is a row of buttons.
 Under the row of buttons, the bulk of the
 form is placed in three sections entitled
@@ -137,16 +143,16 @@ form is placed in three sections entitled
 The title bar of each section has a button
 that will hide or show that section, which
 might help if the height of the form is
-greater than that the display.
+greater than that of the display.
 .PP
 .RS
 .NH 2
 Form Buttons
 \" .RS
 .IP \(bu
-\fBFill form from editor\fP:
+\fBFill from post\fP:
 When the post (or page) already contains
-a \fBSWFPut\fP flash
+a \fBSWFPut\fP
 video object (i.e., shortcode),
 this will find it in the
 editor and fill the form with its details.
@@ -156,31 +162,31 @@ is more than one, then repeatedly
 using this button will cycle through
 each in turn.
 .IP \(bu
-\fBReplace current in editor\fP:
+\fBReplace current in post\fP:
 When the form has been filled with
 the details of a video object using
-\(lq\fBFill form from editor\fP\(rq (described
+\(lq\fBFill from post\fP\(rq (described
 above), or if it contains the details
 of a new video object that has just been
 added, the form items may be changed, and
 this button will edit the associated
-shortcode (video object) with the changes.
+shortcode with the changes.
 .IP \(bu
-\fBDelete current in editor\fP:
+\fBDelete current in post\fP:
 As described above for
-\(lq\fBReplace current in editor\fP\(rq,
+\(lq\fBReplace current in post\fP\(rq,
 except that rather than changing
 the details of the shortcode, it is
 deleted.
 .IP \(bu
-\fBPlace new in editor\fP:
+\fBPlace new in post\fP:
 After making sure that the cursor
 (insertion point) in the editor is
-at the desired position, and setting
+at the desired position, and filling out
 the form items, use this button to add
 a new shortcode (video).
 .IP \(bu
-\fBReset default values\fP:
+\fBReset defaults\fP:
 Except for the \(lqCaption\(rq text
 field, all form items are set to
 default values, or cleared. It is
@@ -203,10 +209,10 @@ and an optional caption, which may be set
 here. If this field is left blank, there
 will be no caption.
 .IP \(bu
-\fBUrl or media library ID\fP:
-A fully qualified URL may be given here,
-or an ID valid for the \fIWordPress\fP
-database.
+\fBFlash video URL or media library ID\fP:
+A video URL may be given here,
+or an attachment ID valid for the
+\fIWordPress\fP database.
 Or more conveniently,
 this field may be set from the two
 drop-down lists described next.
@@ -216,57 +222,36 @@ Support for \fIRTMP\fP is only
 partial and very limited. See
 \(lq\fBPlaypath (rtmp)\fP\(rq
 below. Acceptable file (media) types
-are \fBFLV\fP, \fBMP4\fP (video), and
-\fBMP3\fP (audio)\**.
-.FS
-For \fBMP3\fP files, you may try placing
-a video URL in the
-\(lq\fBPlaypath (rtmp)\fP\(rq field to play
-along with the audio. If the video has an
-audio stream, that will mix in, so it should
-probably be a video only file. This is an
-experimental and \fBunsupported\fP
-feature.
-.FE
+are \fBFLV\fP, \fBMP4\fP.
 \
 .IP \(bu
-\fBUrl from uploads directory\fP:
+\fBSelect flash video URL from uploads directory\fP:
 This is a drop-down list from which
-the \(lq\fBUrl or media library ID\fP\(rq
+the URL
 field may be set. The \fIWordPress\fP
 \f(CRuploads\fR directory is searched
 recursively for files with the suffixes
-\fBFLV\fP, \fBMP4\fP, and \fBMP3\fP,
+\fBFLV\fP, \fBMP4\fP,
 and
-for each a URL is placed in this list.
+for each a URL is added to this list.
 This has the advantage that it will find
-files added by hand (rather than with
+files added by hand upload (rather than with
 the `add media' interface) if they are
 placed in \f(CRuploads\fR or a
 directory under it.
 .IP \(bu
-\fBSelect ID from media library\fP:
+\fBSelect ID for flash video from media library\fP:
 This is a drop-down list from which
-the \(lq\fBUrl or media library ID\fP\(rq
+the URL
 field may be set, as above, with the
 difference that it searches the
 \fIWordPress\fP media database, and
 presents the suitable filenames
-their media IDs.
+with their media IDs.
 .IP \(bu
-\fBMedium is audio\fP:
-To determine whether to play video or audio,
-the file suffix of the medium is checked.
-If the file suffix is not known, the
-medium is assumed to be video. If the medium is
-an mp3 audio file, but it does not have
-the \fBMP3\fP suffix, check this.
-.IP \(bu
-\fBURLs for alternate HTML5 video\fP:
-An optional series of URLs
-for an alternate HTML5 video element that a web
-browser can try if flash video
-is not available or is not supported.
+\fBHTML5 video URLs or media library IDs\fP:
+A series of URLs
+for the HTML5 video player.
 If more than one URL is given, they should be separated
 by the `\f(CR|\fR' (pipe) character. Each individual
 URL may be appended with an argument for the
@@ -283,9 +268,9 @@ be left out)\**.
 .FS
 For example:
 .br
-\f(CRfoo/alternate.mp4?video/mp4|
-foo/alternate.webm?video/webm; codecs=vp8,vorbis|
-foo/alternate.ogv?video/ogg; codecs=theora,vorbis\fR.
+\f(CRvideos/cat.mp4?video/mp4|
+videos/cat.webm?video/webm; codecs=vp8,vorbis|
+videos/cat.ogv?video/ogg; codecs=theora,vorbis\fR.
 .FE
 If more than one is given they will appear in order.
 The browser should use the first type
@@ -295,13 +280,33 @@ but the first to appear). The MP4, WEBM, and OGG
 types have varied support among web browsers,
 so ideally all three formats should be provided.
 .IP \(bu
+\fBSelect HTML5 video URL from uploads directory\fP:
+(See next item below.)
+.IP \(bu
+\fBSelect ID for HTML5 video from media library\fP:
+These selection items work much like the similarly
+named items pertaining to flash URLs, as described
+above. These show files with MP4 or OGG or OGV
+or WEBM extensions, suitable for the HTML5 video
+player. An important difference is that
+when you make a selection, the entry field
+is appended, rather than replaced,
+on the assumption that you are adding
+multiple resources for the necessary
+HTML5 video formats. When the URL field content
+is appended, a `\f(CR|\fR' (pipe) character
+is used as a separator. See
+\(lqHTML5 video URLs or media library IDs\(rq
+above.
+.IP \(bu
 \fBPlaypath (rtmp)\fP:
-If the \(lq\fBUrl or media library ID\fP\(rq
-field
+If the URL
+field for flash video
 is given an \fBRTMP\fP URL, the `playpath'
 is given here. Note that only the simplest
 RTMP connections are supported: those
-requiring only the playpath.
+requiring only the playpath. This item has
+bearing on HTML5 video.
 .IP \(bu
 \fBUrl of initial image file (optional)\fP:
 An \fBHTTP\fP or \fBHTTPS\fP URL for an
@@ -309,17 +314,7 @@ image file may be placed here. When the player
 is loaded, if it is not set to play on load,
 this image is displayed until the play
 button is invoked. Accepted image types are
-\fBJPEG\fP, \fBPNG\fP, and \fBGIF\fP, and
-\fBSWF\fP\**.
-.FS
-\fBSWF\fP files may be stills or
-animations. This type is a flash
-\fIprogram\fP that the flash
-web browser plugin
-will be executing, so, of course, it must
-not interfere with the \fBSWFPut\fP
-player. Test thoroughly if this is used.
-.FE
+\fBJPEG\fP, \fBPNG\fP, and \fBGIF\fP.
 .IP \(bu
 \fBLoad image from uploads directory\fP:
 This is a drop-down list from which
@@ -331,7 +326,7 @@ listed as acceptable for that field,
 and
 for each a URL is placed in this list.
 This has the advantage that it will find
-files added by hand (rather than with
+files added by hand upload (rather than with
 the `add media' interface) if they are
 placed in \f(CRuploads\fR or a
 directory under it.
@@ -342,23 +337,20 @@ the \(lq\fBUrl of initial image file (optional)\fP\(rq
 field may be set, as above, with the
 difference that it searches the
 \fIWordPress\fP media database, and
-presents the suitable filenames
+presents the suitable filenames with
 their media IDs.
 .IP \(bu
-\fBUse initial image as non-flash alternate\fP:
+\fBUse initial image as no-video alternate\fP:
 If an initial image was given, then also use
-it as an alternative display when flash is not
-supported. If optional HTML5 video URLs were
-given, they will remain the first alternate,
-and the initial image will be an alternate
-to that. This option is on by default.
+it as fallback display when video is not
+supported. This option is on by default.
 \
 .NH 3
 Dimensions
 .IP \(bu
 \fBPixel Width \(mu Height\fP:
 set these to the desired size of the
-player's embedded window.
+video player's embedded window.
 This does not need to be the same
 as the display size of the video to be played,
 but the appearance will be best if the \fIaspect\fP
@@ -372,21 +364,28 @@ video to fit within its display, but it maintains
 the aspect ratio, so horizontal or vertical
 black (unused) areas will be visible if the
 aspect ratios do not match.
+These dimensions are not fixed unless scripts
+are disabled. Where scripting is available,
+the video display area is resized in concert
+with changes that the browser applies to the
+surrounding elements. This is particularly
+important on mobile platforms, where the browser
+will probably make extreme size adjustments
+for the small display size (This behavior might
+depend on the current theme). 
 .IP \(bu
 \fBMobile width\fP:
 This is to provide a width to use only
 if a mobile browser is detected; the height is automatically
 proportional, according to the regular
 \(lq\fBPixel Width \(mu Height\fP\(rq
-dimensions. This might
+dimensions described above. This might
 be used for widgets placed on the sidebar, because the
 sidebar might be placed below, rather than beside, the main
 content. In this case more space might be available, and
 larger display might be suitable. This feature is disabled
 with a value of '0,' which is the default, and has no effect
 if the browser is not identified as being on a mobile platform.
-(Note that this feature does not override the display scaling
-added in version 1.0.7 of \fBSWFPut\fP.)
 .IP \(bu
 \fBAuto aspect\fP:
 This enables a feature meant to be helpful
@@ -438,19 +437,28 @@ to save values locally on a visitor's
 machine, then their adjustment will be
 saved, and will be used rather than the default
 when they visit again (or reload the
-page).
+page). User settings are not saved for the
+HTML5 video player presently.
 .IP \(bu
 \fBPlay on load\fP:
-This will cause the video (or audio)
+This will cause the video
 to begin playing as soon as the
 player program is loaded. When this
 is not set, the player waits for the
-play button.
+play button. (Above, it was stated
+that if scripting is not available,
+HTML5 video would have the default
+appearance and behavior provided by
+the web browser. This play on load
+option will not be in effect in that
+case, because while the video element
+can take an autoplay attribute, that
+cannot work the scripted HTML5 player.)
 .IP \(bu
 \fBLoop play\fP:
 This will cause the medium to play again
 from the beginning each time it ends.
-When this is not set, the media plays
+When this is not set, the video plays
 once, and then pauses.
 .IP \(bu
 \fBHide control bar initially\fP:
@@ -472,7 +480,7 @@ embedded window, and is always hidden
 when the mouse is \fIdetected\fP
 leaving the window (when the mouse
 is moved out of the player window
-with rapid motion the browser plugin
+with rapid motion the browser or plugin
 often fails to deliver a `mouse has left'
 event to the player program, so hiding
 the bar is not always reliable).
@@ -486,24 +494,14 @@ This enables a control bar button that
 will place the video in full-screen
 mode.
 .IP \(bu
-\fBControl bar Height (20-50)\fP:
+\fBControl bar Height (30-60)\fP:
 The control bar height can be adjusted
-with this. Actually, there is a fixed
-number precompiled sizes in the player
-binaries that are distributed with
-the package, and this field causes the
-nearest size to be selected. If the
-\fIWordPress\fP host's \fIPHP\fP
-configuration includes the \fIMing\fP
-extension, then you may select an
-option on the \fBSWFPut\fP
-configuration page called
-\(lqDynamic SWF generation\(rq.
-This produces the video player
-on the fly, and in this case the
-value of this field builds the
-control bar at the requested
-size rather than using a near match.
+with this. The range 30-60 merely suggests
+useful sizes; it is not a fixed boundary.
+A good size would be influenced by
+the specified display dimensions on
+non-mobile platforms, but also by
+usability on mobile platforms. Test, please.
 \
 \" .RE
 .RE
@@ -516,7 +514,7 @@ The \(lqAppearance\(rq menu
 \(lqWidgets\(rq item should produce the
 \(lqWidgets\(rq page which, after installation
 of \fBSWFPut\fP, should show
-\(lq\fBSWFPut Flash Video\fP\(rq under
+\(lq\fBSWFPut Video Player\fP\(rq under
 \(lq\fBAvailable Widgets\fP\(rq. After dragging
 this to a widget area the setup form
 should display (click the arrow near

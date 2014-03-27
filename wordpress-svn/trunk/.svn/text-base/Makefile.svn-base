@@ -1,7 +1,7 @@
 #! /usr/bin/make -f
 # License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
 
-PRJVERS = 1.0.7
+PRJVERS = 1.0.8
 PRJSTEM = swfput
 PRJNAME = $(PRJSTEM)-$(PRJVERS)
 
@@ -22,8 +22,10 @@ POTSRCS = ${PRJSTEM}.php
 
 DOCSD = docs
 JSDIR = js
-JSBIN = $(JSDIR)/formxed.js $(JSDIR)/screens.js $(JSDIR)/front.js
-JSSRC = $(JSDIR)/formxed.dev.js $(JSDIR)/screens.dev.js $(JSDIR)/front.dev.js
+JSBIN = $(JSDIR)/formxed.min.js $(JSDIR)/screens.min.js $(H5DIR)/front.min.js
+JSSRC = $(JSDIR)/formxed.js $(JSDIR)/screens.js $(H5DIR)/front.js
+H5DIR = evhh5v
+H5BIN = $(H5DIR)/evhh5v.css $(H5DIR)/ctlbar.svg $(H5DIR)/ctlvol.svg $(H5DIR)/ctrbut.svg $(JSDIR)/front.min.js
 LCDIR = locale
 LCDOM = $(PRJSTEM)_l10n
 LCPOT = $(LCDIR)/$(LCDOM).pot
@@ -31,74 +33,62 @@ LCFPO = $(LCDIR)/$(LCDOM)-en_US.mo
 LC_SH = $(LCDIR)/pot2en_US.sh
 LCSRC = $(LCPOT)
 LCALL = $(LC_SH) $(LCFPO) $(LCSRC)
-SDIRI = mingtest
-SDIRO = mingput
-SSRCS = $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php $(SDIRI)/obj.css
-SBINS = $(SDIRI)/default.flv \
-	$(SDIRI)/mingput.swf \
-	$(SDIRI)/mingput44.swf \
-	$(SDIRI)/mingput40.swf \
-	$(SDIRI)/mingput36.swf \
-	$(SDIRI)/mingput32.swf \
-	$(SDIRI)/mingput28.swf \
-	$(SDIRI)/mingput24.swf
+MNAME = evhflv
+SDIRI = $(MNAME)
+MINGS = mingput.php
+MINGA = mainact.inc.php
+MINGC = obj.css
+SSRCS = $(SDIRI)/$(MINGS) $(SDIRI)/$(MINGA) $(SDIRI)/$(MINGC)
+SBINS = $(SDIRI)/$(MNAME).swf
+SDEFS = $(SDIRI)/default.flv
 
-ALSO = Makefile COPYING
+ALSO = Makefile COPYING version.sh
 #READS= README README.tty README.tt8 README.pdf README.html
 READS= README README.pdf README.html
 ZALL = ${SRCS} ${ALSO} ${READS} readme.txt
-ZSALL = ${SSRCS} ${SBINS}
-ZDIR = $(JSDIR) $(LCDIR) $(DOCSD)
+ZSALL = ${SSRCS} #${SBINS}
+ZDIR = $(H5DIR) $(SDIRI) $(JSDIR) $(LCDIR) $(DOCSD)
 BINALL = ${SBINS} ${JSBIN}
 PRJDIR = ${PRJNAME}
-PRJSDIR = ${PRJNAME}/${SDIRO}
 PRJZIP = ${PRJNAME}.zip
 
 XGETTEXT = xgettext
 ZIP = zip -r -9 -v -T -X
+ZXL = -x \*/.git/\* \*/.git\*
 PHPCLI = php -f
 
 all: ${PRJZIP}
 
-${PRJZIP}: ${SBINS} ${JSBIN} ${ZALL} ${LCFPO}
+${PRJZIP}: ${SBINS} ${SDEFS} ${H5BIN} ${JSBIN} ${ZALL} ${LCFPO}
 	test -e ttd && rm -rf ttd; test -e ${PRJDIR} && mv ${PRJDIR} ttd; \
-	mkdir ${PRJDIR} ${PRJSDIR} && \
+	mkdir ${PRJDIR} && \
 	cp -r -p ${ZALL} ${ZDIR} ${PRJDIR} && \
 	( cd ${PRJDIR}/${DOCSD} && make clean; true ) && \
-	cp -r -p ${ZSALL} ${PRJSDIR} && rm -f ${PRJZIP} && \
-	$(ZIP) ${PRJZIP} ${PRJDIR} && rm -rf ${PRJDIR} && \
+	rm -f ${PRJZIP} && \
+	$(ZIP) ${PRJZIP} ${PRJDIR} ${ZXL} && rm -rf ${PRJDIR} && \
 	(test -e ttd && mv ttd ${PRJDIR}; ls -l ${PRJZIP})
 
-$(SDIRI)/default.flv: $(SDIRI)/droptest.flv
-	ln $(SDIRI)/droptest.flv $(SDIRI)/default.flv
-
-$(SDIRI)/mingput.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
-	$(PHPCLI) $(SDIRI)/mingput.php > $(SDIRI)/mingput.swf
-
-$(SDIRI)/mingput44.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
-	$(PHPCLI) $(SDIRI)/mingput.php -- BH=44 > $(SDIRI)/mingput44.swf
-
-$(SDIRI)/mingput40.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
-	$(PHPCLI) $(SDIRI)/mingput.php -- BH=40 > $(SDIRI)/mingput40.swf
-
-$(SDIRI)/mingput36.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
-	$(PHPCLI) $(SDIRI)/mingput.php -- BH=36 > $(SDIRI)/mingput36.swf
-
-$(SDIRI)/mingput32.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
-	$(PHPCLI) $(SDIRI)/mingput.php -- BH=32 > $(SDIRI)/mingput32.swf
-
-$(SDIRI)/mingput28.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
-	$(PHPCLI) $(SDIRI)/mingput.php -- BH=28 > $(SDIRI)/mingput28.swf
-
-$(SDIRI)/mingput24.swf: $(SDIRI)/mingput.php $(SDIRI)/mainact.inc.php
-	$(PHPCLI) $(SDIRI)/mingput.php -- BH=24 > $(SDIRI)/mingput24.swf
+$(SDIRI)/$(MNAME).swf: $(SDIRI)/$(MINGS) $(SDIRI)/$(MINGA)
+	$(PHPCLI) $(SDIRI)/$(MINGS) -- BH=100 > $@
 
 ${JSBIN}: ${JSSRC}
-	O=$@; I=$${O%.*}.dev.js; \
+	O=$@; I=$${O%%.*}.js; \
+	(P=`which perl` && $$P -e 'use JavaScript::Minifier::XS qw(minify); print minify(join("",<>))' < "$$I" > "$$O" 2>/dev/null ) \
+	|| \
 	(P=`which perl` && $$P -e 'use JavaScript::Minifier qw(minify);minify(input=>*STDIN,outfile=>*STDOUT)' < "$$I" > "$$O" 2>/dev/null) \
-	|| (P=`which perl` && $$P -e \
-		'use JavaScript::Packer;$$p=JavaScript::Packer->init();$$o=join("",<STDIN>);$$p->minify(\$$o,{"compress"=>"clean"});print STDOUT $$o;' < "$$I" > "$$O") \
-	|| cp -f "$$I" "$$O"
+	|| { cp -f "$$I" "$$O" && echo UN-MINIFIED $$I to $$O; }
+
+# NOTE: The non-trivial front.js is broken by perl 'JavaScript::Packer'
+# this rule is saved for reference in case Packer warrants another
+# try some day
+#${JSBIN}: ${JSSRC}
+#	O=$@; I=$${O%%.*}.js; echo $$I to $$O; \
+#	(P=`which perl` && $$P -e \
+#		'use JavaScript::Packer;$$p=JavaScript::Packer->init();$$o=join("",<STDIN>);$$p->minify(\$$o,{"compress"=>"clean"});print STDOUT $$o;' < "$$I" > "$$O") \
+#	|| cp -f "$$I" "$$O"
+
+${H5BIN} : ${H5SRC}
+	exit 0
 
 $(READS): docs/readme.roff
 	(cd docs && make txt tty tt8 pdf html && \

@@ -2,8 +2,8 @@
 /*
 Plugin Name: SWFPut
 Plugin URI: http://agalena.nfshost.com/b1/?page_id=46
-Description: Add Shockwave Flash video to WordPress posts and widgets, from arbitrary URI's or media library ID's or files in your media upload directory tree (even if not added by WordPress and assigned an ID).
-Version: 1.0.7
+Description: Add Flash and HTML5 video to WordPress posts, pages, and widgets, from arbitrary URI's or media library ID's or files in your media upload directory tree (including uplaods not in the WordPress media library).
+Version: 1.0.8
 Author: Ed Hynan
 Author URI: http://agalena.nfshost.com/b1/
 License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
@@ -108,12 +108,15 @@ endif;
 
 
 /**
- * class providing flash video for WP pages
+ * main class flash/HTML5 video for WP pages
  */
 if ( ! class_exists('SWF_put_evh') ) :
 class SWF_put_evh {
 	// web page as of release
 	const plugin_webpage = 'http://agalena.nfshost.com/b1/?page_id=46';
+	
+	// this version
+	const plugin_version = '1.0.8';
 	
 	// the widget class name
 	const swfput_widget = 'SWF_put_widget_evh';
@@ -131,6 +134,7 @@ class SWF_put_evh {
 	const optscreen1 = 'screen_opts_1';
 	// WP option names/keys
 	// optdisp... -- display areas
+	const opth5vprim = '_evh_swfput1_h5pr'; // posts
 	const optdispmsg = '_evh_swfput1_dmsg'; // posts
 	const optdispwdg = '_evh_swfput1_dwdg'; // widgets no-admin
 	const optdisphdr = '_evh_swfput1_dhdr'; // header area
@@ -150,6 +154,8 @@ class SWF_put_evh {
 	const defverbose = 'true';
 	// this is hidden in settings page; used w/ JS for 'screen options'
 	const defscreen1 = 'true';
+	// put html5 video alternate as primary content?
+	const defh5vprim = 'false';
 	// display opts, widget, inline or both
 	 // 1==message | 2==widget | 4==header
 	const defdisplay  = 7;
@@ -177,9 +183,9 @@ class SWF_put_evh {
 	protected $spg = null;
 
 	// swfput program directory
-	const swfputdir = 'mingput';
+	const swfputdir = 'evhflv';
 	// swfput program binary name
-	const swfputbinname = 'mingput.swf';
+	const swfputbinname = 'evhflv.swf';
 	// swfput program php+ming script name
 	const swfputphpname = 'mingput.php';
 	// swfput program css name
@@ -198,7 +204,7 @@ class SWF_put_evh {
 	// settings js subdirectory
 	const settings_jsdir = 'js';
 	// settings js shortcode editor helper name
-	const settings_jsname = 'screens.js';
+	const settings_jsname = 'screens.min.js';
 	// settings program js path
 	protected $settings_js;
 	// JS: name of class to control textare/button pairs
@@ -213,12 +219,24 @@ class SWF_put_evh {
 	protected static $helppdf = null;
 
 	// swfput js shortcode editor helper name
-	const swfxedjsname = 'formxed.js';
+	const swfxedjsname = 'formxed.min.js';
 	
-	// swfput js front-end js (e.g. for mobile)
-	const swfadjjsname = 'front.js';
+	// html5 video front-end js
+	const evhv5vjsdir  = 'evhh5v';
+	const evhv5vjsname = 'front.min.js';
 	// swfput js front-end js name prefix:
-	const swfadjjsnpfx = 'SWFPut_putswf_video';
+	const evhv5vjsnpfx = 'evhh5v';
+	// html5 video front-end css
+	const evhv5vcssdir  = 'evhh5v';
+	const evhv5vcssname = 'evhh5v.css';
+	const evhv5vcssnpfx = 'evhh5v';
+	// html5 video front-end svg files
+	const evhv5vsvgdir  = 'evhh5v';
+	const evhv5vsvg_bar = 'ctlbar.svg';
+	const evhv5vsvg_vol = 'ctlvol.svg';
+	const evhv5vsvg_but = 'ctrbut.svg';
+	// set to map of svg file names -> URL
+	protected $evhv5v_svgs;
 	
 	// hold an instance
 	private static $instance;
@@ -300,6 +318,7 @@ class SWF_put_evh {
 		$items = array(
 			self::optverbose => self::defverbose,
 			self::optscreen1 => self::defscreen1,
+			self::opth5vprim => self::defh5vprim,
 			self::optdispmsg =>
 				(self::defdisplay & self::disp_msg) ? 'true' : 'false',
 			self::optdispwdg =>
@@ -402,6 +421,11 @@ class SWF_put_evh {
 		// placement section: (posts, sidebar, header)
 		$nf = 0;
 		$fields = array();
+		$fields[$nf++] = new $Cf(self::opth5vprim,
+				self::wt(__('HTML5 video primary:', 'swfput_l10n')),
+				self::opth5vprim,
+				$items[self::opth5vprim],
+				array($this, 'put_h5vprim_opt'));
 		$fields[$nf++] = new $Cf(self::optdispmsg,
 				self::wt(__('Place in posts:', 'swfput_l10n')),
 				self::optdispmsg,
@@ -672,12 +696,15 @@ class SWF_put_evh {
 	public static function hook_admin_menu() {
 		$cl = __CLASS__;
 		$id = 'SWFPut_putswf_video';
-		$tl = __('SWFPut Flash Video Shortcode', 'swfput_l10n');
+		$tl = __('SWFPut Video ("Help" above has a tab for this)', 'swfput_l10n');
+		$tl = self::wt($tl);
 		$fn = 'put_xed_form';
-		if ( current_user_can('edit_posts') )
+		if ( current_user_can('edit_posts') ) {
 			add_meta_box($id, $tl, array($cl, $fn), 'post', 'normal');
-		if ( current_user_can('edit_pages') )
+		}
+		if ( current_user_can('edit_pages') ) {
 			add_meta_box($id, $tl, array($cl, $fn), 'page', 'normal');
+		}
 	}
 
 	// add a help tab in the post-related pages
@@ -694,111 +721,183 @@ class SWF_put_evh {
 		}
 
 		$scr = get_current_screen();
-		if ( $scr && $scr->base === 'post'
+		if ( ! $scr ) {
+			return;
+		}
+
+		// The help to be displayed with a tab under the "Help" button.
+		$hlptxt =
+		__('<p>
+		Hopefully, much of the SWFPut setup form
+		is self-explanatory.
+		There is more detailed documentation as HTML
+		<a href="%s" target="_blank">here (in a new tab)</a>,
+		or as a PDF file
+		<a href="%s" target="_blank">here (in a new tab)</a>.
+		</p><p>
+		There is one important restriction on the form\'s
+		text entry fields. The values may not have any
+		ASCII \'&quot;\' (double quote) characters. Hopefully
+		that will not be a problem.
+		</p><p>
+		The following items probably need explanation:
+		</p><p>
+		<h6>Flash or HTML5 video URLs or media library IDs</h6>
+		Near the top of the form, after the "Caption" field,
+		a text entry field named
+		"Flash video URL or media library ID" appears.
+		This is for the video file that the flash player
+		will use. You may enter a URL by hand (which may
+		be off-site), or make a selection from the next
+		two items,
+		"Select flash video URL from uploads directory" and
+		"Select ID for flash video from media library."
+		The first of these two holds a selection of files
+		found under your <code>wp-content/uploads</code>
+		directory with a FLV or MP4 extension. Files
+		are placed under this directory when you use the
+		<em>WordPress</em> media library, but you may also
+		place files there \'by hand\' using, for example,
+		ftp or ssh or any suitable utility (placing files
+		in a subdirectory is a good idea).
+		In fact, uploading video files \'by hand\' might
+		be the easiest way to bypass size limits that
+		reject large video file uploads through the
+		media library interface. The next field
+		has a selection of media files with a
+		<em>WordPress</em> \'attachment id\' and so it
+		provides only those files uploaded to the media
+		library (with a FLV or MP4 extension).
+		</p><p>
+		After those three fields for flash video, there is
+		"HTML5 video URLs or media library IDs" which,
+		like the flash text entry, is followed by selections
+		of files and \'attachment id\'s. These show files
+		with MP4 or OGG or OGV or WEBM extensions. As the
+		field names suggest, these are for the HTML5 video
+		player. An important difference is that when you
+		make a selection, the entry field is appended,
+		rather than replaced, with a \'|\' separator.
+		The HTML5 video entry field can take more than one
+		value, as explained below.
+		</p><p>
+		It is not necessary to fill both the flash and HTML5
+		video URL fields, but it is a good idea to do so
+		if you can prepare the video in the needed formats.
+		If you specify only one type, the other type of
+		video player is not produced in the page code.
+		If you do specify URLs for both flash and HTML5 video,
+		then the page code will have one as primary content,
+		and the other as "fallback" content. Fallback content
+		is shown by the web-browser only when the primary
+		content cannot be shown. For example, if flash is
+		primary content, but you have specified HTML5 content
+		too, then a visitor to your site who does not
+		have a flash plugin would see the HTML5 video player
+		if the browser supports it.
+		(Mobile browsers are less likely to have a flash
+		plugin than desktop-type browsers.)
+		</p><p>
+		By default, flash is made primary content with
+		HTML5 as fallback. You may make HTML5 be primary
+		and flash be fallback with the "HTML5 video primary"
+		option on the settings page. (Go to the "Settings"
+		menu and select "SWFPut Plugin" for the settings page.)
+		</p><p>
+		The current state of affairs with HTML5 video will
+		require three transcodings of the video if you
+		want broad browser support; moreover, the supported
+		"container" formats -- .webm, .ogg/.ogv, and .mp4 --
+		might contain different audio and video types ("codecs")
+		and only some of these will be supported by various
+		browsers.
+		Users not already familiar with this topic should
+		do enough research to make the preceding statements
+		clear.
+		</p><p>
+		The "HTML5 video URLs" field
+		will accept any number of URLs, which
+		must be separated by \'|\'. Each URL <em>may</em>
+		be appended with a mime-type + codecs argument,
+		separated from the URL by \'?\'. Whitespace around
+		the separators is accepted and stripped-off. Please
+		note that the argument given should <em>not</em>
+		include "type=" or quotes: give only the
+		statement that should appear within the quotes.
+		For example:</p>
+		<blockquote><code>
+		vids/gato.mp4 ? video/mp4 | vids/gato.webm ? video/webm; codecs=vp8,vorbis | vids/gato.ogv?video/ogg; codecs=theora,vorbis
+		</code></blockquote>
+		<p>
+		In the example, where two codecs are specified there is
+		no space after the comma.
+		Some online examples
+		show a space after the comma,
+		but some older
+		versions of <em>Firefox</em> will reject that
+		usage, so the space after the comma is best left out.
+		</p><p>
+		<h6>Use initial image as no-video alternate</h6>
+		This checkbox, if enabled (it is, by default) will
+		use the "initial image file" that may be specified
+		for the video player in an \'img\' element
+		that the visitor\'s browser might display if video
+		is not available.
+		</p><p>
+		There is one additional consideration for this image:
+		the \'img\' element is given the width and height
+		specified in the form for the flash player, and the
+		visitor\'s browser will scale the image in both
+		dimensions, possibly causing the image to be
+		\'stretched\' or \'squeezed\'.
+		The image proportions are restored with
+		<em>JavaScript</em>, but only if scripts are
+		not disabled in the visitor\'s browser.
+		Therefore, it is a
+		good idea to prepare images to have the expected
+		<em>pixel</em> aspect ratio
+		(top/bottom or left/right tranparent
+		areas might be one solution).
+		</p><p>
+		<h6>Mobile width</h6>
+		This input field appears just below the
+		pixel dimensions fields. If this value is
+		greater than zero, and a mobile browser is
+		detected, then this width will be used with
+		a proportional height according to the
+		regular pixel dimensions. This might be
+		useful when, for example, sidebar content
+		actually appears below main content due to
+		the mobile browser\'s small size (theme support
+		may be necessary to see this behavior). This
+		is probably most useful for video widgets placed
+		on a sidebar, but please experiment.
+		The default value for this field, 0,
+		disables this feature, and it has no effect if
+		a mobile browser is not detected.
+		</p>', 'swfput_l10n');
+
+		// nothing specific to widgets; only guessing that
+		// edit_theme* are suitable
+		if ( $scr->base === 'widgets'
+			&& (current_user_can('edit_theme_options')
+			||  current_user_can('edit_themes')) ) {
+			$scr->add_help_tab(array(
+				'id'      => 'help_tab_widgets_swfput',
+				'title'   => __('SWFPut Video Player', 'swfput_l10n'),
+				'content' => self::wt(sprintf($hlptxt,
+					self::$helphtml, self::$helppdf))
+				// content may be a callback
+				)
+			);
+		} else if ( $scr->base === 'post'
 			&& (current_user_can('edit_posts')
 			||  current_user_can('edit_pages')) ) {
 			$scr->add_help_tab(array(
 				'id'      => 'help_tab_posts_swfput',
-				'title'   => __('SWFPut Form', 'swfput_l10n'),
-				'content' => self::wt(sprintf(__('<p>
-				Hopefully, much of the SWFPut shortcode form,
-				or "metabox," is self-explanatory.
-				There is more detailed documentation
-				as HTML
-				<a href="%s" target="_blank">here (in a new tab)</a>,
-				or as a PDF file
-				<a href="%s" target="_blank">here (in a new tab)</a>.
-				</p><p>
-				There is one important restriction on the form\'s
-				text entry fields. The values may not have any
-				ASCII \'&quot;\' (double quote) characters. Hopefully
-				that will not be a problem.
-				</p><p>
-				These form items probably need explanation:
-				</p><p>
-				<h6>URLs for alternate HTML5 video</h6>
-				This text field accepts alternatives for non-flash
-				browsers, if recent enough to provide HTML5 video.
-				The current state of affairs with HTML5 video will
-				require three transcodings of the material if you
-				want broad browser support; moreover, the supported
-				"container" formats -- .webm, .ogg, and .mp4 --
-				might contain different audio and video types ("codecs")
-				and only some of these will be supported by various
-				browsers.
-				Users not already familiar with this topic will need
-				to do enough research to make the preceding statements
-				clear.
-				</p><p>
-				The text field will accept any number of URLs, which
-				must be separated by \'|\'. Each URL <em>may</em>
-				be appended with a mime-type + codecs argument,
-				separated from the URL by \'?\'. Whitespace around
-				the separators is accepted and stripped-off. Please
-				note that the argument given should <em>not</em>
-				include "type=" or the quotes: give only the
-				statement that should appear within the quotes.
-				For example:</p>
-				<blockquote><code>
-				vids/gato.mp4?video/mp4 | vids/gato.webm ? video/webm; codecs=vp8,vorbis|vids/gato.ogv?video/ogg; codecs=\'theora, vorbis\'
-				</code></blockquote>
-				<p>
-				In the example, where two codecs are specified there is
-				no space after the comma, or the two codecs are
-				enclosed in <em>single</em> quotes.
-				Many online examples
-				show a space after the comma without the quotes,
-				but some older
-				versions of <em>Firefox</em> will reject that
-				usage, so the space after the comma is best left out.
-				</p><p>
-				<h6>Use initial image as non-flash alternate</h6>
-				This checkbox, if enabled (it is, by default) will
-				use the "initial image file" that may be specified
-				for the flash player in an \'img\' element
-				that the visitor\'s browser should display if flash
-				is not available.
-				</p><p>
-				If alternate HTML5 video was specified, that will
-				remain the first alternate display, and the initial
-				image should display if neither flash or HTML5 video
-				are available.
-				</p><p>
-				There is one additional consideration for this image:
-				the \'img\' element is given the width and height
-				specified in the form for the flash player, and the
-				visitor\'s browser will scale the image in both
-				dimensions, possibly causing the image to be
-				\'stretched\' or \'squeezed\'. (That is not a problem
-				in the flash player, as it is coded to display the
-				initial image proportionally.)
-				The image proportions are restored with
-				<em>JavaScript</em>, but only  if scripts are
-				not disabled in the visitor\'s browser.
-				Therefore, it is a
-				good idea to prepare images to have the expected
-				<em>pixel</em> aspect ratio
-				(top/bottom or left/right tranparent
-				areas might be one solution).
-				</p><p>
-				<h6>Mobile width</h6>
-				This input field appears just below the
-				pixel dimensions fields. If this value is
-				greater than zero, and a mobile browser is
-				detected, then this width will be used with
-				a proportional height according to the
-				regular pixel dimensions. This might be
-				useful when, for example, sidebar content
-				actually appears below main content due to
-				the mobile browser\'s small size (theme support
-				may be necessary to see this behavior). This
-				is probably most useful for video widgets placed
-				on a sidebar, but please experiment.
-				The default value for this field, 0,
-				disables this feature, and it has no effect if
-				a mobile browser is not detected.
-				</p>
-				', 'swfput_l10n'), self::$helphtml, self::$helppdf))
+				'title'   => __('SWFPut Video Form', 'swfput_l10n'),
+				'content' => self::wt(sprintf($hlptxt,
+					self::$helphtml, self::$helppdf))
 				// content may be a callback
 				)
 			);
@@ -900,7 +999,7 @@ class SWF_put_evh {
 		$cl = __CLASS__;
 
 		if ( $adm ) {
-		// keep it clean: {de,}activation
+			// keep it clean: {de,}activation
 			if ( current_user_can('activate_plugins') ) {
 				$aa = array($cl, 'on_deactivate');
 				register_deactivation_hook($pf, $aa);
@@ -927,10 +1026,27 @@ class SWF_put_evh {
 				$this->init_settings_page();
 			}
 		} else { // if ( $adm )
-			$jsfn = 'SWFPut_putswf_video_adj';
-			$t = self::settings_jsdir . '/' . self::swfadjjsname;
+			$stfn = self::evhv5vcssnpfx . '_css';
+			$t = self::evhv5vcssdir . '/' . self::evhv5vcssname;
+			$stfile = plugins_url($t, $pf);
+			$t = self::plugin_version;
+			wp_enqueue_style($stfn, $stfile, false, $t);
+
+			$jsfn = self::evhv5vjsnpfx . '_js';
+			$t = self::evhv5vjsdir . '/' . self::evhv5vjsname;
 			$jsfile = plugins_url($t, $pf);
-	        wp_enqueue_script($jsfn, $jsfile, false, '1.0.7');
+			$t = self::plugin_version;
+	        wp_enqueue_script($jsfn, $jsfile, false, $t);
+
+			$t = self::evhv5vsvgdir;
+			$this->evhv5v_svgs = array(
+				self::evhv5vsvg_bar =>
+					plugins_url($t . '/' . self::evhv5vsvg_bar, $pf),
+				self::evhv5vsvg_vol =>
+					plugins_url($t . '/' . self::evhv5vsvg_vol, $pf),
+				self::evhv5vsvg_but =>
+					plugins_url($t . '/' . self::evhv5vsvg_but, $pf)
+			);
 		}
 
 		$aa = array($this, 'post_shortcode');
@@ -1034,6 +1150,7 @@ class SWF_put_evh {
 					$a_out[$k] = ($ot == 'false') ? 'false' : 'true';
 					break;
 				case self::optverbose:
+				case self::opth5vprim:
 				case self::optdispmsg:
 				case self::optdispwdg:
 				case self::optdisphdr:
@@ -1152,23 +1269,67 @@ class SWF_put_evh {
 
 		$t = self::wt(__('Introduction:', 'swfput_l10n'));
 		printf('<p><strong>%s</strong>%s</p>', $t, "\n");
-		$t = self::wt(__('These options enable or completely disable
-			placing video in posts or widgets. If the placement
+		$t = self::wt(__('These options control video placement.
+			</p><p>
+			The first option, "HTML5 video primary,"
+			makes HTML5 video be placed as
+			primary (rather than fallback) content. If this
+			is selected then flash video
+			will be placed as fallback content when both
+			types have been specified.
+			Be aware that if the web browser supports HTML5 video
+			but cannot play any of the video
+			types specified, it probably will
+			<em>not</em> fallback to flash video. That is,
+			placing flash video as fallback is only useful
+			for browsers that do not support the video
+			element. At this time the major graphical browsers
+			all support the HTML5 video element, so using this
+			option is effectively disabling the flash video
+			(except when HTML5 video was not specified at all).
+			</p><p>
+			By default flash is primary and HTML5 video
+			is fallback content. The flash plugin seems to be
+			losing favor (although it remains a more consistent
+			and simple engine for a video player), and for some
+			platforms the plugin is not available. Even where available,
+			flash might be disabled by default by some browsers, or
+			the browser might
+			require user approval before flash is allowed to run.
+			</p><p>
+			Note that at present the major graphical browsers
+			do <em>not</em> all support the same set of video
+			types for their HTML5 video players.
+			To reliably use HTML5 video as primary content,
+			you will need to prepare the video in .MP4, .OGG (.OGV),
+			and .WEBM container formats with suitable codecs.
+			(The posts/pages editor page has a help button which
+			should have a "SWFPut Video Form" tab
+			with more explanation.)
+			</p><p>
+			Generally, if you can provide the several formats needed
+			for good HTML5 support, using the "HTML5 video primary"
+			option should be a good idea. An MP4 will be among
+			those files, and that can be used for flash too (although
+			if you wish to be compatible with the free/open source
+			<em>Gnash</em> flash plugin you should use FLV).
+			If you cannot provide
+			all the formats, it might be better not to use this option.
+			</p><p>
+			The next two options allow the video content
+			to be completely disabled.
+			If the placement
 			of video must be switched on or off, for either
 			posts (and pages) or widgets
 			or both, these are the options to use.
 			</p><p>
-			When the plugin shortcode is disabled the flash
-			video player that would have been displayed is
+			When the plugin shortcode is disabled the
+			video elements that would have been placed are
 			replaced by a notice with the form
 			"[A/V content &lt;caption&gt; disabled],"
 			where "&lt;caption&gt;"
 			is any caption that was included with the shortcode,
-			or empty if there was no caption.
-			</p><p>
-			Note that in the two following sections,
-			"Video In Posts" and "Video In Widget Areas,"
-			the options are effective only if enabled here.'
+			or empty if there was no caption.'
 			, 'swfput_l10n'));
 		printf('<p>%s</p>%s', $t, "\n");
 
@@ -1197,11 +1358,15 @@ class SWF_put_evh {
 		$t = self::wt(__('Introduction:', 'swfput_l10n'));
 		printf('<p><strong>%s</strong>%s</p>', $t, "\n");
 
-		$t = self::wt(__('These options select 
-			how flash video (or audio) may be placed in posts or pages.
+		$t = self::wt(__('
+			<strong>These options are deprecated and will be
+			removed in a future release. Do not use these.</strong>
+			</p><p>
+			These options select 
+			how video may be placed in posts or pages.
 			Use shortcodes for any new posts (and preferably
 			for existing posts) that should include
-			the flash media player of this plugin.
+			the video players of this plugin.
 			Shortcodes are an efficient method provided by the
 			<em>WordPress</em> API. When shortcodes are enabled,
 			a form for parameters will appear in the post (and page)
@@ -1249,8 +1414,12 @@ class SWF_put_evh {
 		$t = self::wt(__('Introduction:', 'swfput_l10n'));
 		printf('<p><strong>%s</strong>%s</p>', $t, "\n");
 
-		$t = self::wt(__('These options select 
-			how flash video (or audio) may be placed in widget areas.
+		$t = self::wt(__('
+			<strong>These options are deprecated and will be
+			removed in a future release. Do not use these.</strong>
+			</p><p>
+			These options select 
+			how video may be placed in widget areas.
 			The first option selects use of the included multi-widget.
 			This widget is configured in the
 			Appearance-&gt;Widgets page, just
@@ -1382,6 +1551,13 @@ class SWF_put_evh {
 		$this->put_single_checkbox($a, $k, $tt);
 	}
 
+	// callback, place "alternate" HTML <video> as primary content?
+	public function put_h5vprim_opt($a) {
+		$tt = self::wt(__('Place HTML5 "alternate" video as primary content', 'swfput_l10n'));
+		$k = self::opth5vprim;
+		$this->put_single_checkbox($a, $k, $tt);
+	}
+
 	// callback, put SWF in posts?
 	public function put_inposts_opt($a) {
 		$tt = self::wt(__('Enable shortcode or attachment search', 'swfput_l10n'));
@@ -1441,9 +1617,9 @@ class SWF_put_evh {
 		$mpat = self::get_mfilter_pat();
 		// files array from uploads dirs (empty if none)
 		$rhu = self::r_find_uploads($mpat['m'], true);
-		$af = &$rhu['rf'];
-		$au = &$rhu['wu'];
-		$aa = &$rhu['at'];
+		$af = &$rhu['uploadfiles'];
+		$au = &$rhu['uploadsdir'];
+		$aa = &$rhu['medialib'];
 		// url base for upload dirs files
 		$ub = rtrim($au['baseurl'], '/') . '/';
 		// directory base for upload dirs files
@@ -1478,6 +1654,8 @@ class SWF_put_evh {
 		$jfud = "rmsc_xed(this.form,'{$id}','caption','{$sc}')";
 		// js to copy from select/dropdown to text input
 		$jfsl = "form_cpval(this.form,'%s','%s','%s')";
+		// js to append from select/dropdown to text input
+		$jfap = "form_apval(this.form,'%s','%s','%s')";
 		// input text widths, wide, narrow
 		$iw = 100; $in = 8; // was: $in = 16;
 		// incr var for sliding divs
@@ -1499,15 +1677,15 @@ class SWF_put_evh {
 		<table id="<?php echo $id . '_buttons'; ?>"><tr><td>
 			<span  class="submit">
 			<?php
-				$l = self::wt(__('Fill form from editor', 'swfput_l10n'));
+				$l = self::wt(__('Fill from post', 'swfput_l10n'));
 				printf($bjfmt, $job, $jfuf, $l);
-				$l = self::wt(__('Replace current in editor', 'swfput_l10n'));
+				$l = self::wt(__('Replace current in post', 'swfput_l10n'));
 				printf($bjfmt, $job, $jfuc, $l);
-				$l = self::wt(__('Delete current in editor', 'swfput_l10n'));
+				$l = self::wt(__('Delete current in post', 'swfput_l10n'));
 				printf($bjfmt, $job, $jfud, $l);
-				$l = self::wt(__('Place new in editor', 'swfput_l10n'));
+				$l = self::wt(__('Place new in post', 'swfput_l10n'));
 				printf($bjfmt, $job, $jfu, $l);
-				$l = self::wt(__('Reset default values', 'swfput_l10n'));
+				$l = self::wt(__('Reset defaults', 'swfput_l10n'));
 				printf($bjfmt, $job, $jfur, $l);
 			?>
 			</span>
@@ -1534,7 +1712,7 @@ class SWF_put_evh {
 			printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
 		</p><p>
 		<?php $k = 'url';
-			$l = self::wt(__('Url or media library ID:', 'swfput_l10n'));
+			$l = self::wt(__('Flash video URL or media library ID (.flv or .mp4):', 'swfput_l10n'));
 			printf($lbfmt, $id, $k, $l);
 			printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
 		</p>
@@ -1545,7 +1723,7 @@ class SWF_put_evh {
 				echo "<p>\n";
 				$k = 'files';
 				$jfcp = sprintf($jfsl, $id, $k, $kl);
-				$l = self::wt(__('Url from uploads directory:', 'swfput_l10n'));
+				$l = self::wt(__('Select flash video URL from uploads directory:', 'swfput_l10n'));
 				printf($lbfmt, $id, $k, $l);
 				// <select>
 				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfcp);
@@ -1574,7 +1752,7 @@ class SWF_put_evh {
 				echo "<p>\n";
 				$k = 'atch';
 				$jfcp = sprintf($jfsl, $id, $k, $kl);
-				$l = self::wt(__('Select ID from media library:', 'swfput_l10n'));
+				$l = self::wt(__('Select ID for flash video from media library:', 'swfput_l10n'));
 				printf($lbfmt, $id, $k, $l);
 				// <select>
 				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfcp);
@@ -1593,17 +1771,72 @@ class SWF_put_evh {
 			} // end if there are upload files
 		?>
 		<p>
-		<?php $k = 'audio';
+		<?php /* Remove MP3 audio (v. 1.0.8) $k = 'audio';
 			$l = self::wt(__('Medium is audio: ', 'swfput_l10n'));
 			printf($lbfmt, $id, $k, $l);
 			$ck = $$k == 'true' ? 'checked="checked" ' : '';
 			printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
 		</p><p>
-		<?php $k = 'altvideo'; 
-			$l = self::wt(__('URLs for alternate HTML5 video (optional: .mp4, .webm, .ogv):', 'swfput_l10n'));
+		<?php */ $k = 'altvideo'; 
+			$l = self::wt(__('HTML5 video URLs or media library IDs (.mp4, .webm, .ogv):', 'swfput_l10n'));
 			printf($lbfmt, $id, $k, $l);
 			printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
-		</p><p>
+		</p>
+		<?php
+			// if there are upload files, print <select >
+			$kl = $k;
+			if ( count($af) > 0 ) {
+				echo "<p>\n";
+				$k = 'h5files';
+				$jfcp = sprintf($jfap, $id, $k, $kl);
+				$l = self::wt(__('Select HTML5 video URL from uploads directory (appends):', 'swfput_l10n'));
+				printf($lbfmt, $id, $k, $l);
+				// <select>
+				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfcp);
+				// <options>
+				printf($sofmt, '', self::wt(__('none', 'swfput_l10n')));
+				foreach ( $af as $d => $e ) {
+					$hit = array();
+					for ( $i = 0; $i < count($e); $i++ )
+						if ( preg_match($mpat['h5av'], $e[$i]) )
+							$hit[] = &$af[$d][$i];
+					if ( empty($hit) )
+						continue;
+					printf($sgfmt, self::ht($d));
+					foreach ( $hit as $fv ) {
+						$tu = rtrim($ub, '/') . '/' . $d . '/' . $fv;
+						$fv = self::ht($fv);
+						printf($sofmt, self::et($tu), $fv);
+					}
+					echo "</optgroup>\n";
+				}
+				// end select
+				echo "</select><br />\n";
+				echo "</p>\n";
+			} // end if there are upload files
+			if ( ! empty($aa) ) {
+				echo "<p>\n";
+				$k = 'h5atch';
+				$jfcp = sprintf($jfap, $id, $k, $kl);
+				$l = self::wt(__('Select ID for HTML5 video from media library (appends):', 'swfput_l10n'));
+				printf($lbfmt, $id, $k, $l);
+				// <select>
+				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfcp);
+				// <options>
+				printf($sofmt, '', self::wt(__('none', 'swfput_l10n')));
+				foreach ( $aa as $fn => $fi ) {
+					$m = basename($fn);
+					if ( ! preg_match($mpat['h5av'], $m) )
+						continue;
+					$ts = $m . " (" . $fi . ")";
+					printf($sofmt, self::et($fi), self::ht($ts));
+				}
+				// end select
+				echo "</select><br />\n";
+				echo "</p>\n";
+			} // end if there are upload files
+		?>
+		<p>
 		<?php $k = 'playpath'; 
 			$l = self::wt(__('Playpath (rtmp):', 'swfput_l10n'));
 			printf($lbfmt, $id, $k, $l);
@@ -1670,7 +1903,7 @@ class SWF_put_evh {
 		?>
 		<p>
 		<?php $k = 'iimgbg';
-			$l = self::wt(__('Use initial image as non-flash alternate: ', 'swfput_l10n'));
+			$l = self::wt(__('Use initial image as no-video alternate: ', 'swfput_l10n'));
 			printf($lbfmt, $id, $k, $l);
 			$ck = $$k == 'true' ? 'checked="checked" ' : '';
 			printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
@@ -1750,7 +1983,7 @@ class SWF_put_evh {
 			array('allowfull', '<p>', '</p>', $in, 'chk',
 				__('Allow full screen: ', 'swfput_l10n')),
 			array('barheight', '<p>', '</p>', $in, 'inp',
-				__('Control bar Height (20-50): ', 'swfput_l10n'))
+				__('Control bar Height (30-60): ', 'swfput_l10n'))
 			);
 			foreach ( $els as $el ) {
 				$k = $el[0];
@@ -1792,8 +2025,8 @@ class SWF_put_evh {
 			$c = '';
 			// TRANSLATORS the '[]' are meant to indicate strongly
 			// that this is not normal, expected text display,
-			// because this text takes the place of a Flash program
-			// when disabled by a plugin option.
+			// because this text takes the place of the video program
+			// when disabled by a plugin option or not supported.
 			// 'A/V' is understood in US (all English language???)
 			// as 'Audio/Visual' e.g., film, sound.
 			// '%s' is any caption provided for a/v, if any,
@@ -1820,12 +2053,9 @@ class SWF_put_evh {
 		if ( $code === "" ) {
 			$code = 'swfput_div';
 		}
-		if ( $this->should_use_ming() ) {
-			$swf = $this->get_swf_url('widget', $w, $h);
-		} else {
-			$bh = $pr->getvalue('barheight');
-			$swf = $this->get_swf_binurl($bh);
-		}
+		
+		$swf = $this->get_swf_url();
+
 		$dw = $w + 3;
 
 		// use no class, but do use deprecated align
@@ -1839,7 +2069,7 @@ class SWF_put_evh {
 		}
 
 		$ids = $this->get_div_ids($code);
-		$em  = $this->get_swf_tags($swf, $pr, $ids);
+		$em  = $this->get_player_elements($swf, $pr, $ids);
 		return $this->get_div($ids, $dv, $c, $em);
 	}
 
@@ -1854,8 +2084,8 @@ class SWF_put_evh {
 			$c = '';
 			// TRANSLATORS the '[]' are meant to indicate strongly
 			// that this is not normal, expected text display,
-			// because this text takes the place of a Flash program
-			// when disabled by a plugin option.
+			// because this text takes the place of a video program
+			// when disabled by a plugin option or not supported.
 			// 'A/V' is understood in US (all English language???)
 			// as 'Audio/Visual' e.g., film, sound.
 			// '%s' is any caption provided for a/v, if any,
@@ -1882,12 +2112,9 @@ class SWF_put_evh {
 		if ( $code === "" ) {
 			$code = 'swfput_div';
 		}
-		if ( $this->should_use_ming() ) {
-			$swf = $this->get_swf_url('post', $w, $h);
-		} else {
-			$bh = $pr->getvalue('barheight');
-			$swf = $this->get_swf_binurl($bh);
-		}
+		
+		$swf = $this->get_swf_url();
+
 		$dw = $w + 0;
 
 		// use class that WP uses for e.g. images
@@ -1902,7 +2129,7 @@ class SWF_put_evh {
 		}
 
 		$ids = $this->get_div_ids($code);
-		$em  = $this->get_swf_tags($swf, $pr, $ids);
+		$em  = $this->get_player_elements($swf, $pr, $ids);
 		return $this->get_div($ids, $dv, $c, $em);
 	}
 
@@ -1917,12 +2144,8 @@ class SWF_put_evh {
 		$pr = new $pr();
 		$pr->setvalue('width', $w);
 		$pr->setvalue('height', $h);
-		if ( $this->should_use_ming() ) {
-			$swf = $this->get_swf_url('post_sed', $w, $h);
-		} else {
-			$bh = $pr->getvalue('barheight');
-			$swf = $this->get_swf_binurl($bh);
-		}
+		
+		$swf = $this->get_swf_url();
 		
 		// accumulate in $out
 		$out = '';
@@ -1948,7 +2171,7 @@ class SWF_put_evh {
 				} else {
 					$pr->setvalue('url', $url);
 					$ids = $this->get_div_ids('swfput_sed');
-					$em  = $this->get_swf_tags($swf, $pr, $ids);
+					$em  = $this->get_player_elements($swf, $pr, $ids);
 
 					$dv = 'style="width: '.($w+0).'px; max-width: 100%"'
 						. ' class="wp-caption aligncenter"';
@@ -1969,42 +2192,29 @@ class SWF_put_evh {
 		$rndnum = self::uniq_rand();
 		$divid = sprintf('d_%s_%06u', $base, $rndnum);
 		$objid = sprintf('o_%s_%06u', $base, $rndnum);
-		return array($divid, $objid, 'va_' . $objid, 'ia_' . $objid);
+		return array(
+			$divid, $objid, 'va_' . $objid, 'ia_' . $objid, $rndnum
+		);
 	}
 	
 	// get video <div>+<script> strings
 	// $divids are returned from get_div_ids($base),
 	// $divatts are appended to <div> after id,
 	// $cap is caption within <div> below video, and
-	// $vidtags are the array returned by get_swf_tags()
+	// $vidtags are the array returned by get_player_elements()
 	public function get_div($divids, $divatts, $cap, $vidtags) {
-		$opfx = self::swfadjjsnpfx;
+		$opfx = self::evhv5vjsnpfx;
 
 		$dv = sprintf('id="%s" %s', $divids[0], $divatts);
-		$dvf = str_replace(array('-', ' '), '_', $divids[0]);
-
-		if ( function_exists('wp_is_mobile') && wp_is_mobile() ) {
-			return sprintf('
-			<div %s>%s</div>
-			<script type="text/javascript">
-			var ob_%s = new %s_adj("%s", 0, 0, 0, new %s_bld("%s", "%s", "%s", "%s", %s));
-			</script>
-			',
-			$dv, $cap,
-			$dvf, $opfx, $divids[0], $opfx,
-			$divids[0], $divids[1], $divids[2], $divids[3],
-			json_encode($vidtags['js']));
-		}
 
 		return sprintf('
-			<div %s>%s%s</div>
+			<div %s>%s%s
+			</div><!-- %s -->
 			<script type="text/javascript">
-			var adj_%s = new %s_adj("%s", "%s", "%s", "%s", false);
-			</script>
-			',
-			$dv, $vidtags['el'], $cap,
-			$dvf, $opfx,
-			$divids[0], $divids[1], $divids[2], $divids[3]);
+				new %s_sizer("%s", "%s", "%s", "%s", false);
+			</script>',
+			$dv, $vidtags['el'], $cap, $divids[0],
+			$opfx, $divids[0], $divids[1], $divids[2], $divids[3]);
 	}
 
 	/**
@@ -2040,12 +2250,11 @@ class SWF_put_evh {
 			$pf = rtrim(plugin_dir_path($pf), '/');
 		}
 		
-		// store and return corrected file path
 		return $pf;
 	}
 	
 	// help for plugin file path/name; __FILE__ alone
-	// is not good enough -- see comment in body
+	// is not good enough -- see comment in body of mk_plugindir()
 	public static function mk_pluginfile() {
 		if ( self::$pluginfile !== null ) {
 			return self::$pluginfile;
@@ -2099,10 +2308,13 @@ class SWF_put_evh {
 
 	// return preg_match() pattern for media filter by file extension
 	public static function get_mfilter_pat() {
+		// 1.0.8 -- remove mp3: 'av' =>'/.*\.(flv|f4v|m4v|mp4|mp3)$/i'
+		// 'm' => '/.*\.(flv|f4v|m4v|mp4|mp3|swf|png|jpg|jpeg|gif)$/i'
 		// TODO: build from extensions option
-		return array('av' =>'/.*\.(flv|f4v|m4v|mp4|mp3)$/i',
-			'i' => '/.*\.(swf|png|jpg|jpeg|gif)$/i',
-			'm' => '/.*\.(flv|f4v|m4v|mp4|mp3|swf|png|jpg|jpeg|gif)$/i'
+		return array('av' =>'/.*\.(flv|f4v|m4v|mp4)$/i',
+			'h5av' =>'/.*\.(m4v|mp4|og[gv]|webm)$/i',
+			'i' => '/.*\.(png|jpg|jpeg|gif)$/i',
+			'm' => '/.*\.(flv|f4v|m4v|mp4|og[gv]|webm|png|jpg|jpeg|gif)$/i'
 			);
 	}
 
@@ -2184,10 +2396,13 @@ class SWF_put_evh {
 	}
 	
 	// WP provides a MSIE test, but use this for more control; also,
-	// recent MSIE no longer have "MSIE" in the agent string which
+	// recent MSIE no longer have "MSIE" in the agent string[*] which
 	// must be an assertion that it is now compatible and no longer
 	// has special needs, therefore this test need not be comprehensive.
-	protected static function is_msie() {
+	// [*] ``Trident'' is being used, and some MS dev page I found while
+	// web-searching explained it as being indeed to defeat MSIE
+	// identification, so let 'em have it their way.
+	public static function is_msie() {
 		static $is_so = null;
 		if ( $is_so === null ) {
 			$r = preg_match('/\bMSIE\b/', $_SERVER['HTTP_USER_AGENT']);
@@ -2196,8 +2411,13 @@ class SWF_put_evh {
 		return $is_so;
 	}
 	
-	// get a (almost certainly) unique random number:
-	// **not** for security, just probable uniqueness
+	// Get a (almost certainly) unique random number:
+	// **NOT** for security, only probable uniqueness
+	// for e.g., element id attributes.
+	// Note PHP has uniqid(), but docs example says:
+	// ``[...] the more_entropy parameter, which is 
+	// required on some systems[...]'' which makes me
+	// just uncertain enough to want to use this instead.
 	public static function uniq_rand($maxtries = 2048) {
 		static $rndmap = null;
 		if ( $rndmap === null ) {
@@ -2279,8 +2499,6 @@ class SWF_put_evh {
 	                if ( ! is_readable($t) )
 	                        continue;
 	                if ( is_dir($t) ) {
-	                        // array_merge should *not* overwrite
-	                        // numeric keys, but rather append
 	                        $at = self::r_find_files($t, $pat, $follow);
 	                        if ( count($at) > 0 ) {
 	                                $ao = array_merge($ao, $at);
@@ -2321,15 +2539,17 @@ class SWF_put_evh {
 
 		$ao = array();
 		$au = wp_upload_dir();
-		if ( ! $au )
-			return array('rf' => $ao, 'wu' => $au, 'at' => $aa);
 		$cdir = getcwd();
-		if ( ! chdir($au['basedir']) ) {
-			return array('rf' => $ao, 'wu' => $au, 'at' => $aa);
+		if ( $au && chdir($au['basedir']) ) {
+			$ao = self::r_find_files('.', $pat, $follow);
+			chdir($cdir);
 		}
-		$ao = self::r_find_files('.', $pat, $follow);
-		chdir($cdir);
-		return array('rf' => $ao, 'wu' => $au, 'at' => $aa);
+
+		return array(
+			'uploadfiles' => $ao,
+			'uploadsdir' => $au,
+			'medialib' => $aa
+		);
 	}
 
 	/**
@@ -2377,6 +2597,11 @@ class SWF_put_evh {
 		if ( self::get_widget_option() !== 'true' )
 			return 'false';
 		return self::opt_by_name(self::optcodewdg);
+	}
+
+	// get the HTML video as primary option
+	public static function get_h5vprim_option() {
+		return self::opt_by_name(self::opth5vprim);
 	}
 
 	// get the do messages (place in posts) option
@@ -2497,104 +2722,71 @@ class SWF_put_evh {
 		return $ourl;
 	}
 
-	// helper for selecting swf type (bin||script)) url
-	// arg $sel should be caller tag: 'widget',
-	// 'post' (shortcodes in posts), 'post_sed' (attachment_id filter),
-	// 'head' -- it might be used in future
-	public function get_swf_url($sel, $wi = 640, $hi = 480) {
-		$useming = self::should_use_ming();
-
-		if ( $useming === true ) {
-			$t = $this->swfputphp;
-		} else {
-			$n = floor((int)$hi / 10);
-			if ( $sel === 'widget' ) {
-				$n = 24;
-			}
-			$t = $this->get_swf_binurl($n);
-		}
-
-		return $t;
+	// return ming+php script address for server w/ ming module
+	public function get_swf_srcurl() {
+		return $this->swfputphp;
 	}
 
-	// helper for selecting swf bin near desired bar height
-	public function get_swf_binurl($bh = 48) {
-		$d = self::mk_playerdir();
-		$f = self::swfputbinname;
-		$a = explode('.', $f);
-		$p = sprintf('/^%s([0-9]+)\.%s$/i', $a[0], $a[1]);
-		$vmin = 65535; $vmax = 0;
-
-		$a = array();
-		foreach ( scandir($d) as $e ) {
-			$t = $d . '/' . $e;
-			if ( ! is_file($t) )
-				continue;
-			if ( ! is_readable($t) )
-				continue;
-			if ( ! preg_match($p, $e, $m) )
-				continue;
-			$a[$m[1]] = $e;
-			$n = (int)$m[1];
-			$vmin = min($vmin, $n);
-			$vmax = max($vmax, $n);
-		}
-
-		$bh = (int)$bh;
-		$n = count($a);
-		if ( $n === 0 ) {
-			$f = self::swfputbinname;
-		} else if ( $n === 1 ) {
-			// $vmax will index the only entry in $a
-			$f = $a['' . $vmax];
-		} else if ( $bh >= $vmax ) {
-			$f = $a['' . $vmax];
-		} else if ( $bh <= $vmin ) {
-			$f = $a['' . $vmin];
-		} else {
-			$ak = array_keys($a);
-			sort($ak, SORT_NUMERIC);
-			$lk = (int)$ak[0];
-			for ( $n = 1; $n < count($ak); $n++ ) {
-				$k = (int)$ak[$n];
-				// $bh must be found < $k within this loop
-				// due to above test 'if ( $bh >== $vmax )'
-				if ( $bh > $k ) {
-					$lk = (int)$ak[$n];
-					continue;
-				}
-				if ( ($bh - $lk) < ($k - $bh) ) {
-					$n--;
-				}
-				break;
-			}
-			if ( $n >= count($ak) ) {
-				die('broken logic in ' . __FUNCTION__);
-			}
-			$f = $a[$ak[$n]];
-		}
-
-		$t = dirname($this->swfputbin);
-		return $t . '/' . $f;
+	// return compiled .swf program address
+	public function get_swf_binurl() {
+		return $this->swfputbin;
 	}
 
-	// helper for getting swf css (internal use)) url
-	// arg $sel should be caller tag: 'widget',
-	// 'post' (shortcodes in posts), 'post_sed' (attachment_id filter),
-	// 'head' -- it might be used in future
-	public function get_swf_css_url($sel = '') {
+	// return one or the other of the two above
+	public function get_swf_url() {
+		if ( self::should_use_ming() ) {
+			return $this->get_swf_srcurl();
+		}
+
+		return $this->get_swf_binurl();
+	}
+
+	// the swf player use a small bit of css for e.g. net error
+	// reporting; get its address
+	public function get_swf_css_url() {
 		return $this->swfputcss;
 	}
 
-	// The swf player directory should have a small default video file;
-	// if it exists make a url for it.
-	public function get_swf_default_url() {
+	// the swf player directory should have a small default video file;
+	// get its address
+	public function get_swf_default_video_url() {
 		return $this->swfputvid;
 	}
 
-	// return array with suitable SWF object/embed tags in ['el']
-	// and data for building the elements w/ JS in ['js']
-	public function get_swf_tags($uswf, $par, $ids = null) {
+	// expand and check user input URL arg from setup form, return
+	// false if n.g.
+	public function check_expand_video_url($url, $defaulturl = 'default') {
+		if ( preg_match('/^0*[1-9][0-9]*$/', $url) ) {
+			// expand WP media lib ID
+			$url = wp_get_attachment_url(ltrim($url, '0'));
+			if ( ! $url ) {
+				$url = '';
+				self::errlog('rejected video url media ID');
+			}
+		}
+		if ( $url === '' ) {
+			$url = $defaulturl;
+			if ( $url === 'default' ) {
+				$url = $this->get_swf_default_video_url();
+			}
+		}
+		if ( $url === '' ) {
+			return false;
+		}
+		
+		$achk = array(
+			'requirehost' => false, // can use orig host
+			'requirepath' => true,
+			'rejfrag' => true,
+			// no, don't try to match extension; who knows?
+			//'rxpath' => '/.*\.(flv|f4v|mp4|m4v|mp3)$/i',
+			'rxproto' => '/^(https?|rtmp[a-z]{0,2})$/'
+			);
+		return self::check_url($url, $achk);
+	}
+
+	// return array with media elements as string in ['el']
+	public function get_player_elements($uswf, $par, $ids = null) {
 		extract($par->getparams());
 		$ming = self::should_use_ming();
 		$esc = true;
@@ -2607,11 +2799,7 @@ class SWF_put_evh {
 		$idai = $ids[3]; // alternate img
 
 		if ( ! $uswf ) {
-			if ( $ming ) {
-				$uswf = $this->get_swf_url('post', $width, $height);
-			} else {
-				$uswf = $this->get_swf_binurl($barheight);
-			}
+			$uswf = $this->get_swf_url();
 		}
 
 		$fesc = 'rawurlencode';
@@ -2619,39 +2807,16 @@ class SWF_put_evh {
 			$fesc = 'urlencode';
 		}
 
-		if ( preg_match('/^0*[1-9][0-9]*$/', $url) ) {
-			$url = wp_get_attachment_url(ltrim($url, '0'));
-			if ( ! $url ) {
-				$url = '';
-				self::errlog('rejected video url media ID');
-			}
-		}
-		if ( $url === '' ) {
-			$url = $defaulturl;
-			if ( $url === 'default' ) {
-				$url = $this->get_swf_default_url();
-			}
-		}
-		if ( $url === '' ) {
-			$url = $defrtmpurl;
-			$playpath = $defaultplaypath;
-		}
 		
-		$achk = array(
-			'requirehost' => false, // can use orig host
-			'requirepath' => true,
-			'rejfrag' => true,
-			// no, don't try to match extension; who knows?
-			//'rxpath' => '/.*\.(flv|f4v|mp4|m4v|mp3)$/i',
-			'rxproto' => '/^(https?|rtmp[a-z]{0,2})$/'
-			);
-		$ut = self::check_url($url, $achk);
+		$ut = $this->check_expand_video_url($url, $defaulturl);
 		if ( ! $ut ) {
 			self::errlog('rejected URL: "' . $url . '"');
 			return '<!-- SWF embedding declined:  URL displeasing -->';
 		}
+
 		// escaping: note url used here is itself a query arg
 		$url = ($esc == true) ? $fesc($ut) : $ut;
+
 		// Hack: double escaped URL. This is to releive the swf
 		// player of the need to escape URL with the simplistic
 		// ActionScript escape(), the need for which arises from
@@ -2660,6 +2825,14 @@ class SWF_put_evh {
 		// URL args to a/v objects -- escaping is doubled because
 		// flashvars are always unescaped by the plugin, making
 		// a 2nd level necessary.
+		$achk = array(
+			'requirehost' => false, // can use orig host
+			'requirepath' => true,
+			'rejfrag' => true,
+			// no, don't try to match extension; who knows?
+			//'rxpath' => '/.*\.(flv|f4v|mp4|m4v|mp3)$/i',
+			'rxproto' => '/^(https?|rtmp[a-z]{0,2})$/'
+			);
 		$e2url = self::check_url($ut, $achk, 'rawurlencode');
 		if ( $esc == true ) {
 			$e2url = $fesc($e2url);
@@ -2671,8 +2844,10 @@ class SWF_put_evh {
 		// honor new param 'mobiwidth' to set the dimensions
 		// (proportionally to regular WxH) for mobile devices
 		// user can set $mobiwidth 0 to disable this
-		if ( $mobiwidth > 0 && function_exists('wp_is_mobile') ) {
-			if ( wp_is_mobile() ) {
+		$mob = 'false';
+		if ( function_exists('wp_is_mobile') && wp_is_mobile() ) {
+			$mob = 'true';
+			if ( $mobiwidth > 0 ) {
 				$h = (int)($h * $mobiwidth / $w);
 				$w = $mobiwidth;
 			}
@@ -2680,7 +2855,7 @@ class SWF_put_evh {
 
 		if ( $cssurl === '' )
 			$cssurl = $this->get_swf_css_url();
-		$achk = array(
+		/* $achk = array(
 			'requirehost' => false, // can use orig host
 			'requirepath' => true,
 			'rejuser' => true,
@@ -2689,7 +2864,12 @@ class SWF_put_evh {
 			'rxpath' => '/.*\.css$/i',
 			'rxproto' => '/^https?$/'
 			);
-		$ut = self::check_url($cssurl, $achk);
+		$ut = self::check_url($cssurl, $achk); */
+		$ut = $this->check_expand_video_url($cssurl, false);
+		if ( ! $ut ) {
+			self::errlog('rejected URL: "' . $url . '"');
+			return '<!-- SWF embedding declined:  URL displeasing -->';
+		}
 		if ( ! $ut ) {
 			self::errlog('rejected css URL: "' . $cssurl . '"');
 			$ut = '';
@@ -2758,7 +2938,7 @@ class SWF_put_evh {
 				'id'    => $idai,
 				'src'   => self::ht($iimgunesc),
 				'alt'   => self::wt(
-				  __('The flash plugin is not available', 'swfput_l10n')
+				  __('Video playback is not available', 'swfput_l10n')
 				)
 			);
 			if ( $idai != '' ) {
@@ -2766,7 +2946,7 @@ class SWF_put_evh {
 			}
 			$fmt = '%s<img%s src="%s" alt="%s" width="%u" height="%u" '
 				. 'style="margin-left: auto; margin-right: auto;">';
-			$altimg = sprintf($fmt, "\n\t\t", $viid,
+			$altimg = sprintf($fmt, "\n\t\t\t", $viid,
 				$jatt['a_img']['src'],
 				$jatt['a_img']['alt'],
 				$w, $h
@@ -2774,23 +2954,63 @@ class SWF_put_evh {
 		} else {
 			$jatt['a_img'] = '';
 		}
+
+		// v. 1.0.8, H5V as primary content is an option:
+		$h5v_fallback = self::get_h5vprim_option() == 'false'
+			? true : false;
+		$h5v = $h5vclose = '';
 		if ( $altvideo != '' ) {
+			// vars for alternate h5 video
+			$aspect = $displayaspect;
+			$barwidth = $w;
+			$vstd = compact("play", "loop", "volume",
+				"hidebar", "disablebar",
+				"aspectautoadj", "aspect",
+				"displayaspect", "pixelaspect",
+				"barheight", "barwidth",
+				"allowfull", "mob"
+			);
+
 			$viid = '';
+			$vdid = '';
 			$jatt['a_vid'] = array(
 				'width'     => $w, 'height' => $h,
 				'id'        => $idav,
 				'poster'    => self::ht($iimgunesc),
 				'controls'  => 'true',
 				'preload'   => 'none',
-				'autoplay'  => $play,
+				'autoplay'  => $play, // CHECK for h5v player
 				'loop'      => $loop,
-				'srcs'      => array()
+				'srcs'      => array(),
+				// added in 1.0.8 for new h5 video program
+				'fallback'	=> $h5v_fallback ? 'true' : 'false',
+				'uniq'		=> ''.$ids[4],
+				'parentdiv'	=> $ids[0],
+				'barheight'	=> $barheight,
+				'barwidth'	=> $barwidth,
+				'aspect'	=> $displayaspect,
+				'altmsg'	=> 'Control bar load failed.',
+				'std'		=> $vstd
 			);
 			if ( $idav != '' ) {
 				$viid = sprintf(' id="%s"', $idav);
+				$vdid = sprintf(' id="aux_%s"', $idav);
 			}
-			$vd = "\n\t\t" . '<video'.$viid.' controls preload="none"';
-			if ( $play == 'true' ) {
+			// div added in 1.0.8 for new h5 video program
+			// TODO: move css classname to class-constant
+			$vd = "\n\t\t\t".'<div'.$vdid.' class="evhh5v_vidobjdiv">';
+			$vd .= "\n\t\t\t".'<video'.$viid.' controls preload="none"';
+			// cannot use autoplay attr.: video will be played, even
+			// when <video> is placed as fallback content and flash is
+			// loaded in the primary <object>! In fact, fallback content
+			// is not disabled at all, it merely is not shown; so,
+			// with autoplay the audio is heard even though the video
+			// is not shown; Auto play behavior will be implemented
+			// in the JS video controller added in 1.0.8, with the loss
+			// that where JS is disabled and flash is not available
+			// the <video>, in native mode, will not autoplay even
+			// if user set that option.
+			if ( false && $play == 'true' ) {
 				$vd .= ' autoplay';
 			}
 			if ( $loop == 'true' ) {
@@ -2801,7 +3021,7 @@ class SWF_put_evh {
 			}
 			$vd .= sprintf(' width="%u" height="%u">', $w, $h);
 			// format for source elements
-			$fmt = "\n\t\t" . '<source src="%s"%s>';
+			$fmt = "\n\t\t\t" . '<source src="%s"%s>';
 			// allow multiple video src, separated by pipe
 			$altvideo = trim($altvideo, " \t|");
 			$av = explode('|', $altvideo);
@@ -2822,47 +3042,70 @@ class SWF_put_evh {
 					// leave off src
 					$src = trim($tv[0]);
 				}
-				$jsa['src'] = self::ht($src);
+				$ut = $this->check_expand_video_url($src, false);
+				if ( ! $ut ) {
+					self::errlog('rejected HTML video URL: "' . $src . '"');
+					continue;
+				}
+				$jsa['src'] = self::ht($ut);
 				$vd .= sprintf($fmt, $jsa['src'], $typ);
 				$jatt['a_vid']['srcs'][] = $jsa;
 			}
+			
+			$h5v = $vd;
 
 			// place as alt the altimg, or message string
 			$jatt['a_vid']['altmsg'] = self::wt("\n\t\t" .
-				__('Flash video is not available, and the alternate <code>video</code> sources were rejected by your browser', 'swfput_l10n')
-			);
-			$vd .= sprintf("%s\n\t\t</video>",
-				$altimg == '' ? $jatt['a_vid']['altmsg'] : $altimg
+				__('Video playback is not available.', 'swfput_l10n')
 			);
 			
-			$altimg = $vd;
+			if ( $altimg == '' ) {
+				$altimg = $jatt['a_vid']['altmsg'];
+			}
+
+			$h5vclose = sprintf("\n\t\t\t</video>\t%s\n\t\t\t</div>%s",
+				$this->get_h5vjs_tags($jatt['a_vid'], $ids[1]),
+				"<!-- aux -->\n\t\t\t"
+			);
 		} else {
 			$jatt['a_vid'] = '';
 		}
 
 		// Update 2013/09/23: update object element, separating
-		// MSIE, so that alternative elements can be added
-		// for no-flash browsers: previously, with the classid attribute
+		// MSIE, so that alternative elements can be added for
+		// no-flash browsers: previously, with the classid attribute
 		// within the object element, firefox (and others) would
 		// always fall through to the now-removed embed element;
 		// therefore, browser ID is attempted to find MSIE (in
 		// self::is_msie()) on the assumption that classid will
 		// be necessary to make that one work
+		// UPDATE: versions of MSIE calling themselves 'Trident'
+		// handle <object> w/o classid (frankly, I do not have
+		// a good picture of its necessity); the self::is_msie()
+		// call does not test 'Trident' and returns false, and
+		// so far so good.
 		$obj = '';
+		
+		/* $jatt['obj'] was used in 1.0.7 for JS creation, removed 1.0.8
+		 * TODO: use or remove $jatt['obj']
+		 */
 		$jatt['obj'] = array(
 			'width'     => $w, 'height' => $h,
 			'id'        => $id,
 			'parm'      => array()
 		);
+
 		if ( $id != '' ) {
 			$id = sprintf(' id="%s"', $id);
 		}
 		if ( self::is_msie() ) { 
 			$jatt['obj']['ie'] = 'true';
+
 			$obj = sprintf('
 			<object%s classid="%s" codebase="%s" width="%u" height="%u">
 			<param name="data" value="%s?%s">
 			', $id, $classid, $codebase, $w, $h, $uswf, $pv);
+
 			$jatt['obj']['classid'] = $classid;
 			$jatt['obj']['codebase'] = $codebase;
 			$jatt['obj']['parm'][] = array(
@@ -2870,13 +3113,19 @@ class SWF_put_evh {
 			);
 		} else {
 			$jatt['obj']['ie'] = 'false';
-			$typ = 'application/x-shockwave-flash';
+			$typ = $mtype ? $mtype :'application/x-shockwave-flash';
+
 			$obj = sprintf('
-			<object%s data="%s?%s" type="%s" width="%u" height="%u">
-			', $id, $uswf, $pv, $typ, $w, $h);
+			<object%s data="%s?%s" type="%s" %s width="%u" height="%u">
+			', $id, $uswf, $pv, $typ, "typemustmatch", $w, $h);
+
 			$jatt['obj']['data'] = $uswf . '?' . $pv;
 			$jatt['obj']['type'] = $typ;
 		}
+
+		/* $jatt['obj']['parm'] is not being used; left in
+		 * place temporarily --
+		 * TODO: use or remove
 		$jatt['obj']['parm'][] = array(
 			'name' => 'play', 'value' => $play
 		);
@@ -2896,7 +3145,7 @@ class SWF_put_evh {
 			'name' => 'src', 'value' => $uswf . '?' . $pv
 		);
 		$jatt['obj']['parm'][] = array(
-			'name' => 'name', 'value' => 'mingput'
+			'name' => 'name', 'value' => self::swfputdir
 		);
 		$jatt['obj']['parm'][] = array(
 			'name' => 'bgcolor', 'value' => '#000000'
@@ -2905,19 +3154,93 @@ class SWF_put_evh {
 			'name' => 'align', 'value' => 'middle'
 		);
 
-		return array(
-		'el' => $obj . sprintf('<param name="play" value="%s">
+		$ind = '';
+		foreach ( $jatt['obj']['parm'] as $v ) {
+			$obj .= sprintf('%s<param name="%s" value="%s">',
+				$ind, $v['name'], $v['value']);
+			$ind = "\n\t\t\t";
+		}
+		*/
+
+		/* $jatt['obj']['parm'] is not being used; comment
+		 * or remove this if it is put to use
+		 */
+		$obj .= sprintf('<param name="play" value="%s">
 			<param name="quality" value="%s">
 			<param name="allowFullScreen" value="%s">
 			<param name="allowScriptAccess" value="sameDomain">
 			<param name="flashvars" value="%s">
 			<param name="src" value="%s?%s">
-			<param name="name" value="mingput">
+			<param name="name" value="' . self::swfputdir . '">
 			<param name="bgcolor" value="#000000">
-			<param name="align" value="middle">%s
+			<param name="align" value="middle">',
+			$play, $quality, $allowfull, $fv, $uswf, $pv);
+
+		$aret = array('js' => $jatt);
+
+		if ( $h5v_fallback ) {
+			$aret['el'] =  sprintf('%s%s%s%s
 			</object>',
-		$play, $quality, $allowfull, $fv, $uswf, $pv, $altimg),
-		'js' => $jatt);
+				$obj, $h5v, $altimg, $h5vclose);
+		} else {
+			$aret['el'] =  sprintf('%s%s%s
+			</object>%s',
+				$h5v, $obj, $altimg, $h5vclose);
+		}
+		
+		return $aret;
+	}
+
+	// get a script element string for H5 video JS setup
+	public function get_h5vjs_tags($atts, $flashid = null) {
+		$bar = $this->evhv5v_svgs[self::evhv5vsvg_bar];
+		$vol = $this->evhv5v_svgs[self::evhv5vsvg_vol];
+		$but = $this->evhv5v_svgs[self::evhv5vsvg_but];
+
+		/*
+		 * assemble parameters for control bar builder:
+		 * "iparm" are generally needed parameters
+		 * "oparm" are for <param> children of <object>
+		 * some items may be repeated to keep the JS simple and orderly
+		 * * OPTIONAL fields do not appear here;
+		 * * see JS evhh5v_controlbar_elements
+		 */
+		$iparm = array("uniq" => $atts['uniq'],
+			"barurl" => $bar, "buturl" => $but, "volurl" => $vol,
+			"divclass" => "evhh5v_cbardiv", "vidid" => $atts['id'],
+			"parentdiv" => $atts['parentdiv'], "auxdiv" => 'aux_' . $atts['id'],
+			"width" => $atts['width'], "barheight" => $atts['barheight'],
+			"altmsg" => "<span id=\"span_objerr_".$atts['uniq']."\" class=\"evhh5v_cbardiv\">".$atts['altmsg']."</span>"
+		);
+		$oparm = array(
+			// these must be appended with uniq id
+			"uniq" => array("id" => "evhh5v_ctlbar_" . $atts['uniq']),
+			// these must *not* be appended with uniq id
+			"std" => $atts["std"]
+		);
+		
+		$parms = array("iparm" => $iparm, "oparm" => $oparm);
+
+		if ( $atts['fallback'] === 'false' ) {
+			return sprintf('
+			<script type="text/javascript">
+				evhh5v_controlbar_elements(%s, true);
+			</script>', json_encode($parms));
+		}
+		
+		// This is depressing . . . the test should be whether the
+		// outer <object> is exposed (showing, used) or the inner
+		// fallback content is exposed, regardless of the <object>
+		// content type; but, after ridiculous time searching, I
+		// cannot find any way to simply determine whether primary
+		// or fallback elements will be exposed. The plugin check will
+		// be less reliable.
+		return sprintf('
+			<script type="text/javascript">
+				if ( ! navigator.plugins["Shockwave Flash"] ) {
+					evhh5v_controlbar_elements(%s, true);
+				}
+			</script>', json_encode($parms));
 	}
 } // End class SWF_put_evh
 
@@ -2968,7 +3291,7 @@ class SWF_params_evh {
 		'playpath' => '',
 		// alternative <video> within object
 		'altvideo' => '',
-		'defaultplaypath' => 'CSPAN2@14846',
+		'defaultplaypath' => '',
 		// <object>
 		'classid' => 'clsid:d27cdb6e-ae6d-11cf-96b8-444553540000',
 		'codebase' => 'http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,115,0'
@@ -3173,12 +3496,15 @@ class SWF_put_widget_evh extends WP_Widget {
 	
 	// default width should not be wider than sidebar, but
 	// widgets may be placed elsewhere, e.g. near bottom
-	// 216x138 is suggest minimum size in Adobe docs,
+	// 216x138 is suggested minimum size in Adobe docs,
 	// because flash user settings dialog is clipped if 
 	// window is smaller; AFAIK recent plugins refuse to map
 	// the context menu rather than let it be clipped.
 	// 216 is a bit wide for a sidebar (in some themes),
 	// consider 200x150
+	// Update: included JS now sizes the display if enclosing
+	// div is sized smaller than its style.width; this is a
+	// good thing.
 	const defwidth  = 200; // is 4:3 aspect
 	const defheight = 150; //
 
@@ -3188,9 +3514,9 @@ class SWF_put_widget_evh extends WP_Widget {
 	
 		$cl = __CLASS__;
 		// Label shown on widgets page
-		$lb =  __('SWFPut Flash Video', 'swfput_l10n');
+		$lb =  __('SWFPut Video Player', 'swfput_l10n');
 		// Description shown under label shown on widgets page
-		$desc = __('Flash video (with HTML5 video fallback option) for your widget areas', 'swfput_l10n');
+		$desc = __('Flash and HTML5 video for your widget areas', 'swfput_l10n');
 		$opts = array('classname' => $cl, 'description' => $desc);
 
 		// control opts width affects the parameters form,
@@ -3222,10 +3548,10 @@ class SWF_put_widget_evh extends WP_Widget {
 		if ( ! $pr->getvalue('height') ) {
 			$pr->setvalue('height', self::defheight);
 		}
+
 		$pr->sanitize();
 		$w = $pr->getvalue('width');
 		$h = $pr->getvalue('height');
-		$bh = $pr->getvalue('barheight');
 
 		// Added v. 1.0.7; 2014/01/24:
 		// if wp_is_mobile is a defined function (wp 3.4?), then
@@ -3241,11 +3567,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		}
 
 		$cap = $this->plinst->wt($pr->getvalue('caption'));
-		if ( $this->plinst->should_use_ming() ) {
-			$uswf = $this->plinst->get_swf_url('widget', $w, $h);
-		} else {
-			$uswf = $this->plinst->get_swf_binurl($bh);
-		}
+		$uswf = $this->plinst->get_swf_url();
 
 		$dw = $w + 3;
 		// use no class, but do use deprecated align
@@ -3272,7 +3594,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		}
 
 		$ids  = $this->plinst->get_div_ids('widget-div');
-		$em   = $this->plinst->get_swf_tags($uswf, $pr, $ids);
+		$em   = $this->plinst->get_player_elements($uswf, $pr, $ids);
 
 		printf('%s', $this->plinst->get_div($ids, $dv, $cap, $em));
 
@@ -3351,9 +3673,9 @@ class SWF_put_widget_evh extends WP_Widget {
 		$mpat = $this->plinst->get_mfilter_pat();
 		// files array from uploads dirs (empty if none)
 		$rhu = $this->plinst->r_find_uploads($mpat['m'], true);
-		$af = &$rhu['rf'];
-		$au = &$rhu['wu'];
-		$aa = &$rhu['at'];
+		$af = &$rhu['uploadfiles'];
+		$au = &$rhu['uploadsdir'];
+		$aa = &$rhu['medialib'];
 		// url base for upload dirs files
 		$ub = rtrim($au['baseurl'], '/') . '/';
 		// directory base for upload dirs files
@@ -3362,14 +3684,18 @@ class SWF_put_widget_evh extends WP_Widget {
 			'<select class="widefat" name="%s" id="%s" onchange="%s">';
 		$sgfmt = '<optgroup label="%s">' . "\n";
 		$sofmt = '<option value="%s">%s</option>' . "\n";
-		// expect jQuery to be loaded by WP (tried $() invocation
-		// but N.G. w/ MSIE. Sheesh.)
+		// expect jQuery to be loaded by WP
 		$jsfmt = "jQuery('[id=%s]').val";
 		// BAD
 		//$jsfmt .= '(unescape(this.options[selectedIndex].value))';
 		// better
 		$jsfmt .= '(decodeURIComponent(this.options[selectedIndex].value))';
-		$jsfmt .= '; return false;';
+		$jsfmt .= ';return false;';
+
+		$jafmt = "var t=jQuery('[id=%s]'),t1=t.val(),t2=";
+		$jafmt .= 'decodeURIComponent(this.options[selectedIndex].value);';
+		$jafmt .= "t1+=(t1.length>0&&t2.length>0)?' | ':'';t.val(t1+t2);";
+		$jafmt .= 'return false;';
 
 		?>
 
@@ -3393,7 +3719,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $instance['url'];
 		$id = $this->get_field_id('url');
 		$nm = $this->get_field_name('url');
-		$tl = $wt(__('Url or media library ID:', 'swfput_l10n'));
+		$tl = $wt(__('Url or media library ID for flash video:', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -3408,7 +3734,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		if ( count($af) > 0 ) {
 			$id = $this->get_field_id('files');
 			$k = $this->get_field_name('files');
-			$tl = $wt(__('Url from uploads directory:', 'swfput_l10n'));
+			$tl = $wt(__('Url for flash video from uploads directory:', 'swfput_l10n'));
 			printf('<p><label for="%s">%s</label>' . "\n", $id, $tl);
 			// <select>
 			printf($slfmt . "\n", $k, $id, $js);
@@ -3435,7 +3761,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		if ( ! empty($aa) ) {
 			$id = $this->get_field_id('atch');
 			$k = $this->get_field_name('atch');
-			$tl = $wt(__('Select ID from media library:', 'swfput_l10n'));
+			$tl = $wt(__('Select ID from media library for flash video:', 'swfput_l10n'));
 			printf('<p><label for="%s">%s</label>' . "\n", $id, $tl);
 			// <select>
 			printf($slfmt . "\n", $k, $id, $js);
@@ -3453,7 +3779,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		} // end if there are upload files
 		?>
 
-		<?php
+		<?php /*
 		// audio checkbox
 		$val = $instance['audio'];
 		$id = $this->get_field_id('audio');
@@ -3466,16 +3792,69 @@ class SWF_put_widget_evh extends WP_Widget {
 			name="<?php echo $nm; ?>" style="width:16%;" type="checkbox"
 			value="<?php echo $val; ?>"<?php echo $ck; ?> /></p>
 
-		<?php
+		<?php */
 		$val = $instance['altvideo'];
 		$id = $this->get_field_id('altvideo');
 		$nm = $this->get_field_name('altvideo');
-		$tl = $wt(__('URLs for alternate HTML5 video (optional: .mp4, .webm, .ogv):', 'swfput_l10n'));
+		$tl = $wt(__('URLs for HTML5 video (.mp4, .webm, .ogv):', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
 			name="<?php echo $nm; ?>"
 			type="text" value="<?php echo $val; ?>" /></p>
+
+		<?php // selects for URLs and attachment id's
+		// escape url field id for jQuery selector
+		$id = $this->plinst->esc_jqsel($id);
+		$js = sprintf($jafmt, $id);
+		// optional print <select >
+		if ( count($af) > 0 ) {
+			$id = $this->get_field_id('h5files');
+			$k = $this->get_field_name('h5files');
+			$tl = $wt(__('Url for HTML5 video from uploads directory (appends):', 'swfput_l10n'));
+			printf('<p><label for="%s">%s</label>' . "\n", $id, $tl);
+			// <select>
+			printf($slfmt . "\n", $k, $id, $js);
+			// <options>
+			printf($sofmt, '', $wt(__('none', 'swfput_l10n')));
+			foreach ( $af as $d => $e ) {
+				$hit = array();
+				for ( $i = 0; $i < count($e); $i++ )
+					if ( preg_match($mpat['h5av'], $e[$i]) )
+						$hit[] = &$af[$d][$i];
+				if ( empty($hit) )
+					continue;
+				printf($sgfmt, $ht($d));
+				foreach ( $hit as $fv ) {
+					$tu = rtrim($ub, '/') . '/' . $d . '/' . $fv;
+					$fv = $ht($fv);
+					printf($sofmt, $et($tu), $fv);
+				}
+				echo "</optgroup>\n";
+			}
+			// end select
+			echo "</select></td></tr>\n";
+		} // end if there are upload files
+		if ( ! empty($aa) ) {
+			$id = $this->get_field_id('h5atch');
+			$k = $this->get_field_name('h5atch');
+			$tl = $wt(__('Select ID from media library for HTML5 video (appends):', 'swfput_l10n'));
+			printf('<p><label for="%s">%s</label>' . "\n", $id, $tl);
+			// <select>
+			printf($slfmt . "\n", $k, $id, $js);
+			// <options>
+			printf($sofmt, '', $wt(__('none', 'swfput_l10n')));
+			foreach ( $aa as $fn => $fi ) {
+				$m = basename($fn);
+				if ( ! preg_match($mpat['h5av'], $m) )
+					continue;
+				$ts = $m . " (" . $fi . ")";
+				printf($sofmt, $et($fi), $ht($ts));
+			}
+			// end select
+			echo "</select></td></tr>\n";
+		} // end if there are upload files
+		?>
 
 		<?php
 		$val = $instance['playpath'];
@@ -3558,7 +3937,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$id = $this->get_field_id('iimgbg');
 		$nm = $this->get_field_name('iimgbg');
 		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
-		$tl = $wt(__('Use initial image as non-flash alternate: ', 'swfput_l10n'));
+		$tl = $wt(__('Use initial image as no-video alternate: ', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
@@ -3709,7 +4088,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$val = $ht($instance['barheight']);
 		$id = $this->get_field_id('barheight');
 		$nm = $this->get_field_name('barheight');
-		$tl = $wt(__('Control bar Height (20-50): ', 'swfput_l10n'));
+		$tl = $wt(__('Control bar Height (30-60): ', 'swfput_l10n'));
 		?>
 		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
 		<input class="widefat" id="<?php echo $id; ?>"
