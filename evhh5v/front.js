@@ -2434,6 +2434,28 @@ evhh5v_controller.prototype = {
 	mouse_hide_class : "evhh5v_mouseptr_hidden",
 	mouse_show_class : "evhh5v_mouseptr_normal",
 
+	// Bug that appeared in Chrom(e|ium)/33.?
+	// Chrom(e|ium)/33.* has broken display re-draw when
+	// parent div of wait indicator is moved into place.
+	// Earlier Chrom* were fine (in this regard). Note that
+	// I mean the Chrom* component that is used in Opera too,
+	// the exact same bug is seen there with latest version
+	// and it too reports /33.* in its UA string.
+	// I spent hours looking for a workaround but found
+	// nothing, except to disable the spinner.
+	// Update: bug is only exacerbated by showing the wait
+	// spinner, not triggered -- even w/o spinner, the poster
+	// intermittently appears on seek. Apparently, having
+	// to composite the spinner too really gets it confused.
+	// Update: bug evolves with Chromium/34 beta, and with
+	// Chromium/35 the poster is drawn on seek completely and
+	// consistently, and looks very much like an intentional
+	// feature, so let 35+ show the spinner and revisit this
+	// if necessary
+	chrome_draw_bug :
+		/Chrom(e|ium)\/3[3-4]\./i.test(navigator["userAgent"]),
+		// /Chrom(e|ium)\/([4-9][0-9]|3[3-9])\./i.test(navigator["userAgent"]),
+
 	// hack: this member should have been called 'params' rather
 	// than 'ctlbar'; replacement will be arduous, so use this
 	// getter as a "params" alias until the member name is changed
@@ -3139,6 +3161,8 @@ evhh5v_controller.prototype = {
 				// if this.setup_aspect_factors() has correct data
 				// (*aspect and such will likely be invalid after a
 				// src change; as yet this code does not support such).
+				// Update: Chromium 24 beta and 35 unstable are
+				// generating "resize"
 				console.log("Got RESIZE: w == " + 
 					this._vid.videoWidth + ", h == " +
 					this._vid.videoHeight);
@@ -3775,22 +3799,10 @@ evhh5v_controller.prototype = {
 		}
 	},
 	show_wait_ok : function() {
-		// Sigh. Chrom(e|ium)/33.* has broken display re-draw when
-		// parent div of wait indicator is moved into place.
-		// Earlier Chrom* were fine (in this regard). Note that
-		// I mean the Chrom* component that is used in Opera too,
-		// the exact same bug is seen there with latest version
-		// and it too reports /33.* in its UA string.
-		// I spent hours looking for a workaround but found
-		// nothing, except to disable the spinner.
-		// Per Murphy's law, this occurs just as I am on the point
-		// of releasing this; just in time to make *my* player
-		// look bad. Thanks chromium guys.
 		if ( this.chrome_show_wait_bad === undefined ) {
 			this.chrome_show_wait_bad =
-			this.params['chromium_force_show_wait'] ?
-			false :
-			/Chrom(e|ium)\/([4-9][0-9]|3[3-9])\./i.test(navigator["userAgent"]);
+				this.params['chromium_force_show_wait'] ?
+				false : this.chrome_draw_bug;
 		}
 		if ( this.chrome_show_wait_bad ) {
 			return false;
