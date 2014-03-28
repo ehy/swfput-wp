@@ -2357,15 +2357,24 @@ var evhh5v_controller = function(vid, ctlbar, pad) {
 	this.tickinterval_divisor = 1000 / this.tickinterval;
 	this.ptrtickmax = this.tickinterval_divisor * this.ptrinterval;
 	this.ptrtick = 0;
+
 	this.doshowbartime = false;
-	if ( this.params['hidebar'] && this.params['hidebar'] == 'true' ) {
+	if ( this.params['hidebar'] !== undefined
+		&& this.params['hidebar'] == 'true' ) {
 		this.doshowbartime = true;
 	}
-	this.doshowbar     = true;
-	if ( this.params['disablebar'] && this.params['disablebar'] == 'true' ) {
+	this.doshowbar = true;
+	if ( this.params['disablebar'] !== undefined
+		&& this.params['disablebar'] == 'true' ) {
 		this.disablebar = true;
 		this.doshowbar = false;
 		this.doshowbartime = false;
+	}
+
+	this.allowfull = true;
+	if ( this.params['allowfull'] !== undefined
+		&& this.params['allowfull'] == 'false' ) {
+		this.allowfull = false;
 	}
 
 	this.barpadding = 2;
@@ -2437,7 +2446,7 @@ evhh5v_controller.prototype = {
 			this.autoplay = false;
 		}
 		
-		if ( evhh5v_fullscreen_ok() ) {
+		if ( this.allowfull && evhh5v_fullscreen_ok() ) {
 			this.bar.unblur_fullscreen();
 		} else {
 			this.bar.blur_fullscreen();
@@ -3021,7 +3030,7 @@ evhh5v_controller.prototype = {
 		// different between FFox and Chromium.
 		//
 		// 25.03.2014 I have the behavior I want in FFox (28.0), in at
-		// least the current testing; but, Chromium is not delivering
+		// least the current testing; but, Chromium/33. is not delivering
 		// "waiting" even when it has insufficient data and display
 		// is stalled (this is w/ 76.8kbs rate limit). This will
 		// have to do, there is no more time now.
@@ -3043,11 +3052,11 @@ evhh5v_controller.prototype = {
 		}
 		this.addEventListener(wait_ev, function(e) {
 			this.show_wait();
-			console.log("WAIT SPINNER START: " + e.type);
+			//console.log("WAIT SPINNER START: " + e.type);
 		}, false);
 		this.addEventListener(["seeked", "canplaythrough", "playing", "loadeddata", "ended"], function(e) {
 			this.hide_wait();
-			console.log("WAIT SPINNER STOP: " + e.type);
+			//console.log("WAIT SPINNER STOP: " + e.type);
 		}, false);
 
 		this.addEventListener("play", function(e) {
@@ -3158,7 +3167,7 @@ evhh5v_controller.prototype = {
 					console.log("DBG error||abort: .error === "+t);
 					return;
 				}
-				console.log("DBG error||abort: .error.code === "+t.code);
+				//console.log("DBG error||abort: .error.code === "+t.code);
 				// use try in case MediaError constants are undefined
 				try {
 					switch ( t.code ) {
@@ -3312,7 +3321,9 @@ evhh5v_controller.prototype = {
 						this.stop();
 					} else if ( this.curkey == 70 || this.curkey == 102 ) {
 						// F,f
-						this.fullscreen();
+						if ( this.allowfull ) {
+							this.fullscreen();
+						}
 					} else if ( this.curkey == 71 || this.curkey == 103 ) {
 						// G,g
 						// was for debugging in the flash player ... maybe
@@ -3660,9 +3671,11 @@ evhh5v_controller.prototype = {
 	// go fullscreen where possible
 	fullscreen : function() {
 		// possible?
-		if ( ! evhh5v_fullscreen.capable() ) {
+		if ( ! (this.allowfull && evhh5v_fullscreen.capable()) ) {
 			this.bar.blur_fullscreen();
-			alert("As it turns out, full screen mode is not available. Sigh.");
+			if ( this.allowfull ) {
+				alert("Full screen mode is not available.");
+			}
 			return;
 		}
 
@@ -3700,7 +3713,7 @@ evhh5v_controller.prototype = {
 						evhh5v_fullscreen.handle_error(t.orig_fs_error_func);
 						t.orig_fs_change_func = null; // release reference
 						t.orig_fs_error_func = null;
-						alert("Full screen mode failed for an unknown reason.");
+						alert("Full screen mode failed.");
 					});
 
 				evhh5v_fullscreen.request(p);
@@ -3708,7 +3721,7 @@ evhh5v_controller.prototype = {
 				evhh5v_fullscreen.exit();
 			}
 		} catch ( ex ) {
-			alert(ex.name + ": '" + ex.message + "'");
+			alert(ex.name + ': "' + ex.message + '"');
 		}
 	},
 	togglevolctl : function() {
