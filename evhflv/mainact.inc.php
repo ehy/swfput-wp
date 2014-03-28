@@ -1517,11 +1517,9 @@ obj_onMouseDown = function() { this.mousedown = true;  };
 obj_onMouseUp   = function() { this.mousedown = false; };
 
 function doVolumeCtl() {
+	// delay pointer/bar hiding on volume interaction
+	ptrtick = 0;
 	volgadget._visible = ! volgadget._visible;
-	if ( volgadget._visible ) {
-		// delay pointer/bar hiding on volume interaction
-		ptrtick = 0;
-	}
 }
 
 // this must be assigned to MovieClip; N.F. for Button

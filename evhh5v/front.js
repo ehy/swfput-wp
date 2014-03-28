@@ -1599,7 +1599,10 @@ mk_volctl : function(parentobj, doc) {
 	var hdlmd = function(e) {
 		//var t = this;
 		that.volctl_mousedown = 1;
-		e.target.setCapture();
+		// (set|rel)Capture works beautifully in FFox, undef'd in webkit
+		if ( e.target.setCapture !== undefined ) {
+			e.target.setCapture();
+		}
 		return false;
 	};
 	var hdlmu = function(e) {
@@ -1607,7 +1610,10 @@ mk_volctl : function(parentobj, doc) {
 			var t = this;
 			that.hdl_volctl(e, t);
 		}
-		e.target.releaseCapture();
+		// (set|rel)Capture works beautifully in FFox, undef'd in webkit
+		if ( e.target.releaseCapture !== undefined ) {
+			e.target.releaseCapture();
+		}
 		that.volctl_mousedown = 0;
 		return false;
 	};
@@ -3735,6 +3741,8 @@ evhh5v_controller.prototype = {
 		}
 	},
 	togglevolctl : function() {
+		// delay pointer/bar hiding for volume interaction
+		this.ptrtick = 0;
 		if ( ! this.volctl_showing ) {
 			this.show_volctl();
 		} else {
