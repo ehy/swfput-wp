@@ -1518,14 +1518,22 @@ obj_onMouseUp   = function() { this.mousedown = false; };
 
 function doVolumeCtl() {
 	volgadget._visible = ! volgadget._visible;
+	if ( volgadget._visible ) {
+		// delay pointer/bar hiding on volume interaction
+		ptrtick = 0;
+	}
 }
 
 // this must be assigned to MovieClip; N.F. for Button
 volbar_onMouseWheel = function(d) {
+	// delay pointer/bar hiding on volume interaction
+	ptrtick = 0;
 	incrVolumeAdjust(d);
 };
 
 volbar_onMouseMove = function() {
+	// delay pointer/bar hiding on volume interaction
+	ptrtick = 0;
 	if ( this.mousedown ) {
 		setVolumeAdjust(this._xmouse);
 	}
@@ -1837,13 +1845,16 @@ function postStartVideo () {
 
 function ticker () {
 	ntick++;
-	ptrtick++;
 
-	if ( ptrtick >= ptrtickmax ) {
-		Mouse.hide();
-		if ( doshowbartime ) {
-			showhideBar(doshowbar = false);
+	if ( ! volgadget.vbarbut.mousedown ) {
+		if ( ++ptrtick >= ptrtickmax ) {
+			Mouse.hide();
+			if ( doshowbartime ) {
+				showhideBar(doshowbar = false);
+			}
+			ptrtick = 0;
 		}
+	} else {
 		ptrtick = 0;
 	}
 

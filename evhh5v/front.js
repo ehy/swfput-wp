@@ -1599,6 +1599,7 @@ mk_volctl : function(parentobj, doc) {
 	var hdlmd = function(e) {
 		//var t = this;
 		that.volctl_mousedown = 1;
+		e.target.setCapture();
 		return false;
 	};
 	var hdlmu = function(e) {
@@ -1606,6 +1607,7 @@ mk_volctl : function(parentobj, doc) {
 			var t = this;
 			that.hdl_volctl(e, t);
 		}
+		e.target.releaseCapture();
 		that.volctl_mousedown = 0;
 		return false;
 	};
@@ -2468,9 +2470,13 @@ evhh5v_controller.prototype = {
 		var that = this;
 
 		this.bar.controller_handle_volume = function(pct) {
+			// delay pointer/bar hiding for volume interaction
+			that.ptrtick = 0;
+			// paranoia check
 			if ( ! isFinite(pct) ) {
 				return;
 			}
+			//assign volume value
 			var v = that._vid;
 			if ( v.volume !== undefined ) {
 				pct = Math.max(0, Math.min(1, pct));
@@ -3060,7 +3066,7 @@ evhh5v_controller.prototype = {
 		}, false);
 
 		this.addEventListener("play", function(e) {
-			console.log("Event: " + e.type);
+			//console.log("Event: " + e.type);
 			this.get_canvas_context();
 			this.canvas_clear();
 			this.has_been_played = true;
@@ -3409,22 +3415,26 @@ evhh5v_controller.prototype = {
 			this.ntick = 0;
 		}
 		
-		// this hack is due to a bug in the
-		// rekonq browser (Ubuntu 12.04) in which
-		// the mouse_hide() in the this function
-		// causes a mousemove event! So, the ticker
-		// sets this.webkit_mousebug1 to a positive
-		// and decrements it to 0, avoiding the
-		// cycle. Sheesh.
-		if ( this.webkit_mousebug1 )
-			this.webkit_mousebug1--;
-
-		if ( ++this.ptrtick >= this.ptrtickmax ) {
-			this.webkit_mousebug1 = parseInt(this.ptrtickmax/10);//Oy!
-			this.mouse_hide();
-			if ( this.doshowbartime ) {
-				this.showhideBar(this.doshowbar = false);
+		if ( ! this.bar.volctl_mousedown ) {
+			// this hack is due to a bug in the
+			// rekonq browser (Ubuntu 12.04) in which
+			// the mouse_hide() in the this function
+			// causes a mousemove event! So, the ticker
+			// sets this.webkit_mousebug1 to a positive
+			// and decrements it to 0, avoiding the
+			// cycle. Sheesh.
+			if ( this.webkit_mousebug1 )
+				this.webkit_mousebug1--;
+	
+			if ( ++this.ptrtick >= this.ptrtickmax ) {
+				this.webkit_mousebug1 = parseInt(this.ptrtickmax/10);
+				this.mouse_hide();
+				if ( this.doshowbartime ) {
+					this.showhideBar(this.doshowbar = false);
+				}
+				this.ptrtick = 0;
 			}
+		} else {
 			this.ptrtick = 0;
 		}
 
