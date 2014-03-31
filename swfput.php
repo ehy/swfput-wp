@@ -201,6 +201,14 @@ class SWF_put_evh {
 	// swfput program default video path
 	protected $swfputvid;
 
+	// for a link to an html help doc
+	const helphtmlname = 'README.html';
+	const helphtml_ref = '#3.1. Form Buttons';
+	protected static $helphtml = null;
+	// for a link to an pdf help doc
+	const helppdfname = 'README.pdf';
+	protected static $helppdf = null;
+
 	// settings js subdirectory
 	const settings_jsdir = 'js';
 	// settings js shortcode editor helper name
@@ -209,14 +217,6 @@ class SWF_put_evh {
 	protected $settings_js;
 	// JS: name of class to control textare/button pairs
 	const js_textpair_ctl = 'evhplg_ctl_textpair';
-
-	// for a link to an html help doc
-	const helphtmlname = 'README.html';
-	const helphtml_ref = '#3.1. Form Buttons';
-	protected static $helphtml = null;
-	// for a link to an pdf help doc
-	const helppdfname = 'README.pdf';
-	protected static $helppdf = null;
 
 	// swfput js shortcode editor helper name
 	const swfxedjsname = 'formxed.min.js';
@@ -668,7 +668,8 @@ class SWF_put_evh {
 	public function settings_js() {
 		$jsfn = self::settings_jsname;
 		$j = $this->settings_js;
-        wp_enqueue_script($jsfn, $j);
+		$v = self::plugin_version;
+        wp_enqueue_script($jsfn, $j, false, $v);
 	}
 
 	// This function is placed here below the function that sets-up
@@ -915,7 +916,8 @@ class SWF_put_evh {
 			$pf = self::mk_pluginfile();
 			$t = self::settings_jsdir . '/' . self::swfxedjsname;
 			$jsfile = plugins_url($t, $pf);
-	        wp_enqueue_script($jsfn, $jsfile, array('jquery'), '1.0.1');
+			$v = self::plugin_version;
+	        wp_enqueue_script($jsfn, $jsfile, array('jquery'), $v);
 	    }
 	}
 
