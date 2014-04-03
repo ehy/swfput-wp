@@ -708,6 +708,27 @@ class SWF_put_evh {
 		}
 	}
 
+	// on init, e.g. mce plugin in the post-related pages
+	public static function hook_admin_init() {
+		if ( current_user_can( 'edit_posts' )
+			&& current_user_can( 'edit_pages' ) ) {
+			//add_filter('mce_buttons', 'foo');
+			
+			$aa = array(__CLASS__, 'add_mceplugin_js');
+			add_filter('mce_external_plugins', $aa);
+		}
+	}
+
+	// filter to add mce plugin javascript
+	public static function add_mceplugin_js($plugin_array) {
+		$pf = self::mk_pluginfile();
+		$pname = 'swfput_mceplugin';
+		$t = self::settings_jsdir . '/' . 'fmtscxed.js';
+		$jsfile = plugins_url($t, $pf);
+		$plugin_array[$pname] = $jsfile;
+		return $plugin_array;
+	}
+
 	// add a help tab in the post-related pages
 	public static function hook_admin_head() {
 		// get_current_screen() introduced in WP 3.1
@@ -1015,6 +1036,8 @@ class SWF_put_evh {
 
 			// hook&filter to make shortcode form for editor
 			if ( self::get_posts_code_option() === 'true' ) {
+				$aa = array($cl, 'hook_admin_init');
+				add_action('admin_init', $aa);
 				$aa = array($cl, 'hook_admin_head');
 				add_action('admin_head', $aa);
 				$aa = array($cl, 'hook_admin_menu');

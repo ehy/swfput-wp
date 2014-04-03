@@ -29,7 +29,7 @@
 					parms[u[0]] = u[1];
 				}
 			} else {
-				top.console.log("cannot get object params in svg script; browser is obsolete or broken");
+				parent.console.log("cannot get object params in svg script; browser is obsolete or broken");
 			}
 			parms.root_svg = document.getElementById("svg_ctlbar");
 			parms.docu_svg = document;
@@ -37,19 +37,19 @@
 		}
 
 		// put the params for this in data structure maintained in
-		// top document, where it is hooked up as needed
+		// parent document, where it is hooked up as needed
 		var params = getparams();
-		if ( params && (typeof top.evhh5v_put_ctlbarmap) == "function" ) {
-			top.evhh5v_put_ctlbarmap(params);
+		if ( params && (typeof parent.evhh5v_put_ctlbarmap) == "function" ) {
+			parent.evhh5v_put_ctlbarmap(params);
 		}
 
-		// these must be passed back to top; things like
+		// these must be passed back to parent; things like
 		// setAttribute() don't work in this context
 		function setvisi(id, typ) {
-			return top.evhh5v_setvisi(document.getElementById(id), typ);
+			return parent.evhh5v_setvisi(document.getElementById(id), typ);
 		};
 		function svg_click(obj) {
-			return top.evhh5v_svg_click(obj, params);
+			return parent.evhh5v_svg_click(obj, params);
 		};
 	]]>
 	</script>

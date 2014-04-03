@@ -42,7 +42,7 @@ video.evhh5v_mouseptr_hidden, canvas.evhh5v_mouseptr_hidden, div.evhh5v_mouseptr
 	overflow: hidden;
 	clip: auto;
 }
-	/*
+/* seems uneeded -- left for reference
 .evhh5v_vidobjdiv_fullscr {
 	padding: 0px;
 	margin-top:    0px;
@@ -58,7 +58,7 @@ video.evhh5v_mouseptr_hidden, canvas.evhh5v_mouseptr_hidden, div.evhh5v_mouseptr
 	min-height: 100%;
 	position: relative;
 }
-	*/
+*/
 .evhh5v_cbardiv { 
 	display: block;
 	margin-top: 0px;

@@ -183,20 +183,30 @@ SWFPut_putswf_video_xed.prototype = {
 			}
 		}
 	},
-	// The next 2 get/set funcs were fine in Konqueror, Chromium, and
-	// Firefox (Unix and MS); but of course MSIE is too lousy to
-	// just work. Hence, the .isIE noise.
+	// 1.0.9: previously made no distinction between 'Visual'
+	// and 'Text' editor content since the shortcode had no special
+	// presentation and could be handled as plain text in either
+	// case. Now I hope to give it a presentation in the 'Visual'
+	// editor and so it must be possible to get and set
+	// the raw post content regardless of whether the 'Visual'
+	// is displayed.
 	get_edval : function() {
 		if ( typeof tinymce != 'undefined' ) {
 			var ed;
-			if ( (ed = tinyMCE.activeEditor) && !ed.isHidden() ) {
+			if ( (ed = tinymce.activeEditor) && !ed.isHidden() ) {
                 var bm;
-				if ( tinymce.isIE ) {
+				if ( true || tinymce.isIE ) {
 					ed.focus();
 					bm = ed.selection.getBookmark();
 				}
-				c = ed.getContent({format : 'raw'});
-				if ( tinymce.isIE ) {
+
+                // trial and error:
+                tinymce.triggerSave();
+                // the original textarea
+				var t = ed.getElement();
+                var c = t ? t.value : ed.getContent({format : 'raw'});
+				
+				if ( true || tinymce.isIE ) {
 					ed.focus();
 					ed.selection.moveToBookmark(bm);
 				}
@@ -208,15 +218,23 @@ SWFPut_putswf_video_xed.prototype = {
 	set_edval : function(setval) {
 		if ( typeof tinymce != 'undefined' ) {
 			var ed;
-			if ( (ed = tinyMCE.activeEditor) && !ed.isHidden() ) {
-                var bm;
-				if ( tinymce.isIE ) {
+			if ( (ed = tinymce.activeEditor) && !ed.isHidden() ) {
+                var bm, r = false, t;
+
+				if ( true || tinymce.isIE ) {
 					ed.focus();
 					bm = ed.selection.getBookmark();
 					ed.setContent('', {format : 'raw'});
 				}
-				var r = ed.setContent(setval, {format : 'raw'});
-				if ( tinymce.isIE ) {
+
+				if ( (t = ed.getElement()) ) {
+					t.value = setval;
+					ed.load(t);
+				} else {
+					r = ed.setContent(setval, {format : 'raw'});
+				}
+
+				if ( true || tinymce.isIE ) {
 					ed.focus();
 					ed.selection.moveToBookmark(bm);
 				}
@@ -326,7 +344,8 @@ SWFPut_putswf_video_xed.prototype = {
 		if ( va.length < 2 ) {
 			return false;
 		}
-		var oa = new Array();
+
+		var oa = [];
 		var i = 0, j = 0;
 		var l;
 		while ( i < va.length ) {
@@ -336,28 +355,33 @@ SWFPut_putswf_video_xed.prototype = {
 			}
 			oa[j++] = l;
 		}
+
 		var p;
 		if ( j >= va.length || (p = this.find_rbrack(l)) < 0 ) {
-			delete oa;
 			return false;
 		}
 		l = l.substring(p + 1);
+
 		var ce = "[/" + sc + "]";
 		p = l.indexOf(ce);
 		if ( p >= 0 ) {
 			l = l.substring(p + ce.length);
 		}
 		if ( l.length ) {
-			oa[j ? (j - 1) : j++] += l;
+			// the \n<br> are an attempt to leave a visible
+			// indication of where the code/object was, even
+			// struggling a bit against tinymce tag stripping
+			oa[j ? (j - 1) : j++] += "\n<br/>\n<br/>\n" + l;
 		}
 		while ( i < va.length ) {
 			oa[j++] = va[i++];
 		}
+
 		try {
 			this.set_edval(oa.join(sep));
 			this.last_match = '';
 		} catch ( e ) {}
-		delete oa;
+
 		return false;
 	},
 	repl_xed : function(f, id, cs, sc) {
