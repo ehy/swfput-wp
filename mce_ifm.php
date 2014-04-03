@@ -111,10 +111,30 @@ $allvids[] = $jatt;
 	<meta name="viewport" content="width=device-width">
 	<link rel="stylesheet" href="<?php echo $cssurl ?>" type="text/css">
 	<script type="text/javascript" src="<?php echo $jsurl ?>"></script>
+	<style>
+		.main-div {
+			margin-top: 0px;
+			margin-bottom: 0px;
+			margin-left:  0px;
+			margin-right: 0px;
+			outline: 0px;
+			padding: 0px 0px;
+			max-width: 100%;
+			min-width: 100%;
+			max-height: 100%;
+			min-height: 100%;
+			width: 100%;
+			border: 0px;
+			background-color: black;
+			position: relative;
+			overflow: hidden;
+			clip: auto;
+		}
+	</style>
 </head>
 
 <body>
-<div id="main-div" style="max-width: 100%" >
+<div id="main-div" class="main-div" style="max-width: 100%" >
 
 <?php for ( $i = 0; $i < count($allvids); $i++ ) {
 	$jatt = $allvids[$i];

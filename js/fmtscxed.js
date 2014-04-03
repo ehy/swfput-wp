@@ -238,9 +238,10 @@
 			var cls = '';
 			var cap = dat.caption;
 			var w = dat.width, h = dat.height;
+			var dlw = parseInt(w) + 20;
 
 			var r = '';
-			r += '<dl id="'+id+'" class="wp-caption '+cls+'" style="width: '+w+'px">';
+			r += '<dl id="'+id+'" class="wp-caption '+cls+'" style="width: '+dlw+'px">';
 			r += '<dt class="wp-caption-dt">';
 			r += '<evhfrm width="'+w+'" height="'+h+'" class="evh-pseudo" src="' + url;
 			r += '?' + qs;
@@ -275,8 +276,12 @@
 				}
 				
 				var dat = t._sc_atts2if(t.urlfm, atts, cap);
+				var w = dat.width, h = dat.height;
+				var dlw = parseInt(w) + 20;
+
 				var r = '' + pb;
-				r += '<div class="mceTemp mceIEcenter" >';
+				r += '<div class="mceTemp mceIEcenter" style="width: '+dlw+'px">';
+				//r += '<div class="mceTemp mceIEcenter">';
 				r += '<!-- SWFPut b ' + ky + ' -->';
 				r += dat.code;
 				r += '<!-- SWFPut e ' + ky + ' -->';
