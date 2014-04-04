@@ -130,28 +130,24 @@
 				return t._get_shcode(content);
 			};
 
-			// When inserting content, if the caret is inside a caption create new paragraph under
+			// [from WP image edit plugin:]
+			// When inserting content,
+			// if the caret is inside a caption
+			// create new paragraph under
 			// and move the caret there
 			ed.onBeforeExecCommand.add( function(ed, cmd) {
 				var node, p;
 
+				console.log("BeforeExec: " + cmd);
 				if ( cmd == 'mceInsertContent' ) {
 					node = ed.dom.getParent(ed.selection.getNode(), 'div.mceTemp');
 
 					if ( node ) {
+				console.log("BeforeExec: " + node.name);
 						p = ed.dom.create('p');
 						ed.dom.insertAfter(p, node);
 						ed.selection.setCursorLocation(p, 0);
 					}
-				}
-			});
-			// When inserting content, if the caret is inside a caption create new paragraph under
-			// and move the caret there
-			ed.onExecCommand.add( function(ed, cmd) {
-				console.log("Exec: " + cmd);
-				if ( cmd == 'mceInsertContent' ) {
-					//ed.repaint();
-					//ed.execCommand('mceRepaint');
 				}
 			});
 		},
@@ -178,8 +174,8 @@
 				'width' : w,
 				'height' : h,
 				'sandbox' : "allow-same-origin allow-pointer-lock allow-scripts",
-				'allowfullscreen' : '',
-				'seamless' : '',
+				//'allowfullscreen' : '',
+				//'seamless' : '',
 				'class' : cl.indexOf('evh-pseudo') >= 0 ? cl : (cl+' evh-pseudo'),
 				'src' : s
 			});
@@ -252,7 +248,7 @@
 			var sty = 'width: '+dlw+'px';
 			var att = 'width="'+fw+'" height="'+fh+'" ' +
 				'sandbox="allow-same-origin allow-pointer-lock allow-scripts" ' +
-				'allowfullscreen seamless ';
+				''; //'allowfullscreen seamless ';
 			var cap = dat.caption;
 
 			var r = '';

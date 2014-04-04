@@ -267,10 +267,26 @@ SWFPut_putswf_video_xed.prototype = {
 			return false;
 		}
 
+		// found in WP image edit plugin:
+		// if insertion point is within the div block used
+		// to contain the representation of the shortcode,
+		// create new paragraph node and move insertion
+		// point there; class of div we're checking is
+		// "mceTemp" (same as WP image edit plugin, and
+		// presumably others, so the benefit of this is
+		// not ours alone)
+		var node;
+		node = ed.dom.getParent(ed.selection.getNode(), 'div.mceTemp');
+		if ( node ) {
+			var p = ed.dom.create('p');
+			ed.dom.insertAfter(p, node);
+			ed.selection.setCursorLocation(p, 0);
+		}
+
 		ed.selection.setContent(sc, {format : 'text'});
 		// ed.selection.setContent() is not enough, because
 		// without the next (set(get)) line, good not it is;
-		// this apparently coerces reprocessing for 'Visual'
+		// this apparently forces reprocessing for 'Visual'
 		// content such that plugin callbacks get called
 		// (like ed.onBeforeSetContent and ed.onPostProcess)
 		ed.setContent(ed.getContent());
