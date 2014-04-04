@@ -183,65 +183,101 @@ SWFPut_putswf_video_xed.prototype = {
 			}
 		}
 	},
+	// always test retval.ed!
+	get_mce_dat : function() {
+		if ( typeof tinymce == 'undefined' ) {
+			return { "ed" : false };
+		}
+		var r = {};
+		r.ed = tinymce.activeEditor;
+		r.hid = r.ed ? r.ed.isHidden() : true;
+		r.txt = r.ed ? r.ed.getElement() : false;
+		return r;
+	},
 	// 1.0.9: previously made no distinction between 'Visual'
 	// and 'Text' editor content since the shortcode had no special
 	// presentation and could be handled as plain text in either
 	// case. Now I hope to give it a presentation in the 'Visual'
 	// editor and so it must be possible to get and set
-	// the raw post content regardless of whether the 'Visual'
+	// the raw text content regardless of whether the 'Visual'
 	// is displayed.
 	get_edval : function() {
-		if ( typeof tinymce != 'undefined' ) {
-			var ed;
-			if ( (ed = tinymce.activeEditor) && !ed.isHidden() ) {
-                var bm;
-				if ( true || tinymce.isIE ) {
-					ed.focus();
-					bm = ed.selection.getBookmark();
-				}
+		var dat = this.get_mce_dat();
+		var ed = dat.ed;
+		if ( ed && dat.hid ) {
+			if ( dat.txt ) {
+				return dat.txt.value;
+			}
+		} else if ( ed ) {
+			var bm;
+			if ( true || tinymce.isIE ) {
+				ed.focus();
+				bm = ed.selection.getBookmark();
+			}
 
-                // trial and error:
-                tinymce.triggerSave();
-                // the original textarea
-				var t = ed.getElement();
-                var c = t ? t.value : ed.getContent({format : 'raw'});
-				
-				if ( true || tinymce.isIE ) {
-					ed.focus();
-					ed.selection.moveToBookmark(bm);
-				}
-				return c;
-			}			
+			// hope to sync Visual content to textarea:
+			tinymce.triggerSave();
+			// the original textarea
+			var t = dat.txt;
+			var c = t ? t.value : ed.getContent({format : 'raw'});
+			
+			if ( true || tinymce.isIE ) {
+				ed.focus();
+				ed.selection.moveToBookmark(bm);
+			}
+			return c;
 		}
+		// fall through
 		return jQuery(edCanvas).val();
 	},
 	set_edval : function(setval) {
-		if ( typeof tinymce != 'undefined' ) {
-			var ed;
-			if ( (ed = tinymce.activeEditor) && !ed.isHidden() ) {
-                var bm, r = false, t;
+		var dat = this.get_mce_dat();
+		var ed = dat.ed;
+		if ( ed && ! dat.hid ) {
+			var bm, r = false, t;
 
-				if ( true || tinymce.isIE ) {
-					ed.focus();
-					bm = ed.selection.getBookmark();
-					ed.setContent('', {format : 'raw'});
-				}
+			if ( true || tinymce.isIE ) {
+				ed.focus();
+				bm = ed.selection.getBookmark();
+				ed.setContent('', {format : 'raw'});
+			}
 
-				if ( (t = ed.getElement()) ) {
-					t.value = setval;
-					ed.load(t);
-				} else {
-					r = ed.setContent(setval, {format : 'raw'});
-				}
+			if ( (t = dat.txt) ) {
+				t.value = setval;
+				ed.load(t);
+			} else {
+				r = ed.setContent(setval, {format : 'raw'});
+			}
 
-				if ( true || tinymce.isIE ) {
-					ed.focus();
-					ed.selection.moveToBookmark(bm);
-				}
-				return r;
-			}			
+			if ( true || tinymce.isIE ) {
+				ed.focus();
+				ed.selection.moveToBookmark(bm);
+			}
+			return r;
 		}
+		// fall through
 		return jQuery(edCanvas).val(setval);
+	},
+	put_at_cursor : function(sc) {
+		var dat = this.get_mce_dat();
+		var ed = dat.ed;
+
+		if ( ! ed || dat.hid ) {
+			send_to_editor(sc);
+			return false;
+		}
+
+		ed.selection.setContent(sc, {format : 'text'});
+		// ed.selection.setContent() is not enough, because
+		// without the next (set(get)) line, good not it is;
+		// this apparently coerces reprocessing for 'Visual'
+		// content such that plugin callbacks get called
+		// (like ed.onBeforeSetContent and ed.onPostProcess)
+		ed.setContent(ed.getContent());
+		// this is needed to sync change to 'Text' editor
+		tinymce.triggerSave();
+
+		return false;
 	},
 	mk_shortcode : function(cs, sc) {
 		var c = this['map'][cs];
@@ -499,7 +535,7 @@ SWFPut_putswf_video_xed.prototype = {
 		this.fill_map(f, id);
 		var r = this.mk_shortcode(cs, sc);
 		if ( r != null ) {
-			send_to_editor(r);
+			this.put_at_cursor(r);
 		}
 		return false;
 	},

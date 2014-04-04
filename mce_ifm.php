@@ -103,6 +103,9 @@ if ( ($k = getwithdef('altvideo', '')) != '' ) {
 
 $allvids[] = $jatt;
 
+// Start page: note that this targets an iframe context, so several
+// elements are optional, e.g. <title> is left out here, but other
+// optional elements are here for form or functionality
 ?><!DOCTYPE html>
 <html lang="en" dir="ltr">
 
@@ -113,28 +116,17 @@ $allvids[] = $jatt;
 	<script type="text/javascript" src="<?php echo $jsurl ?>"></script>
 	<style>
 		.main-div {
-			margin-top: 0px;
-			margin-bottom: 0px;
-			margin-left:  0px;
-			margin-right: 0px;
+			margin: 0px;
 			outline: 0px;
 			padding: 0px 0px;
-			max-width: 100%;
-			min-width: 100%;
-			max-height: 100%;
-			min-height: 100%;
-			width: 100%;
 			border: 0px;
 			background-color: black;
-			position: relative;
-			overflow: hidden;
-			clip: auto;
 		}
 	</style>
 </head>
 
 <body>
-<div id="main-div" class="main-div" style="max-width: 100%" >
+<div id="main-div" class="main-div">
 
 <?php for ( $i = 0; $i < count($allvids); $i++ ) {
 	$jatt = $allvids[$i];
@@ -149,7 +141,7 @@ $allvids[] = $jatt;
 	$vidid = "va_o_putswf_video_".$i;
 ?>
 
-<div id="<?php echo $parentdiv ?>" class="like-wp-caption" style="max-width: <?php echo "".$w ?>px;">
+<div id="<?php echo $parentdiv ?>" class="like-wp-caption" style="width: <?php echo "".$w ?>px; max-width: <?php echo "".$w ?>px">
   <div id="<?php echo $auxdiv ?>" class="evhh5v_vidobjdiv">
 	<video id="<?php echo $vidid ?>" <?php echo $v['controls'] === 'true' ? "controls" : "" ?> <?php echo $v['autoplay'] === 'true' ? "autoplay" : "" ?> <?php echo $v['loop'] === 'true' ? "loop" : "" ?> preload="<?php echo "".$v['preload'] ?>" poster="<?php echo "".$v['poster'] ?>" height="<?php echo "".$h ?>" width="<?php echo "".$w ?>">
 	<?php

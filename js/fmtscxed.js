@@ -132,18 +132,26 @@
 
 			// When inserting content, if the caret is inside a caption create new paragraph under
 			// and move the caret there
-			ed.onBeforeExecCommand.add( function( ed, cmd ) {
+			ed.onBeforeExecCommand.add( function(ed, cmd) {
 				var node, p;
 
 				if ( cmd == 'mceInsertContent' ) {
 					node = ed.dom.getParent(ed.selection.getNode(), 'div.mceTemp');
 
-					if ( !node )
-						return;
-
-					p = ed.dom.create('p');
-					ed.dom.insertAfter( p, node );
-					ed.selection.setCursorLocation(p, 0);
+					if ( node ) {
+						p = ed.dom.create('p');
+						ed.dom.insertAfter(p, node);
+						ed.selection.setCursorLocation(p, 0);
+					}
+				}
+			});
+			// When inserting content, if the caret is inside a caption create new paragraph under
+			// and move the caret there
+			ed.onExecCommand.add( function(ed, cmd) {
+				console.log("Exec: " + cmd);
+				if ( cmd == 'mceInsertContent' ) {
+					//ed.repaint();
+					//ed.execCommand('mceRepaint');
 				}
 			});
 		},
@@ -169,6 +177,9 @@
 			rep.attr({
 				'width' : w,
 				'height' : h,
+				'sandbox' : "allow-same-origin allow-pointer-lock allow-scripts",
+				'allowfullscreen' : '',
+				'seamless' : '',
 				'class' : cl.indexOf('evh-pseudo') >= 0 ? cl : (cl+' evh-pseudo'),
 				'src' : s
 			});
@@ -234,17 +245,20 @@
 			var t = this;
 			var dat = t._sc_atts2qs(ats, cap);
 			var qs = dat.qs;
+			var w = parseInt(dat.width), h = parseInt(dat.height);
+			var dlw = w + 60, fw = w + 16, fh = h + 16; // ugly
 			var id = '';
-			var cls = '';
+			var cls = 'wp-caption aligncenter';
+			var sty = 'width: '+dlw+'px';
+			var att = 'width="'+fw+'" height="'+fh+'" ' +
+				'sandbox="allow-same-origin allow-pointer-lock allow-scripts" ' +
+				'allowfullscreen seamless ';
 			var cap = dat.caption;
-			var w = dat.width, h = dat.height;
-			var dlw = parseInt(w) + 20,
-				fw = w - 20, fh = h - 20;
 
 			var r = '';
-			r += '<dl id="'+id+'" class="wp-caption '+cls+'" style="width: '+dlw+'px">';
+			r += '<dl id="'+id+'" class="'+cls+'" style="'+sty+'">';
 			r += '<dt class="wp-caption-dt">';
-			r += '<evhfrm width="'+fw+'" height="'+fh+'" class="evh-pseudo" src="' + url;
+			r += '<evhfrm class="evh-pseudo" '+att+' src="' + url;
 			r += '?' + qs;
 			r += '"></evhfrm>';
 			r += '</dt>';
@@ -260,7 +274,7 @@
 			var defs = t.defs;
 			
 			return content.replace(
-/([ \t]*<\/*p>)?([ \t]*<!-- SWFPut b -->)?[ \t]*(\[putswf_video([^\]]+)\]([\s\S]+?)\[\/putswf_video\])([ \t]*<!-- SWFPut e -->)?([ \t]*<\/*p>)?/g
+			/([ \t]*<\/*p>)?([ \t]*<!-- SWFPut b -->)?[ \t]*(\[putswf_video([^\]]+)\]([\s\S]+?)\[\/putswf_video\])([ \t]*<!-- SWFPut e -->)?([ \t]*<\/*p>)?/g
 			, function(a,b,c,d,e,f,g,h) {
 				var pb = b || "\n",
 					sc = d, atts = e, cap = f,
@@ -280,11 +294,11 @@
 				
 				var dat = t._sc_atts2if(t.urlfm, atts, cap);
 				var w = dat.width, h = dat.height;
-				var dlw = parseInt(w) + 20;
+				var dlw = parseInt(w) + 60; // ugly
+				var cls = 'mceTemp mceIEcenter';
 
 				var r = '' + pb;
-				r += '<div class="mceTemp mceIEcenter" style="width: '+dlw+'px">';
-				//r += '<div class="mceTemp mceIEcenter">';
+				r += '<div class="'+cls+'" style="width: '+dlw+'px">';
 				r += '<!-- SWFPut b ' + ky + ' -->';
 				r += dat.code;
 				r += '<!-- SWFPut e ' + ky + ' -->';
@@ -298,7 +312,7 @@
 			var t = this;
 
 			return content.replace(
-/([ \t]*<\/*p>)?([ \t]*<div [^>]+>)?<!-- SWFPut b ([0-9]*) -->.*<!-- SWFPut e (\3) -->([ \t]*<\/div>)?([ \t]*<\/*p>)?/g
+			/([ \t]*<\/*p>)?([ \t]*<div [^>]+>)?<!-- SWFPut b ([0-9]*) -->.*<!-- SWFPut e (\3) -->([ \t]*<\/div>)?([ \t]*<\/*p>)?/g
 			, function(a,b,c,d,e,f,g) {
 				var pb = b || "\n",
 					ky = d, cmp = e,
