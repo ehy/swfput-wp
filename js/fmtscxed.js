@@ -238,12 +238,13 @@
 			var cls = '';
 			var cap = dat.caption;
 			var w = dat.width, h = dat.height;
-			var dlw = parseInt(w) + 20;
+			var dlw = parseInt(w) + 20,
+				fw = w - 20, fh = h - 20;
 
 			var r = '';
 			r += '<dl id="'+id+'" class="wp-caption '+cls+'" style="width: '+dlw+'px">';
 			r += '<dt class="wp-caption-dt">';
-			r += '<evhfrm width="'+w+'" height="'+h+'" class="evh-pseudo" src="' + url;
+			r += '<evhfrm width="'+fw+'" height="'+fh+'" class="evh-pseudo" src="' + url;
 			r += '?' + qs;
 			r += '"></evhfrm>';
 			r += '</dt>';
@@ -261,7 +262,9 @@
 			return content.replace(
 /([ \t]*<\/*p>)?([ \t]*<!-- SWFPut b -->)?[ \t]*(\[putswf_video([^\]]+)\]([\s\S]+?)\[\/putswf_video\])([ \t]*<!-- SWFPut e -->)?([ \t]*<\/*p>)?/g
 			, function(a,b,c,d,e,f,g,h) {
-				var pb = b, sc = d, atts = e, cap = f, pe = h;
+				var pb = b || "\n",
+					sc = d, atts = e, cap = f,
+					pe = h || "\n";
 
 				var ky, ok = false;
 				for ( ky in t.rndmap ) {
@@ -297,7 +300,9 @@
 			return content.replace(
 /([ \t]*<\/*p>)?([ \t]*<div [^>]+>)?<!-- SWFPut b ([0-9]*) -->.*<!-- SWFPut e (\3) -->([ \t]*<\/div>)?([ \t]*<\/*p>)?/g
 			, function(a,b,c,d,e,f,g) {
-				var pb = b, ky = d, cmp = e, pe = g;
+				var pb = b || "\n",
+					ky = d, cmp = e,
+					pe = g || "\n";
 
 				var rpl = pb;
 				if ( ky.length && ky == cmp && t.rndmap[ky] ) {

@@ -80,7 +80,7 @@ $jatt['a_vid'] = array(
 	'aspect'	=> getwithdef('aspect', '4:3')
 );
 
-if ( preg_match($jatt['a_vid']['poster'], '/^[0-9]$/') ) {
+if ( preg_match('/^[0-9]$/', $jatt['a_vid']['poster']) ) {
 	// TODO: see about loading enough WP to get at attachment IDs
 	// but if so, probably use a nonce too -- as is, w/o loading
 	// WP, we're only using info that is already being exposed on
@@ -160,7 +160,7 @@ $allvids[] = $jatt;
 				isset($s['type']) && $s['type'] != '' ?
 					sprintf(' type="%s"', $s['type']) : ''
 			);
-			error_log('source: ' . $src);
+			//error_log('source: ' . $src);
 			echo $src;
 		}
 		if ( array_key_exists('tracks', $v) )
