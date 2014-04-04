@@ -731,6 +731,15 @@ class SWF_put_evh {
 
 	// add a help tab in the post-related pages
 	public static function hook_admin_head() {
+		// for pages w/ TinyMCE editor, put info
+		// needed by the tinymce plugin added in 1.0.9
+		$info = array('a' => ABSPATH, 'i' => WPINC);
+		printf('
+			<script type="text/javascript">
+				var swfput_mceplug_inf = %s;
+			</script>%s',
+			json_encode($info), "\n");
+
 		// get_current_screen() introduced in WP 3.1
 		// (thus spake codex)
 		// I have 3.0.2 to test with, and 3.3.1, nothing in between,
@@ -1039,7 +1048,8 @@ class SWF_put_evh {
 				$aa = array($cl, 'hook_admin_init');
 				add_action('admin_init', $aa);
 				$aa = array($cl, 'hook_admin_head');
-				add_action('admin_head', $aa);
+				add_action('admin_head-post.php', $aa);
+				add_action('admin_head-post-new.php', $aa);
 				$aa = array($cl, 'hook_admin_menu');
 				add_action('admin_menu', $aa);
 				$aa = array($cl, 'filter_admin_print_scripts');

@@ -231,6 +231,13 @@
 				sep = '&';
 			}
 			
+			if ( swfput_mceplug_inf !== undefined ) {
+				qs += sep
+					+ 'a=' + encodeURIComponent(swfput_mceplug_inf.a)
+					+ '&'
+					+ 'i=' + encodeURIComponent(swfput_mceplug_inf.i);
+			}
+			
 			dat.qs = qs;
 			dat.caption = cap || '';
 

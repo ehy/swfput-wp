@@ -32,6 +32,7 @@
  */
 
 $reqs = array('width','height','barheight',
+	'a', 'i'
 );
 
 foreach ( $reqs as $k ) {
@@ -46,6 +47,8 @@ function getwithdef($k, $def) {
 	}
 	return urldecode($_REQUEST[$k]);
 }
+
+require(getwithdef('a', '') . '/wp-load.php');
 
 $t = explode('/', $_SERVER['REQUEST_URI']);
 $t[count($t) - 1] = 'evhh5v/evhh5v.css';
@@ -80,20 +83,23 @@ $jatt['a_vid'] = array(
 	'aspect'	=> getwithdef('aspect', '4:3')
 );
 
-if ( preg_match('/^[0-9]$/', $jatt['a_vid']['poster']) ) {
-	// TODO: see about loading enough WP to get at attachment IDs
-	// but if so, probably use a nonce too -- as is, w/o loading
-	// WP, we're only using info that is already being exposed on
-	// front-end pages, but to query WP DB for attachments by ID
-	// a nonce should be required too.
-	$jatt['a_vid']['poster'] = '';
+function maybe_get_attach($a) {
+	if ( preg_match('/^[0-9]+$/', $a) ) {
+		$u = wp_get_attachment_url($a);
+		if ( $u ) {
+			$a = $u;
+		}
+	}
+	return $a;
 }
+
+$jatt['a_vid']['poster'] = maybe_get_attach($jatt['a_vid']['poster']);
 
 if ( ($k = getwithdef('altvideo', '')) != '' ) {
 	$a = explode('|', $k);
 	foreach ( $a as $k ) {
 		$t = explode('?', trim($k));
-		$v = array('src' => trim($t[0]));
+		$v = array('src' => maybe_get_attach(trim($t[0])));
 		if ( isset($v[1]) ) {
 			$v['type'] = trim($v[1]);
 		}
