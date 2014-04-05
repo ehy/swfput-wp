@@ -126,6 +126,11 @@ class SWF_put_evh {
 	// identifier for settings page
 	const settings_page_id = 'swfput1_settings_page';
 	
+	// option for mce plugin -> iframe video content script
+	const optmceplg  = 'swfput_mceifm';
+	// TTL for ticket, re. mce plugin -> iframe video content script
+	const ttlmceplg  = 86400;
+	
 	// option group name in the WP opt db
 	const opt_group  = '_evh_swfput1_opt_grp';
 	// verbose (helpful?) section descriptions?
@@ -659,8 +664,8 @@ class SWF_put_evh {
 		} else {
 			global $current_screen;
 			add_contextual_help($current_screen,
-				'<h6>' . __('Overview') . '</h6>' . $t[0] .
-				'<h6>' . __('Tips', 'swfput_l10n') . '</h6>' . $t[1] .
+				'<h3>' . __('Overview') . '</h3>' . $t[0] .
+				'<h3>' . __('Tips', 'swfput_l10n') . '</h3>' . $t[1] .
 				$tt);
 		}
 	}
@@ -731,14 +736,41 @@ class SWF_put_evh {
 
 	// add a help tab in the post-related pages
 	public static function hook_admin_head() {
+		$scr = function_exists('get_current_screen') ?
+			get_current_screen() :
+			false;
+
 		// for pages w/ TinyMCE editor, put info
 		// needed by the tinymce plugin added in 1.0.9
-		$info = array('a' => ABSPATH, 'i' => WPINC);
-		printf('
-			<script type="text/javascript">
-				var swfput_mceplug_inf = %s;
-			</script>%s',
-			json_encode($info), "\n");
+		// -- use something like wp nonces -- the nonce will
+		// not work, the checks fail when made from the
+		// iframe content scipt, also nonces are intended
+		// for single use. So, use a prng number; it will be
+		// reused any number of times while post w/ swfput
+		// video is being edited, so it is not a nonce.
+		// Note this is not rigorous security, just deflecting
+		// mischeivous poking the script w/ odd query string
+		// values. Other check values are used as well.
+		if ( ! $scr || $scr->base === 'post' ) {
+			$rnd = array(self::uniq_rand(), (int)time(),
+				self::ttlmceplg, $_SERVER['REMOTE_ADDR']);
+			if ( isset($_SERVER['REMOTE_HOST']) ) {
+				$rnd[] = $_SERVER['REMOTE_HOST'];
+			}
+	
+			if ( get_option(self::optmceplg) ) {
+				update_option(self::optmceplg, $rnd);			
+			} else {
+				add_option(self::optmceplg, $rnd, '', false);
+			}
+	
+			$info = array('a' => ABSPATH, 'i' => '' . $rnd[0]);
+			printf('
+				<script type="text/javascript">
+					var swfput_mceplug_inf = %s;
+				</script>%s',
+				json_encode($info), "\n");
+		}
 
 		// get_current_screen() introduced in WP 3.1
 		// (thus spake codex)
@@ -746,15 +778,6 @@ class SWF_put_evh {
 		// so 3.3 will be used as minimum
 		$v = (3 << 24) | (3 << 16) | (0 << 8) | 0;
 		$ok = self::wpv_min($v);
-		// no compatible alternative for now
-		if ( ! $ok ) {
-			return;
-		}
-
-		$scr = get_current_screen();
-		if ( ! $scr ) {
-			return;
-		}
 
 		// The help to be displayed with a tab under the "Help" button.
 		$hlptxt =
@@ -773,7 +796,7 @@ class SWF_put_evh {
 		</p><p>
 		The following items probably need explanation:
 		</p><p>
-		<h6>Flash or HTML5 video URLs or media library IDs</h6>
+		<h3>Flash or HTML5 video URLs or media library IDs</h3>
 		Near the top of the form, after the "Caption" field,
 		a text entry field named
 		"Flash video URL or media library ID" appears.
@@ -868,7 +891,7 @@ class SWF_put_evh {
 		versions of <em>Firefox</em> will reject that
 		usage, so the space after the comma is best left out.
 		</p><p>
-		<h6>Use initial image as no-video alternate</h6>
+		<h3>Use initial image as no-video alternate</h3>
 		This checkbox, if enabled (it is, by default) will
 		use the "initial image file" that may be specified
 		for the video player in an \'img\' element
@@ -890,7 +913,7 @@ class SWF_put_evh {
 		(top/bottom or left/right tranparent
 		areas might be one solution).
 		</p><p>
-		<h6>Mobile width</h6>
+		<h3>Mobile width</h3>
 		This input field appears just below the
 		pixel dimensions fields. If this value is
 		greater than zero, and a mobile browser is
@@ -908,30 +931,42 @@ class SWF_put_evh {
 		a mobile browser is not detected.
 		</p>', 'swfput_l10n');
 
-		// nothing specific to widgets; only guessing that
-		// edit_theme* are suitable
-		if ( $scr->base === 'widgets'
-			&& (current_user_can('edit_theme_options')
-			||  current_user_can('edit_themes')) ) {
-			$scr->add_help_tab(array(
-				'id'      => 'help_tab_widgets_swfput',
-				'title'   => __('SWFPut Video Player', 'swfput_l10n'),
-				'content' => self::wt(sprintf($hlptxt,
+		// put help tab content, for 3.3.1 or greater . . .
+		if ( $ok && $scr ) {
+			// nothing specific to widgets; only guessing that
+			// edit_theme* are suitable
+			if ( $scr->base === 'widgets'
+				&& (current_user_can('edit_theme_options')
+				||  current_user_can('edit_themes')) ) {
+				$scr->add_help_tab(array(
+					'id'      => 'help_tab_widgets_swfput',
+					'title'   => __('SWFPut Video Player', 'swfput_l10n'),
+					'content' => self::wt(sprintf($hlptxt,
+						self::$helphtml, self::$helppdf))
+					// content may be a callback
+					)
+				);
+			} else if ( $scr->base === 'post'
+				&& (current_user_can('edit_posts')
+				||  current_user_can('edit_pages')) ) {
+				$scr->add_help_tab(array(
+					'id'      => 'help_tab_posts_swfput',
+					'title'   => __('SWFPut Video Form', 'swfput_l10n'),
+					'content' => self::wt(sprintf($hlptxt,
+						self::$helphtml, self::$helppdf))
+					// content may be a callback
+					)
+				);
+			}
+
+		// . . . or, lesser
+		} else {
+			global $current_screen;
+			add_contextual_help($current_screen,
+				'<h6>'.__('SWFPut Video Player', 'swfput_l10n').'</h6>'
+				. self::wt(sprintf($hlptxt,
 					self::$helphtml, self::$helppdf))
-				// content may be a callback
-				)
-			);
-		} else if ( $scr->base === 'post'
-			&& (current_user_can('edit_posts')
-			||  current_user_can('edit_pages')) ) {
-			$scr->add_help_tab(array(
-				'id'      => 'help_tab_posts_swfput',
-				'title'   => __('SWFPut Video Form', 'swfput_l10n'),
-				'content' => self::wt(sprintf($hlptxt,
-					self::$helphtml, self::$helppdf))
-				// content may be a callback
-				)
-			);
+				);
 		}
 	}
 
@@ -979,6 +1014,8 @@ class SWF_put_evh {
 		if ( $opts && $opts[self::optdelopts] != 'false' ) {
 			delete_option(self::opt_group);
 		}
+		// This does not need to be conditional
+		delete_option(self::optmceplg);
 	}
 
 	// add link at plugins page entry for the settings page
@@ -1024,6 +1061,14 @@ class SWF_put_evh {
 		self::load_translations();
 		$this->init_opts();
 
+		// for video in tinymce plugin: remove stale ticket
+		$pf = get_option(self::optmceplg);
+		if ( $pf ) {
+			if ( (int)$pf[2] < ((int)time() - (int)$pf[1]) ) {
+				delete_option(self::optmceplg);
+			}
+		}
+
 		$pf = self::mk_pluginfile();
 		// admin or public invocation?
 		$adm = is_admin();
@@ -1050,6 +1095,7 @@ class SWF_put_evh {
 				$aa = array($cl, 'hook_admin_head');
 				add_action('admin_head-post.php', $aa);
 				add_action('admin_head-post-new.php', $aa);
+				add_action('admin_head-widgets.php', $aa);
 				$aa = array($cl, 'hook_admin_menu');
 				add_action('admin_menu', $aa);
 				$aa = array($cl, 'filter_admin_print_scripts');

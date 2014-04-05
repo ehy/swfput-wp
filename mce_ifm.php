@@ -48,8 +48,28 @@ function getwithdef($k, $def) {
 	return urldecode($_REQUEST[$k]);
 }
 
+// Need WP help
 require(getwithdef('a', '') . '/wp-load.php');
 
+// Checks against naughtiness
+$vopt = get_option('swfput_mceifm');
+if ( ! $vopt ) {
+	die("FAILED");
+}
+if ( (int)$vopt[0] !== (int)getwithdef('i', '') ) {
+	die("NO AUTH");
+}
+if ( (int)$vopt[2] < ((int)time() - (int)$vopt[1]) ) {
+	die("EXPIRED");
+}
+if ( strcmp($vopt[3], $_SERVER['REMOTE_ADDR']) ) {
+	die("BAD CLIENT");
+}
+if ( isset($_SERVER['REMOTE_HOST']) && strcmp($vopt[4], $_SERVER['REMOTE_HOST']) ) {
+	die("BAD CLIENT HOST");
+}
+
+// DATA setup
 $t = explode('/', $_SERVER['REQUEST_URI']);
 $t[count($t) - 1] = 'evhh5v/evhh5v.css';
 $cssurl = implode('/', $t);
@@ -93,6 +113,24 @@ function maybe_get_attach($a) {
 	return $a;
 }
 
+$vstdk = array('play', 'loop', 'volume',
+	'hidebar', 'disablebar',
+	'aspectautoadj', 'aspect',
+	'displayaspect', 'pixelaspect',
+	'barheight', 'barwidth',
+	'allowfull', 'mob'
+);
+$vstd = array();
+foreach ( $vstdk as $k ) {
+	if ( isset($jatt['a_vid'][$k]) ) {
+		$vstd[$k] = $jatt['a_vid'][$k];
+	} else {
+		$vstd[$k] = getwithdef($k, '');
+	}
+}
+$vstd['barwidth'] = getwithdef('width', '');
+$jatt['a_vid']['std'] = $vstd;
+
 $jatt['a_vid']['poster'] = maybe_get_attach($jatt['a_vid']['poster']);
 
 if ( ($k = getwithdef('altvideo', '')) != '' ) {
@@ -106,10 +144,15 @@ if ( ($k = getwithdef('altvideo', '')) != '' ) {
 		$jatt['a_vid']['srcs'][] = $v;
 	}
 }
+$fl_url = maybe_get_attach(trim(getwithdef('url', '')));
+if ( preg_match('/.+\.(mp4|m4v)$/i', $fl_url) ) {
+	$jatt['a_vid']['srcs'][] =
+		array('src' => $fl_url, 'type' => 'video/mp4');
+}
 
 $allvids[] = $jatt;
 
-// Start page: note that this targets an iframe context, so several
+// The page: note that this targets an iframe context, so several
 // elements are optional, e.g. <title> is left out here, but other
 // optional elements are here for form or functionality
 ?><!DOCTYPE html>
@@ -193,25 +236,19 @@ $allvids[] = $jatt;
 		// these must be appended with uniq id
 		"uniq" => array("id" => "evh_h5v_ctlbar_svg_" . $i),
 		// these must *not* be appended with uniq id
-		"std" => array(
-		  "barheight" => $barhi, "barwidth" => $w, "aspect" => $asp,
-			"hidebar" => 'false')
+		"std" => $v['std']
 	);
-	if ( isset($v['pixelaspect']) ) {
-		$oparm["std"]['pixelaspect'] = $v['pixelaspect'];
-	}
-	if ( isset($v['aspectautoadj']) ) {
-		$oparm["std"]['aspectautoadj'] = $v['aspectautoadj'];
-	}
+
 	$parms = array("iparm" => $iparm, "oparm" => $oparm);
 	?>
 	<script type="text/javascript">
-	evhh5v_controlbar_elements(<?php printf('%s', json_encode($parms)); ?>);
+	evhh5v_controlbar_elements(<?php printf('%s', json_encode($parms)); ?>, true);
 	new evhh5v_sizer("<?php echo $parentdiv ?>", "o_putswf_video_<?php echo "".$i ?>", "<?php echo $vidid ?>", "ia_o_putswf_video_<?php echo "".$i ?>", false);
 	</script>
   </div>
 <?php
-	if ( array_key_exists('caption', $v) && $v['caption'] != '' ) {
+	// disabled with false: caption is drawn in tinymce editor
+	if ( false && array_key_exists('caption', $v) && $v['caption'] != '' ) {
 		printf("\n\t\t<p><span class=\"evhh5v_evh-caption\">%s</span></p>\n\n", $v['caption']);
 	}
 ?>

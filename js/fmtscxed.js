@@ -208,7 +208,8 @@
 
 			for ( var k in defs ) {
 				var v = defs[k];
-				var rx = new RegExp(' '+k+'="([^"]*)"');
+				var rx = ' '+k+'="([^"]*)"';
+				rx = new RegExp(rx);
 
 				var p = ats.match(rx);
 				if ( p && p[1] != '' ) {
