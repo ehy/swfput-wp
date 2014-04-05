@@ -715,10 +715,13 @@ class SWF_put_evh {
 
 	// on init, e.g. mce plugin in the post-related pages
 	public static function hook_admin_init() {
-		if ( current_user_can( 'edit_posts' )
+		// tinymce version in 3.0.3 n.g. and next testing
+		// version of WP I have is 3.3.1
+		$v = (3 << 24) | (3 << 16) | (0 << 8) | 0;
+		$ok = self::wpv_min($v);
+
+		if ( $ok && current_user_can( 'edit_posts' )
 			&& current_user_can( 'edit_pages' ) ) {
-			//add_filter('mce_buttons', 'foo');
-			
 			$aa = array(__CLASS__, 'add_mceplugin_js');
 			add_filter('mce_external_plugins', $aa);
 		}
