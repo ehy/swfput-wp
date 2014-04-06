@@ -763,26 +763,22 @@ class SWF_put_evh {
 		// is an expiration value (TTL) tested in the script against
 		// the stored (int)time(). The script fails if its client
 		// differs from $_SERVER['REMOTE_ADDR'].
-		// Presently there is one ticket option and no provision
-		// for multiple users simultaneously editing. This is
-		// subject to revision if I get feedback suggesting a
-		// need for it.
 		if ( ! $scr || $scr->base === 'post' ) {
 			$u = '' . (function_exists('get_current_user_id') ?
 				get_current_user_id() : 0);
 			$rn = '' . self::uniq_rand();
-			$rnd = array($rn, (int)time(),
+			$ticket = array($rn, (int)time(),
 				self::ttlmceplg, $_SERVER['REMOTE_ADDR']);
 			if ( isset($_SERVER['REMOTE_HOST']) ) {
-				$rnd[] = $_SERVER['REMOTE_HOST'];
+				$ticket[] = $_SERVER['REMOTE_HOST'];
 			}
 	
 			$opt = get_option(self::optmceplg);
 			if ( $opt ) {
-				$opt[$u] = $rnd;
+				$opt[$u] = $ticket;
 				update_option(self::optmceplg, $opt);			
 			} else {
-				$opt = array($u => $rnd);
+				$opt = array($u => $ticket);
 				add_option(self::optmceplg, $opt, '', false);
 			}
 	
