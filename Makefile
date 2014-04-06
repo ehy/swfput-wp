@@ -10,6 +10,7 @@ COPYRIGHT_YEAR   = 2013
 TRANS_BUGS_EMAIL = edhynan@gmail.com
 
 SRCS = ${PRJSTEM}.php \
+	help_txt.php \
 	Options_0_0_2b.inc.php \
 	OptField_0_0_2b.inc.php \
 	OptSection_0_0_2b.inc.php \
@@ -19,7 +20,7 @@ SRCS = ${PRJSTEM}.php \
 
 # The Opt*.php are support classes, not tied to this plugin,
 # so they do not share the text-domain and are not args to xgettext
-POTSRCS = ${PRJSTEM}.php
+POTSRCS = ${PRJSTEM}.php help_txt.php mce_ifm.php
 
 DOCSD = docs
 JSDIR = js

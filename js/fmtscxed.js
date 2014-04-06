@@ -90,8 +90,8 @@
 			t.urlfm = u.join('/');
 
 			t.editor = ed;
-			//t._createButtons();
 			
+			//t._createButtons();
 			//ed.addCommand('SWFPut_put', t._editImage);
 			
 			ed.onPreInit.add(function() {
@@ -138,12 +138,10 @@
 			ed.onBeforeExecCommand.add( function(ed, cmd) {
 				var node, p;
 
-				console.log("BeforeExec: " + cmd);
 				if ( cmd == 'mceInsertContent' ) {
 					node = ed.dom.getParent(ed.selection.getNode(), 'div.mceTemp');
 
 					if ( node ) {
-				console.log("BeforeExec: " + node.name);
 						p = ed.dom.create('p');
 						ed.dom.insertAfter(p, node);
 						ed.selection.setCursorLocation(p, 0);
@@ -236,7 +234,9 @@
 				qs += sep
 					+ 'a=' + encodeURIComponent(swfput_mceplug_inf.a)
 					+ '&'
-					+ 'i=' + encodeURIComponent(swfput_mceplug_inf.i);
+					+ 'i=' + encodeURIComponent(swfput_mceplug_inf.i)
+					+ '&'
+					+ 'u=' + encodeURIComponent(swfput_mceplug_inf.u);
 			}
 			
 			dat.qs = qs;

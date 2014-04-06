@@ -1,8 +1,8 @@
 <?php
 /*
- *      swfput.php
+ *      mce_ifm.php
  *      
- *      Copyright 2011 Ed Hynan <edhynan@gmail.com>
+ *      Copyright 2014 Ed Hynan <edhynan@gmail.com>
  *      
  *      This program is free software; you can redistribute it and/or modify
  *      it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@
  */
 
 $reqs = array('width','height','barheight',
-	'a', 'i'
+	'a', 'i', 'u'
 );
 
 foreach ( $reqs as $k ) {
@@ -52,15 +52,17 @@ function getwithdef($k, $def) {
 require(getwithdef('a', '') . '/wp-load.php');
 
 // Checks against naughtiness
-$vopt = get_option('swfput_mceifm');
-if ( ! $vopt ) {
+$usr = getwithdef('u', '');
+$vopt = get_option('swfput_mceifm'); // hardcode name - never from query
+if ( ! ($vopt && isset($vopt[$usr])) ) {
 	die("FAILED");
 }
+$vopt = $vopt[$usr]; // only want this one
 if ( (int)$vopt[0] !== (int)getwithdef('i', '') ) {
 	die("NO AUTH");
 }
 if ( (int)$vopt[2] < ((int)time() - (int)$vopt[1]) ) {
-	die("EXPIRED");
+	die("EXPIRED ticket (please update post before continuing)");
 }
 if ( strcmp($vopt[3], $_SERVER['REMOTE_ADDR']) ) {
 	die("BAD CLIENT");
@@ -70,7 +72,6 @@ if ( isset($_SERVER['REMOTE_HOST']) && strcmp($vopt[4], $_SERVER['REMOTE_HOST'])
 }
 
 // DATA setup
-$rqdat = parse_url($_SERVER['REQUEST_URI']);
 $t = explode('/', $_SERVER['REQUEST_URI']);
 $t[count($t) - 1] = 'evhh5v/evhh5v.css';
 $cssurl = implode('/', $t);

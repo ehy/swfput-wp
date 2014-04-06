@@ -225,6 +225,8 @@ class SWF_put_evh {
 
 	// swfput js shortcode editor helper name
 	const swfxedjsname = 'formxed.min.js';
+	// swfput js shortcode editor helper name
+	const swfxpljsname = 'fmtscxed.min.js';
 	
 	// html5 video front-end js
 	const evhv5vjsdir  = 'evhh5v';
@@ -731,7 +733,7 @@ class SWF_put_evh {
 	public static function add_mceplugin_js($plugin_array) {
 		$pf = self::mk_pluginfile();
 		$pname = 'swfput_mceplugin';
-		$t = self::settings_jsdir . '/' . 'fmtscxed.js';
+		$t = self::settings_jsdir . '/' . self::swfxpljsname;
 		$jsfile = plugins_url($t, $pf);
 		$plugin_array[$pname] = $jsfile;
 		return $plugin_array;
@@ -740,34 +742,51 @@ class SWF_put_evh {
 	// add a help tab in the post-related pages
 	public static function hook_admin_head() {
 		$scr = function_exists('get_current_screen') ?
-			get_current_screen() :
-			false;
+			get_current_screen() : false;
 
 		// for pages w/ TinyMCE editor, put info
 		// needed by the tinymce plugin added in 1.0.9
 		// -- use something like wp nonces -- the nonce will
 		// not work, the checks fail when made from the
-		// iframe content scipt, also nonces are intended
+		// iframe content script, also nonces are intended
 		// for single use. So, use a prng number; it will be
-		// reused any number of times while post w/ swfput
+		// reused any number of times while post with swfput
 		// video is being edited, so it is not a nonce.
-		// Note this is not rigorous security, just deflecting
-		// mischeivous poking the script w/ odd query string
-		// values. Other check values are used as well.
+		// Note this is not rigorous security*, just deflecting
+		// mischievous poking at the script w/ odd query string
+		// values. Other check values may be used as well.
+		// [*] The script does not write to the DB, it only uses
+		// get_option and wp_get_attachment_url; but, prefer not
+		// to produce arbitrary URLs or attachment info that would
+		// result from crafted query --
+		// this prng-ticket should do the trick. self::ttlmceplg
+		// is an expiration value (TTL) tested in the script against
+		// the stored (int)time(). The script fails if its client
+		// differs from $_SERVER['REMOTE_ADDR'].
+		// Presently there is one ticket option and no provision
+		// for multiple users simultaneously editing. This is
+		// subject to revision if I get feedback suggesting a
+		// need for it.
 		if ( ! $scr || $scr->base === 'post' ) {
-			$rnd = array(self::uniq_rand(), (int)time(),
+			$u = '' . (function_exists('get_current_user_id') ?
+				get_current_user_id() : 0);
+			$rn = '' . self::uniq_rand();
+			$rnd = array($rn, (int)time(),
 				self::ttlmceplg, $_SERVER['REMOTE_ADDR']);
 			if ( isset($_SERVER['REMOTE_HOST']) ) {
 				$rnd[] = $_SERVER['REMOTE_HOST'];
 			}
 	
-			if ( get_option(self::optmceplg) ) {
-				update_option(self::optmceplg, $rnd);			
+			$opt = get_option(self::optmceplg);
+			if ( $opt ) {
+				$opt[$u] = $rnd;
+				update_option(self::optmceplg, $opt);			
 			} else {
-				add_option(self::optmceplg, $rnd, '', false);
+				$opt = array($u => $rnd);
+				add_option(self::optmceplg, $opt, '', false);
 			}
 	
-			$info = array('a' => ABSPATH, 'i' => '' . $rnd[0]);
+			$info = array('a' => ABSPATH, 'i' => $rn, 'u' => $u);
 			printf('
 				<script type="text/javascript">
 					var swfput_mceplug_inf = %s;
@@ -782,159 +801,10 @@ class SWF_put_evh {
 		$v = (3 << 24) | (3 << 16) | (0 << 8) | 0;
 		$ok = self::wpv_min($v);
 
-		// The help to be displayed with a tab under the "Help" button.
-		$hlptxt =
-		__('<p>
-		Hopefully, much of the SWFPut setup form
-		is self-explanatory.
-		There is more detailed documentation as HTML
-		<a href="%s" target="_blank">here (in a new tab)</a>,
-		or as a PDF file
-		<a href="%s" target="_blank">here (in a new tab)</a>.
-		</p><p>
-		There is one important restriction on the form\'s
-		text entry fields. The values may not have any
-		ASCII \'&quot;\' (double quote) characters. Hopefully
-		that will not be a problem.
-		</p><p>
-		The following items probably need explanation:
-		</p><p>
-		<h3>Flash or HTML5 video URLs or media library IDs</h3>
-		Near the top of the form, after the "Caption" field,
-		a text entry field named
-		"Flash video URL or media library ID" appears.
-		This is for the video file that the flash player
-		will use. You may enter a URL by hand (which may
-		be off-site), or make a selection from the next
-		two items,
-		"Select flash video URL from uploads directory" and
-		"Select ID for flash video from media library."
-		The first of these two holds a selection of files
-		found under your <code>wp-content/uploads</code>
-		directory with a FLV or MP4 extension. Files
-		are placed under this directory when you use the
-		<em>WordPress</em> media library, but you may also
-		place files there \'by hand\' using, for example,
-		ftp or ssh or any suitable utility (placing files
-		in a subdirectory is a good idea).
-		In fact, uploading video files \'by hand\' might
-		be the easiest way to bypass size limits that
-		reject large video file uploads through the
-		media library interface. The next field
-		has a selection of media files with a
-		<em>WordPress</em> \'attachment id\' and so it
-		provides only those files uploaded to the media
-		library (with a FLV or MP4 extension).
-		</p><p>
-		After those three fields for flash video, there is
-		"HTML5 video URLs or media library IDs" which,
-		like the flash text entry, is followed by selections
-		of files and \'attachment id\'s. These show files
-		with MP4 or OGG or OGV or WEBM extensions. As the
-		field names suggest, these are for the HTML5 video
-		player. An important difference is that when you
-		make a selection, the entry field is appended,
-		rather than replaced, with a \'|\' separator.
-		The HTML5 video entry field can take more than one
-		value, as explained below.
-		</p><p>
-		It is not necessary to fill both the flash and HTML5
-		video URL fields, but it is a good idea to do so
-		if you can prepare the video in the needed formats.
-		If you specify only one type, the other type of
-		video player is not produced in the page code.
-		If you do specify URLs for both flash and HTML5 video,
-		then the page code will have one as primary content,
-		and the other as "fallback" content. Fallback content
-		is shown by the web-browser only when the primary
-		content cannot be shown. For example, if flash is
-		primary content, but you have specified HTML5 content
-		too, then a visitor to your site who does not
-		have a flash plugin would see the HTML5 video player
-		if the browser supports it.
-		(Mobile browsers are less likely to have a flash
-		plugin than desktop-type browsers.)
-		</p><p>
-		By default, flash is made primary content with
-		HTML5 as fallback. You may make HTML5 be primary
-		and flash be fallback with the "HTML5 video primary"
-		option on the settings page. (Go to the "Settings"
-		menu and select "SWFPut Plugin" for the settings page.)
-		</p><p>
-		The current state of affairs with HTML5 video will
-		require three transcodings of the video if you
-		want broad browser support; moreover, the supported
-		"container" formats -- .webm, .ogg/.ogv, and .mp4 --
-		might contain different audio and video types ("codecs")
-		and only some of these will be supported by various
-		browsers.
-		Users not already familiar with this topic should
-		do enough research to make the preceding statements
-		clear.
-		</p><p>
-		The "HTML5 video URLs" field
-		will accept any number of URLs, which
-		must be separated by \'|\'. Each URL <em>may</em>
-		be appended with a mime-type + codecs argument,
-		separated from the URL by \'?\'. Whitespace around
-		the separators is accepted and stripped-off. Please
-		note that the argument given should <em>not</em>
-		include "type=" or quotes: give only the
-		statement that should appear within the quotes.
-		For example:</p>
-		<blockquote><code>
-		vids/gato.mp4 ? video/mp4 | vids/gato.webm ? video/webm; codecs=vp8,vorbis | vids/gato.ogv?video/ogg; codecs=theora,vorbis
-		</code></blockquote>
-		<p>
-		In the example, where two codecs are specified there is
-		no space after the comma.
-		Some online examples
-		show a space after the comma,
-		but some older
-		versions of <em>Firefox</em> will reject that
-		usage, so the space after the comma is best left out.
-		</p><p>
-		<h3>Use initial image as no-video alternate</h3>
-		This checkbox, if enabled (it is, by default) will
-		use the "initial image file" that may be specified
-		for the video player in an \'img\' element
-		that the visitor\'s browser might display if video
-		is not available.
-		</p><p>
-		There is one additional consideration for this image:
-		the \'img\' element is given the width and height
-		specified in the form for the flash player, and the
-		visitor\'s browser will scale the image in both
-		dimensions, possibly causing the image to be
-		\'stretched\' or \'squeezed\'.
-		The image proportions are restored with
-		<em>JavaScript</em>, but only if scripts are
-		not disabled in the visitor\'s browser.
-		Therefore, it is a
-		good idea to prepare images to have the expected
-		<em>pixel</em> aspect ratio
-		(top/bottom or left/right tranparent
-		areas might be one solution).
-		</p><p>
-		<h3>Mobile width</h3>
-		This input field appears just below the
-		pixel dimensions fields. If this value is
-		greater than zero, and a mobile browser is
-		detected, then this width will be used with
-		a proportional height according to the
-		regular pixel dimensions. This might be
-		useful when, for example, sidebar content
-		actually appears below main content due to
-		the mobile browser\'s small size (theme support
-		may be necessary to see this behavior). This
-		is probably most useful for video widgets placed
-		on a sidebar, but please experiment.
-		The default value for this field, 0,
-		disables this feature, and it has no effect if
-		a mobile browser is not detected.
-		</p>', 'swfput_l10n');
+		include 'help_txt.php';
+		$hlptxt = swfput_get_helptext(self::$helphtml, self::$helppdf);
 
-		// put help tab content, for 3.3.1 or greater . . .
+		// put help tab content, for 3.3.0 or greater . . .
 		if ( $ok && $scr ) {
 			// nothing specific to widgets; only guessing that
 			// edit_theme* are suitable
@@ -944,8 +814,7 @@ class SWF_put_evh {
 				$scr->add_help_tab(array(
 					'id'      => 'help_tab_widgets_swfput',
 					'title'   => __('SWFPut Video Player', 'swfput_l10n'),
-					'content' => self::wt(sprintf($hlptxt,
-						self::$helphtml, self::$helppdf))
+					'content' => self::wt($hlptxt)
 					// content may be a callback
 					)
 				);
@@ -954,9 +823,8 @@ class SWF_put_evh {
 				||  current_user_can('edit_pages')) ) {
 				$scr->add_help_tab(array(
 					'id'      => 'help_tab_posts_swfput',
-					'title'   => __('SWFPut Video Form', 'swfput_l10n'),
-					'content' => self::wt(sprintf($hlptxt,
-						self::$helphtml, self::$helppdf))
+					'title'   => __('SWFPut Video', 'swfput_l10n'),
+					'content' => self::wt($hlptxt)
 					// content may be a callback
 					)
 				);
@@ -967,8 +835,7 @@ class SWF_put_evh {
 			global $current_screen;
 			add_contextual_help($current_screen,
 				'<h6>'.__('SWFPut Video Player', 'swfput_l10n').'</h6>'
-				. self::wt(sprintf($hlptxt,
-					self::$helphtml, self::$helppdf))
+				. self::wt($hlptxt)
 				);
 		}
 	}
@@ -1064,11 +931,28 @@ class SWF_put_evh {
 		self::load_translations();
 		$this->init_opts();
 
-		// for video in tinymce plugin: remove stale ticket
+		// for video in tinymce plugin: remove stale tickets;
+		// the option is a map user_id -> ticket-data to allow
+		// multiple users editing (wonder if this code will ever
+		// get excersized); update if any are stale, or delete
+		// if none are fresh
 		$pf = get_option(self::optmceplg);
 		if ( $pf ) {
-			if ( (int)$pf[2] < ((int)time() - (int)$pf[1]) ) {
+			$upd = array();
+			$doupd = false;
+			$t = (int)time();
+			foreach ( $pf as $k => $v ) {
+				if ( (int)$v[2] > ($t - (int)$v[1]) ) {
+					$upd[$k] = $v;
+				} else {
+					$doupd = true;
+				}
+			}
+			
+			if ( empty($upd) ) {
 				delete_option(self::optmceplg);
+			} else if ( $doupd ) {
+				update_option(self::optmceplg, $upd);
 			}
 		}
 
