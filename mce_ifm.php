@@ -102,8 +102,8 @@ $vnum = 0;
 $jatt = array('a_img' => '', 'a_vid' => '', 'obj' => '');
 
 $jatt['a_vid'] = array(
-	'width'     => getwithdef('width', ''),
-	'height'	=> getwithdef('height', ''),
+	'width'     => getwithdef('width', '320'),
+	'height'	=> getwithdef('height', '240'),
 	'barheight'	=> getwithdef('barheight', '36'),
 	'id'        => getwithdef('id', 'vh5_n_' . $vnum++),
 	'poster'    => getwithdef('iimage', ''),
@@ -209,7 +209,7 @@ $allvids[] = $jatt;
 
 <div id="<?php echo $parentdiv ?>" class="like-wp-caption" style="width: <?php echo "".$w ?>px; max-width: <?php echo "".$w ?>px">
   <div id="<?php echo $auxdiv ?>" class="evhh5v_vidobjdiv">
-	<video id="<?php echo $vidid ?>" <?php echo $v['controls'] === 'true' ? "controls" : "" ?> <?php echo $v['autoplay'] === 'true' ? "autoplay" : "" ?> <?php echo $v['loop'] === 'true' ? "loop" : "" ?> preload="<?php echo "".$v['preload'] ?>" poster="<?php echo "".$v['poster'] ?>" height="<?php echo "".$h ?>" width="<?php echo "".$w ?>">
+	<video id="<?php echo $vidid ?>" <?php if ( $v['controls'] === 'true' ) echo "controls"; ?> <?php if ( $v['loop'] === 'true' ) echo "loop"; ?> preload="<?php echo "".$v['preload'] ?>" poster="<?php echo "".$v['poster'] ?>" height="<?php echo "".$h ?>" width="<?php echo "".$w ?>">
 	<?php
 		// sources
 		for ( $j = 0; $j < count($ss); $j++ ) {
