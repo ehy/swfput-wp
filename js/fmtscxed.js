@@ -344,8 +344,8 @@ console.log('addNodeFilter for iframe called\n');
 
 	var getShortcode = function(content) {
 		return content.replace(
-		/<div ([^>]*class="evhTemp[^>]*)>(.*)<\/div>/g
-		, function(a, att, cnt) {
+		/<div ([^>]*class="evhTemp[^>]*)>((.*?)<\/div>)/g
+		, function(a, att, lazy, cnt) {
 			var ky = att.match(/id="evh-sc-([0-9]+)"/);
 			
 			if ( ky && ky[1] ) {
@@ -696,8 +696,8 @@ console.log('addNodeFilter for iframe called\n');
 			var t = this;
 
 			return content.replace(
-			/<div ([^>]*class="evhTemp[^>]*)>(.*)<\/div>/g
-			, function(a, att, cnt) {
+			/<div ([^>]*class="evhTemp[^>]*)>((.*?)<\/div>)/g
+			, function(a, att, lazy, cnt) {
 				var ky = att.match(/id="evh-sc-([0-9]+)"/);
 			
 				if ( ky && ky[1] ) {
