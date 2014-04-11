@@ -227,6 +227,7 @@ class SWF_put_evh {
 	const swfxedjsname = 'formxed.min.js';
 	// swfput js shortcode editor helper name
 	const swfxpljsname = 'fmtscxed.min.js';
+	//const swfxpljsname = 'fmtscxed.js';
 	
 	// html5 video front-end js
 	const evhv5vjsdir  = 'evhh5v';
@@ -726,7 +727,19 @@ class SWF_put_evh {
 			&& current_user_can( 'edit_pages' ) ) {
 			$aa = array(__CLASS__, 'add_mceplugin_js');
 			add_filter('mce_external_plugins', $aa);
+			$aa = array(__CLASS__, 'filter_mce_init');
+			add_filter('tiny_mce_before_init', $aa);
 		}
+	}
+
+	// filter for any mce plugin init settings needs (and testing)
+	public static function filter_mce_init($init_array) {
+		// FPO, presently
+		if ( false ) {
+			//$init_array['wpeditimage_disable_captions'] = true;
+			$init_array['keep_styles'] = true;
+		}
+		return $init_array;
 	}
 
 	// filter to add mce plugin javascript

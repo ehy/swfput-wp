@@ -27,6 +27,12 @@ var SWFPut_putswf_video_xed = function () {
 	this.map = {};
 	this.last_from = 0;
 	this.last_match = '';
+	// tinymce version; also indicates not present if false;
+	// this should not be tested directly, but accessed through
+	// function property 'get_mce_dat' which will try again if
+	// false, because this ctor may be invoked before tinymce setup
+	this.tmv = (typeof tinymce === 'undefined')
+		? false : parseInt(tinymce.majorVersion);
 };
 SWFPut_putswf_video_xed.prototype = {
 	defs : {
@@ -185,14 +191,25 @@ SWFPut_putswf_video_xed.prototype = {
 	},
 	// always test retval.ed!
 	get_mce_dat : function() {
-		if ( typeof tinymce == 'undefined' ) {
-			return { "ed" : false };
+		if ( this.tmv === false ) {
+			this.tmv = (typeof tinymce === 'undefined')
+				? false : parseInt(tinymce.majorVersion);
+			if ( this.tmv === false ) {
+				return { "ed" : false };
+			}
 		}
-		var r = {};
-		r.ed = tinymce.activeEditor;
-		r.hid = r.ed ? r.ed.isHidden() : true;
-		r.txt = r.ed ? r.ed.getElement() : false;
-		return r;
+		if ( typeof(this.tmv) === 'number' ) {
+			// static or invariant
+			var r = {};
+			r.v   = this.tmv;
+			r.old = (this.tmv < 4);
+			this.tmv = r;
+		}
+		// dynamic
+		this.tmv.ed  = tinymce.activeEditor || false;
+		this.tmv.hid = this.tmv.ed ? this.tmv.ed.isHidden() : true;
+		this.tmv.txt = this.tmv.ed ? this.tmv.ed.getElement() : false;
+		return this.tmv;
 	},
 	// 1.0.9: previously made no distinction between 'Visual'
 	// and 'Text' editor content since the shortcode had no special
@@ -233,7 +250,7 @@ SWFPut_putswf_video_xed.prototype = {
 	set_edval : function(setval) {
 		var dat = this.get_mce_dat();
 		var ed = dat.ed;
-		if ( ed && ! dat.hid ) {
+		if ( ed && ! dat.hid && dat.old ) {
 			var bm, r = false, t;
 
 			if ( true || tinymce.isIE ) {
@@ -254,7 +271,25 @@ SWFPut_putswf_video_xed.prototype = {
 				ed.selection.moveToBookmark(bm);
 			}
 			return r;
+		} else if ( ed && ! dat.hid ) {
+			ed.focus();
+			var sel = ed.selection, st = sel ? sel.getStart() : false,
+				r = ed.setContent(setval, {format : 'raw'}); //, no_events: 0});
+			
+			// As of tmce 4 I have not found a way to make node
+			// filter run (for plugins iframe w/ vid), excecpt
+			// this ugly hack hide/show (it just worked w/ tmce 3).
+			// Sigh. Revisit this if new info appears.
+			ed.nodeChanged();
+			ed.hide();
+			ed.show();
+
+			if ( false && st && (sel = ed.selection) ) {
+				sel.setCursorLocation(st);
+			}
+			return r;
 		}
+
 		// fall through
 		return jQuery(edCanvas).val(setval);
 	},
@@ -480,7 +515,9 @@ SWFPut_putswf_video_xed.prototype = {
 			l = va[i];
 			this.set_edval(va.join(sep));
 			this.last_match = l;
-		} catch ( e ) {}
+		} catch ( ex ) {
+			console.log('repl_xed, RETURN EARLY: catch -- ' + ex.name + ': "' + ex.message + '"');
+		}
 		return false;
 	},
 	from_xed : function(f, id, cs, sc) {
