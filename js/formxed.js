@@ -27,12 +27,45 @@ var SWFPut_putswf_video_xed = function () {
 	this.map = {};
 	this.last_from = 0;
 	this.last_match = '';
-	// tinymce version; also indicates not present if false;
-	// this should not be tested directly, but accessed through
-	// function property 'get_mce_dat' which will try again if
-	// false, because this ctor may be invoked before tinymce setup
-	this.tmv = (typeof tinymce === 'undefined')
-		? false : parseInt(tinymce.majorVersion);
+
+	// we might be contructed before tinymce is loaded/setup,
+	// but we need to know about it, so use a 1s timer which,
+	// should not really affect load, until we can get what we
+	// need. *not* using a max because e.g. network errors can
+	// make indefinite delays, and user might continue with
+	// the same loaded page; so, rely on 1s timer being mild
+	// even if it continues throughout the session because
+	// tinymce is not in use.
+	if ( SWFPut_putswf_video_xed.prototype.ini_timer === undefined ) {
+		SWFPut_putswf_video_xed.prototype.ini_timer = "working";
+		var that = this, f = function() {
+			if ( typeof tinymce === 'undefined' ) {
+				SWFPut_putswf_video_xed.prototype.ini_timer =
+					setTimeout(f, 1000);
+				return;
+			}
+
+			SWFPut_putswf_video_xed.prototype.ini_timer = "done";
+
+			SWFPut_putswf_video_xed.prototype.tmce_ma =
+				parseInt(tinymce.majorVersion);
+			SWFPut_putswf_video_xed.prototype.tmce_mn =
+				parseFloat(tinymce.minorVersion);
+
+			// tmce 3.4.x is in WP 3.3.1, and 3.2.7 in WP 3.0.2;
+			if ( that.tmce_ma < 4 && that.tmce_mn < 4.0 ) {
+				SWFPut_putswf_video_xed.prototype.put_at_cursor =
+					SWFPut_putswf_video_xed.prototype.put_at_cursor_OLD;
+				SWFPut_putswf_video_xed.prototype.set_edval =
+					SWFPut_putswf_video_xed.prototype.set_edval_OLD;
+				SWFPut_putswf_video_xed.prototype.get_edval =
+					SWFPut_putswf_video_xed.prototype.get_edval_OLD;
+			} else {
+				that.get_mce_dat();
+			}
+		};
+		f();
+	}
 };
 SWFPut_putswf_video_xed.prototype = {
 	defs : {
@@ -191,18 +224,17 @@ SWFPut_putswf_video_xed.prototype = {
 	},
 	// always test retval.ed!
 	get_mce_dat : function() {
-		if ( this.tmv === false ) {
-			this.tmv = (typeof tinymce === 'undefined')
-				? false : parseInt(tinymce.majorVersion);
-			if ( this.tmv === false ) {
-				return { "ed" : false };
-			}
+		if ( this.ini_timer !== "done" ) {
+			return { "ed" : false };
 		}
-		if ( typeof(this.tmv) === 'number' ) {
+
+		if ( typeof(this.tmv) === 'undefined' ) {
 			// static or invariant
 			var r = {};
-			r.v   = this.tmv;
-			r.old = (this.tmv < 4);
+			r.v   = this.tmce_ma;
+			r.vmn = this.tmce_mn;
+			r.old = (r.v < 4);
+			r.ng  = (r.old && r.vmn < 4.0);
 			this.tmv = r;
 		}
 		// dynamic
@@ -219,6 +251,7 @@ SWFPut_putswf_video_xed.prototype = {
 	// the raw text content regardless of whether the 'Visual'
 	// is displayed.
 	get_edval : function() {
+console.log('NEW -- in get_edval: ' + this.tmce_ma + ', ' + this.tmce_mn);
 		var dat = this.get_mce_dat();
 		var ed = dat.ed;
 		if ( ed && dat.hid ) {
@@ -297,6 +330,7 @@ SWFPut_putswf_video_xed.prototype = {
 		var dat = this.get_mce_dat();
 		var ed = dat.ed;
 
+console.log('NEW -- in put_at_cursor: hid== ' + dat.hid + ', old== ' + dat.old + ', ed== ' + ed);
 		if ( ! ed || dat.hid ) {
 			send_to_editor(sc);
 			return false;
@@ -307,11 +341,11 @@ SWFPut_putswf_video_xed.prototype = {
 		// to contain the representation of the shortcode,
 		// create new paragraph node and move insertion
 		// point there; class of div we're checking is
-		// "mceTemp" (same as WP image edit plugin, and
+		// "evhTemp" (same as WP image edit plugin, and
 		// presumably others, so the benefit of this is
 		// not ours alone)
 		var node;
-		node = ed.dom.getParent(ed.selection.getNode(), 'div.mceTemp');
+		node = ed.dom.getParent(ed.selection.getNode(), 'div.evhTemp');
 		if ( node ) {
 			var p = ed.dom.create('p');
 			ed.dom.insertAfter(p, node);
@@ -330,6 +364,55 @@ SWFPut_putswf_video_xed.prototype = {
 
 		return false;
 	},
+
+	// Old function versions for earlier SWFPut and TinyMCE:
+	// in WP versions < 3.3
+	get_edval_OLD : function() {
+console.log('OLD -- in get_edval_OLD: ' + this.tmce_ma + ', ' + this.tmce_mn);
+		if ( typeof tinymce != 'undefined' ) {
+			var ed;
+			if ( (ed = tinyMCE.activeEditor) && !ed.isHidden() ) {
+                var bm;
+				if ( tinymce.isIE ) {
+					ed.focus();
+					bm = ed.selection.getBookmark();
+				}
+				c = ed.getContent({format : 'raw'});
+				if ( tinymce.isIE ) {
+					ed.focus();
+					ed.selection.moveToBookmark(bm);
+				}
+				return c;
+			}			
+		}
+		return jQuery(edCanvas).val();
+	},
+	set_edval_OLD : function(setval) {
+		if ( typeof tinymce != 'undefined' ) {
+			var ed;
+			if ( (ed = tinyMCE.activeEditor) && !ed.isHidden() ) {
+                var bm;
+				if ( tinymce.isIE ) {
+					ed.focus();
+					bm = ed.selection.getBookmark();
+					ed.setContent('', {format : 'raw'});
+				}
+				var r = ed.setContent(setval, {format : 'raw'});
+				if ( tinymce.isIE ) {
+					ed.focus();
+					ed.selection.moveToBookmark(bm);
+				}
+				return r;
+			}			
+		}
+		return jQuery(edCanvas).val(setval);
+	},
+	// out_at_cursor is not an old proc, but a wrapper around
+	// old functionality
+	put_at_cursor_OLD : function(sc) {
+		send_to_editor(sc);
+	},
+
 	mk_shortcode : function(cs, sc) {
 		var c = this['map'][cs];
 		delete this['map'][cs];

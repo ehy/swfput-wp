@@ -81,6 +81,39 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 	};
 
 	ed.on('init', function() {
+		// EH copied from wpeditimage
+		ed.dom.events.add(ed.getBody(), 'mousedown', function(e) {
+			var parent;
+
+			if ( e.target.nodeName == 'IFRAME' && ( parent = ed.dom.getParent(e.target, 'div.evhTemp') ) ) {
+				if ( tinymce.isGecko )
+					ed.selection.select(parent);
+				else if ( tinymce.isWebKit )
+					ed.dom.events.prevent(e);
+			}
+		});
+
+		// EH copied from wpeditimage
+		// when pressing Return inside a caption move the caret to a new parapraph under it
+		ed.dom.events.add(ed.getBody(), 'keydown', function(e) {
+			var n, DL, DIV, P;
+
+			if ( e.keyCode == 13 ) {
+				n = ed.selection.getNode();
+				DL = ed.dom.getParent(n, 'dl.wp-caption');
+
+				if ( DL )
+					DIV = ed.dom.getParent(DL, 'div.evhTemp');
+
+				if ( DIV ) {
+					ed.dom.events.cancel(e);
+					P = ed.dom.create('p', {}, '\uFEFF');
+					ed.dom.insertAfter( P, DIV );
+					ed.selection.setCursorLocation(P, 0);
+					return false;
+				}
+			}
+		});
 	});
 
 	ed.on('preInit', function() {
@@ -92,20 +125,15 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 			}
 		});
 
-		/*
-		 * This was put in place for symmetry with the above,
-		 * but seems to be unnecessary; left for reference
-		 * TODO: remove when certain
-		//ed.parser.addNodeFilter('iframe', function(nodes, name) {
 		ed.serializer.addNodeFilter('iframe', function(nodes, name) {
 			for ( var i = 0; i < nodes.length; i++ ) {
 				var cl = nodes[i].attr('class');
 				if ( cl && cl.indexOf('evh-pseudo') >= 0 ) {
-console.log('addNodeFilter for iframe called\n');
 					to_pseudo(nodes[i], name);
 				}
 			}
 		});
+		/*
 		*/
 	});
 
@@ -126,7 +154,29 @@ console.log('addNodeFilter for iframe called\n');
 		var node, p, cmd = o.command;
 
 		if ( cmd == 'mceInsertContent' ) {
-			node = ed.dom.getParent(ed.selection.getNode(), 'div.evhTemp');
+			var n = ed.selection.getNode();
+
+			node = ed.dom.getParent(n, 'evh-pseudo');
+			if ( node ) {
+				n = node;
+			}
+
+			node = ed.dom.getParent(n, 'wp-caption-dt');
+			if ( node ) {
+				n = node;
+			} else if ( false ) { // allow in caption
+				node = ed.dom.getParent(n, 'wp-caption-dd');
+				if ( node ) {
+					n = node;
+				}
+			}
+
+			node = ed.dom.getParent(n, 'dl.wp-caption');
+			if ( node ) {
+				n = node;
+			}
+
+			node = ed.dom.getParent(n, 'div.evhTemp');
 
 			if ( node ) {
 				p = ed.dom.create('p');
@@ -448,6 +498,53 @@ console.log('addNodeFilter for iframe called\n');
 						t.from_pseudo(nodes[i], name);
 					}
 				});
+
+				ed.serializer.addNodeFilter('iframe', function(nodes, name) {
+					for ( var i = 0; i < nodes.length; i++ ) {
+						var cl = nodes[i].attr('class');
+						if ( cl && cl.indexOf('evh-pseudo') >= 0 ) {
+							t.to_pseudo(nodes[i], name);
+						}
+					}
+				});
+				/*
+				*/
+			});
+
+			ed.onInit.add(function(ed) {
+				// EH copied from wpeditimage
+				ed.dom.events.add(ed.getBody(), 'mousedown', function(e) {
+					var parent;
+
+					if ( e.target.nodeName == 'IFRAME' && ( parent = ed.dom.getParent(e.target, 'div.evhTemp') ) ) {
+						if ( tinymce.isGecko )
+							ed.selection.select(parent);
+						else if ( tinymce.isWebKit )
+							ed.dom.events.prevent(e);
+					}
+				});
+
+				// EH copied from wpeditimage
+				// when pressing Return inside a caption move the caret to a new parapraph under it
+				ed.dom.events.add(ed.getBody(), 'keydown', function(e) {
+					var n, DL, DIV, P;
+
+					if ( e.keyCode == 13 ) {
+						n = ed.selection.getNode();
+						DL = ed.dom.getParent(n, 'dl.wp-caption');
+
+						if ( DL )
+							DIV = ed.dom.getParent(DL, 'div.evhTemp');
+
+						if ( DIV ) {
+							ed.dom.events.cancel(e);
+							P = ed.dom.create('p', {}, '\uFEFF');
+							ed.dom.insertAfter( P, DIV );
+							ed.selection.setCursorLocation(P, 0);
+							return false;
+						}
+					}
+				});
 			});
 
 			ed.onBeforeSetContent.add(function(ed, o) {
@@ -470,10 +567,33 @@ console.log('addNodeFilter for iframe called\n');
 				var node, p;
 
 				if ( cmd == 'mceInsertContent' ) {
-					node = ed.dom.getParent(ed.selection.getNode(), 'div.evhTemp');
+					var n = ed.selection.getNode();
+
+					node = ed.dom.getParent(n, 'evh-pseudo');
+					if ( node ) {
+						n = node;
+					}
+
+					node = ed.dom.getParent(n, 'wp-caption-dt');
+					if ( node ) {
+						n = node;
+					} else if ( false ) { // allow in caption
+						node = ed.dom.getParent(n, 'wp-caption-dd');
+						if ( node ) {
+							n = node;
+						}
+					}
+
+					node = ed.dom.getParent(n, 'dl.wp-caption');
+					if ( node ) {
+						n = node;
+					}
+
+					node = ed.dom.getParent(n, 'div.evhTemp');
 
 					if ( node ) {
 						p = ed.dom.create('p');
+						//p = ed.dom.create('p', {}, '\uFEFF');
 						ed.dom.insertAfter(p, node);
 						ed.selection.setCursorLocation(p, 0);
 					}
@@ -501,7 +621,10 @@ console.log('addNodeFilter for iframe called\n');
 		},
 
 		from_pseudo : function(node) {
-			if ( ! node ) return node;
+			if ( ! node ) {
+				return node;
+			}
+
 			var t = this;
 			var w, h, s, id, cl, rep = false;
 			w = node.attr('width');
@@ -539,7 +662,11 @@ console.log('addNodeFilter for iframe called\n');
 		},
 
 		to_pseudo : function(node, name) {
-			if ( ! node ) return node;
+			if ( ! node ) {
+				return node;
+			}
+
+			var t = this;
 			var w, h, s, id, cl, rep = false;
 			id = node.attr('id') || '';
 			cl = node.attr('class') || '';
