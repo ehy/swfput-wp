@@ -251,7 +251,6 @@ SWFPut_putswf_video_xed.prototype = {
 	// the raw text content regardless of whether the 'Visual'
 	// is displayed.
 	get_edval : function() {
-console.log('NEW -- in get_edval: ' + this.tmce_ma + ', ' + this.tmce_mn);
 		var dat = this.get_mce_dat();
 		var ed = dat.ed;
 		if ( ed && dat.hid ) {
@@ -330,7 +329,6 @@ console.log('NEW -- in get_edval: ' + this.tmce_ma + ', ' + this.tmce_mn);
 		var dat = this.get_mce_dat();
 		var ed = dat.ed;
 
-console.log('NEW -- in put_at_cursor: hid== ' + dat.hid + ', old== ' + dat.old + ', ed== ' + ed);
 		if ( ! ed || dat.hid ) {
 			send_to_editor(sc);
 			return false;
@@ -368,7 +366,6 @@ console.log('NEW -- in put_at_cursor: hid== ' + dat.hid + ', old== ' + dat.old +
 	// Old function versions for earlier SWFPut and TinyMCE:
 	// in WP versions < 3.3
 	get_edval_OLD : function() {
-console.log('OLD -- in get_edval_OLD: ' + this.tmce_ma + ', ' + this.tmce_mn);
 		if ( typeof tinymce != 'undefined' ) {
 			var ed;
 			if ( (ed = tinyMCE.activeEditor) && !ed.isHidden() ) {

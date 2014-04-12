@@ -81,39 +81,40 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 	};
 
 	ed.on('init', function() {
-		// EH copied from wpeditimage
-		ed.dom.events.add(ed.getBody(), 'mousedown', function(e) {
-			var parent;
+	});
 
-			if ( e.target.nodeName == 'IFRAME' && ( parent = ed.dom.getParent(e.target, 'div.evhTemp') ) ) {
-				if ( tinymce.isGecko )
-					ed.selection.select(parent);
-				else if ( tinymce.isWebKit )
-					ed.dom.events.prevent(e);
+	// EH copied from wpeditimage
+	ed.on('mousedown', function(e) {
+		var parent;
+
+		if ( e.target.nodeName == 'IFRAME' && ( parent = dom.getParent(e.target, 'div.evhTemp') ) ) {
+			if ( tinymce.isGecko )
+				ed.selection.select(parent);
+			else if ( tinymce.isWebKit )
+				ed.dom.events.prevent(e);
+		}
+	});
+
+	// EH copied from wpeditimage
+	// when pressing Return inside a caption move the caret to a new parapraph under it
+	ed.on('keydown', function(e) {
+		var n, DL, DIV, P;
+
+		if ( e.keyCode == tinymce.util.VK.ENTER ) {
+			n = ed.selection.getNode();
+			DL = ed.dom.getParent(n, 'dl.wp-caption');
+
+			if ( DL )
+				DIV = ed.dom.getParent(DL, 'div.evhTemp');
+
+			if ( DIV ) {
+				ed.dom.events.cancel(e);
+				P = ed.dom.create('p', {}, '\uFEFF');
+				ed.dom.insertAfter( P, DIV );
+				ed.ed.nodeChanged();
+				ed.selection.setCursorLocation(P, 0);
 			}
-		});
-
-		// EH copied from wpeditimage
-		// when pressing Return inside a caption move the caret to a new parapraph under it
-		ed.dom.events.add(ed.getBody(), 'keydown', function(e) {
-			var n, DL, DIV, P;
-
-			if ( e.keyCode == 13 ) {
-				n = ed.selection.getNode();
-				DL = ed.dom.getParent(n, 'dl.wp-caption');
-
-				if ( DL )
-					DIV = ed.dom.getParent(DL, 'div.evhTemp');
-
-				if ( DIV ) {
-					ed.dom.events.cancel(e);
-					P = ed.dom.create('p', {}, '\uFEFF');
-					ed.dom.insertAfter( P, DIV );
-					ed.selection.setCursorLocation(P, 0);
-					return false;
-				}
-			}
-		});
+		}
 	});
 
 	ed.on('preInit', function() {
@@ -344,14 +345,24 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 			''; //'allowfullscreen seamless ';
 		cap = dat.caption;
 
+		// Sigh. If <dd></dd> is really empty *nothing*
+		// shows, but a comment placeholder does the trick.
+		// Of course, this must be checked in _get_shcode()
+		var fpo = '<!-- evh-pseudo caption -->';
+		if ( typeof (cap) !== 'string' || cap.length < 1 ) {
+			cap = fpo;
+		}
+
 		var r = '';
 		r += '<dl id="dl-'+id+'" class="'+cls+' mceItem" style="'+sty+'">';
 		r += '<dt class="wp-caption-dt mceItem" id="dt-'+id+'">';
 		r += '<evhfrm id="'+id+'" class="evh-pseudo mceItem" '+att+' src="';
 		r += url + '?' + qs;
 		r += '"></evhfrm>';
-		r += '</dt><dd class="wp-caption-dd mceItem" id="dd-'+id+'">' + cap;
-		r += '</dd></dl>';
+		r += '</dt>'
+		r += '<dd class="wp-caption-dd mceItem" id="dd-'+id+'">';
+		r += cap + '</dd>';
+		r += '</dl>';
 		
 		dat.code = r;
 		return dat;
@@ -362,7 +373,7 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 		var uri = urlfm;
 		
 		return content.replace(
-		/([\r\n]*)?(<p>)?(\[putswf_video([^\]]+)\]([\s\S]+?)\[\/putswf_video\])(<\/p>)?([\r\n]*)?/g
+		/([\r\n]*)?(<p>)?(\[putswf_video([^\]]+)\]([\s\S]*?)\[\/putswf_video\])(<\/p>)?([\r\n]*)?/g
 		, function(a,n1,p1, b,c,e, p2,n2) {
 			var sc = b, atts = c, cap = e;
 			var ky = newkey();
@@ -412,8 +423,12 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 				n1 = sc_map[ky].n1 || '';
 				n2 = sc_map[ky].n2 || '';
 				if ( cnt ) {
+					var fpo = '<!-- evh-pseudo caption -->';
 					var m = /.*<dd[^>]*>(.*)<\/dd>.*/.exec(cnt);
 					if ( m && (m = m[1]) ) {
+						if ( m === fpo ) {
+							m = '';
+						}
 						sc = sc.replace(
 						/^(.*\]).*(\[\/[a-zA-Z0-9_-]+\])$/
 						, function(a, scbase, scclose) {
@@ -770,6 +785,14 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 				''; //'allowfullscreen seamless ';
 			cap = dat.caption;
 
+			// Sigh. If <dd></dd> is really empty *nothing*
+			// shows, but a comment placeholder does the trick.
+			// Of course, this must be checked in _get_shcode()
+			var fpo = '<!-- evh-pseudo caption -->';
+			if ( typeof (cap) !== 'string' || cap.length < 1 ) {
+				cap = fpo;
+			}
+
 			var r = '';
 			r += '<dl id="dl-'+id+'" class="'+cls+' mceItem" style="'+sty+'">';
 			r += '<dt class="wp-caption-dt mceItem" id="dt-'+id+'">';
@@ -789,7 +812,7 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 			//t.sc_map = {};
 			
 			return content.replace(
-			/([\r\n]*)?(<p>)?(\[putswf_video([^\]]+)\]([\s\S]+?)\[\/putswf_video\])(<\/p>)?([\r\n]*)?/g
+			/([\r\n]*)?(<p>)?(\[putswf_video([^\]]+)\]([\s\S]*?)\[\/putswf_video\])(<\/p>)?([\r\n]*)?/g
 			, function(a,n1,p1, b,c,e, p2,n2) {
 				var sc = b, atts = c, cap = e;
 				var ky = t.newkey();
@@ -841,8 +864,12 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 					n1 = t.sc_map[ky].n1 || '';
 					n2 = t.sc_map[ky].n2 || '';
 					if ( cnt ) {
+						var fpo = '<!-- evh-pseudo caption -->';
 						var m = /.*<dd[^>]*>(.*)<\/dd>.*/.exec(cnt);
 						if ( m && (m = m[1]) ) {
+							if ( m === fpo ) {
+								m = '';
+							}
 							sc = sc.replace(
 							/^(.*\]).*(\[\/[a-zA-Z0-9_-]+\])$/
 							, function(a, scbase, scclose) {
