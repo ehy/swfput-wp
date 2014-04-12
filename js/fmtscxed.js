@@ -345,17 +345,11 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 			''; //'allowfullscreen seamless ';
 		cap = dat.caption;
 
-		// Sigh. If <dd></dd> is really empty *nothing*
-		// shows, but a comment placeholder does the trick.
-		// Of course, this must be checked in _get_shcode()
-		var fpo = '<!-- evh-pseudo caption -->';
-		if ( typeof (cap) !== 'string' || cap.length < 1 ) {
-			cap = fpo;
-		}
-
+		// NOTE data-no-stripme="sigh": w/o this, if caption
+		// <dd> is empty, while <dl> might get stripped out!
 		var r = '';
 		r += '<dl id="dl-'+id+'" class="'+cls+' mceItem" style="'+sty+'">';
-		r += '<dt class="wp-caption-dt mceItem" id="dt-'+id+'">';
+		r += '<dt class="wp-caption-dt mceItem" id="dt-'+id+'" data-no-stripme="sigh">';
 		r += '<evhfrm id="'+id+'" class="evh-pseudo mceItem" '+att+' src="';
 		r += url + '?' + qs;
 		r += '"></evhfrm>';
@@ -423,12 +417,8 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 				n1 = sc_map[ky].n1 || '';
 				n2 = sc_map[ky].n2 || '';
 				if ( cnt ) {
-					var fpo = '<!-- evh-pseudo caption -->';
 					var m = /.*<dd[^>]*>(.*)<\/dd>.*/.exec(cnt);
 					if ( m && (m = m[1]) ) {
-						if ( m === fpo ) {
-							m = '';
-						}
 						sc = sc.replace(
 						/^(.*\]).*(\[\/[a-zA-Z0-9_-]+\])$/
 						, function(a, scbase, scclose) {
@@ -785,21 +775,16 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 				''; //'allowfullscreen seamless ';
 			cap = dat.caption;
 
-			// Sigh. If <dd></dd> is really empty *nothing*
-			// shows, but a comment placeholder does the trick.
-			// Of course, this must be checked in _get_shcode()
-			var fpo = '<!-- evh-pseudo caption -->';
-			if ( typeof (cap) !== 'string' || cap.length < 1 ) {
-				cap = fpo;
-			}
-
+			// NOTE data-no-stripme="sigh": w/o this, if caption
+			// <dd> is empty, while <dl> might get stripped out!
 			var r = '';
 			r += '<dl id="dl-'+id+'" class="'+cls+' mceItem" style="'+sty+'">';
-			r += '<dt class="wp-caption-dt mceItem" id="dt-'+id+'">';
+			r += '<dt class="wp-caption-dt mceItem" id="dt-'+id+'" data-no-stripme="sigh">';
 			r += '<evhfrm id="'+id+'" class="evh-pseudo mceItem" '+att+' src="';
 			r += url + '?' + qs;
 			r += '"></evhfrm>';
-			r += '</dt><dd class="wp-caption-dd mceItem" id="dd-'+id+'">' + cap;
+			r += '</dt>';
+			r += '<dd class="wp-caption-dd mceItem" id="dd-'+id+'">' + cap;
 			r += '</dd></dl>';
 			
 			dat.code = r;
@@ -864,12 +849,8 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 					n1 = t.sc_map[ky].n1 || '';
 					n2 = t.sc_map[ky].n2 || '';
 					if ( cnt ) {
-						var fpo = '<!-- evh-pseudo caption -->';
 						var m = /.*<dd[^>]*>(.*)<\/dd>.*/.exec(cnt);
 						if ( m && (m = m[1]) ) {
-							if ( m === fpo ) {
-								m = '';
-							}
 							sc = sc.replace(
 							/^(.*\]).*(\[\/[a-zA-Z0-9_-]+\])$/
 							, function(a, scbase, scclose) {
