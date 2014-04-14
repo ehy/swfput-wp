@@ -28,6 +28,33 @@ var SWFPut_putswf_video_xed = function () {
 	this.last_from = 0;
 	this.last_match = '';
 
+	// placeholder token data: regretable hack for SWFPut video
+	// plugin for the tinymce, with WordPress; this is to hold
+	// place in a <dd> element which normally holds a caption,
+	// but when there is no caption, because tinymce strips out
+	// or refuses to render a whole <dl> when a <dd> is empty
+	if ( this.fpo === undefined ) {
+		SWFPut_putswf_video_xed.prototype.fpo = {};
+		var t = this.fpo;
+		t.cmt = '<!-- do not strip me -->';
+		t.ent = t.cmt;
+		//t.ent = '&thinsp;';
+		//t.ent = '&zwj;&zwj;&zwj;';
+		t.enx = t.ent;
+		//t.ent = '{}';
+		//t.enx = '\{\}';
+		//t.ent = '&empty;';
+		//t.enx = t.ent;
+		var eenc = document.createElement('div');
+		eenc.innerHTML = t.ent;
+		t.enc = eenc.textContent || eenc.innerText || t.ent;
+		t.rxs = '((' + t.cmt + ')|(' + t.enx + ')|(' + t.enc + '))';
+		t.rxx = '.*' + t.rxs + '.*';
+		t.is  = function(s, eq) {
+			return s.match(RegExp(eq ? t.rxs : t.rxx));
+		};
+	}
+
 	// we might be contructed before tinymce is loaded/setup,
 	// but we need to know about it, so use a 1s timer which,
 	// should not really affect load, until we can get what we
@@ -36,30 +63,24 @@ var SWFPut_putswf_video_xed = function () {
 	// the same loaded page; so, rely on 1s timer being mild
 	// even if it continues throughout the session because
 	// tinymce is not in use.
-	if ( SWFPut_putswf_video_xed.prototype.ini_timer === undefined ) {
+	if ( this.ini_timer === undefined ) {
 		SWFPut_putswf_video_xed.prototype.ini_timer = "working";
 		var that = this, f = function() {
 			if ( typeof tinymce === 'undefined' ) {
-				SWFPut_putswf_video_xed.prototype.ini_timer =
-					setTimeout(f, 1000);
+				that.ini_timer = setTimeout(f, 1000);
 				return;
 			}
 
-			SWFPut_putswf_video_xed.prototype.ini_timer = "done";
+			that.ini_timer = "done";
 
-			SWFPut_putswf_video_xed.prototype.tmce_ma =
-				parseInt(tinymce.majorVersion);
-			SWFPut_putswf_video_xed.prototype.tmce_mn =
-				parseFloat(tinymce.minorVersion);
+			that.tmce_ma = parseInt(tinymce.majorVersion);
+			that.tmce_mn = parseFloat(tinymce.minorVersion);
 
 			// tmce 3.4.x is in WP 3.3.1, and 3.2.7 in WP 3.0.2;
 			if ( that.tmce_ma < 4 && that.tmce_mn < 4.0 ) {
-				SWFPut_putswf_video_xed.prototype.put_at_cursor =
-					SWFPut_putswf_video_xed.prototype.put_at_cursor_OLD;
-				SWFPut_putswf_video_xed.prototype.set_edval =
-					SWFPut_putswf_video_xed.prototype.set_edval_OLD;
-				SWFPut_putswf_video_xed.prototype.get_edval =
-					SWFPut_putswf_video_xed.prototype.get_edval_OLD;
+				that.put_at_cursor = that.put_at_cursor_OLD;
+				that.set_edval = that.set_edval_OLD;
+				that.get_edval = that.get_edval_OLD;
 			} else {
 				that.get_mce_dat();
 			}
@@ -659,6 +680,12 @@ SWFPut_putswf_video_xed.prototype = {
 						v = '';
 					}
 				}
+
+				// lousy hack for the SWFPut tinymce plugin to
+				// combat tinymce element-stripping breakage
+				if ( k === 'caption' && $this.fpo.is(v, 0) ) {
+					v = '';
+				}
 				$this['map'][k] = v;
 			}
 		});
@@ -685,6 +712,12 @@ SWFPut_putswf_video_xed.prototype = {
 					this.checked = v == 'true' ? 'checked' : '';
 				} else if ( this.type == "text" ) {
 					if ( true || v != '' ) {
+						this.value = v;
+					}
+					// lousy hack for the SWFPut tinymce plugin to
+					// combat tinymce element-stripping breakage
+					if ( k === 'caption' && $this.fpo.is(v, 0) ) {
+						v = '';
 						this.value = v;
 					}
 				}

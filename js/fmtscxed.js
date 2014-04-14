@@ -41,6 +41,43 @@
 // 0x27070x0487: ✇ ҇
 //
 
+// placeholder token data: regretable hack for SWFPut video
+// plugin for the tinymce, with WordPress; this is to hold
+// place in a <dd> element which normally holds a caption,
+// but when there is no caption, because tinymce strips out
+// or refuses to render a whole <dl> when a <dd> is empty
+SWFPut_video_tmce_plugin_fpo_obj = function() {
+	if ( this._fpo === undefined
+	  && SWFPut_putswf_video_inst !== undefined ) {
+		this.fpo = SWFPut_putswf_video_inst.fpo;
+	} else if ( this.fpo === undefined ) {
+		SWFPut_video_tmce_plugin_fpo_obj.prototype._fpo = {};
+		var t = this._fpo;
+		t.cmt = '<!-- do not strip me -->';
+		t.ent = t.cmt;
+		//t.ent = '&thinsp;';
+		//t.ent = '&zwj;&zwj;&zwj;';
+		t.enx = t.ent;
+		//t.ent = '{}';
+		//t.enx = '\{\}';
+		//t.ent = '&empty;';
+		//t.enx = t.ent;
+		var eenc = document.createElement('div');
+		eenc.innerHTML = t.ent;
+		t.enc = eenc.textContent || eenc.innerText || t.ent;
+		t.rxs = '((' + t.cmt + ')|(' + t.enx + ')|(' + t.enc + '))';
+		t.rxx = '.*' + t.rxs + '.*';
+		t.is  = function(s, eq) {
+			return s.match(RegExp(eq ? t.rxs : t.rxx));
+		};
+		
+		this.fpo = this._fpo;
+	}
+};
+SWFPut_video_tmce_plugin_fpo_obj.prototype = {};
+var SWFPut_video_tmce_plugin_fpo_inst = 
+	new SWFPut_video_tmce_plugin_fpo_obj();
+
 if ( parseInt(tinymce.majorVersion) > 3 ) {
 tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 	var Node  = tinymce.html.Node;
@@ -48,6 +85,7 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 	var url   = plurl;
 	var urlfm = url.split('/');
 	var that  = this;
+	var fpo   = SWFPut_video_tmce_plugin_fpo_inst.fpo;
 
 	urlfm[urlfm.length - 1] = 'mce_ifm.php'; // iframe doc
 	urlfm = urlfm.join('/');
@@ -98,21 +136,45 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 	// EH copied from wpeditimage
 	// when pressing Return inside a caption move the caret to a new parapraph under it
 	ed.on('keydown', function(e) {
-		var n, DL, DIV, P;
+		var n, node, p;
 
-		if ( e.keyCode == tinymce.util.VK.ENTER ) {
-			n = ed.selection.getNode();
-			DL = ed.dom.getParent(n, 'dl.wp-caption');
+		if ( true || e.keyCode == tinymce.util.VK.ENTER ) {
+			var n = ed.selection.getNode();
 
-			if ( DL )
-				DIV = ed.dom.getParent(DL, 'div.evhTemp');
+			node = ed.dom.getParent(n, 'wp-caption-dd');
+			if ( n.nodeName == 'DD' || (node) ) {
+				if ( e.keyCode != tinymce.util.VK.ENTER ) {
+					return;
+				}
+				n = node;
+			}
+			//dom.hasClass( node, 'mceTemp' )
 
-			if ( DIV ) {
+			node = ed.dom.getParent(n, 'evh-pseudo');
+			if ( node ) {
+				n = node;
+			}
+
+			node = ed.dom.getParent(n, 'wp-caption-dt');
+			if ( node ) {
+				n = node;
+			}
+
+			node = ed.dom.getParent(n, 'dl.wp-caption');
+			if ( node ) {
+				n = node;
+			}
+
+			node = ed.dom.getParent(n, 'div.evhTemp');
+
+			if ( node ) {
 				ed.dom.events.cancel(e);
-				P = ed.dom.create('p', {}, '\uFEFF');
-				ed.dom.insertAfter( P, DIV );
-				ed.ed.nodeChanged();
-				ed.selection.setCursorLocation(P, 0);
+				ed.nodeChanged();
+				ed.selection.setCursorLocation(node, 0);
+				p = ed.dom.create('p', null, '!!!');
+				ed.dom.insertAfter(p, node);
+				ed.nodeChanged();
+				ed.selection.setCursorLocation(p, 0);
 			}
 		}
 	});
@@ -345,6 +407,10 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 			''; //'allowfullscreen seamless ';
 		cap = dat.caption;
 
+		if ( cap == '' ) {
+			cap = fpo.ent; //'<!-- do not strip me -->';
+		}
+
 		// NOTE data-no-stripme="sigh": w/o this, if caption
 		// <dd> is empty, while <dl> might get stripped out!
 		var r = '';
@@ -419,6 +485,9 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 				if ( cnt ) {
 					var m = /.*<dd[^>]*>(.*)<\/dd>.*/.exec(cnt);
 					if ( m && (m = m[1]) ) {
+						if ( fpo.is(m, 0) ) {
+							m = '';
+						}
 						sc = sc.replace(
 						/^(.*\]).*(\[\/[a-zA-Z0-9_-]+\])$/
 						, function(a, scbase, scclose) {
@@ -449,6 +518,7 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 	var Node = tinymce.html.Node;
 	var tmv  = parseInt(tinymce.majorVersion);
 	var old  = (tmv < 4);
+	var fpo  = SWFPut_video_tmce_plugin_fpo_inst.fpo;
 
 	tinymce.create('tinymce.plugins.SWFPut', {
 		url : '',
@@ -521,7 +591,7 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 				ed.dom.events.add(ed.getBody(), 'mousedown', function(e) {
 					var parent;
 
-					if ( e.target.nodeName == 'IFRAME' && ( parent = ed.dom.getParent(e.target, 'div.evhTemp') ) ) {
+					if ( e.target.nodeName == 'IFRAME' && (parent = ed.dom.getParent(e.target, 'div.evhTemp')) ) {
 						if ( tinymce.isGecko )
 							ed.selection.select(parent);
 						else if ( tinymce.isWebKit )
@@ -625,7 +695,7 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 			return r;
 		},
 
-		from_pseudo : function(node) {
+		from_pseudo : function(node, name) {
 			if ( ! node ) {
 				return node;
 			}
@@ -775,16 +845,20 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 				''; //'allowfullscreen seamless ';
 			cap = dat.caption;
 
+			if ( cap == '' ) {
+				cap = fpo.ent;
+			}
+
 			// NOTE data-no-stripme="sigh": w/o this, if caption
 			// <dd> is empty, while <dl> might get stripped out!
 			var r = '';
-			r += '<dl id="dl-'+id+'" class="'+cls+' mceItem" style="'+sty+'">';
+			r += '<dl id="dl-'+id+'" class="'+cls+' mceItem" style="'+sty+'" data-no-stripme="sigh">';
 			r += '<dt class="wp-caption-dt mceItem" id="dt-'+id+'" data-no-stripme="sigh">';
 			r += '<evhfrm id="'+id+'" class="evh-pseudo mceItem" '+att+' src="';
 			r += url + '?' + qs;
 			r += '"></evhfrm>';
 			r += '</dt>';
-			r += '<dd class="wp-caption-dd mceItem" id="dd-'+id+'">' + cap;
+			r += '<dd class="wp-caption-dd mceItem" id="dd-'+id+'" data-no-stripme="sigh">' + cap;
 			r += '</dd></dl>';
 			
 			dat.code = r;
@@ -849,8 +923,12 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 					n1 = t.sc_map[ky].n1 || '';
 					n2 = t.sc_map[ky].n2 || '';
 					if ( cnt ) {
+						cnt = cnt.replace(/([\r\n]|<br[^>]*>)*/, '');
 						var m = /.*<dd[^>]*>(.*)<\/dd>.*/.exec(cnt);
 						if ( m && (m = m[1]) ) {
+							if ( fpo.is(m, 0) ) {
+								m = '';
+							}
 							sc = sc.replace(
 							/^(.*\]).*(\[\/[a-zA-Z0-9_-]+\])$/
 							, function(a, scbase, scclose) {
