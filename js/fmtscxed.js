@@ -616,6 +616,7 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 					}
 			
 					ed.dom.events.cancel(e);
+				});
 			});
 
 			ed.onBeforeSetContent.add(function(ed, o) {
