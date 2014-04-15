@@ -158,7 +158,7 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 			return;
 		}
 
-		var ka = [vk.UP, vk.DOWN, vk.RIGHT, vk.LEFT];
+		var ka = [vk.LEFT, vk.UP, vk.RIGHT, vk.DOWN];
 		if ( ka.indexOf(e.keyCode) >= 0 ) {
 			return;
 		}
@@ -582,9 +582,9 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 				// when pressing Return inside a caption move the caret to a new parapraph under it
 				ed.dom.events.add(ed.getBody(), 'keydown', function(e) {
 					var node, p, n = ed.selection.getNode();
-			
+
 					if ( n.className.indexOf('evh-pseudo') < 0 ) {
-						return;
+						return false;
 					}
 			
 					node = ed.dom.getParent(n, 'div.evhTemp');
@@ -592,27 +592,33 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 					if ( ! node ) {
 						p = 'tinymce, SWFPut plugin: failed dom.getParent()';
 						console.log(p);
-						return;
+						return false;
 					}
 			
-					var vk = tinymce.VK || tinymce.util.VK;
-			
-					if ( e.keyCode == vk.ENTER ) {
+					// VK.codes are undefined in WP 3.3, although I see
+					// them in tinymce 3.5.10 source			
+					if ( e.keyCode == 13 /*vk.ENTER*/ ) {
 						ed.dom.events.cancel(e);
 						p = ed.dom.create('p', null, '\n');
 						ed.dom.insertAfter(p, node);
-						ed.selection.setCursorLocation(p, 0);
+						if ( ed.selection.setCursorLocation != undefined ) {
+							ed.selection.setCursorLocation(p, 0);
+						} else {
+							p = p.firstChild || p;
+							ed.selection.select(p);
+						}
 						ed.nodeChanged();
-						return;
+						return false;
 					}
 			
 					if ( n.nodeName == 'DD' ) {
 						return;
 					}
 			
-					var ka = [vk.UP, vk.DOWN, vk.RIGHT, vk.LEFT];
+					//var ka = [vk.LEFT, vk.UP, vk.RIGHT, vk.DOWN];
+					var ka = [37, 38, 39, 40];
 					if ( ka.indexOf(e.keyCode) >= 0 ) {
-						return;
+						return false;
 					}
 			
 					ed.dom.events.cancel(e);
@@ -652,7 +658,12 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 					if ( node ) {
 						p = ed.dom.create('p', null, '\n');
 						ed.dom.insertAfter(p, node);
-						ed.selection.setCursorLocation(p, 0);
+						if ( ed.selection.setCursorLocation != undefined ) {
+							ed.selection.setCursorLocation(p, 0);
+						} else {
+							p = p.firstChild || p;
+							ed.selection.select(p);
+						}
 						ed.nodeChanged();
 					}
 				}
