@@ -38,13 +38,7 @@ var SWFPut_putswf_video_xed = function () {
 		var t = this.fpo;
 		t.cmt = '<!-- do not strip me -->';
 		t.ent = t.cmt;
-		//t.ent = '&thinsp;';
-		//t.ent = '&zwj;&zwj;&zwj;';
 		t.enx = t.ent;
-		//t.ent = '{}';
-		//t.enx = '\{\}';
-		//t.ent = '&empty;';
-		//t.enx = t.ent;
 		var eenc = document.createElement('div');
 		eenc.innerHTML = t.ent;
 		t.enc = eenc.textContent || eenc.innerText || t.ent;
@@ -280,7 +274,7 @@ SWFPut_putswf_video_xed.prototype = {
 			}
 		} else if ( ed ) {
 			var bm;
-			if ( true || tinymce.isIE ) {
+			if ( tinymce.isIE ) {
 				ed.focus();
 				bm = ed.selection.getBookmark();
 			}
@@ -291,7 +285,7 @@ SWFPut_putswf_video_xed.prototype = {
 			var t = dat.txt;
 			var c = t ? t.value : ed.getContent({format : 'raw'});
 			
-			if ( true || tinymce.isIE ) {
+			if ( tinymce.isIE ) {
 				ed.focus();
 				ed.selection.moveToBookmark(bm);
 			}

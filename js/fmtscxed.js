@@ -55,13 +55,7 @@ SWFPut_video_tmce_plugin_fpo_obj = function() {
 		var t = this._fpo;
 		t.cmt = '<!-- do not strip me -->';
 		t.ent = t.cmt;
-		//t.ent = '&thinsp;';
-		//t.ent = '&zwj;&zwj;&zwj;';
 		t.enx = t.ent;
-		//t.ent = '{}';
-		//t.enx = '\{\}';
-		//t.ent = '&empty;';
-		//t.enx = t.ent;
 		var eenc = document.createElement('div');
 		eenc.innerHTML = t.ent;
 		t.enc = eenc.textContent || eenc.innerText || t.ent;
@@ -125,7 +119,8 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 	ed.on('mousedown', function(e) {
 		var parent;
 
-		if ( e.target.nodeName == 'IFRAME' && ( parent = dom.getParent(e.target, 'div.evhTemp') ) ) {
+		if ( e.target.nodeName == 'IFRAME'
+			&& (parent = ed.dom.getParent(e.target, 'div.evhTemp')) ) {
 			if ( tinymce.isGecko )
 				ed.selection.select(parent);
 			else if ( tinymce.isWebKit )
@@ -133,50 +128,42 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 		}
 	});
 
-	// EH copied from wpeditimage
-	// when pressing Return inside a caption move the caret to a new parapraph under it
 	ed.on('keydown', function(e) {
-		var n, node, p;
+		var node, p, n = ed.selection.getNode();
 
-		if ( true || e.keyCode == tinymce.util.VK.ENTER ) {
-			var n = ed.selection.getNode();
-
-			node = ed.dom.getParent(n, 'wp-caption-dd');
-			if ( n.nodeName == 'DD' || (node) ) {
-				if ( e.keyCode != tinymce.util.VK.ENTER ) {
-					return;
-				}
-				n = node;
-			}
-			//dom.hasClass( node, 'mceTemp' )
-
-			node = ed.dom.getParent(n, 'evh-pseudo');
-			if ( node ) {
-				n = node;
-			}
-
-			node = ed.dom.getParent(n, 'wp-caption-dt');
-			if ( node ) {
-				n = node;
-			}
-
-			node = ed.dom.getParent(n, 'dl.wp-caption');
-			if ( node ) {
-				n = node;
-			}
-
-			node = ed.dom.getParent(n, 'div.evhTemp');
-
-			if ( node ) {
-				ed.dom.events.cancel(e);
-				ed.nodeChanged();
-				ed.selection.setCursorLocation(node, 0);
-				p = ed.dom.create('p', null, '!!!');
-				ed.dom.insertAfter(p, node);
-				ed.nodeChanged();
-				ed.selection.setCursorLocation(p, 0);
-			}
+		if ( n.className.indexOf('evh-pseudo') < 0 ) {
+			return;
 		}
+
+		node = ed.dom.getParent(n, 'div.evhTemp');
+
+		if ( ! node ) {
+			p = 'tinymce, SWFPut plugin: failed dom.getParent()';
+			console.log(p);
+			return;
+		}
+
+		var vk = tinymce.VK || tinymce.util.VK;
+
+		if ( e.keyCode == vk.ENTER ) {
+			ed.dom.events.cancel(e);
+			p = ed.dom.create('p', null, '\n');
+			ed.dom.insertAfter(p, node);
+			ed.selection.setCursorLocation(p, 0);
+			ed.nodeChanged();
+			return;
+		}
+
+		if ( n.nodeName == 'DD' ) {
+			return;
+		}
+
+		var ka = [vk.UP, vk.DOWN, vk.RIGHT, vk.LEFT];
+		if ( ka.indexOf(e.keyCode) >= 0 ) {
+			return;
+		}
+
+		ed.dom.events.cancel(e);
 	});
 
 	ed.on('preInit', function() {
@@ -196,8 +183,6 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 				}
 			}
 		});
-		/*
-		*/
 	});
 
 	ed.on('BeforeSetContent', function(o) {
@@ -214,37 +199,26 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 	});
 
 	ed.on('BeforeExecCommand', function(o) {
-		var node, p, cmd = o.command;
+		var cmd = o.command;
 
 		if ( cmd == 'mceInsertContent' ) {
-			var n = ed.selection.getNode();
+			var node, p, n = ed.selection.getNode();
 
-			node = ed.dom.getParent(n, 'evh-pseudo');
-			if ( node ) {
-				n = node;
+			if ( n.className.indexOf('evh-pseudo') < 0 ) {
+				return;
 			}
 
-			node = ed.dom.getParent(n, 'wp-caption-dt');
-			if ( node ) {
-				n = node;
-			} else if ( false ) { // allow in caption
-				node = ed.dom.getParent(n, 'wp-caption-dd');
-				if ( node ) {
-					n = node;
-				}
-			}
-
-			node = ed.dom.getParent(n, 'dl.wp-caption');
-			if ( node ) {
-				n = node;
+			if ( n.nodeName == 'DD' ) {
+				return;
 			}
 
 			node = ed.dom.getParent(n, 'div.evhTemp');
 
 			if ( node ) {
-				p = ed.dom.create('p');
+				p = ed.dom.create('p', null, '\n');
 				ed.dom.insertAfter(p, node);
 				ed.selection.setCursorLocation(p, 0);
+				ed.nodeChanged();
 			}
 		}
 	});
@@ -287,7 +261,7 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 			rep = new Node('iframe', 1);
 			rep.attr({
 				'id' : id,
-				'class' : cl.indexOf('evh-pseudo') >= 0 ? cl : (cl+' evh-pseudo mceItem'),
+				'class' : cl.indexOf('evh-pseudo') >= 0 ? cl : (cl+' evh-pseudo'),
 				'width' : w,
 				'height' : h,
 				'sandbox' : "allow-same-origin allow-pointer-lock allow-scripts",
@@ -400,7 +374,6 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 		var qs = dat.qs;
 		var w = parseInt(dat.width), h = parseInt(dat.height);
 		var dlw = w + 60, fw = w + 16, fh = h + 16; // ugly
-		var cls = 'wp-caption aligncenter';
 		var sty = 'width: '+dlw+'px';
 		var att = 'width="'+fw+'" height="'+fh+'" ' +
 			'sandbox="allow-same-origin allow-pointer-lock allow-scripts" ' +
@@ -411,18 +384,23 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 			cap = fpo.ent; //'<!-- do not strip me -->';
 		}
 
+		// for clarity, use separate vars for classes, accepting
+		// slightly more inefficiency in the concatenation chain
+		// [yearning for sprintf()]
+		var cls = ' aligncenter';
+		var cldl = 'wp-caption evh-pseudo-dl ' + cls;
+		var cldt = 'wp-caption-dt evh-pseudo-dt';
+		var cldd = 'wp-caption-dd evh-pseudo-dd';
 		// NOTE data-no-stripme="sigh": w/o this, if caption
-		// <dd> is empty, while <dl> might get stripped out!
+		// <dd> is empty, whole <dl> might get stripped out!
 		var r = '';
-		r += '<dl id="dl-'+id+'" class="'+cls+' mceItem" style="'+sty+'">';
-		r += '<dt class="wp-caption-dt mceItem" id="dt-'+id+'" data-no-stripme="sigh">';
-		r += '<evhfrm id="'+id+'" class="evh-pseudo mceItem" '+att+' src="';
+		r += '<dl id="dl-'+id+'" class="'+cldl+'" style="'+sty+'">';
+		r += '<dt id="dt-'+id+'" class="'+cldt+'" data-no-stripme="sigh">';
+		r += '<evhfrm id="'+id+'" class="evh-pseudo" '+att+' src="';
 		r += url + '?' + qs;
 		r += '"></evhfrm>';
-		r += '</dt>'
-		r += '<dd class="wp-caption-dd mceItem" id="dd-'+id+'">';
-		r += cap + '</dd>';
-		r += '</dl>';
+		r += '</dt><dd id="dd-'+id+'" class="'+cldd+'">';
+		r += cap + '</dd></dl>';
 		
 		dat.code = r;
 		return dat;
@@ -449,7 +427,7 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 			var w = dat.width, h = dat.height;
 			var dlw = parseInt(w) + 60; // ugly
 			//var cls = 'mceTemp mceIEcenter';
-			var cls = 'evhTemp mceItem';
+			var cls = 'evhTemp';
 
 			var r = n1 || '';
 			r += p1 || '';
@@ -483,6 +461,7 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 				n1 = sc_map[ky].n1 || '';
 				n2 = sc_map[ky].n2 || '';
 				if ( cnt ) {
+					cnt = cnt.replace(/([\r\n]|<br[^>]*>)*/, '');
 					var m = /.*<dd[^>]*>(.*)<\/dd>.*/.exec(cnt);
 					if ( m && (m = m[1]) ) {
 						if ( fpo.is(m, 0) ) {
@@ -599,27 +578,44 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 					}
 				});
 
-				// EH copied from wpeditimage
+				// EH original from wpeditimage
 				// when pressing Return inside a caption move the caret to a new parapraph under it
 				ed.dom.events.add(ed.getBody(), 'keydown', function(e) {
-					var n, DL, DIV, P;
-
-					if ( e.keyCode == 13 ) {
-						n = ed.selection.getNode();
-						DL = ed.dom.getParent(n, 'dl.wp-caption');
-
-						if ( DL )
-							DIV = ed.dom.getParent(DL, 'div.evhTemp');
-
-						if ( DIV ) {
-							ed.dom.events.cancel(e);
-							P = ed.dom.create('p', {}, '\uFEFF');
-							ed.dom.insertAfter( P, DIV );
-							ed.selection.setCursorLocation(P, 0);
-							return false;
-						}
+					var node, p, n = ed.selection.getNode();
+			
+					if ( n.className.indexOf('evh-pseudo') < 0 ) {
+						return;
 					}
-				});
+			
+					node = ed.dom.getParent(n, 'div.evhTemp');
+			
+					if ( ! node ) {
+						p = 'tinymce, SWFPut plugin: failed dom.getParent()';
+						console.log(p);
+						return;
+					}
+			
+					var vk = tinymce.VK || tinymce.util.VK;
+			
+					if ( e.keyCode == vk.ENTER ) {
+						ed.dom.events.cancel(e);
+						p = ed.dom.create('p', null, '\n');
+						ed.dom.insertAfter(p, node);
+						ed.selection.setCursorLocation(p, 0);
+						ed.nodeChanged();
+						return;
+					}
+			
+					if ( n.nodeName == 'DD' ) {
+						return;
+					}
+			
+					var ka = [vk.UP, vk.DOWN, vk.RIGHT, vk.LEFT];
+					if ( ka.indexOf(e.keyCode) >= 0 ) {
+						return;
+					}
+			
+					ed.dom.events.cancel(e);
 			});
 
 			ed.onBeforeSetContent.add(function(ed, o) {
@@ -639,38 +635,24 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 			// create new paragraph under
 			// and move the caret there
 			ed.onBeforeExecCommand.add(function(ed, cmd, ui, val) {
-				var node, p;
-
 				if ( cmd == 'mceInsertContent' ) {
-					var n = ed.selection.getNode();
-
-					node = ed.dom.getParent(n, 'evh-pseudo');
-					if ( node ) {
-						n = node;
+					var node, p, n = ed.selection.getNode();
+		
+					if ( n.className.indexOf('evh-pseudo') < 0 ) {
+						return;
 					}
-
-					node = ed.dom.getParent(n, 'wp-caption-dt');
-					if ( node ) {
-						n = node;
-					} else if ( false ) { // allow in caption
-						node = ed.dom.getParent(n, 'wp-caption-dd');
-						if ( node ) {
-							n = node;
-						}
+		
+					if ( n.nodeName == 'DD' ) {
+						return;
 					}
-
-					node = ed.dom.getParent(n, 'dl.wp-caption');
-					if ( node ) {
-						n = node;
-					}
-
+		
 					node = ed.dom.getParent(n, 'div.evhTemp');
-
+		
 					if ( node ) {
-						p = ed.dom.create('p');
-						//p = ed.dom.create('p', {}, '\uFEFF');
+						p = ed.dom.create('p', null, '\n');
 						ed.dom.insertAfter(p, node);
 						ed.selection.setCursorLocation(p, 0);
+						ed.nodeChanged();
 					}
 				}
 			});
@@ -719,7 +701,7 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 				rep = new Node('iframe', 1);
 				rep.attr({
 					'id' : id,
-					'class' : cl.indexOf('evh-pseudo') >= 0 ? cl : (cl+' evh-pseudo mceItem'),
+					'class' : cl.indexOf('evh-pseudo') >= 0 ? cl : (cl+' evh-pseudo'),
 					'width' : w,
 					'height' : h,
 					'sandbox' : "allow-same-origin allow-pointer-lock allow-scripts",
@@ -838,7 +820,6 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 			var qs = dat.qs;
 			var w = parseInt(dat.width), h = parseInt(dat.height);
 			var dlw = w + 60, fw = w + 16, fh = h + 16; // ugly
-			var cls = 'wp-caption aligncenter';
 			var sty = 'width: '+dlw+'px';
 			var att = 'width="'+fw+'" height="'+fh+'" ' +
 				'sandbox="allow-same-origin allow-pointer-lock allow-scripts" ' +
@@ -849,18 +830,39 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 				cap = fpo.ent;
 			}
 
+			/*
 			// NOTE data-no-stripme="sigh": w/o this, if caption
 			// <dd> is empty, while <dl> might get stripped out!
+			var cls = 'wp-caption aligncenter';
 			var r = '';
-			r += '<dl id="dl-'+id+'" class="'+cls+' mceItem" style="'+sty+'" data-no-stripme="sigh">';
-			r += '<dt class="wp-caption-dt mceItem" id="dt-'+id+'" data-no-stripme="sigh">';
-			r += '<evhfrm id="'+id+'" class="evh-pseudo mceItem" '+att+' src="';
+			r += '<dl id="dl-'+id+'" class="'+cls+'" style="'+sty+'" data-no-stripme="sigh">';
+			r += '<dt class="wp-caption-dt" id="dt-'+id+'" data-no-stripme="sigh">';
+			r += '<evhfrm id="'+id+'" class="evh-pseudo" '+att+' src="';
 			r += url + '?' + qs;
 			r += '"></evhfrm>';
 			r += '</dt>';
-			r += '<dd class="wp-caption-dd mceItem" id="dd-'+id+'" data-no-stripme="sigh">' + cap;
+			r += '<dd class="wp-caption-dd" id="dd-'+id+'" data-no-stripme="sigh">' + cap;
 			r += '</dd></dl>';
+			*/
 			
+			// for clarity, use separate vars for classes, accepting
+			// slightly more inefficiency in the concatenation chain
+			// [yearning for sprintf()]
+			var cls = ' aligncenter';
+			var cldl = 'wp-caption evh-pseudo-dl ' + cls;
+			var cldt = 'wp-caption-dt evh-pseudo-dt';
+			var cldd = 'wp-caption-dd evh-pseudo-dd';
+			// NOTE data-no-stripme="sigh": w/o this, if caption
+			// <dd> is empty, whole <dl> might get stripped out!
+			var r = '';
+			r += '<dl id="dl-'+id+'" class="'+cldl+'" style="'+sty+'">';
+			r += '<dt id="dt-'+id+'" class="'+cldt+'" data-no-stripme="sigh">';
+			r += '<evhfrm id="'+id+'" class="evh-pseudo" '+att+' src="';
+			r += url + '?' + qs;
+			r += '"></evhfrm>';
+			r += '</dt><dd id="dd-'+id+'" class="'+cldd+'">';
+			r += cap + '</dd></dl>';
+
 			dat.code = r;
 			return dat;
 		},
@@ -891,7 +893,7 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 
 				var r = n1 || '';
 				r += p1 || '';
-				r += '<div id="evh-sc-'+ky+'" class="'+cls+' mceItem" style="width: '+dlw+'px">';
+				r += '<div id="evh-sc-'+ky+'" class="'+cls+'" style="width: '+dlw+'px">';
 				r += dat.code;
 				r += '</div>';
 				r += p2 || '';
