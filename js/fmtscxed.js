@@ -132,7 +132,7 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 		var node, p, n = ed.selection.getNode();
 
 		if ( n.className.indexOf('evh-pseudo') < 0 ) {
-			return;
+			return true;
 		}
 
 		node = ed.dom.getParent(n, 'div.evhTemp');
@@ -140,18 +140,17 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 		if ( ! node ) {
 			p = 'tinymce, SWFPut plugin: failed dom.getParent()';
 			console.log(p);
-			return;
+			return false;
 		}
 
 		var vk = tinymce.VK || tinymce.util.VK;
 
 		if ( e.keyCode == vk.ENTER ) {
 			ed.dom.events.cancel(e);
-			p = ed.dom.create('p', null, '\n');
+			p = ed.dom.create('p', null, '\uFEFF');
 			ed.dom.insertAfter(p, node);
 			ed.selection.setCursorLocation(p, 0);
-			ed.nodeChanged();
-			return;
+			return true;
 		}
 
 		if ( n.nodeName == 'DD' ) {
@@ -160,10 +159,11 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 
 		var ka = [vk.LEFT, vk.UP, vk.RIGHT, vk.DOWN];
 		if ( ka.indexOf(e.keyCode) >= 0 ) {
-			return;
+			return true;
 		}
 
 		ed.dom.events.cancel(e);
+		return false;
 	});
 
 	ed.on('preInit', function() {
@@ -584,7 +584,7 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 					var node, p, n = ed.selection.getNode();
 
 					if ( n.className.indexOf('evh-pseudo') < 0 ) {
-						return false;
+						return true;
 					}
 			
 					node = ed.dom.getParent(n, 'div.evhTemp');
@@ -599,7 +599,7 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 					// them in tinymce 3.5.10 source			
 					if ( e.keyCode == 13 /*vk.ENTER*/ ) {
 						ed.dom.events.cancel(e);
-						p = ed.dom.create('p', null, '\n');
+						p = ed.dom.create('p', null, '\uFEFF');
 						ed.dom.insertAfter(p, node);
 						if ( ed.selection.setCursorLocation != undefined ) {
 							ed.selection.setCursorLocation(p, 0);
@@ -607,21 +607,21 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 							p = p.firstChild || p;
 							ed.selection.select(p);
 						}
-						ed.nodeChanged();
-						return false;
+						return true;
 					}
 			
 					if ( n.nodeName == 'DD' ) {
-						return;
+						return true;
 					}
 			
 					//var ka = [vk.LEFT, vk.UP, vk.RIGHT, vk.DOWN];
 					var ka = [37, 38, 39, 40];
 					if ( ka.indexOf(e.keyCode) >= 0 ) {
-						return false;
+						return true;
 					}
 			
 					ed.dom.events.cancel(e);
+					return false;
 				});
 			});
 
