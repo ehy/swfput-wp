@@ -24,8 +24,8 @@ POTSRCS = ${PRJSTEM}.php help_txt.php mce_ifm.php
 
 DOCSD = docs
 JSDIR = js
-JSBIN = $(JSDIR)/fmtscxed.min.js $(JSDIR)/formxed.min.js $(JSDIR)/screens.min.js $(H5DIR)/front.min.js
-JSSRC = $(JSDIR)/fmtscxed.js $(JSDIR)/formxed.js $(JSDIR)/screens.js $(H5DIR)/front.js
+JSBIN = $(JSDIR)/fmtscxed.min.js $(JSDIR)/fmtscxed3x.min.js $(JSDIR)/formxed.min.js $(JSDIR)/screens.min.js $(H5DIR)/front.min.js
+JSSRC = $(JSDIR)/fmtscxed.js $(JSDIR)/fmtscxed3x.js $(JSDIR)/formxed.js $(JSDIR)/screens.js $(H5DIR)/front.js
 H5DIR = evhh5v
 H5BIN = $(H5DIR)/evhh5v.css $(H5DIR)/ctlbar.svg $(H5DIR)/ctlvol.svg $(H5DIR)/ctrbut.svg $(JSDIR)/front.min.js
 LCDIR = locale
