@@ -72,6 +72,14 @@ SWFPut_video_tmce_plugin_fpo_obj.prototype = {};
 var SWFPut_video_tmce_plugin_fpo_inst = 
 	new SWFPut_video_tmce_plugin_fpo_obj();
 
+// Utility used in plugin
+function SWFPut_repl_nl(str) {
+	return str.replace(
+		/\r\n/g, '\n').replace(
+			/\r/g, '\n').replace(
+				/\n/g, '<br />');
+}
+	
 if ( parseInt(tinymce.majorVersion) > 3 ) {
 tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 	var Node  = tinymce.html.Node;
@@ -201,7 +209,8 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 	ed.on('BeforeExecCommand', function(o) {
 		var cmd = o.command;
 
-		if ( cmd == 'mceInsertContent' ) {
+		if ( cmd == 'mceToggleEditor' ) { // hide/show
+		} else if ( cmd == 'mceInsertContent' ) {
 			var node, p, n = ed.selection.getNode();
 
 			if ( n.className.indexOf('evh-pseudo') < 0 ) {
@@ -221,6 +230,31 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 				ed.nodeChanged();
 			}
 		}
+	});
+
+	ed.on('Paste', function(ev) {
+		var n = ed.selection.getNode(),
+			node = ed.dom.getParent(n, 'div.evhTemp');
+		if ( ! node ) { // not ours
+			return true;
+		}
+
+		var d = ev.clipboardData || dom.doc.dataTransfer;
+		if ( ! d ) { // what to do?
+			return true;
+		}
+
+		// get & process text, change to an mce insert
+		var tx = tinymce.isIE ? 'Text' : 'text/plain';
+		var rep = SWFPut_repl_nl(d.getData(tx));
+		// timeout is safer: funny business happens in handlers
+		setTimeout(function() {
+			ed.execCommand('mceInsertContent', false, rep);
+		}, 1);
+
+		// lose the original event
+		ev.preventDefault();
+		return tinymce.dom.Event.cancel(ev);
 	});
 
 	ed.SWFPut_Set_code = function(content) {
@@ -656,7 +690,7 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 					node = ed.dom.getParent(n, 'div.evhTemp');
 		
 					if ( node ) {
-						p = ed.dom.create('p', null, '\n');
+						p = ed.dom.create('p', null, '\uFEFF');
 						ed.dom.insertAfter(p, node);
 						if ( ed.selection.setCursorLocation != undefined ) {
 							ed.selection.setCursorLocation(p, 0);
@@ -667,6 +701,31 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 						ed.nodeChanged();
 					}
 				}
+			});
+
+			ed.onPaste.add(function(ed, ev) {
+				var n = ed.selection.getNode(),
+					node = ed.dom.getParent(n, 'div.evhTemp');
+				if ( ! node ) { // not ours
+					return true;
+				}
+
+				var d = ev.clipboardData || dom.doc.dataTransfer;
+				if ( ! d ) { // what to do?
+					return true;
+				}
+
+				// get & process text, change to an mce insert
+				var tx = tinymce.isIE ? 'Text' : 'text/plain';
+				var rep = SWFPut_repl_nl(d.getData(tx));
+				// timeout is safer: funny business happens in handlers
+				setTimeout(function() {
+					ed.execCommand('mceInsertContent', false, rep);
+				}, 1);
+
+				// lose the original event
+				ev.preventDefault();
+				return tinymce.dom.Event.cancel(ev);
 			});
 
 			ed.SWFPut_Set_code = function(content) {
