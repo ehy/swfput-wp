@@ -78,7 +78,7 @@ function SWFPut_repl_nl(str) {
 		/\r\n/g, '\n').replace(
 			/\r/g, '\n').replace(
 				/\n/g, '<br />');
-}
+};
 	
 if ( parseInt(tinymce.majorVersion) > 3 ) {
 tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
@@ -209,8 +209,7 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 	ed.on('BeforeExecCommand', function(o) {
 		var cmd = o.command;
 
-		if ( cmd == 'mceToggleEditor' ) { // hide/show
-		} else if ( cmd == 'mceInsertContent' ) {
+		if ( cmd == 'mceInsertContent' ) {
 			var node, p, n = ed.selection.getNode();
 
 			if ( n.className.indexOf('evh-pseudo') < 0 ) {
@@ -224,7 +223,7 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 			node = ed.dom.getParent(n, 'div.evhTemp');
 
 			if ( node ) {
-				p = ed.dom.create('p', null, '\n');
+				p = ed.dom.create('p', null, '\uFEFF');
 				ed.dom.insertAfter(p, node);
 				ed.selection.setCursorLocation(p, 0);
 				ed.nodeChanged();
