@@ -1,108 +1,51 @@
-//
-//      This program is free software; you can redistribute it and/or modify
-//      it under the terms of the GNU General Public License as published by
-//      the Free Software Foundation; either version 2 of the License, or
-//      (at your option) any later version.
-//      
-//      This program is distributed in the hope that it will be useful,
-//      but WITHOUT ANY WARRANTY; without even the implied warranty of
-//      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//      GNU General Public License for more details.
-//      
-//      You should have received a copy of the GNU General Public License
-//      along with this program; if not, write to the Free Software
-//      Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-//      MA 02110-1301, USA.
-//
+/*
+ *      editor_plugin3x.js
+ *      
+ *      Copyright 2014 Ed Hynan <edhynan@gmail.com>
+ *      
+ *      This program is free software; you can redistribute it and/or modify
+ *      it under the terms of the GNU General Public License as published by
+ *      the Free Software Foundation; specifically version 3 of the License.
+ *      
+ *      This program is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU General Public License for more details.
+ *      
+ *      You should have received a copy of the GNU General Public License
+ *      along with this program; if not, write to the Free Software
+ *      Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ *      MA 02110-1301, USA.
+ */
 
 /**
- * For Wordpress public facing front end: optional JS presentation
- * of the flash player and alternate <video> and <img> -- meant
- * particularly for mobile device clients
+ * HTML5 <video> controller, providing a control bar and associated
+ * graphical elements (wait spinner, initial centered play icon),
+ * including the ability to paint the video on a <canvas> element
+ * thus allowing asjustment for user-set aspect ratio (used also
+ * as a workaroung for browser bugs).
+ * 
+ * Also included here is re-sizer code, which is works with parent
+ * <div> and so can work with other contents; primarily flash
+ * plugin video player of the SWFPut WordPress plugin for/with
+ * which this was developed.
  * 
  * Added evhh5v v. 1.0.7, 2014/01/26
  * (C) Ed Hynan 2014
  */
 
-// borrowed from:
-// http://robertnyman.com/2006/04/24/get-the-rendered-style-of-an-element/
-// get 'computed' style of element
-var evhh5v_getstyle = function (el, sty) {
-	var v = 0;
-	if ( document.defaultView && document.defaultView.getComputedStyle ) {
-		v = document.defaultView.getComputedStyle(el, "").getPropertyValue(sty);
-	} else if ( el.currentStyle ) {
-		sty = sty.replace(/\-(\w)/g, function (m1, p1) {
-			return p1.toUpperCase();
-		});
-		v = el.currentStyle[sty];
-	}
-	return v;
-};
 
 
-// preferably do not add query string to svg url where
-// it is known to be not needed (actually, I know only
-// that MSIE *does* need it, but it is safer to be certain
-// it is not needed) -- this function will test only once
-// and return true if we are not confident the user agent
-// does *not* need a query string for the svg parameters
-function evhh5v_need_svg_query() {
-	if ( document.evhh5v_need_svg_query_bool !== undefined ) {
-		return document.evhh5v_need_svg_query_bool;
-	}
-	document.evhh5v_need_svg_query_bool = ( !
-	/(FireFox|WebKit|KHTML|Chrom[ie]|Safari|OPR\/|Opera)/i.test(navigator["userAgent"])
-	) == false;
-	
-	return document.evhh5v_need_svg_query_bool;
-};
-
-// is the browser, or 'user agent', mobile?
-// [lifted from WordPress php]
-function evhh5v_ua_is_mobile() {
-	if ( document.evhh5v_ua_is_mobile_bool !== undefined ) {
-		return document.evhh5v_ua_is_mobile_bool;
-	}
-
-	document.evhh5v_ua_is_mobile_bool = false;
-	var ua = navigator["userAgent"];
-	
-	if (   ua.indexOf('Mobile') >= 0 // many mobile devices (all iPhone, iPad, etc.)
-		|| ua.indexOf('Android') >= 0
-		|| ua.indexOf('Silk/') >= 0
-		|| ua.indexOf('Kindle') >= 0
-		|| ua.indexOf('BlackBerry') >= 0
-		|| ua.indexOf('Opera Mini') >= 0
-		|| ua.indexOf('Opera Mobi') >= 0 ) {
-		document.evhh5v_ua_is_mobile_bool = true;
-	}
-
-	return document.evhh5v_ua_is_mobile_bool;
-};
-
-// Unfortunately some browser brokenness must be handled under
-// some circumstances; e.g., a not-current Opera under FreeBSD
-// tested fine with all this until it was integrated with the
-// the SWFPut WordPress plugin, in which context the outer <div>
-// was not adjusting its height properly (seemingly confused that
-// the first fallback element under the flash <object> was a <div>
-// because in earlier versions of the plugin there was no problem:
-// the div is the most obvious difference).
-// So, corrective measures may be added here as needed.
-function evhh5v_fixup_elements(parms) {
-	var ip = parms["iparm"];
-
-	if ( /Opera/i.test(navigator["userAgent"]) ) {
-		var t = document.getElementById(ip["auxdiv"]);
-		if ( t && t.parentNode && t.parentNode.nodeName.toLowerCase() === "object" ) {
-			var p = t.parentNode;
-			var d = p.parentNode;
-			p.removeChild(t);
-			d.replaceChild(t, p);
-		}
-	}
-}
+/**********************************************************************\
+ *                                                                    *
+ * Procedure to create the <object> and <param> elements that support *
+ * the video controller and control bar, serving two related goals:   *
+ * 1. the HTML5 video should remain useful where JavaScript is disa-  *
+ *    bled, in which case the browser-native interface should work    *
+ * 2. eliminates much of the page markup that would be necessary, and *
+ *    and useless (with whatever side-effects) without JavaScript.    *
+ *                                                                    *
+\**********************************************************************/
 
 // build and add to DOM the elements needed for the svg control bar
 // of the html5 video player; arg is a map[*] of map,
@@ -284,6 +227,22 @@ function evhh5v_controlbar_elements(parms, fixups) {
 		evhh5v_fixup_elements(parms);
 	}
 };
+
+
+/**********************************************************************\
+ *                                                                    *
+ * evhh5v_sizer, and support code: works based on browser changes to  *
+ * and enclosing <div>, as happens with 'responsive' CSS and elements *
+ *                                                                    *
+ * cannot rely on the browser to resize video along with the other    *
+ * elements -- the flash plugin in particular is not resized without  *
+ * this, and the HTML5 video controller is designed to work with this *
+ * rather that hook size events (i.e. it defines width & height       *
+ * getter/setter properties that this uses like any property).        *
+ *                                                                    *
+ * this is not tied th the video controller                           *
+ *                                                                    *
+\**********************************************************************/
 
 // (ugly hack to get resize event: save _adj instances, see below)
 var evhh5v_sizer_instances = [];
@@ -501,7 +460,15 @@ evhh5v_sizer.prototype = {
 	}
 };
 
-// helper to use fullscreen where available
+
+/**********************************************************************\
+ *                                                                    *
+ * Support object for FullScreen mode -- this mode is not finalized   *
+ * so browser prefixed symbols are tested and used -- proves reliable *
+ * in the major browsers
+ *                                                                    *
+\**********************************************************************/
+
 //
 // map of symbols derived from code with copyright, MIT license,
 // and URL as follows (in original C-style comment):
@@ -529,12 +496,12 @@ var evhh5v_fullscreen = {
 	// public methods corresponding to fullscreen api:
 	// these throw on error
 	//
-	// invoke ~= requestFullscreen; takes element or uses document
+	// ~= requestFullscreen; takes element or uses document
 	request : function(elm) {
 		var el = elm === undefined ? document : elm;
 		el[this.map_val("request")]();
 	},
-	// invoke ~= exitFullscreen
+	// ~= exitFullscreen
 	exit : function() {
 		document[this.map_val("exit")]();
 	},
@@ -665,10 +632,11 @@ function evhh5v_fullscreen_ok() {
 }
 
 
-/**
- * svg-based control bar for HTML5 video
- */
-
+/**********************************************************************\
+ *                                                                    *
+ * SVG-based control bar construction and maintencance object         *
+ *                                                                    *
+\**********************************************************************/
 
 // build svg control bar for video object
 // this class is matched to svg in ctl(bar|but|vol).svg
@@ -714,6 +682,8 @@ var evhh5v_controlbar = function(params) {
 	this.mk();
 };
 evhh5v_controlbar.prototype = {
+
+// helper for placing properties on the prototype; k must be a string
 proto_set : function(k, v) {
 	evhh5v_controlbar.prototype[k] = v;
 },
@@ -2335,6 +2305,8 @@ mk : function() {
 	endmember : this
 };
 
+// helpers to be called from svg browsing context JS, because
+// 'onfoo' will execute in that context
 function evhh5v_setvisi(obj, visi) {
 	if ( obj ) {
 		obj.setAttribute("visibility", visi);
@@ -2348,6 +2320,14 @@ function evhh5v_svg_click(obj, parms) {
 	}
 	bar.evhh5v_controller.button_click(obj);
 };
+
+
+/**********************************************************************\
+ *                                                                    *
+ * The HTML5 video controller object -- scaling, fullscreen, aspect,  *
+ * event handling, control bar control (and browser bugs)             *
+ *                                                                    *
+\**********************************************************************/
 
 var evhh5v_controller = function(vid, ctlbar, pad) {
 	vid.removeAttribute("controls"); // should be done, but be sure
@@ -3888,15 +3868,21 @@ evhh5v_controller.prototype = {
 	protoplasmaticism : true
 };
 
-/* each loaded instance of the bar svg will call this from
- * its own script and pass the parameters it receives from
- * the object (tag) that loaded it; this is how each is id'd
- * and glued to associated objects
- */
+
+/**********************************************************************\
+ *                                                                    *
+ * Support procedures and data structures for the SVG control bar     *
+ *                                                                    *
+\**********************************************************************/
+
 var evhh5v_ctlbarmap = {};
 var evhh5v_ctlbutmap = {};
 var evhh5v_ctlvolmap = {};
 
+// each loaded instance of the bar svg will call this from
+// its own (child browsing context) script and pass the
+// parameters it receives from the object (tag) that loaded it;
+// this is how each is id'd and glued to associated objects
 function evhh5v_put_ctlbarmap(parms) {
 	if ( ! parms["parentdiv"] || ! parms["role"] ) {
 		console.log("evhh5v_put_ctlbarmap was passed a foul object: no parentdiv or role: " + parms);
@@ -3913,6 +3899,11 @@ function evhh5v_put_ctlbarmap(parms) {
 	map[parms["parentdiv"]]["loaded"] = false;
 };
 
+// these evhh5v_*load procs are assigned to the inline
+// 'onload' attributes of the *bar SVG <object>s primarily
+// to set the 'loaded' property of the relevant data structure
+// member; evhh5v_ctlbarload also constructs the evhh5v_controlbar
+// object that builds and maintains the SVG elements
 function evhh5v_ctlbarload(obj, divid) {
 	var p = evhh5v_ctlbarmap[divid];
 	p.evhh5v_controlbar = new evhh5v_controlbar(p);
@@ -3927,6 +3918,92 @@ function evhh5v_ctlbutload(obj, divid) {
 function evhh5v_ctlvolload(obj, divid) {
 	evhh5v_ctlvolmap[divid]["loaded"] = true;
 }
+
+
+/**********************************************************************\
+ *                                                                    *
+ * Support procedures for all the above                               *
+ *                                                                    *
+\**********************************************************************/
+
+// preferably do not add query string to svg url where
+// it is known to be not needed (actually, I know only
+// that MSIE *does* need it, but it is safer to be certain
+// it is not needed) -- this function will test only once
+// and return true if we are not confident the user agent
+// does *not* need a query string for the svg parameters
+function evhh5v_need_svg_query() {
+	if ( document.evhh5v_need_svg_query_bool !== undefined ) {
+		return document.evhh5v_need_svg_query_bool;
+	}
+	document.evhh5v_need_svg_query_bool = ( !
+	/(FireFox|WebKit|KHTML|Chrom[ie]|Safari|OPR\/|Opera)/i.test(navigator["userAgent"])
+	) == false;
+	
+	return document.evhh5v_need_svg_query_bool;
+};
+
+// is the browser, or 'user agent', mobile?
+// [lifted from WordPress php]
+function evhh5v_ua_is_mobile() {
+	if ( document.evhh5v_ua_is_mobile_bool !== undefined ) {
+		return document.evhh5v_ua_is_mobile_bool;
+	}
+
+	document.evhh5v_ua_is_mobile_bool = false;
+	var ua = navigator["userAgent"];
+	
+	if (   ua.indexOf('Mobile') >= 0 // many mobile devices (all iPhone, iPad, etc.)
+		|| ua.indexOf('Android') >= 0
+		|| ua.indexOf('Silk/') >= 0
+		|| ua.indexOf('Kindle') >= 0
+		|| ua.indexOf('BlackBerry') >= 0
+		|| ua.indexOf('Opera Mini') >= 0
+		|| ua.indexOf('Opera Mobi') >= 0 ) {
+		document.evhh5v_ua_is_mobile_bool = true;
+	}
+
+	return document.evhh5v_ua_is_mobile_bool;
+};
+
+// Unfortunately some browser brokenness must be handled under
+// some circumstances; e.g., a not-current Opera under FreeBSD
+// tested fine with all this until it was integrated with the
+// the SWFPut WordPress plugin, in which context the outer <div>
+// was not adjusting its height properly (seemingly confused that
+// the first fallback element under the flash <object> was a <div>
+// because in earlier versions of the plugin there was no problem:
+// the div is the most obvious difference).
+// So, corrective measures may be added here as needed.
+function evhh5v_fixup_elements(parms) {
+	var ip = parms["iparm"];
+
+	if ( /Opera/i.test(navigator["userAgent"]) ) {
+		var t = document.getElementById(ip["auxdiv"]);
+		if ( t && t.parentNode && t.parentNode.nodeName.toLowerCase() === "object" ) {
+			var p = t.parentNode;
+			var d = p.parentNode;
+			p.removeChild(t);
+			d.replaceChild(t, p);
+		}
+	}
+}
+
+// borrowed from:
+// http://robertnyman.com/2006/04/24/get-the-rendered-style-of-an-element/
+// get 'computed' style of element
+var evhh5v_getstyle = function (el, sty) {
+	var v = 0;
+	if ( document.defaultView && document.defaultView.getComputedStyle ) {
+		v = document.defaultView.getComputedStyle(el, "").getPropertyValue(sty);
+	} else if ( el.currentStyle ) {
+		sty = sty.replace(/\-(\w)/g, function (m1, p1) {
+			return p1.toUpperCase();
+		});
+		v = el.currentStyle[sty];
+	}
+	return v;
+};
 
 
 function evhh5v_do_dbg_obj(o) {

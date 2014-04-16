@@ -226,9 +226,8 @@ class SWF_put_evh {
 	// swfput js shortcode editor helper name
 	const swfxedjsname = 'formxed.min.js';
 	// swfput js shortcode editor helper name
-	const swfxpljsname = 'fmtscxed.min.js';
-	//const swfxpljsname = 'fmtscxed.js';
-	const swfxpljsname3x = 'fmtscxed3x.min.js';
+	const swfxpljsname = 'editor_plugin.min.js';
+	const swfxpljsname3x = 'editor_plugin3x.min.js';
 	
 	// html5 video front-end js
 	const evhv5vjsdir  = 'evhh5v';
