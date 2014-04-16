@@ -228,6 +228,7 @@ class SWF_put_evh {
 	// swfput js shortcode editor helper name
 	const swfxpljsname = 'fmtscxed.min.js';
 	//const swfxpljsname = 'fmtscxed.js';
+	const swfxpljsname3x = 'fmtscxed3x.min.js';
 	
 	// html5 video front-end js
 	const evhv5vjsdir  = 'evhh5v';
@@ -744,9 +745,15 @@ class SWF_put_evh {
 
 	// filter to add mce plugin javascript
 	public static function add_mceplugin_js($plugin_array) {
+		// tinymce major version 4 begins in WP 3.9
+		$v = (3 << 24) | (9 << 16) | (0 << 8) | 0;
+		$shiny = self::wpv_min($v);
+		
+		$jsfile = $shiny ? self::swfxpljsname : self::swfxpljsname3x;
+
 		$pf = self::mk_pluginfile();
 		$pname = 'swfput_mceplugin';
-		$t = self::settings_jsdir . '/' . self::swfxpljsname;
+		$t = self::settings_jsdir . '/' . $jsfile;
 		$jsfile = plugins_url($t, $pf);
 		$plugin_array[$pname] = $jsfile;
 		return $plugin_array;
