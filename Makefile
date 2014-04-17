@@ -16,6 +16,7 @@ SRCS = ${PRJSTEM}.php \
 	OptSection_0_0_2b.inc.php \
 	OptPage_0_0_2b.inc.php \
 	mce_ifm.php \
+	wpabspath.php \
 	index.php
 
 # The Opt*.php are support classes, not tied to this plugin,

@@ -48,8 +48,78 @@ function getwithdef($k, $def) {
 	return urldecode($_REQUEST[$k]);
 }
 
-// Need WP help
-require(getwithdef('a', '') . '/wp-load.php');
+// Need WP DB and functions: WP installation ABSPATH
+// should be 'a' in query, BUT if possible the main
+// plugin file wrote ABSPATH into wpabspath.php as
+// var $wpabspath, which is good because that file's
+// contents are as secure as this file's . . .
+$fn = rtrim(dirname(__FILE__), '/') . '/wpabspath.php';
+if ( is_readable($fn) && is_file($fn) ) {
+	include $fn;
+}
+
+// . . . but it might not have been possible to prepare the file
+// wpabspath.php due to safe_mode, file mode, and such, so
+// fall back to the following if needed:
+if ( ! isset($wpabspath) ||
+	! $wpabspath || $wpabspath === '' ||
+	  $wpabspath === 'REPLACEME' ) {
+
+	$wpabspath = getwithdef('a', '');
+	
+	// non-Einsteinian relativity: path of observer *shall*
+	// be *not* relative *but* ABSOLUTE *and* move *only forward*
+	if ( $wpabspath == '' ||
+		preg_match(',^\.\./,', $wpabspath) ||
+		preg_match(',/\.\./,', $wpabspath) ||
+		! preg_match(',^/,', $wpabspath) ) {
+		die("PATH OF RIGHTEOUSNESS FORSAKEN");
+	}
+
+	$wpabspath = rtrim($wpabspath, '/');
+	
+	// $_SERVER['SCRIPT_FILENAME'], not  __FILE__,
+	// used to compare abspath -- why? you ask?
+	// __FILE__ might dereference symbolic links, but
+	// the plugin directory path might include
+	// symlinks; also, the JS that uses its own URL to
+	// invoke this had its PATH prepared using WP_PLUGIN_DIR,
+	// which is by default WP_CONTENT_DIR . '/plugins', and
+	// WP_CONTENT_DIR is by default ABSPATH . 'wp-content',
+	// so they should match for the length $wpabspath
+	// unless *some other factor* is in play.
+	// One other factor, and a not improbable point of
+	// failure is that sites can give definitions of
+	// those macros that do not follow the above -- so
+	// die with a gentle and informative message. (No
+	// WP loaded, so no i18n, with regret.)
+	// If not obvious, the concern is like two installs
+	// on one host like 'd1/wp' and 'd2/wp' and trickster
+	// puts the wrong dN in place, and it seems to succeed
+	// because we load wp-load.php, but the wrong one.
+	// Not a problem for core files because they are in
+	// known relative locations (unlike plugin files) and
+	// can rely on "dirname(__FILE__)" and such. Sigh.
+	$t1 = explode('/', $wpabspath);
+	$t2 = explode('/', $_SERVER['SCRIPT_FILENAME']);
+	for ( $i = 0; $i < count($t1); $i++ ) {
+		if ( $t1[$i] !== $t2[$i] ) {
+			die("Security: plugin directory descent is not from\n" .
+				"the expected path, probably due to a non-standard\n" .
+				"definition of WP_PLUGIN_DIR or WP_CONTENT_DIR.\n" .
+				"This plugin script will not run in that case,\n" .
+				"to guard against path attacks -- sorry!");
+		}
+	}
+}
+
+$wpabspath = rtrim($wpabspath, '/');
+$wpabspath .= '/wp-load.php';
+if ( ! is_file($wpabspath) || ! is_readable($wpabspath) ) {
+	die("PATH LEADS TO EREHWON");
+}
+
+require($wpabspath);
 
 // Checks against naughtiness
 $usr = getwithdef('u', '');

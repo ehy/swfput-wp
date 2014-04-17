@@ -889,6 +889,38 @@ class SWF_put_evh {
 	public static function on_activate() {
 		$wreg = __CLASS__;
 		add_action('widgets_init', array($wreg, 'regi_widget'), 1);
+
+		// try to write ABSPATH to a php var in an included php file,
+		// for secure use by the script that produces iframe content
+		// for the tinymce plugin.
+		//
+		// Whether this can be done is uncertain, and we are silent
+		// about failure, the consequence of which is that the
+		// aforementioned script will use another that requires
+		// WP_PLUGIN_DIR to be descebded from the WP root dir, and
+		// will fail if it is not.
+		if ( ! defined('ABSPATH') ) {
+			return;
+		}
+		
+		$fn = rtrim(dirname(__FILE__), '/') . '/wpabspath.php';
+		$fh = fopen($fn, 'r+b');
+		if ( ! $fh ) return;
+		$cont = fread($fh, filesize($fn));
+		$pat =
+			'/([ \t]*\\$wpabspath[ \t]*=[ \t]*\').+(\'[ \t]*;[ \t]*)/m';
+
+		if ( $cont && preg_match($pat, $cont) ) {
+			$cont = explode("\n", $cont);
+			$cont = preg_replace($pat, '\1' . ABSPATH . '\2', $cont);
+			if ( $cont && ! fseek($fh, 0, SEEK_SET) ) {
+				$cont = implode("\n", $cont);
+				// no need to check return: failure allowed
+				fwrite($fh, $cont);
+			}
+		}
+		
+		fclose($fh);
 	}
 
 	// uninstall cleanup
