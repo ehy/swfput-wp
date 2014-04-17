@@ -297,11 +297,18 @@ class SWF_put_evh {
 		$cl = __CLASS__;
 
 		if ( $adm ) {
-			// add 'Settings' link on the plugins page entry
-			// cannot be in activate hook
-			$name = plugin_basename($pf);
-			add_filter("plugin_action_links_$name",
-				array($cl, 'plugin_page_addlink'));
+			// Some things that must be *before* 'init'
+			if ( current_user_can('activate_plugins') ) {
+				$aa = array($cl, 'on_deactivate');
+				register_deactivation_hook($pf, $aa);
+				$aa = array($cl, 'on_activate');
+				register_activation_hook($pf,   $aa);
+			}
+			if ( current_user_can('install_plugins') ) {
+				$aa = array($cl, 'on_uninstall');
+				register_uninstall_hook($pf,    $aa);
+			}
+
 		}
 
 		// some things are to be done in init hook: add
@@ -888,6 +895,13 @@ class SWF_put_evh {
 	// activate setup
 	public static function on_activate() {
 		$wreg = __CLASS__;
+
+		// add 'Settings' link on the plugins page entry
+		// cannot be in activate hook
+		$name = plugin_basename($pf);
+		add_filter("plugin_action_links_$name",
+			array($cl, 'plugin_page_addlink'));
+
 		add_action('widgets_init', array($wreg, 'regi_widget'), 1);
 
 		// try to write ABSPATH to a php var in an included php file,
@@ -899,13 +913,16 @@ class SWF_put_evh {
 		// aforementioned script will use another that requires
 		// WP_PLUGIN_DIR to be descebded from the WP root dir, and
 		// will fail if it is not.
+		error_log('IN on_activate');
 		if ( ! defined('ABSPATH') ) {
+		error_log('IN on_activate: NO ABSPATH');
 			return;
 		}
 		
 		$fn = rtrim(dirname(__FILE__), '/') . '/wpabspath.php';
 		$fh = fopen($fn, 'r+b');
 		if ( ! $fh ) return;
+		error_log('IN on_activate: FILE OPEN');
 		$cont = fread($fh, filesize($fn));
 		$pat =
 			'/([ \t]*\\$wpabspath[ \t]*=[ \t]*\').+(\'[ \t]*;[ \t]*)/m';
@@ -1010,18 +1027,6 @@ class SWF_put_evh {
 		$cl = __CLASS__;
 
 		if ( $adm ) {
-			// keep it clean: {de,}activation
-			if ( current_user_can('activate_plugins') ) {
-				$aa = array($cl, 'on_deactivate');
-				register_deactivation_hook($pf, $aa);
-				$aa = array($cl, 'on_activate');
-				register_activation_hook($pf,   $aa);
-			}
-			if ( current_user_can('install_plugins') ) {
-				$aa = array($cl, 'on_uninstall');
-				register_uninstall_hook($pf,    $aa);
-			}
-
 			// hook&filter to make shortcode form for editor
 			if ( self::get_posts_code_option() === 'true' ) {
 				$aa = array($cl, 'hook_admin_init');
