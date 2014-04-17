@@ -143,6 +143,7 @@ class SWF_put_evh {
 	const optdispmsg = '_evh_swfput1_dmsg'; // posts
 	const optdispwdg = '_evh_swfput1_dwdg'; // widgets no-admin
 	const optdisphdr = '_evh_swfput1_dhdr'; // header area
+	const opttinymce = '_evh_swfput1_dmce'; // tinymce editor
 	// optcode... -- shortcode processing
 	const optcodemsg = '_evh_swfput1_scms'; // posts
 	const optcodewdg = '_evh_swfput1_scwi'; // widgets no-admin
@@ -167,6 +168,8 @@ class SWF_put_evh {
 	const disp_msg    = 1;
 	const disp_widget = 2;
 	const disp_hdr    = 4;
+	// when to use video display in tinymce editot
+	const deftinymce  = 'always'; // always, nonmobile, never
 	// more
 	const defcodemsg = 'true';  // posts
 	const defcodewdg = 'false'; // widgets no-admin
@@ -300,22 +303,19 @@ class SWF_put_evh {
 			// Some things that must be *before* 'init'
 			// NOTE cannot call current_user_can() because
 			// its dependencies might not be ready at this point!
-			// Condition on current_user_can() in the callbacks
-			if ( true /* current_user_can('activate_plugins') */ ) {
-				$aa = array($cl, 'on_deactivate');
-				register_deactivation_hook($pf, $aa);
-				$aa = array($cl, 'on_activate');
-				register_activation_hook($pf,   $aa);
-			}
-			if ( true /* current_user_can('install_plugins') */ ) {
-				$aa = array($cl, 'on_uninstall');
-				register_uninstall_hook($pf,    $aa);
-			}
+			// Use condition on current_user_can() in the callbacks
+			$aa = array($cl, 'on_deactivate');
+			register_deactivation_hook($pf, $aa);
+			$aa = array($cl, 'on_activate');
+			register_activation_hook($pf,   $aa);
+
+			$aa = array($cl, 'on_uninstall');
+			register_uninstall_hook($pf,    $aa);
 
 			// add 'Settings' link on the plugins page entry
 			$name = plugin_basename($pf);
-			add_filter("plugin_action_links_$name",
-				array($cl, 'plugin_page_addlink'));
+			$aa = array($cl, 'plugin_page_addlink');
+			add_filter('plugin_action_links_' . $name, $aa);
 		}
 
 		// some things are to be done in init hook: add
@@ -356,7 +356,7 @@ class SWF_put_evh {
 		);
 		
 		if ( $chkonly !== true ) {
-			// TODO: so far there are only checkboxes
+			$items[self::opttinymce] = self::deftinymce;
 		}
 		
 		return $items;
@@ -458,6 +458,11 @@ class SWF_put_evh {
 				self::optdispwdg,
 				$items[self::optdispwdg],
 				array($this, 'put_widget_opt'));
+		$fields[$nf++] = new $Cf(self::opttinymce,
+				self::wt(__('Video in post editor:', 'swfput_l10n')),
+				self::opttinymce,
+				$items[self::opttinymce],
+				array($this, 'put_tinymce_opt'));
 		// commented: from early false assumption that header
 		// could be easily hooked:
 		//$fields[$nf++] = new $Cf(self::optdisphdr,
@@ -719,7 +724,7 @@ class SWF_put_evh {
 	public static function hook_admin_menu() {
 		$cl = __CLASS__;
 		$id = 'SWFPut_putswf_video';
-		$tl = __('SWFPut Video ("Help" above has a tab for this)', 'swfput_l10n');
+		$tl = __('SWFPut Video', 'swfput_l10n');
 		$tl = self::wt($tl);
 		$fn = 'put_xed_form';
 		if ( current_user_can('edit_posts') ) {
@@ -731,18 +736,40 @@ class SWF_put_evh {
 	}
 
 	// on init, e.g. mce plugin in the post-related pages
-	public static function hook_admin_init() {
-		// tinymce version in 3.0.3 n.g. and next testing
-		// version of WP I have is 3.3.1
-		$v = (3 << 24) | (3 << 16) | (0 << 8) | 0;
-		$ok = self::wpv_min($v);
+	public static function use_tinymce_plugin() {
+		$opt = self::get_tinymce_option();
+		
+		switch ( $opt ) {
+			case 'always':
+				return true;
+			case 'nonmobile':
+				if ( function_exists('wp_is_mobile') ) {
+					return ! wp_is_mobile();
+				}
+				return true;
+			case 'never':
+			default:
+				return false;
+		}
+		
+		return false;
+	}
 
-		if ( $ok && current_user_can( 'edit_posts' )
-			&& current_user_can( 'edit_pages' ) ) {
-			$aa = array(__CLASS__, 'add_mceplugin_js');
-			add_filter('mce_external_plugins', $aa);
-			$aa = array(__CLASS__, 'filter_mce_init');
-			add_filter('tiny_mce_before_init', $aa);
+	// on init, e.g. mce plugin in the post-related pages
+	public static function hook_admin_init() {
+		if ( self::use_tinymce_plugin() ) {
+			// tinymce version in 3.0.3 n.g. and next testing
+			// version of WP I have is 3.3.1
+			$v = (3 << 24) | (3 << 16) | (0 << 8) | 0;
+			$ok = self::wpv_min($v);
+	
+			if ( $ok && current_user_can( 'edit_posts' )
+				&& current_user_can( 'edit_pages' ) ) {
+				$aa = array(__CLASS__, 'add_mceplugin_js');
+				add_filter('mce_external_plugins', $aa);
+				$aa = array(__CLASS__, 'filter_mce_init');
+				add_filter('tiny_mce_before_init', $aa);
+			}
 		}
 	}
 
@@ -796,31 +823,33 @@ class SWF_put_evh {
 		// is an expiration value (TTL) tested in the script against
 		// the stored (int)time(). The script fails if its client
 		// differs from $_SERVER['REMOTE_ADDR'].
-		if ( ! $scr || $scr->base === 'post' ) {
-			$u = '' . (function_exists('get_current_user_id') ?
-				get_current_user_id() : 0);
-			$rn = '' . self::uniq_rand();
-			$ticket = array($rn, (int)time(),
-				self::ttlmceplg, $_SERVER['REMOTE_ADDR']);
-			if ( isset($_SERVER['REMOTE_HOST']) ) {
-				$ticket[] = $_SERVER['REMOTE_HOST'];
+		if ( self::use_tinymce_plugin() ) {
+			if ( ! $scr || $scr->base === 'post' ) {
+				$u = '' . (function_exists('get_current_user_id') ?
+					get_current_user_id() : 0);
+				$rn = '' . self::uniq_rand();
+				$ticket = array($rn, (int)time(),
+					self::ttlmceplg, $_SERVER['REMOTE_ADDR']);
+				if ( isset($_SERVER['REMOTE_HOST']) ) {
+					$ticket[] = $_SERVER['REMOTE_HOST'];
+				}
+		
+				$opt = get_option(self::optmceplg);
+				if ( $opt ) {
+					$opt[$u] = $ticket;
+					update_option(self::optmceplg, $opt);			
+				} else {
+					$opt = array($u => $ticket);
+					add_option(self::optmceplg, $opt, '', false);
+				}
+		
+				$info = array('a' => ABSPATH, 'i' => $rn, 'u' => $u);
+				printf('
+					<script type="text/javascript">
+						var swfput_mceplug_inf = %s;
+					</script>%s',
+					json_encode($info), "\n");
 			}
-	
-			$opt = get_option(self::optmceplg);
-			if ( $opt ) {
-				$opt[$u] = $ticket;
-				update_option(self::optmceplg, $opt);			
-			} else {
-				$opt = array($u => $ticket);
-				add_option(self::optmceplg, $opt, '', false);
-			}
-	
-			$info = array('a' => ABSPATH, 'i' => $rn, 'u' => $u);
-			printf('
-				<script type="text/javascript">
-					var swfput_mceplug_inf = %s;
-				</script>%s',
-				json_encode($info), "\n");
 		}
 
 		// get_current_screen() introduced in WP 3.1
@@ -891,16 +920,16 @@ class SWF_put_evh {
 			return;
 		}
 
-		$wreg = __CLASS__;
 		$name = plugin_basename(self::mk_pluginfile());
-		$arf = array($wreg, 'plugin_page_addlink');
-		remove_filter("plugin_action_links_$name", $arf);
+		$aa = array(__CLASS__, 'plugin_page_addlink');
+		remove_filter('plugin_action_links_' . $name, $aa);
 
 		self::unregi_widget();
 
+		$aa = array(__CLASS__, 'validate_opts');
 		unregister_setting(self::opt_group, // option group
 			self::opt_group, // opt name; using group passes all to cb
-			array($wreg, 'validate_opts'));
+			$aa);
 	}
 
 	// activate setup
@@ -909,9 +938,7 @@ class SWF_put_evh {
 			return;
 		}
 
-		$wreg = __CLASS__;
-
-		add_action('widgets_init', array($wreg, 'regi_widget'), 1);
+		add_action('widgets_init', array(__CLASS__, 'regi_widget'), 1);
 
 		// try to write ABSPATH to a php var in an included php file,
 		// for secure use by the script that produces iframe content
@@ -919,8 +946,8 @@ class SWF_put_evh {
 		//
 		// Whether this can be done is uncertain, and we are silent
 		// about failure, the consequence of which is that the
-		// aforementioned script will use another that requires
-		// WP_PLUGIN_DIR to be descebded from the WP root dir, and
+		// aforementioned script will do something else that requires
+		// WP_PLUGIN_DIR to be descended from the WP root dir, and
 		// will fail if it is not.
 		if ( ! defined('ABSPATH') ) {
 			return;
@@ -928,7 +955,9 @@ class SWF_put_evh {
 		
 		$fn = rtrim(dirname(__FILE__), '/') . '/wpabspath.php';
 		$fh = fopen($fn, 'r+b');
-		if ( ! $fh ) return;
+		if ( ! $fh ) {
+			return;
+		}
 		$cont = fread($fh, filesize($fn));
 		$pat =
 			'/([ \t]*\\$wpabspath[ \t]*=[ \t]*\').+(\'[ \t]*;[ \t]*)/m';
@@ -1149,7 +1178,7 @@ class SWF_put_evh {
 			$opts = array();
 		}
 		// checkboxes need value set - nonexistant means false
-		$ta = self::get_opts_defaults();
+		$ta = self::get_opts_defaults(true);
 		foreach ( $ta as $k => $v ) {
 			if ( array_key_exists($k, $opts) ) {
 				continue;
@@ -1175,6 +1204,27 @@ class SWF_put_evh {
 			$oo = $a_orig[$k];
 
 			switch ( $k ) {
+				// 'radio' multi-choice
+				case self::opttinymce:
+					switch ( $ot ) {
+						case 'always':
+						case 'nonmobile':
+						case 'never':
+							$a_out[$k] = $ot;
+							$nupd += ($ot === $oo) ? 0 : 1;
+							break;
+						default:               //'Set a value:'
+							$e = __('bad choice: "%s"', 'spambl_l10n');
+							$e = sprintf($e, $ot);
+							self::errlog($e);
+							add_settings_error(self::wt($k),
+								sprintf('%s[%s]', self::opt_group, $k),
+								self::wt($e), 'error');
+							$a_out[$k] = $oo;
+							$nerr++;
+							break;
+					}
+					break;
 				// hidden opts for 'screen options' -- boolean
 				case self::optscreen1:
 					$a_out[$k] = ($ot == 'false') ? 'false' : 'true';
@@ -1352,14 +1402,20 @@ class SWF_put_evh {
 			of video must be switched on or off, for either
 			posts (and pages) or widgets
 			or both, these are the options to use.
-			</p><p>
 			When the plugin shortcode is disabled the
 			video elements that would have been placed are
 			replaced by a notice with the form
 			"[A/V content &lt;caption&gt; disabled],"
 			where "&lt;caption&gt;"
 			is any caption that was included with the shortcode,
-			or empty if there was no caption.'
+			or empty if there was no caption.
+			</p><p>
+			The "Video in post editor" multiple choice option
+			controls the display of video in the post/page
+			editor. This is only effective if the "TinyMCE"
+			editor included with WordPress is in use, and only
+			when the "Visual" tab is selected.
+			'
 			, 'swfput_l10n'));
 		printf('<p>%s</p>%s', $t, "\n");
 
@@ -1563,6 +1619,37 @@ class SWF_put_evh {
 		$tt = self::wt(__('Use SWF script if PHP+Ming is available', 'swfput_l10n'));
 		$k = self::optuseming;
 		$this->put_single_checkbox($a, $k, $tt);
+	}
+
+	// callback, put SWF in head?
+	public function put_tinymce_opt($a) {
+		$tt = self::wt(__('When to display video in post editor', 'swfput_l10n'));
+		$k = self::opttinymce;
+		$group = self::opt_group;
+		$va = array(
+			array(__('Always display video in the post editor', 'spambl_l10n'), 'always'),
+			array(__('Only when the browser platform is not mobile', 'spambl_l10n'), 'nonmobile'),
+			array(__('Never display video in the post editor', 'spambl_l10n'), 'never')
+		);
+
+		$v = trim('' . $a[$k]);
+
+		foreach ( $va as $oa ) {
+			$txt = self::wt($oa[0]);
+			$val = $oa[1];
+			$chk = '';
+			$chk = $v === $val ? 'checked="checked" ' : '';
+
+			printf(
+				'%s<label><input type="radio" id="%s" ', "\n", $k
+			);
+			printf(
+				'name="%s[%s]" value="%s" %s/>', $group, $k, $val, $chk
+			);
+			printf(
+				'&nbsp;%s</label><br />%s', $txt, "\n"
+			);
+		}
 	}
 
 	// commented: from early false assumption that header
@@ -2651,6 +2738,11 @@ class SWF_put_evh {
 		if ( self::get_message_option() !== 'true' )
 			return 'false';
 		return self::opt_by_name(self::optpregmsg);
+	}
+
+	// get the place at head option
+	public static function get_tinymce_option() {
+		return self::opt_by_name(self::opttinymce);
 	}
 
 	// get the place at head option
