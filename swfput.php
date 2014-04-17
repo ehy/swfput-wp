@@ -298,13 +298,16 @@ class SWF_put_evh {
 
 		if ( $adm ) {
 			// Some things that must be *before* 'init'
-			if ( current_user_can('activate_plugins') ) {
+			// NOTE cannot call current_user_can() because
+			// its dependencies might not be ready at this point!
+			// Condition on current_user_can() in the callbacks
+			if ( true /* current_user_can('activate_plugins') */ ) {
 				$aa = array($cl, 'on_deactivate');
 				register_deactivation_hook($pf, $aa);
 				$aa = array($cl, 'on_activate');
 				register_activation_hook($pf,   $aa);
 			}
-			if ( current_user_can('install_plugins') ) {
+			if ( true /* current_user_can('install_plugins') */ ) {
 				$aa = array($cl, 'on_uninstall');
 				register_uninstall_hook($pf,    $aa);
 			}
@@ -880,6 +883,10 @@ class SWF_put_evh {
 
 	// deactivate cleanup
 	public static function on_deactivate() {
+		if ( ! current_user_can('activate_plugins') ) {
+			return;
+		}
+
 		$wreg = __CLASS__;
 		$name = plugin_basename(self::mk_pluginfile());
 		$arf = array($wreg, 'plugin_page_addlink');
@@ -894,6 +901,10 @@ class SWF_put_evh {
 
 	// activate setup
 	public static function on_activate() {
+		if ( ! current_user_can('activate_plugins') ) {
+			return;
+		}
+
 		$wreg = __CLASS__;
 
 		// add 'Settings' link on the plugins page entry
@@ -942,6 +953,10 @@ class SWF_put_evh {
 
 	// uninstall cleanup
 	public static function on_uninstall() {
+		if ( ! current_user_can('install_plugins') ) {
+			return;
+		}
+
 		self::unregi_widget();
 		
 		$opts = self::get_opt_group();
