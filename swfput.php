@@ -936,7 +936,7 @@ class SWF_put_evh {
 		if ( $cont && preg_match($pat, $cont) ) {
 			$cont = explode("\n", $cont);
 			$cont = preg_replace($pat, '\1' . ABSPATH . '\2', $cont);
-			if ( $cont && ! fseek($fh, 0, SEEK_SET) ) {
+			if ( $cont && ! fseek($fh, 0, SEEK_SET) && ftruncate($fh, 0) ) {
 				$cont = implode("\n", $cont);
 				// no need to check return: failure allowed
 				fwrite($fh, $cont);
