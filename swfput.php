@@ -905,13 +905,14 @@ class SWF_put_evh {
 			return;
 		}
 
+		$pf = self::mk_pluginfile();
 		$wreg = __CLASS__;
 
 		// add 'Settings' link on the plugins page entry
 		// cannot be in activate hook
 		$name = plugin_basename($pf);
 		add_filter("plugin_action_links_$name",
-			array($cl, 'plugin_page_addlink'));
+			array($wreg, 'plugin_page_addlink'));
 
 		add_action('widgets_init', array($wreg, 'regi_widget'), 1);
 
@@ -924,16 +925,13 @@ class SWF_put_evh {
 		// aforementioned script will use another that requires
 		// WP_PLUGIN_DIR to be descebded from the WP root dir, and
 		// will fail if it is not.
-		error_log('IN on_activate');
 		if ( ! defined('ABSPATH') ) {
-		error_log('IN on_activate: NO ABSPATH');
 			return;
 		}
 		
 		$fn = rtrim(dirname(__FILE__), '/') . '/wpabspath.php';
 		$fh = fopen($fn, 'r+b');
 		if ( ! $fh ) return;
-		error_log('IN on_activate: FILE OPEN');
 		$cont = fread($fh, filesize($fn));
 		$pat =
 			'/([ \t]*\\$wpabspath[ \t]*=[ \t]*\').+(\'[ \t]*;[ \t]*)/m';
