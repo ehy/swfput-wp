@@ -312,6 +312,10 @@ class SWF_put_evh {
 				register_uninstall_hook($pf,    $aa);
 			}
 
+			// add 'Settings' link on the plugins page entry
+			$name = plugin_basename($pf);
+			add_filter("plugin_action_links_$name",
+				array($cl, 'plugin_page_addlink'));
 		}
 
 		// some things are to be done in init hook: add
@@ -905,14 +909,7 @@ class SWF_put_evh {
 			return;
 		}
 
-		$pf = self::mk_pluginfile();
 		$wreg = __CLASS__;
-
-		// add 'Settings' link on the plugins page entry
-		// cannot be in activate hook
-		$name = plugin_basename($pf);
-		add_filter("plugin_action_links_$name",
-			array($wreg, 'plugin_page_addlink'));
 
 		add_action('widgets_init', array($wreg, 'regi_widget'), 1);
 
