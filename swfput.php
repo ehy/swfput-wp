@@ -736,26 +736,6 @@ class SWF_put_evh {
 	}
 
 	// on init, e.g. mce plugin in the post-related pages
-	public static function use_tinymce_plugin() {
-		$opt = self::get_tinymce_option();
-		
-		switch ( $opt ) {
-			case 'always':
-				return true;
-			case 'nonmobile':
-				if ( function_exists('wp_is_mobile') ) {
-					return ! wp_is_mobile();
-				}
-				return true;
-			case 'never':
-			default:
-				return false;
-		}
-		
-		return false;
-	}
-
-	// on init, e.g. mce plugin in the post-related pages
 	public static function hook_admin_init() {
 		if ( self::use_tinymce_plugin() ) {
 			// tinymce version in 3.0.3 n.g. and next testing
@@ -2528,6 +2508,28 @@ class SWF_put_evh {
 		return $is_so;
 	}
 	
+	// V. 1.0.9 added video display in the TinyMCE post/page editor,
+	// and this checks the settings page option controlling when
+	// it is used, and returns boolean.
+	public static function use_tinymce_plugin() {
+		$opt = self::get_tinymce_option();
+		
+		switch ( $opt ) {
+			case 'always':
+				return true;
+			case 'nonmobile':
+				if ( function_exists('wp_is_mobile') ) {
+					return ! wp_is_mobile();
+				}
+				return true;
+			case 'never':
+			default:
+				return false;
+		}
+		
+		return false;
+	}
+
 	// Get a (almost certainly) unique random number:
 	// **NOT** for security, only probable uniqueness
 	// for e.g., element id attributes.
