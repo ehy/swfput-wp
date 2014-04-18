@@ -86,6 +86,7 @@ var origbarheight = barheight, origbarlength = barlength;
 //var iscl = 1.0 / bscl;
 var butwidthfactor = tf(0.60, "$butwidthfactor", $butwidthfactor);
 var butwidth = tf(barheight * butwidthfactor + 1, "$butwidth", $butwidth);
+var orig_butwidth = butwidth;
 var butheight = butwidth;
 var barshowmargin = tf(2, "$barshowmargin", $barshowmargin);
 var progressbarheight = tf((barheight - butheight) * 0.20, "$progressbarheight", $progressbarheight);
@@ -1335,6 +1336,17 @@ var bbar_resize = function () {
 	this._xscale = 100;
 	this._yscale = 100;
 
+	if ( rtmbut.save_x === undefined ) {
+		rtmbut.save_x = rtmbut._x;
+	}
+
+	var hidebuts = Stage.width < ((rtmbut.save_x + rtmbut._width + 0)*bscl);
+	if ( hidebuts ) {
+		rm_scale_buttons();
+	} else {
+		add_scale_buttons();
+	}
+
 	barlength = Stage.width - barsubtr;
 	butwidth =  barheight * butwidthfactor;
 	butheight = butwidth;
@@ -2142,45 +2154,96 @@ if ( audb ) {
 	adddbgtext(" v4aud: '" + v4aud + "'\n");
 }
 
+function add_scale_buttons() {
+	if ( disable_scale_buttons || ! rm_scale_buttons_done ) {
+		return;
+	}
+	rm_scale_buttons_done = false;
+
+	var t = movebutkey;
+	for ( var i in t ) {
+		var c = t[i];
+		bbar[c]._x = bbar[c].save_x;
+	}
+	
+	var b = savebutkey;
+	for ( var i in b ) {
+		var c = b[i];
+		bbar[c] = savebutobj[c];
+		bbar[c]._visible = savebutobj[c].save_visible;
+	}
+}
+
+function rm_scale_buttons() {
+	if ( disable_scale_buttons || rm_scale_buttons_done ) {
+		return;
+	}
+	rm_scale_buttons_done = true;
+	
+	if ( savebutevt === undefined ) {
+		savebutevt = ["onDragOut","onDragOver","onKeyUp","onKillFocus",
+			"onPress","onRelease","onReleaseOutside","onRollOut",
+			"onRollOver","onSetFocus"];
+	}
+	var e = savebutevt;
+	if ( savebutkey === undefined ) {
+		savebutkey = ["dosclbut", "nosclbut", "nosclbutdisable",
+			"fullscrbut", "windscrbut"];
+	}
+	var b = savebutkey;
+	var savenew = savebutobj === undefined;
+	if ( savenew ) {
+		savebutobj = {};
+	}
+
+	var offs = bbar.spkrbut._x + butwidth;
+	for ( var i in b ) {
+		var c = b[i];
+		if ( savenew ) {
+			savebutobj[c] = bbar[c];
+		}
+		savebutobj[c].save_visible = savebutobj[c]._visible;
+		savebutobj[c]._visible = false;
+		bbar[c] = {};
+		bbar[c]._x = offs;
+		bbar[c]._xscale = 0;
+		bbar[c]._yscale = 0;
+		bbar[c]._visible = false;
+		bbar[c].enabled = false;
+	}
+
+	if ( movebutkey === undefined ) {
+		movebutkey = ["playbut", "pausebut", "pausebutdisable",
+			"stopbut", "stopbutdisable", "spkrbut", "spkrmsw"];
+	}
+	var t = movebutkey;
+	for ( var i in t ) {
+		var c = t[i];
+		bbar[c].save_x = bbar[c]._x;
+	}
+	
+	var w = orig_butwidth;
+	offs = 0.25;
+	bbar.playbut._x = w * offs;
+	bbar.pausebut._x = w * offs;
+	bbar.pausebutdisable._x = w * offs;
+	offs += 1.75;
+	bbar.stopbut._x = w * offs;
+	bbar.stopbutdisable._x = w * offs;
+	offs += 1.75;
+	bbar.spkrbut._x = w * offs;
+	bbar.spkrmsw._x = w * offs;
+}
+
 // initial interface and size setup
 // mobile adjustments
 if ( ua_is_mobile() ) {
+	disable_scale_buttons = false;
 	volgadget._rotation = 0;
-
-	var offs;
-	offs = 0.25;
-	bbar.playbut._x = butwidth * offs;
-	bbar.pausebut._x = butwidth * offs;
-	bbar.pausebutdisable._x = butwidth * offs;
-	offs += 1.75;
-	bbar.stopbut._x = butwidth * offs;
-	bbar.stopbutdisable._x = butwidth * offs;
-	offs += 1.75;
-	bbar.spkrbut._x = butwidth * offs;
-	bbar.spkrmsw._x = butwidth * offs;
-	
-	// surprisingly difficult to get rid of buttons: some of
-	// this ugly junk could be removed, time permitting, but
-	// for now, shotgun.
-	var e = ["onDragOut","onDragOver","onKeyUp","onKillFocus",
-		"onPress","onRelease","onReleaseOutside","onRollOut",
-		"onRollOver","onSetFocus"];
-	var b = [bbar.dosclbut, bbar.nosclbut, bbar.nosclbutdisable,
-		bbar.fullscrbut, bbar.windscrbut];
-	offs = bbar.spkrbut._x + butwidth;
-	for ( var i in b ) {
-		var c = b[i];
-		c._x = offs;
-		c._xscale = 0;
-		c._yscale = 0;
-		for ( var j in e ) {
-			c[e[j]] = null;
-		}
-		c._visible = false;
-		c.enabled = false;
-		delete c;
-	}
+	rm_scale_buttons();
+	disable_scale_buttons = true;
 } else {
+	disable_scale_buttons = false;
 	volgadget._rotation = -90;
 }
 

@@ -111,6 +111,7 @@
 	<g id="g_all_g">
 		<g class="bgrect" id="ctlbar_bg"></g>
 		<g id="g_button_1"></g>
+		<g id="g_button_2"></g>
 		<g class="progseek" id="prog_seek"></g>
 		<g class="progload" id="prog_load"></g>
 	</g>

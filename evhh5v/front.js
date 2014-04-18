@@ -465,7 +465,7 @@ evhh5v_sizer.prototype = {
  *                                                                    *
  * Support object for FullScreen mode -- this mode is not finalized   *
  * so browser prefixed symbols are tested and used -- proves reliable *
- * in the major browsers
+ * in the major browsers                                              *
  *                                                                    *
 \**********************************************************************/
 
@@ -730,11 +730,12 @@ treqbase : function(height) {
 	return height * this.treq_r_bh;
 },
 // angle unit conversion
+pi_hemi : Math.PI / 180.0,
 deg2rad : function(a) {
-	return a * Math.PI / 180.0;
+	return a * this.pi_hemi;
 },
 rad2deg : function(a) {
-	return a / (Math.PI / 180.0);
+	return a / this.pi_hemi;
 },
 // because a browser's Math might not have hypot(); this.ctor may
 // change this if hypot() is found.
@@ -1741,8 +1742,6 @@ var_init : function() {
 
 // for disbled button icons: refers to filter in svg <defs> block
 disabfilter : 'url(#blur_dis)',
-// x position offset factors for buttons
-xfacts : [0.5, 1.5, 2, 1.5, 2],
 
 // event handler for play progress bar, which is used to seek
 prog_pl_click : function(e) {
@@ -1770,7 +1769,8 @@ init_inibut : function() {
 		return true;
 	}
 	var k = this.parms["parentdiv"];
-	if ( evhh5v_ctlbutmap[k] === undefined || evhh5v_ctlbutmap[k]["loaded"] !== true ) {
+	if ( evhh5v_ctlbutmap[k] === undefined
+		|| evhh5v_ctlbutmap[k]["loaded"] !== true ) {
 		return false;
 	}
 	this.b_parms = evhh5v_ctlbutmap[k];
@@ -1812,6 +1812,9 @@ is_mobile : function() {
 	return evhh5v_ua_is_mobile();
 },
 
+// x position offset factors for buttons
+xfacts : [0.5, 1.5, 2, 1.5, 2],
+
 mk : function() {
 	var mobi = this.is_mobile();
 	var mnot = ! mobi;
@@ -1826,6 +1829,10 @@ mk : function() {
 	if ( mobi ) {
 		this.xfacts = [0.25, 1.75, 1.75, 1.75, 1.75];
 	}
+	
+	// store for button default and current x.position and state
+	this.button_data = {};
+	var dat = this.button_data;
 
 	svg.setAttribute("viewBox", this.viewbox);
 	this.gall = doc.getElementById("g_all_g");
@@ -1836,20 +1843,55 @@ mk : function() {
 
 	// buttons
 	var gbn = doc.getElementById("g_button_1");
-	this.button_play = this.mk_playpause(gbn, ofs += this.xfacts[0]);
-	this.button_stop = this.mk_stop(gbn, ofs += this.xfacts[1]);
+	dat["show"] = gbn;
+	dat["hide"] = doc.getElementById("g_button_2");
+	dat["hide"].setAttribute("visibility", "hidden");
+
+	dat["play"] = {}; dat["play"].defx = ofs += this.xfacts[0];
+	this.button_play = this.mk_playpause(gbn, dat["play"].defx);
+	dat["play"].obj = this.button_play;
+
+	dat["stop"] = {}; dat["stop"].defx = ofs += this.xfacts[1];
+	this.button_stop = this.mk_stop(gbn, dat["stop"].defx);
+	dat["stop"].obj = this.button_stop;
 	this.stopbtn_disab();
-	if ( mnot ) { // neither scale nor fullscreen for mobile
-		this.button_doscale = this.mk_doscale(gbn, ofs += this.xfacts[2]);
+
+	if ( true || mnot ) { // neither scale nor fullscreen for mobile
+		dat["doscale"] = {}; dat["doscale"].defx = ofs += this.xfacts[2];
+		this.button_doscale = this.mk_doscale(gbn, dat["doscale"].defx);
+		dat["doscale"].obj = this.button_doscale;
 		this.show_scalein();
 		this.blur_doscale();
-		this.button_fullscreen = this.mk_fullscreen(gbn, ofs += this.xfacts[3]);
+
+		dat["fullscreen"] = {}; dat["fullscreen"].defx = ofs += this.xfacts[3];
+		this.button_fullscreen = this.mk_fullscreen(gbn, dat["fullscreen"].defx);
+		dat["fullscreen"].obj = this.button_fullscreen;
 		this.show_fullscreenout();
 		this.blur_fullscreen();
 	} else {
 		this.button_doscale = this.button_fullscreen = false;
 	}
-	this.button_volume = this.mk_volume(gbn, ofs += this.xfacts[4]);
+	dat["volume"] = {}; dat["volume"].defx = ofs += this.xfacts[4];
+	this.button_volume = this.mk_volume(gbn, dat["volume"].defx);
+	dat["volume"].obj = this.button_volume;
+
+	for ( var k in dat ) {
+		var cur = dat[k];
+		if ( cur.defx === undefined ) {
+			continue;
+		}
+
+		var obj = cur.obj;
+		cur.defx = obj.getAttribute("x");
+
+		obj.x.baseVal.convertToSpecifiedUnits(
+			obj.x.baseVal.SVG_LENGTHTYPE_PX);
+		cur.defx_px = obj.x.baseVal.valueInSpecifiedUnits;
+		obj.width.baseVal.convertToSpecifiedUnits(
+			obj.width.baseVal.SVG_LENGTHTYPE_PX);
+		cur.defwidth_px = obj.width.baseVal.valueInSpecifiedUnits;
+
+	}
 
 	// progress bars
 	var gpl = doc.getElementById("prog_seek");
@@ -1869,6 +1911,48 @@ mk : function() {
 	// . . . public methods
 	set_bar_visibility : function(visi) {
 		this.svg.setAttribute("visibility", visi);
+	},
+
+	// handle narrow width: arg is boolean
+	set_narrow : function(narrow) {
+		var dat = this.button_data;
+		
+		if ( dat["doscale"] == undefined || dat["fullscreen"] == undefined ) {
+			return;
+		}
+
+		if ( dat["doscale"].hidden && narrow ) {
+			return;
+		}
+		if ( ! dat["doscale"].hidden && ! narrow ) {
+			return;
+		}
+
+		var gs = dat["show"], gh = dat["hide"];
+
+		if ( narrow ) {
+			var x = dat["doscale"].obj.getAttribute("x");
+
+			gs.removeChild(dat["doscale"].obj);
+			gs.removeChild(dat["fullscreen"].obj);
+
+			//gh.appendChild(dat["doscale"].obj);
+			//gh.appendChild(dat["fullscreen"].obj);
+
+			dat["doscale"].hidden = true;
+			dat["volume"].obj.setAttribute("x", x);
+
+			return;
+		}
+
+		dat["doscale"].hidden = false;
+		dat["volume"].obj.setAttribute("x", dat["volume"].defx);
+
+		//gh.removeChild(dat["doscale"].obj);
+		//gh.removeChild(dat["fullscreen"].obj);
+
+		gs.insertBefore(dat["fullscreen"].obj, dat["volume"].obj);
+		gs.insertBefore(dat["doscale"].obj, dat["fullscreen"].obj);
 	},
 
 	// show wait spinner
@@ -2196,6 +2280,17 @@ mk : function() {
 			var t = this.rszo[i].id == "bgrect" ? nw : pnw;
 			this.rszo[i].setAttribute("width", t);
 		}
+
+		var obj = this.button_data["volume"].obj;
+		obj.width.baseVal.convertToSpecifiedUnits(
+			obj.width.baseVal.SVG_LENGTHTYPE_PX);
+		var mxw = obj.width.baseVal.valueInSpecifiedUnits;
+		var mxx = this.button_data["volume"].defx_px;
+		var max = mxx + mxw;
+		// right pad == leftmost button.x
+		max += this.button_data["play"].defx_px;
+
+		this.set_narrow(w < max);
 	},
 
 	show_dl_active : function() {
@@ -2883,6 +2978,7 @@ evhh5v_controller.prototype = {
 
 		this.setup_aspect_factors(); this.put_canvas_poster();
 		if ( this.ctlbar.evhh5v_controlbar ) {
+console.log('CALL resize_bar: w == ' + v + ', h == ' + this.barheight);
 			this.ctlbar.evhh5v_controlbar.resize_bar(v, this.barheight);
 			this.play_progress_update();
 		}
@@ -2970,6 +3066,10 @@ evhh5v_controller.prototype = {
 			t = ename.slice(0);
 		}
 		for ( var i = 0; i < t.length; i++ ) {
+			this.add_evt(t[i], callbk, bubool);
+			/* This big switch was from early development; later
+			 * just a reference for events. For now, leave it and
+			 * let minimizer strip it out.
 			switch ( t[i] ) {
 				// video
 				case "loadstart":
@@ -3013,6 +3113,7 @@ evhh5v_controller.prototype = {
 				default:
 					console.log('evhh5v_controller: unexpected event added: "' + ename + '"');
 			}
+			*/
 		}
 	},
 	// events
@@ -3142,7 +3243,7 @@ evhh5v_controller.prototype = {
 				// (*aspect and such will likely be invalid after a
 				// src change; as yet this code does not support such).
 				// Update: Chromium 24 beta and 35 unstable are
-				// generating "resize"
+				// generating "resize" -- why?
 				console.log("Got RESIZE: w == " + 
 					this._vid.videoWidth + ", h == " +
 					this._vid.videoHeight);
@@ -3172,7 +3273,7 @@ evhh5v_controller.prototype = {
 				// probably in error. IAC, it is proving to be not only
 				// non-fatal, but unnoticeable in playback and further
 				// consequence; so, just return
-				console.log("DBG event error : video.error === " + this._vid.error);
+				//console.log("DBG event error : video.error === " + this._vid.error);
 				return;
 			} else if ( e.type !== "ended" ) {
 				var t = this._vid.error;
@@ -3180,7 +3281,7 @@ evhh5v_controller.prototype = {
 				// determined, so this this is guesswork subject
 				// to revision
 				if ( ! t ) {
-					console.log("DBG error||abort: .error === "+t);
+					//console.log("DBG error||abort: .error === "+t);
 					return;
 				}
 				//console.log("DBG error||abort: .error.code === "+t.code);
@@ -3274,7 +3375,6 @@ evhh5v_controller.prototype = {
 					var co;
 					if ( te ) {
 						e.preventDefault();
-						//evhh5v_do_dbg_obj(e.changedTouches[0]);
 						co = this.mouse_coords(e.changedTouches[0]);
 					} else {
 						co = this.mouse_coords(e);
@@ -3596,76 +3696,55 @@ evhh5v_controller.prototype = {
 	// SWF player, this *should* 1) stop playback 2) stop any media
 	// network transfer 3) re-init so that play() again is as if it
 	// was the first time -- do as much of this as possible and
-	// make the behavior at least look the same [after trying some
-	// simple things, and some insane things, it seems simple
-	// load() does the trick; the name doesn't suggest it would,
-	// but more slogging through the w3/whatwg spec did! No no no,
-	// while load alone worked for wobkit, behavior is different
-	// in ffox (of course), so discharge both barrels anyway]
+	// make the behavior at least look the same.
 	stop : function() {
 		this.stop_forced = true;
 		this.hide_wait();
-		/* these two were tried, but N.G. overall -- left
-		 * in place temporarily for reference 
-		// some per browser hacks seem to work
-		if ( false && this._vid.mozHasAudio !== undefined ) {
-			// this is not reliable: disabled
-			this._vid.pause();
-			this._vid.src = "";
-			this._vid.removeAttribute("src");
-		} else if ( false && this._vid.webkitDecodedFrameCount !== undefined ) {
-			this._vid.load(); // stops webkit download, causes ffox download; wonderful!
-			evhh5v_do_dbg_obj(["WEBKIT -- SRC REMOVED"]);
-		// but generally, since the spec does not provide a sensible
-		// way, a method of madness + shotgun must be employed:
-		} else {
-		*/
-		if ( true ) {
-			this._vid.pause();
-	
-			// make new similar video
-			var tv = document.createElement('video');
-			var att = ["poster", "loop", "width", "height", "id", "class", "name"];
-			while ( att.length ) {
-				var tn = att.shift();
-				var ta;
-				if ( ! (ta = this._vid.getAttribute(tn)) ) continue;
-				tv.setAttribute(tn, ta);
-			}
-			// regardless of original value, it seems that after user
-			// hits stop, the only reasonable 'preload' is 'none' --
-			// and obviously 'autostart' is not wanted
-			tv.setAttribute("preload", "none");
-			while ( this._vid.hasChildNodes() ) {
-				var tn = this._vid.firstChild.cloneNode(true);
-				tv.appendChild(tn);
-				this._vid.removeChild(this._vid.firstChild);
-			}
-	
-			// unload shotgun on old video
-			this._vid.src = null;
-			this._vid.removeAttribute("src");
-			// spec says currentSrc readonly; ffox and webkit do not complain
-			try { this._vid.currentSrc = null; } catch(e) {}
-			// hopefully, w/ no source, this will stop current transfers;
-			// per spec it should, and yes, it provides a way to stop
-			// webkit from fetching the media
-			this._vid.load();
-	
-			// hook up new video; ready for play()
-			if ( ! this.is_canvas ) {
-				this._vid.parentNode.replaceChild(tv, this._vid);
-			}
-			try { delete this._vid; } catch(e) {}
+		this._vid.pause();
 
-			this._vid = tv;
-			this._vid.evhh5v_controller = this;
-			this.setup_aspect_factors();
-			this.install_handlers(true);
+		// make new similar video
+		var tv = document.createElement('video');
+		var att = ["poster", "loop", "width", "height", "id", "class", "name"];
+		while ( att.length ) {
+			var tn = att.shift();
+			var ta;
+			if ( ! (ta = this._vid.getAttribute(tn)) ) continue;
+			tv.setAttribute(tn, ta);
 		}
 
+		// regardless of original value, it seems that after user
+		// hits stop, the only reasonable 'preload' is 'none' --
+		// and obviously 'autostart' is not wanted
+		tv.setAttribute("preload", "none");
+		while ( this._vid.hasChildNodes() ) {
+			var tn = this._vid.firstChild.cloneNode(true);
+			tv.appendChild(tn);
+			this._vid.removeChild(this._vid.firstChild);
+		}
+
+		// unload shotgun on old video
+		this._vid.src = null;
+		this._vid.removeAttribute("src");
+		// spec says currentSrc readonly; ffox and webkit do not complain
+		try { this._vid.currentSrc = null; } catch(e) {}
+		// hopefully, w/ no source, this will stop current transfers;
+		// per spec it should, and yes, it provides a way to stop
+		// webkit from fetching the media
+		this._vid.load();
+
+		// hook up new video; ready for play()
+		if ( ! this.is_canvas ) {
+			this._vid.parentNode.replaceChild(tv, this._vid);
+		}
+		try { delete this._vid; } catch(e) {}
+
+		this._vid = tv;
+		this._vid.evhh5v_controller = this;
+		this.setup_aspect_factors();
+		this.install_handlers(true);
 		this.gotmetadata = this.playing = false;
 		this.put_canvas_poster();
+
 		// control bar maintenance
 		this.bar.show_playico();
 		this.bar.progress_pl(1);
@@ -4004,26 +4083,3 @@ var evhh5v_getstyle = function (el, sty) {
 	}
 	return v;
 };
-
-
-function evhh5v_do_dbg_obj(o) {
-/* debug object function -- comment-out for release;
- * just body content, not definition, so refs may remain
-	var dt;
-	if ( ! (dt = document.getElementById("dbg_area")) ) return;
-	
-	var n = 0;
-	for ( var k in o ) {
-		dt.value += "" + (n++) + " [" + k + "]) " + o[k] + "\n";
-	}
- */
-}
-
-
-
-
-
-
-
-
-
