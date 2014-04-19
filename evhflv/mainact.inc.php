@@ -1339,9 +1339,12 @@ var bbar_resize = function () {
 	if ( rtmbut.save_x === undefined ) {
 		rtmbut.save_x = rtmbut._x;
 	}
+	if ( this.playbut.save_x === undefined ) {
+		this.playbut.save_x = this.playbut._x;
+	}
 
-	var hidebuts = Stage.width < ((rtmbut.save_x + rtmbut._width + 0)*bscl);
-	if ( hidebuts ) {
+	var mxx = (rtmbut.save_x + rtmbut._width + this.playbut.save_x);
+	if ( Stage.width < (mxx * bscl) ) {
 		rm_scale_buttons();
 	} else {
 		add_scale_buttons();
