@@ -27,6 +27,10 @@ the usual drag and drop widget interface. After adding
 video objects, the form will continue to be useful for
 making changes (or, if you wish, to delete the video).
 
+In WordPress versions 3.3 and greater, SWFPut makes the
+WordPress "Visual" editor for posts and pages display the
+video in context.
+
 As many video objects as you wish can be placed in posts
 pages, and of course the widget supports as many instances
 as you wish. Note that widget support may be theme-dependent.
@@ -147,6 +151,12 @@ flash video player in more detail.
 
 == Frequently Asked Questions ==
 
+= How do give feedback to the developer? =
+Post a comment at http://agalena.nfshost.com/b1/?page_id=46
+or email edhynan at gmail, or of course go the the SWFPut
+WordPress page at https://wordpress.org/support/plugin/swfput
+and select the "Support" tab.
+
 = Do I really need to understand "aspect ratio" and things? =
 
 Probably not. In most case the width and height of the
@@ -187,6 +197,26 @@ Update: now it does. In the words of Emily Litella, "Never mind."
 	with dark custom colors, sidebar on left), not yet playing.
 
 == Changelog ==
+
+= 2.0 =
+* Video will now display in the TinyMCE "Visual" editor. This
+	requires HTML5 compatible video files, and a recent and
+	not-too-buggy browser (Chromium is fine on GNU/Linux, but
+	as on MS it might not run the script in the iframe,
+	but the display is still useful; MSIE has some oddities but
+	overall works). The settings page has a new option to control
+	SWFPut video in the editor: always, only non-mobile, or
+	never. If the video display feature is disabled, the
+	shortcode will simply appear in the editor.
+* Overdue improvement to the video control bar: if the display
+	is too narrow for all buttons, then the non-essential
+	fullscreen and natural-scale buttons are hidden.
+* Miscellaneous small fixes.
+* Checked with new WordPress 3.9.
+
+= 1.0.9 =
+* Vacated in quantum leap to ring 2 resulting from increased
+	energy state induced by scale of recent changes.
 
 = 1.0.8 =
 * HTML5 video support now equals the original flash video support, and
@@ -330,6 +360,9 @@ Update: now it does. In the words of Emily Litella, "Never mind."
 * Initial release.
 
 == Upgrade Notice ==
+
+= 2.0 =
+* New video display in editor, minor bug fixes.
 
 = 1.0.8 =
 * HTML5 video support now equals the original flash video support, and
