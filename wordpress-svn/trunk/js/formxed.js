@@ -27,6 +27,60 @@ var SWFPut_putswf_video_xed = function () {
 	this.map = {};
 	this.last_from = 0;
 	this.last_match = '';
+
+	// placeholder token data: regretable hack for SWFPut video
+	// plugin for the tinymce, with WordPress; this is to hold
+	// place in a <dd> element which normally holds a caption,
+	// but when there is no caption, because tinymce strips out
+	// or refuses to render a whole <dl> when a <dd> is empty
+	if ( this.fpo === undefined ) {
+		SWFPut_putswf_video_xed.prototype.fpo = {};
+		var t = this.fpo;
+		t.cmt = '<!-- do not strip me -->';
+		t.ent = t.cmt;
+		t.enx = t.ent;
+		var eenc = document.createElement('div');
+		eenc.innerHTML = t.ent;
+		t.enc = eenc.textContent || eenc.innerText || t.ent;
+		t.rxs = '((' + t.cmt + ')|(' + t.enx + ')|(' + t.enc + '))';
+		t.rxx = '.*' + t.rxs + '.*';
+		t.is  = function(s, eq) {
+			return s.match(RegExp(eq ? t.rxs : t.rxx));
+		};
+	}
+
+	// we might be contructed before tinymce is loaded/setup,
+	// but we need to know about it, so use a 1s timer which,
+	// should not really affect load, until we can get what we
+	// need. *not* using a max because e.g. network errors can
+	// make indefinite delays, and user might continue with
+	// the same loaded page; so, rely on 1s timer being mild
+	// even if it continues throughout the session because
+	// tinymce is not in use.
+	if ( this.ini_timer === undefined ) {
+		SWFPut_putswf_video_xed.prototype.ini_timer = "working";
+		var that = this, f = function() {
+			if ( typeof tinymce === 'undefined' ) {
+				that.ini_timer = setTimeout(f, 1000);
+				return;
+			}
+
+			that.ini_timer = "done";
+
+			that.tmce_ma = parseInt(tinymce.majorVersion);
+			that.tmce_mn = parseFloat(tinymce.minorVersion);
+
+			// tmce 3.4.x is in WP 3.3.1, and 3.2.7 in WP 3.0.2;
+			if ( that.tmce_ma < 4 && that.tmce_mn < 4.0 ) {
+				that.put_at_cursor = that.put_at_cursor_OLD;
+				that.set_edval = that.set_edval_OLD;
+				that.get_edval = that.get_edval_OLD;
+			} else {
+				that.get_mce_dat();
+			}
+		};
+		f();
+	}
 };
 SWFPut_putswf_video_xed.prototype = {
 	defs : {
@@ -183,10 +237,150 @@ SWFPut_putswf_video_xed.prototype = {
 			}
 		}
 	},
-	// The next 2 get/set funcs were fine in Konqueror, Chromium, and
-	// Firefox (Unix and MS); but of course MSIE is too lousy to
-	// just work. Hence, the .isIE noise.
+	// always test retval.ed!
+	get_mce_dat : function() {
+		if ( this.ini_timer !== "done" ) {
+			return { "ed" : false };
+		}
+
+		if ( typeof(this.tmv) === 'undefined' ) {
+			// static or invariant
+			var r = {};
+			r.v   = this.tmce_ma;
+			r.vmn = this.tmce_mn;
+			r.old = (r.v < 4);
+			r.ng  = (r.old && r.vmn < 4.0);
+			this.tmv = r;
+		}
+		// dynamic
+		this.tmv.ed  = tinymce.activeEditor || false;
+		this.tmv.hid = this.tmv.ed ? this.tmv.ed.isHidden() : true;
+		this.tmv.txt = this.tmv.ed ? this.tmv.ed.getElement() : false;
+		return this.tmv;
+	},
+	// 1.0.9: previously made no distinction between 'Visual'
+	// and 'Text' editor content since the shortcode had no special
+	// presentation and could be handled as plain text in either
+	// case. Now I hope to give it a presentation in the 'Visual'
+	// editor and so it must be possible to get and set
+	// the raw text content regardless of whether the 'Visual'
+	// is displayed.
 	get_edval : function() {
+		var dat = this.get_mce_dat();
+		var ed = dat.ed;
+		if ( ed && dat.hid ) {
+			if ( dat.txt ) {
+				return dat.txt.value;
+			}
+		} else if ( ed ) {
+			var bm;
+			if ( tinymce.isIE ) {
+				ed.focus();
+				bm = ed.selection.getBookmark();
+			}
+
+			// hope to sync Visual content to textarea:
+			tinymce.triggerSave();
+			// the original textarea
+			var t = dat.txt;
+			var c = t ? t.value : ed.getContent({format : 'raw'});
+			
+			if ( tinymce.isIE ) {
+				ed.focus();
+				ed.selection.moveToBookmark(bm);
+			}
+			return c;
+		}
+		// fall through
+		return jQuery(edCanvas).val();
+	},
+	set_edval : function(setval) {
+		var dat = this.get_mce_dat();
+		var ed = dat.ed;
+		if ( ed && ! dat.hid && dat.old ) {
+			var bm, r = false, t;
+
+			if ( true || tinymce.isIE ) {
+				ed.focus();
+				bm = ed.selection.getBookmark();
+				ed.setContent('', {format : 'raw'});
+			}
+
+			if ( (t = dat.txt) ) {
+				t.value = setval;
+				ed.load(t);
+			} else {
+				r = ed.setContent(setval, {format : 'raw'});
+			}
+
+			if ( true || tinymce.isIE ) {
+				ed.focus();
+				ed.selection.moveToBookmark(bm);
+			}
+			return r;
+		} else if ( ed && ! dat.hid ) {
+			ed.focus();
+			var sel = ed.selection, st = sel ? sel.getStart() : false,
+				r = ed.setContent(setval, {format : 'raw'}); //, no_events: 0});
+			
+			// As of tmce 4 I have not found a way to make node
+			// filter run (for plugins iframe w/ vid), excecpt
+			// this ugly hack hide/show (it just worked w/ tmce 3).
+			// Sigh. Revisit this if new info appears.
+			ed.nodeChanged();
+			ed.hide();
+			ed.show();
+
+			if ( false && st && (sel = ed.selection) ) {
+				sel.setCursorLocation(st);
+			}
+			return r;
+		}
+
+		// fall through
+		return jQuery(edCanvas).val(setval);
+	},
+	put_at_cursor : function(sc) {
+		var dat = this.get_mce_dat();
+		var ed = dat.ed;
+
+		if ( ! ed || dat.hid ) {
+			send_to_editor(sc);
+			return false;
+		}
+
+		// found in WP image edit plugin:
+		// if insertion point is within the div block used
+		// to contain the representation of the shortcode,
+		// create new paragraph node and move insertion
+		// point there; class of div we're checking is
+		// "evhTemp" (same as WP image edit plugin, and
+		// presumably others, so the benefit of this is
+		// not ours alone)
+		var node;
+		node = ed.dom.getParent(ed.selection.getNode(), 'div.evhTemp');
+		if ( node ) {
+			var p = ed.dom.create('p');
+			ed.dom.insertAfter(p, node);
+			ed.selection.setCursorLocation(p, 0);
+		}
+
+		ed.selection.setContent(sc, {format : 'text'});
+		// ed.selection.setContent() is not enough, because
+		// without the next (set(get)) line, good not it is;
+		// this apparently forces reprocessing for 'Visual'
+		// content such that plugin callbacks get called
+		// (like ed.onBeforeSetContent and ed.onPostProcess)
+		ed.setContent(ed.getContent());
+		// this is needed to sync change to 'Text' editor
+		tinymce.triggerSave();
+
+		return false;
+	},
+
+	// Old function versions for earlier SWFPut and TinyMCE:
+	// in WP versions < 3.3
+	get_edval_OLD : function() {
 		if ( typeof tinymce != 'undefined' ) {
 			var ed;
 			if ( (ed = tinyMCE.activeEditor) && !ed.isHidden() ) {
@@ -205,7 +399,7 @@ SWFPut_putswf_video_xed.prototype = {
 		}
 		return jQuery(edCanvas).val();
 	},
-	set_edval : function(setval) {
+	set_edval_OLD : function(setval) {
 		if ( typeof tinymce != 'undefined' ) {
 			var ed;
 			if ( (ed = tinyMCE.activeEditor) && !ed.isHidden() ) {
@@ -225,6 +419,12 @@ SWFPut_putswf_video_xed.prototype = {
 		}
 		return jQuery(edCanvas).val(setval);
 	},
+	// out_at_cursor is not an old proc, but a wrapper around
+	// old functionality
+	put_at_cursor_OLD : function(sc) {
+		send_to_editor(sc);
+	},
+
 	mk_shortcode : function(cs, sc) {
 		var c = this['map'][cs];
 		delete this['map'][cs];
@@ -326,7 +526,8 @@ SWFPut_putswf_video_xed.prototype = {
 		if ( va.length < 2 ) {
 			return false;
 		}
-		var oa = new Array();
+
+		var oa = [];
 		var i = 0, j = 0;
 		var l;
 		while ( i < va.length ) {
@@ -336,28 +537,33 @@ SWFPut_putswf_video_xed.prototype = {
 			}
 			oa[j++] = l;
 		}
+
 		var p;
 		if ( j >= va.length || (p = this.find_rbrack(l)) < 0 ) {
-			delete oa;
 			return false;
 		}
 		l = l.substring(p + 1);
+
 		var ce = "[/" + sc + "]";
 		p = l.indexOf(ce);
 		if ( p >= 0 ) {
 			l = l.substring(p + ce.length);
 		}
 		if ( l.length ) {
-			oa[j ? (j - 1) : j++] += l;
+			// the \n<br> are an attempt to leave a visible
+			// indication of where the code/object was, even
+			// struggling a bit against tinymce tag stripping
+			oa[j ? (j - 1) : j++] += "\n<br/>\n<br/>\n" + l;
 		}
 		while ( i < va.length ) {
 			oa[j++] = va[i++];
 		}
+
 		try {
 			this.set_edval(oa.join(sep));
 			this.last_match = '';
 		} catch ( e ) {}
-		delete oa;
+
 		return false;
 	},
 	repl_xed : function(f, id, cs, sc) {
@@ -404,7 +610,9 @@ SWFPut_putswf_video_xed.prototype = {
 			l = va[i];
 			this.set_edval(va.join(sep));
 			this.last_match = l;
-		} catch ( e ) {}
+		} catch ( ex ) {
+			console.log('repl_xed, RETURN EARLY: catch -- ' + ex.name + ': "' + ex.message + '"');
+		}
 		return false;
 	},
 	from_xed : function(f, id, cs, sc) {
@@ -466,6 +674,12 @@ SWFPut_putswf_video_xed.prototype = {
 						v = '';
 					}
 				}
+
+				// lousy hack for the SWFPut tinymce plugin to
+				// combat tinymce element-stripping breakage
+				if ( k === 'caption' && $this.fpo.is(v, 0) ) {
+					v = '';
+				}
 				$this['map'][k] = v;
 			}
 		});
@@ -475,7 +689,7 @@ SWFPut_putswf_video_xed.prototype = {
 		this.fill_map(f, id);
 		var r = this.mk_shortcode(cs, sc);
 		if ( r != null ) {
-			send_to_editor(r);
+			this.put_at_cursor(r);
 		}
 		return false;
 	},
@@ -492,6 +706,12 @@ SWFPut_putswf_video_xed.prototype = {
 					this.checked = v == 'true' ? 'checked' : '';
 				} else if ( this.type == "text" ) {
 					if ( true || v != '' ) {
+						this.value = v;
+					}
+					// lousy hack for the SWFPut tinymce plugin to
+					// combat tinymce element-stripping breakage
+					if ( k === 'caption' && $this.fpo.is(v, 0) ) {
+						v = '';
 						this.value = v;
 					}
 				}

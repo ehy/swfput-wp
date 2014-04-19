@@ -1,7 +1,7 @@
 #! /usr/bin/make -f
 # License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
 
-PRJVERS = 1.0.8
+PRJVERS = 2.0.0
 PRJSTEM = swfput
 PRJNAME = $(PRJSTEM)-$(PRJVERS)
 
@@ -10,20 +10,23 @@ COPYRIGHT_YEAR   = 2013
 TRANS_BUGS_EMAIL = edhynan@gmail.com
 
 SRCS = ${PRJSTEM}.php \
+	help_txt.php \
 	Options_0_0_2b.inc.php \
 	OptField_0_0_2b.inc.php \
 	OptSection_0_0_2b.inc.php \
 	OptPage_0_0_2b.inc.php \
+	mce_ifm.php \
+	wpabspath.php \
 	index.php
 
 # The Opt*.php are support classes, not tied to this plugin,
 # so they do not share the text-domain and are not args to xgettext
-POTSRCS = ${PRJSTEM}.php
+POTSRCS = ${PRJSTEM}.php help_txt.php mce_ifm.php
 
 DOCSD = docs
 JSDIR = js
-JSBIN = $(JSDIR)/formxed.min.js $(JSDIR)/screens.min.js $(H5DIR)/front.min.js
-JSSRC = $(JSDIR)/formxed.js $(JSDIR)/screens.js $(H5DIR)/front.js
+JSBIN = $(JSDIR)/editor_plugin.min.js $(JSDIR)/editor_plugin3x.min.js $(JSDIR)/formxed.min.js $(JSDIR)/screens.min.js $(H5DIR)/front.min.js
+JSSRC = $(JSDIR)/editor_plugin.js $(JSDIR)/editor_plugin3x.js $(JSDIR)/formxed.js $(JSDIR)/screens.js $(H5DIR)/front.js
 H5DIR = evhh5v
 H5BIN = $(H5DIR)/evhh5v.css $(H5DIR)/ctlbar.svg $(H5DIR)/ctlvol.svg $(H5DIR)/ctrbut.svg $(JSDIR)/front.min.js
 LCDIR = locale

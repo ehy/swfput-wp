@@ -1,7 +1,7 @@
 10
 
 dir
-898084
+898100
 http://plugins.svn.wordpress.org/swfput/tags
 http://plugins.svn.wordpress.org
 
@@ -25,52 +25,6 @@ EdHynan
 
 
 b8457f37-d9ea-0310-8a92-e5e31aec5664
-
-1.0.7
-dir
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-http://plugins.svn.wordpress.org/swfput/trunk
-849091
-
-1.0.8
-dir
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-http://plugins.svn.wordpress.org/swfput/trunk
-883056
 
 1.0.1
 dir
@@ -164,6 +118,29 @@ dir
 http://plugins.svn.wordpress.org/swfput/trunk
 767937
 
+2.0
+dir
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+http://plugins.svn.wordpress.org/swfput/trunk
+898100
+
 1.0.4
 dir
 
@@ -232,4 +209,50 @@ dir
 
 http://plugins.svn.wordpress.org/swfput/trunk
 820298
+
+1.0.7
+dir
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+http://plugins.svn.wordpress.org/swfput/trunk
+849091
+
+1.0.8
+dir
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+http://plugins.svn.wordpress.org/swfput/trunk
+883056
 

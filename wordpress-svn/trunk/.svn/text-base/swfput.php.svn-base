@@ -2,8 +2,8 @@
 /*
 Plugin Name: SWFPut
 Plugin URI: http://agalena.nfshost.com/b1/?page_id=46
-Description: Add Flash and HTML5 video to WordPress posts, pages, and widgets, from arbitrary URI's or media library ID's or files in your media upload directory tree (including uplaods not in the WordPress media library).
-Version: 1.0.8
+Description: Add Flash and HTML5 video to WordPress posts, pages, and widgets, from arbitrary URI's or media library ID's or files in your media upload directory tree (including uploads not in the WordPress media library).
+Version: 2.0
 Author: Ed Hynan
 Author URI: http://agalena.nfshost.com/b1/
 License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
@@ -116,7 +116,7 @@ class SWF_put_evh {
 	const plugin_webpage = 'http://agalena.nfshost.com/b1/?page_id=46';
 	
 	// this version
-	const plugin_version = '1.0.8';
+	const plugin_version = '2.0.0';
 	
 	// the widget class name
 	const swfput_widget = 'SWF_put_widget_evh';
@@ -125,6 +125,11 @@ class SWF_put_evh {
 	
 	// identifier for settings page
 	const settings_page_id = 'swfput1_settings_page';
+	
+	// option for mce plugin -> iframe video content script
+	const optmceplg  = 'swfput_mceifm';
+	// TTL for ticket, re. mce plugin -> iframe video content script
+	const ttlmceplg  = 86400;
 	
 	// option group name in the WP opt db
 	const opt_group  = '_evh_swfput1_opt_grp';
@@ -138,6 +143,7 @@ class SWF_put_evh {
 	const optdispmsg = '_evh_swfput1_dmsg'; // posts
 	const optdispwdg = '_evh_swfput1_dwdg'; // widgets no-admin
 	const optdisphdr = '_evh_swfput1_dhdr'; // header area
+	const opttinymce = '_evh_swfput1_dmce'; // tinymce editor
 	// optcode... -- shortcode processing
 	const optcodemsg = '_evh_swfput1_scms'; // posts
 	const optcodewdg = '_evh_swfput1_scwi'; // widgets no-admin
@@ -162,6 +168,8 @@ class SWF_put_evh {
 	const disp_msg    = 1;
 	const disp_widget = 2;
 	const disp_hdr    = 4;
+	// when to use video display in tinymce editot
+	const deftinymce  = 'always'; // always, nonmobile, never
 	// more
 	const defcodemsg = 'true';  // posts
 	const defcodewdg = 'false'; // widgets no-admin
@@ -201,6 +209,14 @@ class SWF_put_evh {
 	// swfput program default video path
 	protected $swfputvid;
 
+	// for a link to an html help doc
+	const helphtmlname = 'README.html';
+	const helphtml_ref = '#3.1. Form Buttons';
+	protected static $helphtml = null;
+	// for a link to an pdf help doc
+	const helppdfname = 'README.pdf';
+	protected static $helppdf = null;
+
 	// settings js subdirectory
 	const settings_jsdir = 'js';
 	// settings js shortcode editor helper name
@@ -210,16 +226,11 @@ class SWF_put_evh {
 	// JS: name of class to control textare/button pairs
 	const js_textpair_ctl = 'evhplg_ctl_textpair';
 
-	// for a link to an html help doc
-	const helphtmlname = 'README.html';
-	const helphtml_ref = '#3.1. Form Buttons';
-	protected static $helphtml = null;
-	// for a link to an pdf help doc
-	const helppdfname = 'README.pdf';
-	protected static $helppdf = null;
-
 	// swfput js shortcode editor helper name
 	const swfxedjsname = 'formxed.min.js';
+	// swfput js shortcode editor helper name
+	const swfxpljsname = 'editor_plugin.min.js';
+	const swfxpljsname3x = 'editor_plugin3x.min.js';
 	
 	// html5 video front-end js
 	const evhv5vjsdir  = 'evhh5v';
@@ -289,11 +300,22 @@ class SWF_put_evh {
 		$cl = __CLASS__;
 
 		if ( $adm ) {
+			// Some things that must be *before* 'init'
+			// NOTE cannot call current_user_can() because
+			// its dependencies might not be ready at this point!
+			// Use condition on current_user_can() in the callbacks
+			$aa = array($cl, 'on_deactivate');
+			register_deactivation_hook($pf, $aa);
+			$aa = array($cl, 'on_activate');
+			register_activation_hook($pf,   $aa);
+
+			$aa = array($cl, 'on_uninstall');
+			register_uninstall_hook($pf,    $aa);
+
 			// add 'Settings' link on the plugins page entry
-			// cannot be in activate hook
 			$name = plugin_basename($pf);
-			add_filter("plugin_action_links_$name",
-				array($cl, 'plugin_page_addlink'));
+			$aa = array($cl, 'plugin_page_addlink');
+			add_filter('plugin_action_links_' . $name, $aa);
 		}
 
 		// some things are to be done in init hook: add
@@ -334,7 +356,7 @@ class SWF_put_evh {
 		);
 		
 		if ( $chkonly !== true ) {
-			// TODO: so far there are only checkboxes
+			$items[self::opttinymce] = self::deftinymce;
 		}
 		
 		return $items;
@@ -436,6 +458,11 @@ class SWF_put_evh {
 				self::optdispwdg,
 				$items[self::optdispwdg],
 				array($this, 'put_widget_opt'));
+		$fields[$nf++] = new $Cf(self::opttinymce,
+				self::wt(__('Video in post editor:', 'swfput_l10n')),
+				self::opttinymce,
+				$items[self::opttinymce],
+				array($this, 'put_tinymce_opt'));
 		// commented: from early false assumption that header
 		// could be easily hooked:
 		//$fields[$nf++] = new $Cf(self::optdisphdr,
@@ -659,8 +686,8 @@ class SWF_put_evh {
 		} else {
 			global $current_screen;
 			add_contextual_help($current_screen,
-				'<h6>' . __('Overview') . '</h6>' . $t[0] .
-				'<h6>' . __('Tips', 'swfput_l10n') . '</h6>' . $t[1] .
+				'<h3>' . __('Overview') . '</h3>' . $t[0] .
+				'<h3>' . __('Tips', 'swfput_l10n') . '</h3>' . $t[1] .
 				$tt);
 		}
 	}
@@ -668,7 +695,8 @@ class SWF_put_evh {
 	public function settings_js() {
 		$jsfn = self::settings_jsname;
 		$j = $this->settings_js;
-        wp_enqueue_script($jsfn, $j);
+		$v = self::plugin_version;
+        wp_enqueue_script($jsfn, $j, false, $v);
 	}
 
 	// This function is placed here below the function that sets-up
@@ -696,7 +724,7 @@ class SWF_put_evh {
 	public static function hook_admin_menu() {
 		$cl = __CLASS__;
 		$id = 'SWFPut_putswf_video';
-		$tl = __('SWFPut Video ("Help" above has a tab for this)', 'swfput_l10n');
+		$tl = __('SWFPut Video', 'swfput_l10n');
 		$tl = self::wt($tl);
 		$fn = 'put_xed_form';
 		if ( current_user_can('edit_posts') ) {
@@ -707,200 +735,146 @@ class SWF_put_evh {
 		}
 	}
 
+	// on init, e.g. mce plugin in the post-related pages
+	public static function hook_admin_init() {
+		if ( self::use_tinymce_plugin() ) {
+			// tinymce version in 3.0.3 n.g. and next testing
+			// version of WP I have is 3.3.1
+			$v = (3 << 24) | (3 << 16) | (0 << 8) | 0;
+			$ok = self::wpv_min($v);
+	
+			if ( $ok && current_user_can( 'edit_posts' )
+				&& current_user_can( 'edit_pages' ) ) {
+				$aa = array(__CLASS__, 'add_mceplugin_js');
+				add_filter('mce_external_plugins', $aa);
+				$aa = array(__CLASS__, 'filter_mce_init');
+				add_filter('tiny_mce_before_init', $aa);
+			}
+		}
+	}
+
+	// filter for any mce plugin init settings needs (and testing)
+	public static function filter_mce_init($init_array) {
+		// FPO, presently
+		if ( false ) {
+			//$init_array['wpeditimage_disable_captions'] = true;
+			$init_array['keep_styles'] = true;
+		}
+		return $init_array;
+	}
+
+	// filter to add mce plugin javascript
+	public static function add_mceplugin_js($plugin_array) {
+		// tinymce major version 4 begins in WP 3.9
+		$v = (3 << 24) | (9 << 16) | (0 << 8) | 0;
+		$shiny = self::wpv_min($v);
+		
+		$jsfile = $shiny ? self::swfxpljsname : self::swfxpljsname3x;
+
+		$pf = self::mk_pluginfile();
+		$pname = 'swfput_mceplugin';
+		$t = self::settings_jsdir . '/' . $jsfile;
+		$jsfile = plugins_url($t, $pf);
+		$plugin_array[$pname] = $jsfile;
+		return $plugin_array;
+	}
+
 	// add a help tab in the post-related pages
 	public static function hook_admin_head() {
+		$scr = function_exists('get_current_screen') ?
+			get_current_screen() : false;
+
+		// for pages w/ TinyMCE editor, put info
+		// needed by the tinymce plugin added in 1.0.9
+		// -- use something like wp nonces -- the nonce will
+		// not work, the checks fail when made from the
+		// iframe content script, also nonces are intended
+		// for single use. So, use a prng number; it will be
+		// reused any number of times while post with swfput
+		// video is being edited, so it is not a nonce.
+		// Note this is not rigorous security*, just deflecting
+		// mischievous poking at the script w/ odd query string
+		// values. Other check values may be used as well.
+		// [*] The script does not write to the DB, it only uses
+		// get_option and wp_get_attachment_url; but, prefer not
+		// to produce arbitrary URLs or attachment info that would
+		// result from crafted query --
+		// this prng-ticket should do the trick. self::ttlmceplg
+		// is an expiration value (TTL) tested in the script against
+		// the stored (int)time(). The script fails if its client
+		// differs from $_SERVER['REMOTE_ADDR'].
+		if ( self::use_tinymce_plugin() ) {
+			if ( ! $scr || $scr->base === 'post' ) {
+				$u = '' . (function_exists('get_current_user_id') ?
+					get_current_user_id() : 0);
+				$rn = '' . self::uniq_rand();
+				$ticket = array($rn, (int)time(),
+					self::ttlmceplg, $_SERVER['REMOTE_ADDR']);
+				if ( isset($_SERVER['REMOTE_HOST']) ) {
+					$ticket[] = $_SERVER['REMOTE_HOST'];
+				}
+		
+				$opt = get_option(self::optmceplg);
+				if ( $opt ) {
+					$opt[$u] = $ticket;
+					update_option(self::optmceplg, $opt);			
+				} else {
+					$opt = array($u => $ticket);
+					add_option(self::optmceplg, $opt, '', false);
+				}
+		
+				$info = array('a' => ABSPATH, 'i' => $rn, 'u' => $u);
+				printf('
+					<script type="text/javascript">
+						var swfput_mceplug_inf = %s;
+					</script>%s',
+					json_encode($info), "\n");
+			}
+		}
+
 		// get_current_screen() introduced in WP 3.1
 		// (thus spake codex)
 		// I have 3.0.2 to test with, and 3.3.1, nothing in between,
 		// so 3.3 will be used as minimum
 		$v = (3 << 24) | (3 << 16) | (0 << 8) | 0;
 		$ok = self::wpv_min($v);
-		// no compatible alternative for now
-		if ( ! $ok ) {
-			return;
-		}
 
-		$scr = get_current_screen();
-		if ( ! $scr ) {
-			return;
-		}
+		include 'help_txt.php';
+		$hlptxt = swfput_get_helptext(self::$helphtml, self::$helppdf);
 
-		// The help to be displayed with a tab under the "Help" button.
-		$hlptxt =
-		__('<p>
-		Hopefully, much of the SWFPut setup form
-		is self-explanatory.
-		There is more detailed documentation as HTML
-		<a href="%s" target="_blank">here (in a new tab)</a>,
-		or as a PDF file
-		<a href="%s" target="_blank">here (in a new tab)</a>.
-		</p><p>
-		There is one important restriction on the form\'s
-		text entry fields. The values may not have any
-		ASCII \'&quot;\' (double quote) characters. Hopefully
-		that will not be a problem.
-		</p><p>
-		The following items probably need explanation:
-		</p><p>
-		<h6>Flash or HTML5 video URLs or media library IDs</h6>
-		Near the top of the form, after the "Caption" field,
-		a text entry field named
-		"Flash video URL or media library ID" appears.
-		This is for the video file that the flash player
-		will use. You may enter a URL by hand (which may
-		be off-site), or make a selection from the next
-		two items,
-		"Select flash video URL from uploads directory" and
-		"Select ID for flash video from media library."
-		The first of these two holds a selection of files
-		found under your <code>wp-content/uploads</code>
-		directory with a FLV or MP4 extension. Files
-		are placed under this directory when you use the
-		<em>WordPress</em> media library, but you may also
-		place files there \'by hand\' using, for example,
-		ftp or ssh or any suitable utility (placing files
-		in a subdirectory is a good idea).
-		In fact, uploading video files \'by hand\' might
-		be the easiest way to bypass size limits that
-		reject large video file uploads through the
-		media library interface. The next field
-		has a selection of media files with a
-		<em>WordPress</em> \'attachment id\' and so it
-		provides only those files uploaded to the media
-		library (with a FLV or MP4 extension).
-		</p><p>
-		After those three fields for flash video, there is
-		"HTML5 video URLs or media library IDs" which,
-		like the flash text entry, is followed by selections
-		of files and \'attachment id\'s. These show files
-		with MP4 or OGG or OGV or WEBM extensions. As the
-		field names suggest, these are for the HTML5 video
-		player. An important difference is that when you
-		make a selection, the entry field is appended,
-		rather than replaced, with a \'|\' separator.
-		The HTML5 video entry field can take more than one
-		value, as explained below.
-		</p><p>
-		It is not necessary to fill both the flash and HTML5
-		video URL fields, but it is a good idea to do so
-		if you can prepare the video in the needed formats.
-		If you specify only one type, the other type of
-		video player is not produced in the page code.
-		If you do specify URLs for both flash and HTML5 video,
-		then the page code will have one as primary content,
-		and the other as "fallback" content. Fallback content
-		is shown by the web-browser only when the primary
-		content cannot be shown. For example, if flash is
-		primary content, but you have specified HTML5 content
-		too, then a visitor to your site who does not
-		have a flash plugin would see the HTML5 video player
-		if the browser supports it.
-		(Mobile browsers are less likely to have a flash
-		plugin than desktop-type browsers.)
-		</p><p>
-		By default, flash is made primary content with
-		HTML5 as fallback. You may make HTML5 be primary
-		and flash be fallback with the "HTML5 video primary"
-		option on the settings page. (Go to the "Settings"
-		menu and select "SWFPut Plugin" for the settings page.)
-		</p><p>
-		The current state of affairs with HTML5 video will
-		require three transcodings of the video if you
-		want broad browser support; moreover, the supported
-		"container" formats -- .webm, .ogg/.ogv, and .mp4 --
-		might contain different audio and video types ("codecs")
-		and only some of these will be supported by various
-		browsers.
-		Users not already familiar with this topic should
-		do enough research to make the preceding statements
-		clear.
-		</p><p>
-		The "HTML5 video URLs" field
-		will accept any number of URLs, which
-		must be separated by \'|\'. Each URL <em>may</em>
-		be appended with a mime-type + codecs argument,
-		separated from the URL by \'?\'. Whitespace around
-		the separators is accepted and stripped-off. Please
-		note that the argument given should <em>not</em>
-		include "type=" or quotes: give only the
-		statement that should appear within the quotes.
-		For example:</p>
-		<blockquote><code>
-		vids/gato.mp4 ? video/mp4 | vids/gato.webm ? video/webm; codecs=vp8,vorbis | vids/gato.ogv?video/ogg; codecs=theora,vorbis
-		</code></blockquote>
-		<p>
-		In the example, where two codecs are specified there is
-		no space after the comma.
-		Some online examples
-		show a space after the comma,
-		but some older
-		versions of <em>Firefox</em> will reject that
-		usage, so the space after the comma is best left out.
-		</p><p>
-		<h6>Use initial image as no-video alternate</h6>
-		This checkbox, if enabled (it is, by default) will
-		use the "initial image file" that may be specified
-		for the video player in an \'img\' element
-		that the visitor\'s browser might display if video
-		is not available.
-		</p><p>
-		There is one additional consideration for this image:
-		the \'img\' element is given the width and height
-		specified in the form for the flash player, and the
-		visitor\'s browser will scale the image in both
-		dimensions, possibly causing the image to be
-		\'stretched\' or \'squeezed\'.
-		The image proportions are restored with
-		<em>JavaScript</em>, but only if scripts are
-		not disabled in the visitor\'s browser.
-		Therefore, it is a
-		good idea to prepare images to have the expected
-		<em>pixel</em> aspect ratio
-		(top/bottom or left/right tranparent
-		areas might be one solution).
-		</p><p>
-		<h6>Mobile width</h6>
-		This input field appears just below the
-		pixel dimensions fields. If this value is
-		greater than zero, and a mobile browser is
-		detected, then this width will be used with
-		a proportional height according to the
-		regular pixel dimensions. This might be
-		useful when, for example, sidebar content
-		actually appears below main content due to
-		the mobile browser\'s small size (theme support
-		may be necessary to see this behavior). This
-		is probably most useful for video widgets placed
-		on a sidebar, but please experiment.
-		The default value for this field, 0,
-		disables this feature, and it has no effect if
-		a mobile browser is not detected.
-		</p>', 'swfput_l10n');
+		// put help tab content, for 3.3.0 or greater . . .
+		if ( $ok && $scr ) {
+			// nothing specific to widgets; only guessing that
+			// edit_theme* are suitable
+			if ( $scr->base === 'widgets'
+				&& (current_user_can('edit_theme_options')
+				||  current_user_can('edit_themes')) ) {
+				$scr->add_help_tab(array(
+					'id'      => 'help_tab_widgets_swfput',
+					'title'   => __('SWFPut Video Player', 'swfput_l10n'),
+					'content' => self::wt($hlptxt)
+					// content may be a callback
+					)
+				);
+			} else if ( $scr->base === 'post'
+				&& (current_user_can('edit_posts')
+				||  current_user_can('edit_pages')) ) {
+				$scr->add_help_tab(array(
+					'id'      => 'help_tab_posts_swfput',
+					'title'   => __('SWFPut Video', 'swfput_l10n'),
+					'content' => self::wt($hlptxt)
+					// content may be a callback
+					)
+				);
+			}
 
-		// nothing specific to widgets; only guessing that
-		// edit_theme* are suitable
-		if ( $scr->base === 'widgets'
-			&& (current_user_can('edit_theme_options')
-			||  current_user_can('edit_themes')) ) {
-			$scr->add_help_tab(array(
-				'id'      => 'help_tab_widgets_swfput',
-				'title'   => __('SWFPut Video Player', 'swfput_l10n'),
-				'content' => self::wt(sprintf($hlptxt,
-					self::$helphtml, self::$helppdf))
-				// content may be a callback
-				)
-			);
-		} else if ( $scr->base === 'post'
-			&& (current_user_can('edit_posts')
-			||  current_user_can('edit_pages')) ) {
-			$scr->add_help_tab(array(
-				'id'      => 'help_tab_posts_swfput',
-				'title'   => __('SWFPut Video Form', 'swfput_l10n'),
-				'content' => self::wt(sprintf($hlptxt,
-					self::$helphtml, self::$helppdf))
-				// content may be a callback
-				)
-			);
+		// . . . or, lesser
+		} else {
+			global $current_screen;
+			add_contextual_help($current_screen,
+				'<h6>'.__('SWFPut Video Player', 'swfput_l10n').'</h6>'
+				. self::wt($hlptxt)
+				);
 		}
 	}
 
@@ -915,38 +889,86 @@ class SWF_put_evh {
 			$pf = self::mk_pluginfile();
 			$t = self::settings_jsdir . '/' . self::swfxedjsname;
 			$jsfile = plugins_url($t, $pf);
-	        wp_enqueue_script($jsfn, $jsfile, array('jquery'), '1.0.1');
+			$v = self::plugin_version;
+	        wp_enqueue_script($jsfn, $jsfile, array('jquery'), $v);
 	    }
 	}
 
 	// deactivate cleanup
 	public static function on_deactivate() {
-		$wreg = __CLASS__;
+		if ( ! current_user_can('activate_plugins') ) {
+			return;
+		}
+
 		$name = plugin_basename(self::mk_pluginfile());
-		$arf = array($wreg, 'plugin_page_addlink');
-		remove_filter("plugin_action_links_$name", $arf);
+		$aa = array(__CLASS__, 'plugin_page_addlink');
+		remove_filter('plugin_action_links_' . $name, $aa);
 
 		self::unregi_widget();
 
+		$aa = array(__CLASS__, 'validate_opts');
 		unregister_setting(self::opt_group, // option group
 			self::opt_group, // opt name; using group passes all to cb
-			array($wreg, 'validate_opts'));
+			$aa);
 	}
 
 	// activate setup
 	public static function on_activate() {
-		$wreg = __CLASS__;
-		add_action('widgets_init', array($wreg, 'regi_widget'), 1);
+		if ( ! current_user_can('activate_plugins') ) {
+			return;
+		}
+
+		add_action('widgets_init', array(__CLASS__, 'regi_widget'), 1);
+
+		// try to write ABSPATH to a php var in an included php file,
+		// for secure use by the script that produces iframe content
+		// for the tinymce plugin.
+		//
+		// Whether this can be done is uncertain, and we are silent
+		// about failure, the consequence of which is that the
+		// aforementioned script will do something else that requires
+		// WP_PLUGIN_DIR to be descended from the WP root dir, and
+		// will fail if it is not.
+		if ( ! defined('ABSPATH') ) {
+			return;
+		}
+		
+		$fn = rtrim(dirname(__FILE__), '/') . '/wpabspath.php';
+		$fh = fopen($fn, 'r+b');
+		if ( ! $fh ) {
+			return;
+		}
+		$cont = fread($fh, filesize($fn));
+		$pat =
+			'/([ \t]*\\$wpabspath[ \t]*=[ \t]*\').+(\'[ \t]*;[ \t]*)/m';
+
+		if ( $cont && preg_match($pat, $cont) ) {
+			$cont = explode("\n", $cont);
+			$cont = preg_replace($pat, '\1' . ABSPATH . '\2', $cont);
+			if ( $cont && ! fseek($fh, 0, SEEK_SET) && ftruncate($fh, 0) ) {
+				$cont = implode("\n", $cont);
+				// no need to check return: failure allowed
+				fwrite($fh, $cont);
+			}
+		}
+		
+		fclose($fh);
 	}
 
 	// uninstall cleanup
 	public static function on_uninstall() {
+		if ( ! current_user_can('install_plugins') ) {
+			return;
+		}
+
 		self::unregi_widget();
 		
 		$opts = self::get_opt_group();
 		if ( $opts && $opts[self::optdelopts] != 'false' ) {
 			delete_option(self::opt_group);
 		}
+		// This does not need to be conditional
+		delete_option(self::optmceplg);
 	}
 
 	// add link at plugins page entry for the settings page
@@ -992,6 +1014,31 @@ class SWF_put_evh {
 		self::load_translations();
 		$this->init_opts();
 
+		// for video in tinymce plugin: remove stale tickets;
+		// the option is a map user_id -> ticket-data to allow
+		// multiple users editing (wonder if this code will ever
+		// get excersized); update if any are stale, or delete
+		// if none are fresh
+		$pf = get_option(self::optmceplg);
+		if ( $pf ) {
+			$upd = array();
+			$doupd = false;
+			$t = (int)time();
+			foreach ( $pf as $k => $v ) {
+				if ( (int)$v[2] > ($t - (int)$v[1]) ) {
+					$upd[$k] = $v;
+				} else {
+					$doupd = true;
+				}
+			}
+			
+			if ( empty($upd) ) {
+				delete_option(self::optmceplg);
+			} else if ( $doupd ) {
+				update_option(self::optmceplg, $upd);
+			}
+		}
+
 		$pf = self::mk_pluginfile();
 		// admin or public invocation?
 		$adm = is_admin();
@@ -999,22 +1046,14 @@ class SWF_put_evh {
 		$cl = __CLASS__;
 
 		if ( $adm ) {
-			// keep it clean: {de,}activation
-			if ( current_user_can('activate_plugins') ) {
-				$aa = array($cl, 'on_deactivate');
-				register_deactivation_hook($pf, $aa);
-				$aa = array($cl, 'on_activate');
-				register_activation_hook($pf,   $aa);
-			}
-			if ( current_user_can('install_plugins') ) {
-				$aa = array($cl, 'on_uninstall');
-				register_uninstall_hook($pf,    $aa);
-			}
-
 			// hook&filter to make shortcode form for editor
 			if ( self::get_posts_code_option() === 'true' ) {
+				$aa = array($cl, 'hook_admin_init');
+				add_action('admin_init', $aa);
 				$aa = array($cl, 'hook_admin_head');
-				add_action('admin_head', $aa);
+				add_action('admin_head-post.php', $aa);
+				add_action('admin_head-post-new.php', $aa);
+				add_action('admin_head-widgets.php', $aa);
 				$aa = array($cl, 'hook_admin_menu');
 				add_action('admin_menu', $aa);
 				$aa = array($cl, 'filter_admin_print_scripts');
@@ -1119,7 +1158,7 @@ class SWF_put_evh {
 			$opts = array();
 		}
 		// checkboxes need value set - nonexistant means false
-		$ta = self::get_opts_defaults();
+		$ta = self::get_opts_defaults(true);
 		foreach ( $ta as $k => $v ) {
 			if ( array_key_exists($k, $opts) ) {
 				continue;
@@ -1145,6 +1184,27 @@ class SWF_put_evh {
 			$oo = $a_orig[$k];
 
 			switch ( $k ) {
+				// 'radio' multi-choice
+				case self::opttinymce:
+					switch ( $ot ) {
+						case 'always':
+						case 'nonmobile':
+						case 'never':
+							$a_out[$k] = $ot;
+							$nupd += ($ot === $oo) ? 0 : 1;
+							break;
+						default:               //'Set a value:'
+							$e = __('bad choice: "%s"', 'spambl_l10n');
+							$e = sprintf($e, $ot);
+							self::errlog($e);
+							add_settings_error(self::wt($k),
+								sprintf('%s[%s]', self::opt_group, $k),
+								self::wt($e), 'error');
+							$a_out[$k] = $oo;
+							$nerr++;
+							break;
+					}
+					break;
 				// hidden opts for 'screen options' -- boolean
 				case self::optscreen1:
 					$a_out[$k] = ($ot == 'false') ? 'false' : 'true';
@@ -1322,14 +1382,20 @@ class SWF_put_evh {
 			of video must be switched on or off, for either
 			posts (and pages) or widgets
 			or both, these are the options to use.
-			</p><p>
 			When the plugin shortcode is disabled the
 			video elements that would have been placed are
 			replaced by a notice with the form
 			"[A/V content &lt;caption&gt; disabled],"
 			where "&lt;caption&gt;"
 			is any caption that was included with the shortcode,
-			or empty if there was no caption.'
+			or empty if there was no caption.
+			</p><p>
+			The "Video in post editor" multiple choice option
+			controls the display of video in the post/page
+			editor. This is only effective if the "TinyMCE"
+			editor included with WordPress is in use, and only
+			when the "Visual" tab is selected.
+			'
 			, 'swfput_l10n'));
 		printf('<p>%s</p>%s', $t, "\n");
 
@@ -1533,6 +1599,37 @@ class SWF_put_evh {
 		$tt = self::wt(__('Use SWF script if PHP+Ming is available', 'swfput_l10n'));
 		$k = self::optuseming;
 		$this->put_single_checkbox($a, $k, $tt);
+	}
+
+	// callback, put SWF in head?
+	public function put_tinymce_opt($a) {
+		$tt = self::wt(__('When to display video in post editor', 'swfput_l10n'));
+		$k = self::opttinymce;
+		$group = self::opt_group;
+		$va = array(
+			array(__('Always display video in the post editor', 'spambl_l10n'), 'always'),
+			array(__('Only when the browser platform is not mobile', 'spambl_l10n'), 'nonmobile'),
+			array(__('Never display video in the post editor', 'spambl_l10n'), 'never')
+		);
+
+		$v = trim('' . $a[$k]);
+
+		foreach ( $va as $oa ) {
+			$txt = self::wt($oa[0]);
+			$val = $oa[1];
+			$chk = '';
+			$chk = $v === $val ? 'checked="checked" ' : '';
+
+			printf(
+				'%s<label><input type="radio" id="%s" ', "\n", $k
+			);
+			printf(
+				'name="%s[%s]" value="%s" %s/>', $group, $k, $val, $chk
+			);
+			printf(
+				'&nbsp;%s</label><br />%s', $txt, "\n"
+			);
+		}
 	}
 
 	// commented: from early false assumption that header
@@ -2411,6 +2508,28 @@ class SWF_put_evh {
 		return $is_so;
 	}
 	
+	// V. 1.0.9 added video display in the TinyMCE post/page editor,
+	// and this checks the settings page option controlling when
+	// it is used, and returns boolean.
+	public static function use_tinymce_plugin() {
+		$opt = self::get_tinymce_option();
+		
+		switch ( $opt ) {
+			case 'always':
+				return true;
+			case 'nonmobile':
+				if ( function_exists('wp_is_mobile') ) {
+					return ! wp_is_mobile();
+				}
+				return true;
+			case 'never':
+			default:
+				return false;
+		}
+		
+		return false;
+	}
+
 	// Get a (almost certainly) unique random number:
 	// **NOT** for security, only probable uniqueness
 	// for e.g., element id attributes.
@@ -2621,6 +2740,11 @@ class SWF_put_evh {
 		if ( self::get_message_option() !== 'true' )
 			return 'false';
 		return self::opt_by_name(self::optpregmsg);
+	}
+
+	// get the place at head option
+	public static function get_tinymce_option() {
+		return self::opt_by_name(self::opttinymce);
 	}
 
 	// get the place at head option
