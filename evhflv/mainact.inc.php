@@ -1445,6 +1445,95 @@ var bbar_resize = function () {
 	this._yscale = bscl * 100;
 };
 
+function add_scale_buttons() {
+	if ( disable_scale_buttons || ! rm_scale_buttons_done ) {
+		return;
+	}
+	rm_scale_buttons_done = false;
+
+	var t = movebutkey;
+	for ( var i in t ) {
+		var c = t[i];
+		bbar[c]._x = bbar[c].save_x;
+	}
+	
+	var b = savebutkey;
+	for ( var i in b ) {
+		var c = b[i];
+		bbar[c] = savebutobj[c];
+		bbar[c]._visible = savebutobj[c].save_visible;
+	}
+}
+
+function rm_scale_buttons() {
+	if ( disable_scale_buttons || rm_scale_buttons_done ) {
+		return;
+	}
+	rm_scale_buttons_done = true;
+	
+	/*
+	if ( savebutevt === undefined ) {
+		savebutevt = ["onDragOut","onDragOver","onKeyUp","onKillFocus",
+			"onPress","onRelease","onReleaseOutside","onRollOut",
+			"onRollOver","onSetFocus"];
+	}
+	var e = savebutevt;
+	*/
+
+	if ( savebutkey === undefined ) {
+		savebutkey = ["dosclbut", "nosclbut", "nosclbutdisable",
+			"fullscrbut", "windscrbut"];
+	}
+	var b = savebutkey;
+
+	var savenew = savebutobj === undefined;
+	if ( savenew ) {
+		savebutobj = {};
+	}
+
+	var offs = bbar.spkrbut._x + butwidth;
+	for ( var i in b ) {
+		var c = b[i];
+		if ( savenew ) {
+			savebutobj[c] = bbar[c];
+		}
+		savebutobj[c].save_visible = savebutobj[c]._visible;
+		savebutobj[c]._visible = false;
+		bbar[c] = {};
+		// put props on stand-in obj, to simplify some using code
+		bbar[c]._x       = savebutobj[c]._x;
+		bbar[c]._y       = savebutobj[c]._y;
+		bbar[c]._width   = savebutobj[c]._width;
+		bbar[c]._height  = savebutobj[c]._height;
+		bbar[c]._xscale  = savebutobj[c]._xscale;
+		bbar[c]._yscale  = savebutobj[c]._yscale;
+		bbar[c]._visible = savebutobj[c]._visible;
+		bbar[c].enabled  = savebutobj[c].enabled;
+	}
+
+	if ( movebutkey === undefined ) {
+		movebutkey = ["playbut", "pausebut", "pausebutdisable",
+			"stopbut", "stopbutdisable", "spkrbut", "spkrmsw"];
+	}
+	var t = movebutkey;
+	for ( var i in t ) {
+		var c = t[i];
+		bbar[c].save_x = bbar[c]._x;
+	}
+	
+	var w = orig_butwidth;
+	offs = 0.25;
+	bbar.playbut._x = w * offs;
+	bbar.pausebut._x = w * offs;
+	bbar.pausebutdisable._x = w * offs;
+	offs += 1.75;
+	bbar.stopbut._x = w * offs;
+	bbar.stopbutdisable._x = w * offs;
+	offs += 1.75;
+	bbar.spkrbut._x = w * offs;
+	bbar.spkrmsw._x = w * offs;
+}
+
 var inibut_resize = function () {
 	this._x = Stage.width / 2;
 	this._y = Stage.height / 2;
@@ -2152,87 +2241,6 @@ adddbgtext(" audb: '" + audb + "'\n");
 if ( audb ) {
 	v4aud = urlesc(v_id);
 	adddbgtext(" v4aud: '" + v4aud + "'\n");
-}
-
-function add_scale_buttons() {
-	if ( disable_scale_buttons || ! rm_scale_buttons_done ) {
-		return;
-	}
-	rm_scale_buttons_done = false;
-
-	var t = movebutkey;
-	for ( var i in t ) {
-		var c = t[i];
-		bbar[c]._x = bbar[c].save_x;
-	}
-	
-	var b = savebutkey;
-	for ( var i in b ) {
-		var c = b[i];
-		bbar[c] = savebutobj[c];
-		bbar[c]._visible = savebutobj[c].save_visible;
-	}
-}
-
-function rm_scale_buttons() {
-	if ( disable_scale_buttons || rm_scale_buttons_done ) {
-		return;
-	}
-	rm_scale_buttons_done = true;
-	
-	if ( savebutevt === undefined ) {
-		savebutevt = ["onDragOut","onDragOver","onKeyUp","onKillFocus",
-			"onPress","onRelease","onReleaseOutside","onRollOut",
-			"onRollOver","onSetFocus"];
-	}
-	var e = savebutevt;
-	if ( savebutkey === undefined ) {
-		savebutkey = ["dosclbut", "nosclbut", "nosclbutdisable",
-			"fullscrbut", "windscrbut"];
-	}
-	var b = savebutkey;
-	var savenew = savebutobj === undefined;
-	if ( savenew ) {
-		savebutobj = {};
-	}
-
-	var offs = bbar.spkrbut._x + butwidth;
-	for ( var i in b ) {
-		var c = b[i];
-		if ( savenew ) {
-			savebutobj[c] = bbar[c];
-		}
-		savebutobj[c].save_visible = savebutobj[c]._visible;
-		savebutobj[c]._visible = false;
-		bbar[c] = {};
-		bbar[c]._x = offs;
-		bbar[c]._xscale = 0;
-		bbar[c]._yscale = 0;
-		bbar[c]._visible = false;
-		bbar[c].enabled = false;
-	}
-
-	if ( movebutkey === undefined ) {
-		movebutkey = ["playbut", "pausebut", "pausebutdisable",
-			"stopbut", "stopbutdisable", "spkrbut", "spkrmsw"];
-	}
-	var t = movebutkey;
-	for ( var i in t ) {
-		var c = t[i];
-		bbar[c].save_x = bbar[c]._x;
-	}
-	
-	var w = orig_butwidth;
-	offs = 0.25;
-	bbar.playbut._x = w * offs;
-	bbar.pausebut._x = w * offs;
-	bbar.pausebutdisable._x = w * offs;
-	offs += 1.75;
-	bbar.stopbut._x = w * offs;
-	bbar.stopbutdisable._x = w * offs;
-	offs += 1.75;
-	bbar.spkrbut._x = w * offs;
-	bbar.spkrmsw._x = w * offs;
 }
 
 // initial interface and size setup

@@ -79,7 +79,7 @@ if ( ! isset($wpabspath) ||
 	$wpabspath = rtrim($wpabspath, '/');
 	
 	// $_SERVER['SCRIPT_FILENAME'], not  __FILE__,
-	// used to compare abspath -- why? you ask?
+	// used to compare abspath -- why, you ask?
 	// __FILE__ might dereference symbolic links, but
 	// the plugin directory path might include
 	// symlinks; also, the JS that uses its own URL to
@@ -106,22 +106,23 @@ if ( ! isset($wpabspath) ||
 		if ( $t1[$i] !== $t2[$i] ) {
 			die("Security: plugin directory descent is not from\n" .
 				"the expected path, probably due to a non-standard\n" .
-				"definition of WP_PLUGIN_DIR or WP_CONTENT_DIR.\n" .
-				"This plugin script will not run in that case,\n" .
-				"to guard against path attacks -- sorry!");
+				"location of the plugins directory in this WordPress\n" .
+				"installation. This plugin script requires that the\n" .
+				"plugins directory be descended from the WordPress\n" .
+				"install directory, if it cannot write to its own\n" .
+				"directory, to guard against path attacks -- sorry!");
 		}
 	}
 }
 
-$wpabspath = rtrim($wpabspath, '/');
-$wpabspath .= '/wp-load.php';
+$wpabspath = rtrim($wpabspath, '/') . '/wp-load.php';
 if ( ! is_file($wpabspath) || ! is_readable($wpabspath) ) {
 	die("PATH LEADS TO EREHWON");
 }
 
 require($wpabspath);
 
-// Checks against naughtiness
+// Checks against ticket stored as option referenced in query data
 $usr = getwithdef('u', '');
 $vopt = get_option('swfput_mceifm'); // hardcode name - never from query
 if ( ! ($vopt && isset($vopt[$usr])) ) {
@@ -158,14 +159,41 @@ $ctrbut = implode('/', $t);
 // will not work relative to the URL of this script
 function fix_url($u) {
 	if ( ! preg_match(',^ *[a-z]+://[^/]+/,i', $u) ) {
-		// We ignore possible server w/o proto and
-		// paths that do not start at server root
-		// TODO: more work on this
-		$u = 'http://' . $_SERVER['SERVER_NAME'] . '/' . ltrim($u, '/');
+		$tpr = isset($_SERVER['HTTPS']);
+		if ( $tpr ) {
+			$tpr = $_SERVER['HTTPS'];
+			$tpr = ($tpr === '' || strcasecmp($tpr, 'off') === 0)
+				? 'http://' : 'https://';
+		} else {
+			$tpr = 'http://';
+		}
+		
+		$tsv = isset($_SERVER['SERVER_NAME']);
+		if ( $tsv ) {
+			$tsv = $_SERVER['SERVER_NAME'];
+		}
+		if ( ! $tsv ) {
+			$tsv = isset($_SERVER['SERVER_ADDR']);
+			$tsv = $tsv ? $_SERVER['SERVER_ADDR'] : '';
+		}
+
+		if ( $tsv === '' ) {
+			$tpr = '';
+		} else if ( isset($_SERVER['SERVER_PORT']) ) {
+			$tpt = '' . $_SERVER['SERVER_PORT'];
+			if ( ($tpr === 'http://' && $tpt !== '80')
+				|| ($tpr === 'https://' && $tpt !== '443') ) {
+				$tsv = explode(':', $tsv);
+				$tsv = $tsv[0] . ':' . $tpt;
+			}
+		}
+
+		$u = $tpr . $tsv . '/' . ltrim($u, '/');
 	}
 	return $u;
 }
 
+// now, setup for and do output
 $allvids = array();
 $vnum = 0;
 
