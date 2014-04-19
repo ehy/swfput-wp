@@ -198,6 +198,8 @@ Update: now it does. In the words of Emily Litella, "Never mind."
 
 == Changelog ==
 
+= 2.1 =
+
 = 2.0 =
 * Video will now display in the TinyMCE "Visual" editor. This
 	requires HTML5 compatible video files, and a recent and
@@ -360,6 +362,8 @@ Update: now it does. In the words of Emily Litella, "Never mind."
 * Initial release.
 
 == Upgrade Notice ==
+
+= 2.1 =
 
 = 2.0 =
 * New video display in editor, minor bug fixes.

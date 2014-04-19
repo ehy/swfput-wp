@@ -1,7 +1,7 @@
 #! /bin/sh
 
 VMAJOR=2
-VMINOR=0
+VMINOR=1
 RMAJOR=0
 RMINOR=0
 

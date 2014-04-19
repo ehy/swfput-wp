@@ -21,7 +21,7 @@
 
 /*
 * Description: build SWF video app with PHP/Ming, put on stdout
-* Version: 2.0
+* Version: 2.1
 * Author: Ed Hynan
 * License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
 */
