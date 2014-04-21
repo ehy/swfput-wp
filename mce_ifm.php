@@ -212,7 +212,7 @@ $jatt['a_vid'] = array(
 	'srcs'      => array(),
 	'altmsg'    => getwithdef('altmsg', 'Video is not available'),
 	'caption'	=> getwithdef('caption', ''),
-	'aspect'	=> getwithdef('aspect', '4:3')
+	'aspect'	=> getwithdef('aspect', '0')
 );
 
 $vstdk = array('play', 'loop', 'volume',
@@ -253,8 +253,8 @@ if ( ($k = getwithdef('altvideo', '')) != '' ) {
 	foreach ( $a as $k ) {
 		$t = explode('?', trim($k));
 		$v = array('src' => maybe_get_attach(trim($t[0])));
-		if ( isset($v[1]) ) {
-			$v['type'] = trim($v[1]);
+		if ( isset($t[1]) ) {
+			$v['type'] = trim($t[1]);
 		}
 		$jatt['a_vid']['srcs'][] = $v;
 	}
@@ -299,7 +299,7 @@ $allvids[] = $jatt;
 	$w = $v['width'];
 	$h = $v['height'];
 	$barhi = $v['barheight'];
-	$asp = array_key_exists('aspect', $v) ? $v['aspect'] : 0;
+	$asp = array_key_exists('aspect', $v) ? $v['aspect'] : '0';
 	$parentdiv = "div_wp_media_".$i;
 	$auxdiv = "div_vidoj_".$i;
 	$vidid = "va_o_putswf_video_".$i;
@@ -312,12 +312,10 @@ $allvids[] = $jatt;
 		// sources
 		for ( $j = 0; $j < count($ss); $j++ ) {
 			$s = $ss[$j];
-			$src = sprintf('<source src="%s"%s>'."\n", $s['src'],
+			printf('<source src="%s"%s>'."\n", $s['src'],
 				isset($s['type']) && $s['type'] != '' ?
 					sprintf(' type="%s"', $s['type']) : ''
 			);
-			//error_log('source: ' . $src);
-			echo $src;
 		}
 		if ( array_key_exists('tracks', $v) )
 		for ( $j = 0; $j < count($v['tracks']); $j++ ) {

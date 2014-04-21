@@ -2978,7 +2978,6 @@ evhh5v_controller.prototype = {
 
 		this.setup_aspect_factors(); this.put_canvas_poster();
 		if ( this.ctlbar.evhh5v_controlbar ) {
-console.log('CALL resize_bar: w == ' + v + ', h == ' + this.barheight);
 			this.ctlbar.evhh5v_controlbar.resize_bar(v, this.barheight);
 			this.play_progress_update();
 		}
