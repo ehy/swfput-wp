@@ -1,0 +1,372 @@
+=== SWFPut - SWFlash Put ===
+Contributors: EdHynan
+Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4Q2Y8ZUG8HXLC
+Tags: video, video player, movies, tube, flash, flash video, html5, html5 video, graphics, movie, video content, a/v content
+Requires at least: 3.0.2
+Tested up to: 3.8.1
+Stable tag: 1.0.8
+Text Domain: swfput_l10n
+License: GPLv3 or later
+License URI: http://www.gnu.org/licenses/gpl-3.0.html
+
+SWFPut provides a video players for posts and pages and widget areas, as both flash and HTML5 video.
+
+== Description ==
+
+SWFPut provides video players for posts and pages, and
+in widget areas with an included video widget. There
+are two video player programs included: one for the
+flash plugin, and one for the HTML5 video element.
+
+As well as providing video player programs, SWFPut makes
+video setup easy by providing a full featured form with
+fields for your video URL's and the necessary details.
+For posts and pages, the form appears in a new "metabox"
+on the editor page. For widgets, the form appears with
+the usual drag and drop widget interface. After adding
+video objects, the form will continue to be useful for
+making changes (or, if you wish, to delete the video).
+
+As many video objects as you wish can be placed in posts
+pages, and of course the widget supports as many instances
+as you wish. Note that widget support may be theme-dependent.
+You may specify flash or HTML5 video, or both with one
+being primary content and the other as fallback.
+
+Here are some features of SWFPut to consider:
+
+*	SWFPut works directly with media file
+	URL's; that is, SWFPut does *not* embed
+	the video players of providers such as YouTube or Vimeo.
+	SWFPut is for video files which are accessible by URL,
+	whether hosted at your site or off-site.
+	The setup form provides two media selection lists.
+	The first is a selection of files found (recursively)
+	under your wp-content/uploads directory. This list
+	has the advantage that it does *not* use the
+	WordPress media library -- it will find files that
+	you upload 'by hand' (with ftp, ssh, etc.). This feature
+	will work around upload size limits that might prevent
+	you from uploading large video files to the media library.
+	The second is a selection of files found in the
+	WordPress media library and is presented with the
+	file name and the 'attachment id'. This refers to files
+	by ID, so it might be helpful if you manipulate media
+	and expect ID associations to be valid. Files selections
+	are filtered by name extension: FLV and MP4 for flash,
+	and MP4, OGG and OGV, and WEBM for HTML5 video.
+	
+*	Video resources do not need to be on your site:
+	any URL can be specified, so you may present players
+	for off-site of 3rd party resources.
+
+*	SWFPut does not interfere with the appearance of
+	a site: a video is presented much like an image
+	(such as .png or .jpg) is, with the same sort of
+	border and optional caption. The appearance of the
+	video control interface, or control bar, is simple
+	and quiet so it should not clash with site design.
+
+*	SWFPut allows you to set the display aspect ratio
+	for the video. Some video is 'anamorphic' in that
+	the pixel width and height do not match the intended
+	proportion of display width and height. You might
+	film your child's school play as 16:9 'widescreen'
+	but use a space saving feature of your recorder that
+	saves the video at 480x360 (which is not 16:9). You can
+	set SWFPut to display the video at the intended 16:9
+	aspect ratio. You may set any aspect ratio (make it
+	distorted if you wish).
+
+*	The core features of the flash video player program
+	included with SWFPut have been verified to work with
+	the Gnash free-software browser plugin, which is good
+	because non-free binary-only software is bad. (At the
+	time of this writing, Gnash does not handle the MP4
+	video container format, so it is preferable that you
+	prepare flash video in the FLV container, even using the
+	h.264 and AAC codecs. Of course, you may use MP4 if
+	you must.)
+
+*	The flash video player program included with SWFPut
+	is written and compiled with the *Ming* PHP extension,
+	and the code is included, so you may modify the player.
+	The HTML5 player is written JavaScript, and the original,
+	un-minified version is included, so you may modify it.
+	In fact, the zip archive available at the WordPress
+	repository includes all sources, although a POSIX/Unix
+	environment is required to build.
+
+*	Localization sources are included; hopefully, polyglot
+	users will help with translations.
+
+== Installation ==
+
+There are no special installation requirements.
+
+Preferably, install SWFPut from the WordPress Plugin
+Repository through the WordPress administrative interface.
+
+To install from a zip archive:
+
+1. Log in at your WordPress site
+
+1. Select 'Plugins -> Add New'
+
+1. Select 'Upload'
+
+1. Select 'Browse'
+
+1. In your system's file selector, select the SWFPut zip file;
+  select 'OK' or equivalent
+
+1. Select 'Install Now'
+
+1. Select 'Activate Plugin'
+
+At this point "SWFPut" should be an entry on the plugins page.
+The Settings menu should have an item "SWFPut Plugin".
+
+If the above is not so, there is probably a problem at your site's
+host; for example if the host is Unix system there is very likely
+a problem with incorrect permissions metadata (mode) on a directory
+such as wp-content/uploads, or an unsuitable user or group ownership
+of (probably several) files and directories. This can be a frequent
+problem if the host has PHP configured in "safe mode".
+
+If the host is not a Unix system, I'm sorry to say I cannot help;
+maybe your hosting provider can.
+
+If the installation was successful, you should see a "SWFPut Video Player"
+widget under 'Appearance -> Widgets' and a meta-box entitled
+"SWFPut Video" on the posts and pages editing pages.
+
+For additional help, you will find README* files (differing in format,
+and excluding 'readme.txt', which is this file) that discuss the
+flash video player in more detail.
+
+== Frequently Asked Questions ==
+
+= Do I really need to understand "aspect ratio" and things? =
+
+Probably not. In most case the width and height of the
+video will match the intended display proportion.
+"Anamorphic" video is not rare, but probably not too common
+either. The author has seen videos on e.g., YouTube,
+that are distorted by wrong display aspect ratio
+(which is not YouTube's fault), but only a few.
+If you find that your video looks squeezed or stretched,
+you can always use a little trial & error with the display
+aspect setting until it looks good.
+
+What you *must* understand is that you *must* convert
+video to the format (the type) that the plugin or browser
+can handle; namely, FLV or MP4 for flash; and, MP4 *and*
+OGG *and* WEBM for HTML5 video. Web searches will yield
+plenty of resources on video file formats, but many of them
+will be difficult to understand if you are not experienced
+with digital video and its formats.
+
+If you use a converter
+program designed for non-experts, you won't need to
+understand too many details. A web search should turn up
+some converter programs that might be worth a try.
+
+= Why doesn't SWFPut support HTML5 video? =
+
+Update: now it does. In the words of Emily Litella, "Never mind."
+
+== Screenshots ==
+
+1. The SWFPut widget setup form (bottom).
+
+2. The SWFPut posts/page setup form ('meta box') with the first
+	section hidden.
+
+3. The appearance of video placed by SWFPut (Twentyeleven theme
+	with dark custom colors, sidebar on left), not yet playing.
+
+== Changelog ==
+
+= 1.0.8 =
+* HTML5 video support now equals the original flash video support, and
+	a new HTML5 video player provides an interface with the same
+	design as the flash player, and as much of the same behavior
+	as can be implemented with the HTML5 video specification.
+* A new option (on the settings page) to make HTML5 video be primary
+	content, with flash video as fallback. The default is to place
+	flash video as primary content with HTML5 video as fallback due
+	to the burden HTML5 video puts on users to provide several
+	video file formats, but users who are confident in the use
+	of HTML5 video will find this new option preferable.
+* It is not necessary to specify both flash and and html video
+	resources; either can be left out (i.e., SWFPut is no longer
+	a flash video player first with html video as an afterthought).
+* Incompatible change: a checkbox on the setup form to specify that
+	the medium is audio, not video, has been removed. That feature
+	really had no place in this plugin, and audio-only support in
+	the flash player was bare-bones minimal.
+* Interface: when a mobile browser is detected, the control bar
+	removes the natural-scale and full-scale buttons, which do
+	not make sense on mobile. The simpler control bar is more
+	appropriate and usable.
+* Improved help under the "Help" button the editor and widgets pages.
+* Interface: volume control slider now presents vertically on
+	non-mobile, and horizontally on mobile. It now scales down
+	at small display sizes (previously it was clipped).
+* The original design goal that JavaScript will not be necessary so
+	that your site remains useful to visitors with scripting
+	disabled has been retained, albeit with necessary qualification:
+	the html video player requires JavaScript, but where scripting
+	is not available, the default interface and behavior for the
+	HTML5 video element provided by the browser will be present,
+	so all is not lost.
+* The several .swf binaries for control bar sizes are gone, now
+	a single binary simply scales the control bar (which of course
+	was the original intent and meant to be among the first
+	updates, but time flies like a banana).
+* Directory and file file name changes.
+* Bug fixes, of course.
+
+= 1.0.7 =
+* Presentation improvements. Display should be well scaled now,
+	at least for themes that handle scaling; e.g., 'viewport'
+	meta element. This improvement should be particularly
+	appreciable with regard to mobile platforms (on which the
+	display was very poor in previous versions), but desktop/notebook
+	machines benefit too when the window is made small. Video
+	widgets place on sidebar should now be resized to sidebar
+	width regardless of user-set dimensions, but on mobile if
+	secondary content is placed below primary content (i.e.
+	sidebar appears below main area) video object will use
+	available space up up to the dimensions set.
+* The original description through version 1.0.6 stated that
+	"SWFPut does not add any JavaScript." That is no longer
+	the case. Video object size adjustments depend on JavaScript,
+	but on non-mobile platforms the display does not depend on
+	script, and if scripts are disabled the video objects will
+	behave as they have through version 1.0.6. On mobile platforms
+	JavaScript is necessary because on those platforms the plugin now 
+	builds the elements by script rather than putting out HTML
+	directly. (It is probably uncommon and impractical for
+	scripting to be disabled in mobile browsers.)
+* There is a new input field on the setup forms, just below the
+	dimensions fields. This is to provide a width to use only
+	if a mobile browser is detected; the height is automatically
+	proportional, according to the regular dimensions. This might
+	be useful for widgets placed on the sidebar, because the
+	sidebar might be placed below, rather than beside, the main
+	content. In this case more space might be available, and
+	larger display might be suitable. This feature is disabled
+	with a value of '0' which is the default. Experiment.
+
+= 1.0.6 =
+* Added do-nothing index.php to prevent directory listing, as WP does.
+* Made the "Screen Options" tab -> "Section Introductions" checkbox
+	value persistent, if the "Save Settings" button is clicked.
+* Style tweaks and size tweaks (admin) in response to WP 3.8 changes.
+* Checked with WP 3.8: OK.
+
+= 1.0.5 =
+* BUG[unimportant]: tested a defined(FOO) (rather than 'FOO'),
+	but PHP handles that common mistake anyway, and
+	it could only matter in the very exceedingly extremely unlikely
+	case that a .mo translation binary for this plugin's
+	text domain has been installed under the WP's WP_LANG_DIR.
+* Added check for naughty direct invocation.
+* Checked (Oct 25 2013) with just-released WP 3.7: OK.
+
+= 1.0.4 =
+* Fixed duplicated message on settings page update resulting from
+	unneeded settings_errors() call: this call did not cause a dup
+	from 3.0.1 to 3.3.1 (but was not needed either), but between
+	WP 3.3.1 and 3.5.? some core guard against the duplicate was
+	removed (or broken?).
+* Updated swf object element and added optional alternative
+	img and video (html5) nested elements. Removed classid from
+	object, except when MSIE is in user agent string. (inspired
+	by suggestion from aileenf).
+* Added help tabs.
+* Some code cleanups.
+
+= 1.0.3 =
+* Maintenance.
+* Put i18n final code (__() was already present), added make rules to
+	build *.mo using (added) script in new locale dir, added FPO/test
+	en_US.mo, confirmed working with dummy string replacement.
+* Changed Opt* support classes to use display strings borrowed
+	exactly from WP (3.6) core; these classes are not tied to this
+	plugin and should not use its text-domain. Using core strings,
+	they might still get translated (might get translated when the
+	plugin does not -- that is deemed OK).
+* Added is_admin() check in init code to avoid setting admin-only
+	hooks when not needed (and executing associated code); plus a
+	few more specific current_user_can() checks.
+* Increased maximum "attachment" queried when finding suitable
+	media files to present in posts/pages shortcode form.
+
+= 1.0.2 =
+* Corrections in (vaguely distinguished)
+	add_(action|filter) calls, according to tag used, checked against
+	WP source (whether do_action() or apply_filters() is invoked
+	for the tag in question).
+* Changed JS unescape() to decodeURIComponent().
+* Removed compiled README.{tty,tt8} from distribution.
+* Changed 'wptexturize' to 'htmlentities' for paths and things that
+	should not be pretty-pretty'd.
+* Changed 'Tags:' in readme.txt (and stable, etc.).
+
+= 1.0.1 =
+* Maintenance.
+* Editing and corrections in readme.txt.
+* Behavior change: without initial image ('poster'), medium is no
+	longer fetched automatically (without visitor play); was a
+	misfeature that would simulate an initial image by pausing
+	at a random point within first few seconds of the video, but
+	the unsolicited download is a bad idea. (Might be an option
+	in future.)
+
+= 1.0.0 =
+* Initial release.
+
+== Upgrade Notice ==
+
+= 1.0.8 =
+* HTML5 video support now equals the original flash video support, and
+	a new HTML5 video player provides an interface with the same
+	design as the flash player, and as much of the same behavior
+	as can be implemented with the HTML5 video specification.
+
+= 1.0.7 =
+* Presentation improvements, especially for small mobile platforms.
+
+= 1.0.6 =
+* Confirmed working with WP 3.8.
+
+= 1.0.5 =
+* Confirmed working with WP 3.7.
+
+= 1.0.4 =
+* Now has option to specify fallback HTML5 video sources, and/or use
+	the initial (poster) image as display when flash video is
+	not supported.
+
+= 1.0.3 =
+* Internationalized (i18n) string handling should now be usable for
+	anyone interested in making (and contributing) translations;
+	distribution includes a .POT file. Remaining changes are cleanups
+	which should not have a noticeable effect.
+
+= 1.0.2 =
+* BUG FIX: URLs with non-8-bit characters would be corrupted in form
+	fields, causing not-found errors in the player: changed
+	JS unescape() to decodeURIComponent(). (Feedback on non-UTF-8
+	charsets would be welcome!)
+
+= 1.0.1 =
+* This revision has one important change: a misfeature that would
+	simulate an initial image (if one was not set) by pausing
+	at a random point within first few seconds of the video, but
+	causing an unsolicited download of the medium in order to do so,
+	has been disabled.
+	

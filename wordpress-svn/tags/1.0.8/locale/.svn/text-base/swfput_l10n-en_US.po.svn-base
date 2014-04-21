@@ -1,0 +1,1149 @@
+# swfput 1.0.8 Pot Source
+# Copyright (C) 2013 Ed Hynan
+# This file is distributed under the same license as the swfput package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: swfput 1.0.8\n"
+"Report-Msgid-Bugs-To: edhynan@gmail.com\n"
+"POT-Creation-Date: 2014-03-27 12:02-0400\n"
+"PO-Revision-Date: 2014-03-27 12:02 EDT\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: swfput.php:400
+msgid "Show verbose introductions:"
+msgstr "Show verbose introductions:"
+
+#: swfput.php:407
+msgid "Dynamic SWF generation:"
+msgstr "Dynamic SWF generation:"
+
+#: swfput.php:417
+msgid "General Options"
+msgstr "General Options"
+
+#: swfput.php:425
+msgid "HTML5 video primary:"
+msgstr "HTML5 video primary:"
+
+#: swfput.php:430
+msgid "Place in posts:"
+msgstr "Place in posts:"
+
+#: swfput.php:435
+msgid "Place in widget areas:"
+msgstr "Place in widget areas:"
+
+#: swfput.php:451
+msgid "Video Placement Options"
+msgstr "Video Placement Options"
+
+#: swfput.php:459
+msgid "Use shortcodes in posts:"
+msgstr "Use shortcodes in posts:"
+
+#: swfput.php:464
+msgid "Search attachment links in posts:"
+msgstr "Search attachment links in posts:"
+
+#: swfput.php:473
+msgid "Video In Posts"
+msgstr "Video In Posts"
+
+#: swfput.php:481
+msgid "Use the included widget:"
+msgstr "Use the included widget:"
+
+#: swfput.php:486
+msgid "Use shortcodes in widgets:"
+msgstr "Use shortcodes in widgets:"
+
+#: swfput.php:495
+msgid "Video In Widget Areas"
+msgstr "Video In Widget Areas"
+
+#: swfput.php:504
+msgid "When the plugin is uninstalled:"
+msgstr "When the plugin is uninstalled:"
+
+#: swfput.php:513
+msgid "Plugin Install Settings"
+msgstr "Plugin Install Settings"
+
+#: swfput.php:537
+msgid "SWFPut Plugin"
+msgstr "SWFPut Plugin"
+
+#: swfput.php:538
+msgid "SWFPut Configuration"
+msgstr "SWFPut Configuration"
+
+#. pagetype = 'options'
+#. capability = 'manage_options'
+#. callback
+#. 'hook_suffix' callback array
+#: swfput.php:544
+msgid "SWFPut Plugin Configuration"
+msgstr "SWFPut Plugin Configuration"
+
+#: swfput.php:545
+msgid "Display and Runtime Settings."
+msgstr "Display and Runtime Settings."
+
+#: swfput.php:546 swfput.php:606
+msgid "Save Settings"
+msgstr "Save Settings"
+
+#. checkbox id will 'verbose_show-hide'
+#: swfput.php:559
+msgid "Section introductions"
+msgstr "Section introductions"
+
+#. TRANSLATORS: '%1$s' is the label of a checkbox option,
+#. '%2$s' is the button label 'Save Settings';
+#. The quoted string "Screen Options" should match an
+#. interface label from the WP core, so if possible
+#. use the WP core translation for that (likewise "Help").
+#: swfput.php:587
+#, possible-php-format
+msgid ""
+"<p>The sections of this page each have an\n"
+"\t\t\tintroduction which will, hopefully, be helpful.\n"
+"\t\t\tThese introductions may\n"
+"\t\t\tbe hidden or shown with a checkbox under the\n"
+"\t\t\t\"Screen Options\" tab (next to \"Help\") or with\n"
+"\t\t\tthe \"%1$s\"\n"
+"\t\t\toption, which is the first option on this page.\n"
+"\t\t\tIf \"Screen Options\" is absent, the verbose option\n"
+"\t\t\tis off: it must be on to enable that tab.\n"
+"\t\t\t</p><p>\n"
+"\t\t\t<em>SWFPut</em> will work well with\n"
+"\t\t\tthe installed defaults, so it's not necessary\n"
+"\t\t\tto worry over the options on this page. \n"
+"\t\t\t</p><p>\n"
+"\t\t\tRemember, when any change is made, the new settings must\n"
+"\t\t\tbe submitted with the \"%2$s\" button, near the end\n"
+"\t\t\tof this page, to take effect.\n"
+"\t\t\t</p>"
+msgstr ""
+"<p>The sections of this page each have an\n"
+"\t\t\tintroduction which will, hopefully, be helpful.\n"
+"\t\t\tThese introductions may\n"
+"\t\t\tbe hidden or shown with a checkbox under the\n"
+"\t\t\t\"Screen Options\" tab (next to \"Help\") or with\n"
+"\t\t\tthe \"%1$s\"\n"
+"\t\t\toption, which is the first option on this page.\n"
+"\t\t\tIf \"Screen Options\" is absent, the verbose option\n"
+"\t\t\tis off: it must be on to enable that tab.\n"
+"\t\t\t</p><p>\n"
+"\t\t\t<em>SWFPut</em> will work well with\n"
+"\t\t\tthe installed defaults, so it's not necessary\n"
+"\t\t\tto worry over the options on this page. \n"
+"\t\t\t</p><p>\n"
+"\t\t\tRemember, when any change is made, the new settings must\n"
+"\t\t\tbe submitted with the \"%2$s\" button, near the end\n"
+"\t\t\tof this page, to take effect.\n"
+"\t\t\t</p>"
+
+#: swfput.php:605 swfput.php:1516
+msgid "Show verbose introductions"
+msgstr "Show verbose introductions"
+
+#: swfput.php:609
+#, possible-php-format
+msgid ""
+"<p>TODO: %s\n"
+"\t\t\t</p>"
+msgstr ""
+"<p>TODO: %s\n"
+"\t\t\t</p>"
+
+#: swfput.php:611
+msgid "WRITE TIPS"
+msgstr "WRITE TIPS"
+
+#: swfput.php:619
+#, possible-php-format
+msgid ""
+"<p><strong>%s</strong></p><p>\n"
+"\t\t\tMore information can be found on the\n"
+"\t\t\t<a href=\"%s\" target=\"_blank\">web page</a>.\n"
+"\t\t\tPlease submit feedback or questions as comments\n"
+"\t\t\ton that page.\n"
+"\t\t\t</p>"
+msgstr ""
+"<p><strong>%s</strong></p><p>\n"
+"\t\t\tMore information can be found on the\n"
+"\t\t\t<a href=\"%s\" target=\"_blank\">web page</a>.\n"
+"\t\t\tPlease submit feedback or questions as comments\n"
+"\t\t\ton that page.\n"
+"\t\t\t</p>"
+
+#: swfput.php:625
+msgid "For more information:"
+msgstr "For more information:"
+
+#: swfput.php:640 swfput.php:662
+msgid "Overview"
+msgstr "Overview"
+
+#: swfput.php:650 swfput.php:663
+msgid "Tips"
+msgstr "Tips"
+
+#: swfput.php:699
+msgid "SWFPut Video (\"Help\" above has a tab for this)"
+msgstr "SWFPut Video (\"Help\" above has a tab for this)"
+
+#: swfput.php:730
+#, possible-php-format
+msgid ""
+"<p>\n"
+"\t\tHopefully, much of the SWFPut setup form\n"
+"\t\tis self-explanatory.\n"
+"\t\tThere is more detailed documentation as HTML\n"
+"\t\t<a href=\"%s\" target=\"_blank\">here (in a new tab)</a>,\n"
+"\t\tor as a PDF file\n"
+"\t\t<a href=\"%s\" target=\"_blank\">here (in a new tab)</a>.\n"
+"\t\t</p><p>\n"
+"\t\tThere is one important restriction on the form's\n"
+"\t\ttext entry fields. The values may not have any\n"
+"\t\tASCII '&quot;' (double quote) characters. Hopefully\n"
+"\t\tthat will not be a problem.\n"
+"\t\t</p><p>\n"
+"\t\tThe following items probably need explanation:\n"
+"\t\t</p><p>\n"
+"\t\t<h6>Flash or HTML5 video URLs or media library IDs</h6>\n"
+"\t\tNear the top of the form, after the \"Caption\" field,\n"
+"\t\ta text entry field named\n"
+"\t\t\"Flash video URL or media library ID\" appears.\n"
+"\t\tThis is for the video file that the flash player\n"
+"\t\twill use. You may enter a URL by hand (which may\n"
+"\t\tbe off-site), or make a selection from the next\n"
+"\t\ttwo items,\n"
+"\t\t\"Select flash video URL from uploads directory\" and\n"
+"\t\t\"Select ID for flash video from media library.\"\n"
+"\t\tThe first of these two holds a selection of files\n"
+"\t\tfound under your <code>wp-content/uploads</code>\n"
+"\t\tdirectory with a FLV or MP4 extension. Files\n"
+"\t\tare placed under this directory when you use the\n"
+"\t\t<em>WordPress</em> media library, but you may also\n"
+"\t\tplace files there 'by hand' using, for example,\n"
+"\t\tftp or ssh or any suitable utility (placing files\n"
+"\t\tin a subdirectory is a good idea).\n"
+"\t\tIn fact, uploading video files 'by hand' might\n"
+"\t\tbe the easiest way to bypass size limits that\n"
+"\t\treject large video file uploads through the\n"
+"\t\tmedia library interface. The next field\n"
+"\t\thas a selection of media files with a\n"
+"\t\t<em>WordPress</em> 'attachment id' and so it\n"
+"\t\tprovides only those files uploaded to the media\n"
+"\t\tlibrary (with a FLV or MP4 extension).\n"
+"\t\t</p><p>\n"
+"\t\tAfter those three fields for flash video, there is\n"
+"\t\t\"HTML5 video URLs or media library IDs\" which,\n"
+"\t\tlike the flash text entry, is followed by selections\n"
+"\t\tof files and 'attachment id's. These show files\n"
+"\t\twith MP4 or OGG or OGV or WEBM extensions. As the\n"
+"\t\tfield names suggest, these are for the HTML5 video\n"
+"\t\tplayer. An important difference is that when you\n"
+"\t\tmake a selection, the entry field is appended,\n"
+"\t\trather than replaced, with a '|' separator.\n"
+"\t\tThe HTML5 video entry field can take more than one\n"
+"\t\tvalue, as explained below.\n"
+"\t\t</p><p>\n"
+"\t\tIt is not necessary to fill both the flash and HTML5\n"
+"\t\tvideo URL fields, but it is a good idea to do so\n"
+"\t\tif you can prepare the video in the needed formats.\n"
+"\t\tIf you specify only one type, the other type of\n"
+"\t\tvideo player is not produced in the page code.\n"
+"\t\tIf you do specify URLs for both flash and HTML5 video,\n"
+"\t\tthen the page code will have one as primary content,\n"
+"\t\tand the other as \"fallback\" content. Fallback content\n"
+"\t\tis shown by the web-browser only when the primary\n"
+"\t\tcontent cannot be shown. For example, if flash is\n"
+"\t\tprimary content, but you have specified HTML5 content\n"
+"\t\ttoo, then a visitor to your site who does not\n"
+"\t\thave a flash plugin would see the HTML5 video player\n"
+"\t\tif the browser supports it.\n"
+"\t\t(Mobile browsers are less likely to have a flash\n"
+"\t\tplugin than desktop-type browsers.)\n"
+"\t\t</p><p>\n"
+"\t\tBy default, flash is made primary content with\n"
+"\t\tHTML5 as fallback. You may make HTML5 be primary\n"
+"\t\tand flash be fallback with the \"HTML5 video primary\"\n"
+"\t\toption on the settings page. (Go to the \"Settings\"\n"
+"\t\tmenu and select \"SWFPut Plugin\" for the settings page.)\n"
+"\t\t</p><p>\n"
+"\t\tThe current state of affairs with HTML5 video will\n"
+"\t\trequire three transcodings of the video if you\n"
+"\t\twant broad browser support; moreover, the supported\n"
+"\t\t\"container\" formats -- .webm, .ogg/.ogv, and .mp4 --\n"
+"\t\tmight contain different audio and video types (\"codecs\")\n"
+"\t\tand only some of these will be supported by various\n"
+"\t\tbrowsers.\n"
+"\t\tUsers not already familiar with this topic should\n"
+"\t\tdo enough research to make the preceding statements\n"
+"\t\tclear.\n"
+"\t\t</p><p>\n"
+"\t\tThe \"HTML5 video URLs\" field\n"
+"\t\twill accept any number of URLs, which\n"
+"\t\tmust be separated by '|'. Each URL <em>may</em>\n"
+"\t\tbe appended with a mime-type + codecs argument,\n"
+"\t\tseparated from the URL by '?'. Whitespace around\n"
+"\t\tthe separators is accepted and stripped-off. Please\n"
+"\t\tnote that the argument given should <em>not</em>\n"
+"\t\tinclude \"type=\" or quotes: give only the\n"
+"\t\tstatement that should appear within the quotes.\n"
+"\t\tFor example:</p>\n"
+"\t\t<blockquote><code>\n"
+"\t\tvids/gato.mp4 ? video/mp4 | vids/gato.webm ? video/webm; "
+"codecs=vp8,vorbis | vids/gato.ogv?video/ogg; codecs=theora,vorbis\n"
+"\t\t</code></blockquote>\n"
+"\t\t<p>\n"
+"\t\tIn the example, where two codecs are specified there is\n"
+"\t\tno space after the comma.\n"
+"\t\tSome online examples\n"
+"\t\tshow a space after the comma,\n"
+"\t\tbut some older\n"
+"\t\tversions of <em>Firefox</em> will reject that\n"
+"\t\tusage, so the space after the comma is best left out.\n"
+"\t\t</p><p>\n"
+"\t\t<h6>Use initial image as no-video alternate</h6>\n"
+"\t\tThis checkbox, if enabled (it is, by default) will\n"
+"\t\tuse the \"initial image file\" that may be specified\n"
+"\t\tfor the video player in an 'img' element\n"
+"\t\tthat the visitor's browser might display if video\n"
+"\t\tis not available.\n"
+"\t\t</p><p>\n"
+"\t\tThere is one additional consideration for this image:\n"
+"\t\tthe 'img' element is given the width and height\n"
+"\t\tspecified in the form for the flash player, and the\n"
+"\t\tvisitor's browser will scale the image in both\n"
+"\t\tdimensions, possibly causing the image to be\n"
+"\t\t'stretched' or 'squeezed'.\n"
+"\t\tThe image proportions are restored with\n"
+"\t\t<em>JavaScript</em>, but only if scripts are\n"
+"\t\tnot disabled in the visitor's browser.\n"
+"\t\tTherefore, it is a\n"
+"\t\tgood idea to prepare images to have the expected\n"
+"\t\t<em>pixel</em> aspect ratio\n"
+"\t\t(top/bottom or left/right tranparent\n"
+"\t\tareas might be one solution).\n"
+"\t\t</p><p>\n"
+"\t\t<h6>Mobile width</h6>\n"
+"\t\tThis input field appears just below the\n"
+"\t\tpixel dimensions fields. If this value is\n"
+"\t\tgreater than zero, and a mobile browser is\n"
+"\t\tdetected, then this width will be used with\n"
+"\t\ta proportional height according to the\n"
+"\t\tregular pixel dimensions. This might be\n"
+"\t\tuseful when, for example, sidebar content\n"
+"\t\tactually appears below main content due to\n"
+"\t\tthe mobile browser's small size (theme support\n"
+"\t\tmay be necessary to see this behavior). This\n"
+"\t\tis probably most useful for video widgets placed\n"
+"\t\ton a sidebar, but please experiment.\n"
+"\t\tThe default value for this field, 0,\n"
+"\t\tdisables this feature, and it has no effect if\n"
+"\t\ta mobile browser is not detected.\n"
+"\t\t</p>"
+msgstr ""
+"<p>\n"
+"\t\tHopefully, much of the SWFPut setup form\n"
+"\t\tis self-explanatory.\n"
+"\t\tThere is more detailed documentation as HTML\n"
+"\t\t<a href=\"%s\" target=\"_blank\">here (in a new tab)</a>,\n"
+"\t\tor as a PDF file\n"
+"\t\t<a href=\"%s\" target=\"_blank\">here (in a new tab)</a>.\n"
+"\t\t</p><p>\n"
+"\t\tThere is one important restriction on the form's\n"
+"\t\ttext entry fields. The values may not have any\n"
+"\t\tASCII '&quot;' (double quote) characters. Hopefully\n"
+"\t\tthat will not be a problem.\n"
+"\t\t</p><p>\n"
+"\t\tThe following items probably need explanation:\n"
+"\t\t</p><p>\n"
+"\t\t<h6>Flash or HTML5 video URLs or media library IDs</h6>\n"
+"\t\tNear the top of the form, after the \"Caption\" field,\n"
+"\t\ta text entry field named\n"
+"\t\t\"Flash video URL or media library ID\" appears.\n"
+"\t\tThis is for the video file that the flash player\n"
+"\t\twill use. You may enter a URL by hand (which may\n"
+"\t\tbe off-site), or make a selection from the next\n"
+"\t\ttwo items,\n"
+"\t\t\"Select flash video URL from uploads directory\" and\n"
+"\t\t\"Select ID for flash video from media library.\"\n"
+"\t\tThe first of these two holds a selection of files\n"
+"\t\tfound under your <code>wp-content/uploads</code>\n"
+"\t\tdirectory with a FLV or MP4 extension. Files\n"
+"\t\tare placed under this directory when you use the\n"
+"\t\t<em>WordPress</em> media library, but you may also\n"
+"\t\tplace files there 'by hand' using, for example,\n"
+"\t\tftp or ssh or any suitable utility (placing files\n"
+"\t\tin a subdirectory is a good idea).\n"
+"\t\tIn fact, uploading video files 'by hand' might\n"
+"\t\tbe the easiest way to bypass size limits that\n"
+"\t\treject large video file uploads through the\n"
+"\t\tmedia library interface. The next field\n"
+"\t\thas a selection of media files with a\n"
+"\t\t<em>WordPress</em> 'attachment id' and so it\n"
+"\t\tprovides only those files uploaded to the media\n"
+"\t\tlibrary (with a FLV or MP4 extension).\n"
+"\t\t</p><p>\n"
+"\t\tAfter those three fields for flash video, there is\n"
+"\t\t\"HTML5 video URLs or media library IDs\" which,\n"
+"\t\tlike the flash text entry, is followed by selections\n"
+"\t\tof files and 'attachment id's. These show files\n"
+"\t\twith MP4 or OGG or OGV or WEBM extensions. As the\n"
+"\t\tfield names suggest, these are for the HTML5 video\n"
+"\t\tplayer. An important difference is that when you\n"
+"\t\tmake a selection, the entry field is appended,\n"
+"\t\trather than replaced, with a '|' separator.\n"
+"\t\tThe HTML5 video entry field can take more than one\n"
+"\t\tvalue, as explained below.\n"
+"\t\t</p><p>\n"
+"\t\tIt is not necessary to fill both the flash and HTML5\n"
+"\t\tvideo URL fields, but it is a good idea to do so\n"
+"\t\tif you can prepare the video in the needed formats.\n"
+"\t\tIf you specify only one type, the other type of\n"
+"\t\tvideo player is not produced in the page code.\n"
+"\t\tIf you do specify URLs for both flash and HTML5 video,\n"
+"\t\tthen the page code will have one as primary content,\n"
+"\t\tand the other as \"fallback\" content. Fallback content\n"
+"\t\tis shown by the web-browser only when the primary\n"
+"\t\tcontent cannot be shown. For example, if flash is\n"
+"\t\tprimary content, but you have specified HTML5 content\n"
+"\t\ttoo, then a visitor to your site who does not\n"
+"\t\thave a flash plugin would see the HTML5 video player\n"
+"\t\tif the browser supports it.\n"
+"\t\t(Mobile browsers are less likely to have a flash\n"
+"\t\tplugin than desktop-type browsers.)\n"
+"\t\t</p><p>\n"
+"\t\tBy default, flash is made primary content with\n"
+"\t\tHTML5 as fallback. You may make HTML5 be primary\n"
+"\t\tand flash be fallback with the \"HTML5 video primary\"\n"
+"\t\toption on the settings page. (Go to the \"Settings\"\n"
+"\t\tmenu and select \"SWFPut Plugin\" for the settings page.)\n"
+"\t\t</p><p>\n"
+"\t\tThe current state of affairs with HTML5 video will\n"
+"\t\trequire three transcodings of the video if you\n"
+"\t\twant broad browser support; moreover, the supported\n"
+"\t\t\"container\" formats -- .webm, .ogg/.ogv, and .mp4 --\n"
+"\t\tmight contain different audio and video types (\"codecs\")\n"
+"\t\tand only some of these will be supported by various\n"
+"\t\tbrowsers.\n"
+"\t\tUsers not already familiar with this topic should\n"
+"\t\tdo enough research to make the preceding statements\n"
+"\t\tclear.\n"
+"\t\t</p><p>\n"
+"\t\tThe \"HTML5 video URLs\" field\n"
+"\t\twill accept any number of URLs, which\n"
+"\t\tmust be separated by '|'. Each URL <em>may</em>\n"
+"\t\tbe appended with a mime-type + codecs argument,\n"
+"\t\tseparated from the URL by '?'. Whitespace around\n"
+"\t\tthe separators is accepted and stripped-off. Please\n"
+"\t\tnote that the argument given should <em>not</em>\n"
+"\t\tinclude \"type=\" or quotes: give only the\n"
+"\t\tstatement that should appear within the quotes.\n"
+"\t\tFor example:</p>\n"
+"\t\t<blockquote><code>\n"
+"\t\tvids/gato.mp4 ? video/mp4 | vids/gato.webm ? video/webm; "
+"codecs=vp8,vorbis | vids/gato.ogv?video/ogg; codecs=theora,vorbis\n"
+"\t\t</code></blockquote>\n"
+"\t\t<p>\n"
+"\t\tIn the example, where two codecs are specified there is\n"
+"\t\tno space after the comma.\n"
+"\t\tSome online examples\n"
+"\t\tshow a space after the comma,\n"
+"\t\tbut some older\n"
+"\t\tversions of <em>Firefox</em> will reject that\n"
+"\t\tusage, so the space after the comma is best left out.\n"
+"\t\t</p><p>\n"
+"\t\t<h6>Use initial image as no-video alternate</h6>\n"
+"\t\tThis checkbox, if enabled (it is, by default) will\n"
+"\t\tuse the \"initial image file\" that may be specified\n"
+"\t\tfor the video player in an 'img' element\n"
+"\t\tthat the visitor's browser might display if video\n"
+"\t\tis not available.\n"
+"\t\t</p><p>\n"
+"\t\tThere is one additional consideration for this image:\n"
+"\t\tthe 'img' element is given the width and height\n"
+"\t\tspecified in the form for the flash player, and the\n"
+"\t\tvisitor's browser will scale the image in both\n"
+"\t\tdimensions, possibly causing the image to be\n"
+"\t\t'stretched' or 'squeezed'.\n"
+"\t\tThe image proportions are restored with\n"
+"\t\t<em>JavaScript</em>, but only if scripts are\n"
+"\t\tnot disabled in the visitor's browser.\n"
+"\t\tTherefore, it is a\n"
+"\t\tgood idea to prepare images to have the expected\n"
+"\t\t<em>pixel</em> aspect ratio\n"
+"\t\t(top/bottom or left/right tranparent\n"
+"\t\tareas might be one solution).\n"
+"\t\t</p><p>\n"
+"\t\t<h6>Mobile width</h6>\n"
+"\t\tThis input field appears just below the\n"
+"\t\tpixel dimensions fields. If this value is\n"
+"\t\tgreater than zero, and a mobile browser is\n"
+"\t\tdetected, then this width will be used with\n"
+"\t\ta proportional height according to the\n"
+"\t\tregular pixel dimensions. This might be\n"
+"\t\tuseful when, for example, sidebar content\n"
+"\t\tactually appears below main content due to\n"
+"\t\tthe mobile browser's small size (theme support\n"
+"\t\tmay be necessary to see this behavior). This\n"
+"\t\tis probably most useful for video widgets placed\n"
+"\t\ton a sidebar, but please experiment.\n"
+"\t\tThe default value for this field, 0,\n"
+"\t\tdisables this feature, and it has no effect if\n"
+"\t\ta mobile browser is not detected.\n"
+"\t\t</p>"
+
+#. Label shown on widgets page
+#: swfput.php:887 swfput.php:3517
+msgid "SWFPut Video Player"
+msgstr "SWFPut Video Player"
+
+#: swfput.php:898
+msgid "SWFPut Video Form"
+msgstr "SWFPut Video Form"
+
+#: swfput.php:957
+msgid "Settings"
+msgstr "Settings"
+
+#: swfput.php:1190
+msgid "Settings updated successfully"
+msgstr "Settings updated successfully"
+
+#: swfput.php:1191
+#, possible-php-format
+msgid "One (%d) setting updated"
+msgid_plural "Some settings (%d) updated"
+msgstr[0] "One (%d) setting updated"
+msgstr[1] "Some settings (%d) updated"
+
+#: swfput.php:1223 swfput.php:1270 swfput.php:1358 swfput.php:1414
+#: swfput.php:1468
+msgid "Introduction:"
+msgstr "Introduction:"
+
+#: swfput.php:1226
+msgid ""
+"The verbose option selects whether\n"
+"\t\t\tverbose descriptions\n"
+"\t\t\tshould be displayed with the various settings\n"
+"\t\t\tsections. The long descriptions, of which \n"
+"\t\t\tthis paragraph is an example,\n"
+"\t\t\twill not be shown if the option is not\n"
+"\t\t\tselected."
+msgstr ""
+"The verbose option selects whether\n"
+"\t\t\tverbose descriptions\n"
+"\t\t\tshould be displayed with the various settings\n"
+"\t\t\tsections. The long descriptions, of which \n"
+"\t\t\tthis paragraph is an example,\n"
+"\t\t\twill not be shown if the option is not\n"
+"\t\t\tselected."
+
+#: swfput.php:1236
+msgid ""
+"The PHP+Ming option selects whether\n"
+"\t\t\t\tthe Flash player program is generated with PHP\n"
+"\t\t\t\tand the Ming extension for each request.\n"
+"\t\t\t\tWhen this option is not selected, then\n"
+"\t\t\t\ta compiled binary player is used.\n"
+"\t\t\t\tThis option is only displayed if the Ming\n"
+"\t\t\t\tPHP extension is installed and loaded; if you\n"
+"\t\t\t\tare reading this then Ming has been found to\n"
+"\t\t\t\tbe loaded.\n"
+"\t\t\t\tNote that this option will increase the load on the\n"
+"\t\t\t\tserver of your site."
+msgstr ""
+"The PHP+Ming option selects whether\n"
+"\t\t\t\tthe Flash player program is generated with PHP\n"
+"\t\t\t\tand the Ming extension for each request.\n"
+"\t\t\t\tWhen this option is not selected, then\n"
+"\t\t\t\ta compiled binary player is used.\n"
+"\t\t\t\tThis option is only displayed if the Ming\n"
+"\t\t\t\tPHP extension is installed and loaded; if you\n"
+"\t\t\t\tare reading this then Ming has been found to\n"
+"\t\t\t\tbe loaded.\n"
+"\t\t\t\tNote that this option will increase the load on the\n"
+"\t\t\t\tserver of your site."
+
+#: swfput.php:1257 swfput.php:1343 swfput.php:1399 swfput.php:1451
+#: swfput.php:1492
+msgid "Go forward to save button."
+msgstr "Go forward to save button."
+
+#: swfput.php:1272
+msgid ""
+"These options control video placement.\n"
+"\t\t\t</p><p>\n"
+"\t\t\tThe first option, \"HTML5 video primary,\"\n"
+"\t\t\tmakes HTML5 video be placed as\n"
+"\t\t\tprimary (rather than fallback) content. If this\n"
+"\t\t\tis selected then flash video\n"
+"\t\t\twill be placed as fallback content when both\n"
+"\t\t\ttypes have been specified.\n"
+"\t\t\tBe aware that if the web browser supports HTML5 video\n"
+"\t\t\tbut cannot play any of the video\n"
+"\t\t\ttypes specified, it probably will\n"
+"\t\t\t<em>not</em> fallback to flash video. That is,\n"
+"\t\t\tplacing flash video as fallback is only useful\n"
+"\t\t\tfor browsers that do not support the video\n"
+"\t\t\telement. At this time the major graphical browsers\n"
+"\t\t\tall support the HTML5 video element, so using this\n"
+"\t\t\toption is effectively disabling the flash video\n"
+"\t\t\t(except when HTML5 video was not specified at all).\n"
+"\t\t\t</p><p>\n"
+"\t\t\tBy default flash is primary and HTML5 video\n"
+"\t\t\tis fallback content. The flash plugin seems to be\n"
+"\t\t\tlosing favor (although it remains a more consistent\n"
+"\t\t\tand simple engine for a video player), and for some\n"
+"\t\t\tplatforms the plugin is not available. Even where available,\n"
+"\t\t\tflash might be disabled by default by some browsers, or\n"
+"\t\t\tthe browser might\n"
+"\t\t\trequire user approval before flash is allowed to run.\n"
+"\t\t\t</p><p>\n"
+"\t\t\tNote that at present the major graphical browsers\n"
+"\t\t\tdo <em>not</em> all support the same set of video\n"
+"\t\t\ttypes for their HTML5 video players.\n"
+"\t\t\tTo reliably use HTML5 video as primary content,\n"
+"\t\t\tyou will need to prepare the video in .MP4, .OGG (.OGV),\n"
+"\t\t\tand .WEBM container formats with suitable codecs.\n"
+"\t\t\t(The posts/pages editor page has a help button which\n"
+"\t\t\tshould have a \"SWFPut Video Form\" tab\n"
+"\t\t\twith more explanation.)\n"
+"\t\t\t</p><p>\n"
+"\t\t\tGenerally, if you can provide the several formats needed\n"
+"\t\t\tfor good HTML5 support, using the \"HTML5 video primary\"\n"
+"\t\t\toption should be a good idea. An MP4 will be among\n"
+"\t\t\tthose files, and that can be used for flash too (although\n"
+"\t\t\tif you wish to be compatible with the free/open source\n"
+"\t\t\t<em>Gnash</em> flash plugin you should use FLV).\n"
+"\t\t\tIf you cannot provide\n"
+"\t\t\tall the formats, it might be better not to use this option.\n"
+"\t\t\t</p><p>\n"
+"\t\t\tThe next two options allow the video content\n"
+"\t\t\tto be completely disabled.\n"
+"\t\t\tIf the placement\n"
+"\t\t\tof video must be switched on or off, for either\n"
+"\t\t\tposts (and pages) or widgets\n"
+"\t\t\tor both, these are the options to use.\n"
+"\t\t\t</p><p>\n"
+"\t\t\tWhen the plugin shortcode is disabled the\n"
+"\t\t\tvideo elements that would have been placed are\n"
+"\t\t\treplaced by a notice with the form\n"
+"\t\t\t\"[A/V content &lt;caption&gt; disabled],\"\n"
+"\t\t\twhere \"&lt;caption&gt;\"\n"
+"\t\t\tis any caption that was included with the shortcode,\n"
+"\t\t\tor empty if there was no caption."
+msgstr ""
+"These options control video placement.\n"
+"\t\t\t</p><p>\n"
+"\t\t\tThe first option, \"HTML5 video primary,\"\n"
+"\t\t\tmakes HTML5 video be placed as\n"
+"\t\t\tprimary (rather than fallback) content. If this\n"
+"\t\t\tis selected then flash video\n"
+"\t\t\twill be placed as fallback content when both\n"
+"\t\t\ttypes have been specified.\n"
+"\t\t\tBe aware that if the web browser supports HTML5 video\n"
+"\t\t\tbut cannot play any of the video\n"
+"\t\t\ttypes specified, it probably will\n"
+"\t\t\t<em>not</em> fallback to flash video. That is,\n"
+"\t\t\tplacing flash video as fallback is only useful\n"
+"\t\t\tfor browsers that do not support the video\n"
+"\t\t\telement. At this time the major graphical browsers\n"
+"\t\t\tall support the HTML5 video element, so using this\n"
+"\t\t\toption is effectively disabling the flash video\n"
+"\t\t\t(except when HTML5 video was not specified at all).\n"
+"\t\t\t</p><p>\n"
+"\t\t\tBy default flash is primary and HTML5 video\n"
+"\t\t\tis fallback content. The flash plugin seems to be\n"
+"\t\t\tlosing favor (although it remains a more consistent\n"
+"\t\t\tand simple engine for a video player), and for some\n"
+"\t\t\tplatforms the plugin is not available. Even where available,\n"
+"\t\t\tflash might be disabled by default by some browsers, or\n"
+"\t\t\tthe browser might\n"
+"\t\t\trequire user approval before flash is allowed to run.\n"
+"\t\t\t</p><p>\n"
+"\t\t\tNote that at present the major graphical browsers\n"
+"\t\t\tdo <em>not</em> all support the same set of video\n"
+"\t\t\ttypes for their HTML5 video players.\n"
+"\t\t\tTo reliably use HTML5 video as primary content,\n"
+"\t\t\tyou will need to prepare the video in .MP4, .OGG (.OGV),\n"
+"\t\t\tand .WEBM container formats with suitable codecs.\n"
+"\t\t\t(The posts/pages editor page has a help button which\n"
+"\t\t\tshould have a \"SWFPut Video Form\" tab\n"
+"\t\t\twith more explanation.)\n"
+"\t\t\t</p><p>\n"
+"\t\t\tGenerally, if you can provide the several formats needed\n"
+"\t\t\tfor good HTML5 support, using the \"HTML5 video primary\"\n"
+"\t\t\toption should be a good idea. An MP4 will be among\n"
+"\t\t\tthose files, and that can be used for flash too (although\n"
+"\t\t\tif you wish to be compatible with the free/open source\n"
+"\t\t\t<em>Gnash</em> flash plugin you should use FLV).\n"
+"\t\t\tIf you cannot provide\n"
+"\t\t\tall the formats, it might be better not to use this option.\n"
+"\t\t\t</p><p>\n"
+"\t\t\tThe next two options allow the video content\n"
+"\t\t\tto be completely disabled.\n"
+"\t\t\tIf the placement\n"
+"\t\t\tof video must be switched on or off, for either\n"
+"\t\t\tposts (and pages) or widgets\n"
+"\t\t\tor both, these are the options to use.\n"
+"\t\t\t</p><p>\n"
+"\t\t\tWhen the plugin shortcode is disabled the\n"
+"\t\t\tvideo elements that would have been placed are\n"
+"\t\t\treplaced by a notice with the form\n"
+"\t\t\t\"[A/V content &lt;caption&gt; disabled],\"\n"
+"\t\t\twhere \"&lt;caption&gt;\"\n"
+"\t\t\tis any caption that was included with the shortcode,\n"
+"\t\t\tor empty if there was no caption."
+
+#: swfput.php:1345 swfput.php:1401 swfput.php:1453 swfput.php:1494
+msgid "Go back to top (General section)."
+msgstr "Go back to top (General section)."
+
+#: swfput.php:1361
+msgid ""
+"\n"
+"\t\t\t<strong>These options are deprecated and will be\n"
+"\t\t\tremoved in a future release. Do not use these.</strong>\n"
+"\t\t\t</p><p>\n"
+"\t\t\tThese options select \n"
+"\t\t\thow video may be placed in posts or pages.\n"
+"\t\t\tUse shortcodes for any new posts (and preferably\n"
+"\t\t\tfor existing posts) that should include\n"
+"\t\t\tthe video players of this plugin.\n"
+"\t\t\tShortcodes are an efficient method provided by the\n"
+"\t\t\t<em>WordPress</em> API. When shortcodes are enabled,\n"
+"\t\t\ta form for parameters will appear in the post (and page)\n"
+"\t\t\tediting pages (probably near the bottom of the page,\n"
+"\t\t\tbut it can be dragged nearer to the editor).\n"
+"\t\t\t</p><p>\n"
+"\t\t\tThe \"Search attachment\"\n"
+"\t\t\toption might help with some existing posts if\n"
+"\t\t\tyou already have attached media (i.e., the posts contain\n"
+"\t\t\tattachment_id=<em>N</em> links).\n"
+"\t\t\tThe attachment number is used to find the associated\n"
+"\t\t\tURL, and if the filename extension suggests that the\n"
+"\t\t\tmedium is a suitable type, the flash player code\n"
+"\t\t\tis put in line with the URL; the original attachment_id\n"
+"\t\t\tURL is placed after the flash player.\n"
+"\t\t\tUse of this option is discouraged\n"
+"\t\t\tbecause it requires additional processing of each\n"
+"\t\t\tline of each post (or page) displayed,\n"
+"\t\t\tand so it increases server load. User parameters\n"
+"\t\t\tare not available for this method."
+msgstr ""
+"\n"
+"\t\t\t<strong>These options are deprecated and will be\n"
+"\t\t\tremoved in a future release. Do not use these.</strong>\n"
+"\t\t\t</p><p>\n"
+"\t\t\tThese options select \n"
+"\t\t\thow video may be placed in posts or pages.\n"
+"\t\t\tUse shortcodes for any new posts (and preferably\n"
+"\t\t\tfor existing posts) that should include\n"
+"\t\t\tthe video players of this plugin.\n"
+"\t\t\tShortcodes are an efficient method provided by the\n"
+"\t\t\t<em>WordPress</em> API. When shortcodes are enabled,\n"
+"\t\t\ta form for parameters will appear in the post (and page)\n"
+"\t\t\tediting pages (probably near the bottom of the page,\n"
+"\t\t\tbut it can be dragged nearer to the editor).\n"
+"\t\t\t</p><p>\n"
+"\t\t\tThe \"Search attachment\"\n"
+"\t\t\toption might help with some existing posts if\n"
+"\t\t\tyou already have attached media (i.e., the posts contain\n"
+"\t\t\tattachment_id=<em>N</em> links).\n"
+"\t\t\tThe attachment number is used to find the associated\n"
+"\t\t\tURL, and if the filename extension suggests that the\n"
+"\t\t\tmedium is a suitable type, the flash player code\n"
+"\t\t\tis put in line with the URL; the original attachment_id\n"
+"\t\t\tURL is placed after the flash player.\n"
+"\t\t\tUse of this option is discouraged\n"
+"\t\t\tbecause it requires additional processing of each\n"
+"\t\t\tline of each post (or page) displayed,\n"
+"\t\t\tand so it increases server load. User parameters\n"
+"\t\t\tare not available for this method."
+
+#: swfput.php:1417
+msgid ""
+"\n"
+"\t\t\t<strong>These options are deprecated and will be\n"
+"\t\t\tremoved in a future release. Do not use these.</strong>\n"
+"\t\t\t</p><p>\n"
+"\t\t\tThese options select \n"
+"\t\t\thow video may be placed in widget areas.\n"
+"\t\t\tThe first option selects use of the included multi-widget.\n"
+"\t\t\tThis widget is configured in the\n"
+"\t\t\tAppearance-&gt;Widgets page, just\n"
+"\t\t\tlike the widgets included with <em>WordPress</em>, and\n"
+"\t\t\tthe widget setup interface\n"
+"\t\t\tincludes a form to set parameters.\n"
+"\t\t\t</p><p>\n"
+"\t\t\tThe second option \"shortcodes in widgets\"\n"
+"\t\t\tselects shortcode processing in other widget output, as for\n"
+"\t\t\tposts. This is probably only useful with the\n"
+"\t\t\t<em>WordPress</em> Text widget or a similar widget. These\n"
+"\t\t\tshortcodes must be entered by hand, and therefore this\n"
+"\t\t\toption requires a knowledge of the shortcode and\n"
+"\t\t\tparameters used by this plugin.\n"
+"\t\t\t(If necessary, a temporary shortcode\n"
+"\t\t\tcan be made within a post using the provided form, and\n"
+"\t\t\tthen cut and\n"
+"\t\t\tpasted into the widget text, on a line of its own.)"
+msgstr ""
+"\n"
+"\t\t\t<strong>These options are deprecated and will be\n"
+"\t\t\tremoved in a future release. Do not use these.</strong>\n"
+"\t\t\t</p><p>\n"
+"\t\t\tThese options select \n"
+"\t\t\thow video may be placed in widget areas.\n"
+"\t\t\tThe first option selects use of the included widget.\n"
+"\t\t\tThis widget is configured in the\n"
+"\t\t\tAppearance-&gt;Widgets page, just\n"
+"\t\t\tlike the widgets included with <em>WordPress</em>, and\n"
+"\t\t\tthe widget setup interface\n"
+"\t\t\tincludes a form to set parameters.\n"
+"\t\t\t</p><p>\n"
+"\t\t\tThe second option \"shortcodes in widgets\"\n"
+"\t\t\tselects shortcode processing in other widget output, as for\n"
+"\t\t\tposts. This is probably only useful with the\n"
+"\t\t\t<em>WordPress</em> Text widget or a similar widget. These\n"
+"\t\t\tshortcodes must be entered by hand, and therefore this\n"
+"\t\t\toption requires a knowledge of the shortcode and\n"
+"\t\t\tparameters used by this plugin.\n"
+"\t\t\t(If necessary, a temporary shortcode\n"
+"\t\t\tcan be made within a post using the provided form, and\n"
+"\t\t\tthen cut and\n"
+"\t\t\tpasted into the widget text, on a line of its own.)"
+
+#: swfput.php:1459
+msgid "Install options:"
+msgstr "Install options:"
+
+#: swfput.php:1471
+msgid ""
+"This section includes optional\n"
+"\t\t\tfeatures for plugin install or uninstall. Presently\n"
+"\t\t\tthe only option is whether to remove the plugin's\n"
+"\t\t\tset of options from the database when\n"
+"\t\t\tthe plugin is deleted.\n"
+"\t\t\tThere is probably no reason to leave the options in\n"
+"\t\t\tplace if you intend to delete the plugin permanently;\n"
+"\t\t\tyou may simply deactivate the plugin if\n"
+"\t\t\tyou want it off temporarily.\n"
+"\t\t\tIf you intend to delete and then reinstall the plugin,\n"
+"\t\t\tpossibly for a new version or update, then keeping the\n"
+"\t\t\toptions might be helpful."
+msgstr ""
+"This section includes optional\n"
+"\t\t\tfeatures for plugin install or uninstall. Presently\n"
+"\t\t\tthe only option is whether to remove the plugin's\n"
+"\t\t\tset of options from the database when\n"
+"\t\t\tthe plugin is deleted.\n"
+"\t\t\tThere is probably no reason to leave the options in\n"
+"\t\t\tplace if you intend to delete the plugin permanently;\n"
+"\t\t\tyou may simply deactivate the plugin if\n"
+"\t\t\tyou want it off temporarily.\n"
+"\t\t\tIf you intend to delete and then reinstall the plugin,\n"
+"\t\t\tpossibly for a new version or update, then keeping the\n"
+"\t\t\toptions might be helpful."
+
+#: swfput.php:1533
+msgid "Use SWF script if PHP+Ming is available"
+msgstr "Use SWF script if PHP+Ming is available"
+
+#: swfput.php:1549
+msgid "Enable widget or shortcode"
+msgstr "Enable widget or shortcode"
+
+#: swfput.php:1556
+msgid "Place HTML5 \"alternate\" video as primary content"
+msgstr "Place HTML5 \"alternate\" video as primary content"
+
+#: swfput.php:1563
+msgid "Enable shortcode or attachment search"
+msgstr "Enable shortcode or attachment search"
+
+#: swfput.php:1570
+msgid "Search attachments in posts"
+msgstr "Search attachments in posts"
+
+#: swfput.php:1577
+msgid "Enable the included widget"
+msgstr "Enable the included widget"
+
+#: swfput.php:1584
+msgid "Enable shortcodes in widgets"
+msgstr "Enable shortcodes in widgets"
+
+#: swfput.php:1591
+msgid "Enable shortcode in posts"
+msgstr "Enable shortcode in posts"
+
+#: swfput.php:1598
+msgid "Permanently delete settings (clean db)"
+msgstr "Permanently delete settings (clean db)"
+
+#. button values for sliding divs
+#: swfput.php:1666
+msgid "Hide"
+msgstr "Hide"
+
+#: swfput.php:1667
+msgid "Show"
+msgstr "Show"
+
+#: swfput.php:1680
+msgid "Fill from post"
+msgstr "Fill from post"
+
+#: swfput.php:1682
+msgid "Replace current in post"
+msgstr "Replace current in post"
+
+#: swfput.php:1684
+msgid "Delete current in post"
+msgstr "Delete current in post"
+
+#: swfput.php:1686
+msgid "Place new in post"
+msgstr "Place new in post"
+
+#: swfput.php:1688
+msgid "Reset defaults"
+msgstr "Reset defaults"
+
+#: swfput.php:1705
+msgid "Media"
+msgstr "Media"
+
+#: swfput.php:1710 swfput.php:3711
+msgid "Caption:"
+msgstr "Caption:"
+
+#: swfput.php:1715
+msgid "Flash video URL or media library ID (.flv or .mp4):"
+msgstr "Flash video URL or media library ID (.flv or .mp4):"
+
+#: swfput.php:1726
+msgid "Select flash video URL from uploads directory:"
+msgstr "Select flash video URL from uploads directory:"
+
+#. <options>
+#: swfput.php:1731 swfput.php:1760 swfput.php:1797 swfput.php:1826
+#: swfput.php:1862 swfput.php:1891 swfput.php:3742 swfput.php:3769
+#: swfput.php:3819 swfput.php:3846 swfput.php:3894 swfput.php:3921
+msgid "none"
+msgstr "none"
+
+#: swfput.php:1755
+msgid "Select ID for flash video from media library:"
+msgstr "Select ID for flash video from media library:"
+
+#. end if there are upload files
+#. Remove MP3 audio (v. 1.0.8) $k = 'audio';
+#. $l = self::wt(__('Medium is audio: ', 'swfput_l10n'));
+#. printf($lbfmt, $id, $k, $l);
+#. $ck = $$k == 'true' ? 'checked="checked" ' : '';
+#. printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
+#. </p><p>
+#. <?php
+#: swfput.php:1781
+msgid "HTML5 video URLs or media library IDs (.mp4, .webm, .ogv):"
+msgstr "HTML5 video URLs or media library IDs (.mp4, .webm, .ogv):"
+
+#: swfput.php:1792
+msgid "Select HTML5 video URL from uploads directory (appends):"
+msgstr "Select HTML5 video URL from uploads directory (appends):"
+
+#: swfput.php:1821
+msgid "Select ID for HTML5 video from media library (appends):"
+msgstr "Select ID for HTML5 video from media library (appends):"
+
+#: swfput.php:1841
+msgid "Playpath (rtmp):"
+msgstr "Playpath (rtmp):"
+
+#: swfput.php:1846 swfput.php:3874
+msgid "Url of initial image file (optional):"
+msgstr "Url of initial image file (optional):"
+
+#: swfput.php:1857 swfput.php:3889
+msgid "Load image from uploads directory:"
+msgstr "Load image from uploads directory:"
+
+#: swfput.php:1886 swfput.php:3916
+msgid "Load image ID from media library:"
+msgstr "Load image ID from media library:"
+
+#: swfput.php:1906 swfput.php:3940
+msgid "Use initial image as no-video alternate: "
+msgstr "Use initial image as no-video alternate: "
+
+#: swfput.php:1924
+msgid "Dimensions"
+msgstr "Dimensions"
+
+#: swfput.php:1929
+msgid "Pixel Width: "
+msgstr "Pixel Width: "
+
+#: swfput.php:1931
+msgid "Height: "
+msgstr "Height: "
+
+#: swfput.php:1933
+msgid "Mobile width (0 disables): "
+msgstr "Mobile width (0 disables): "
+
+#: swfput.php:1935 swfput.php:3987
+msgid "Auto aspect (e.g. 360x240 to 4:3): "
+msgstr "Auto aspect (e.g. 360x240 to 4:3): "
+
+#: swfput.php:1937 swfput.php:3998
+msgid "Display aspect (e.g. 4:3, precludes Auto): "
+msgstr "Display aspect (e.g. 4:3, precludes Auto): "
+
+#: swfput.php:1939 swfput.php:4009
+msgid "Pixel aspect (e.g. 8:9, precluded by Display): "
+msgstr "Pixel aspect (e.g. 8:9, precluded by Display): "
+
+#: swfput.php:1969
+msgid "Behavior"
+msgstr "Behavior"
+
+#: swfput.php:1974 swfput.php:4020
+msgid "Initial volume (0-100): "
+msgstr "Initial volume (0-100): "
+
+#: swfput.php:1976 swfput.php:4032
+msgid "Play on load (else waits for play button): "
+msgstr "Play on load (else waits for play button): "
+
+#: swfput.php:1978 swfput.php:4044
+msgid "Loop play: "
+msgstr "Loop play: "
+
+#: swfput.php:1980 swfput.php:4056
+msgid "Hide control bar initially: "
+msgstr "Hide control bar initially: "
+
+#: swfput.php:1982 swfput.php:4068
+msgid "Hide and disable control bar: "
+msgstr "Hide and disable control bar: "
+
+#: swfput.php:1984 swfput.php:4080
+msgid "Allow full screen: "
+msgstr "Allow full screen: "
+
+#: swfput.php:1986 swfput.php:4091
+msgid "Control bar Height (30-60): "
+msgstr "Control bar Height (30-60): "
+
+#. TRANSLATORS the '[]' are meant to indicate strongly
+#. that this is not normal, expected text display,
+#. because this text takes the place of the video program
+#. when disabled by a plugin option or not supported.
+#. 'A/V' is understood in US (all English language???)
+#. as 'Audio/Visual' e.g., film, sound.
+#. '%s' is any caption provided for a/v, if any,
+#. prepended with ASCII space ' '; '%s' is an empty string
+#. if there is no caption
+#. TRANSLATORS the '[]' are meant to indicate strongly
+#. that this is not normal, expected text display,
+#. because this text takes the place of a video program
+#. when disabled by a plugin option or not supported.
+#. 'A/V' is understood in US (all English language???)
+#. as 'Audio/Visual' e.g., film, sound.
+#. '%s' is any caption provided for a/v, if any,
+#. prepended with ASCII space ' '; '%s' is an empty string
+#. if there is no caption
+#: swfput.php:2035 swfput.php:2094
+#, possible-php-format
+msgid " [A/V content \"%s\" disabled] "
+msgstr " [A/V content \"%s\" disabled] "
+
+#: swfput.php:2941
+msgid "Video playback is not available"
+msgstr "Video playback is not available"
+
+#: swfput.php:3059
+msgid "Video playback is not available."
+msgstr "Video playback is not available."
+
+#. TRANSLATORS perl-type regular expression
+#. that matches a 'yes'
+#: swfput.php:3415
+msgid "/^?y(e((s|ah)!?)?)?$/i"
+msgstr "/^?y(e((s|ah)!?)?)?$/i"
+
+#. TRANSLATORS perl-type regular expression
+#. that matches a 'no'
+#: swfput.php:3418
+msgid "/^n(o!?)?)?$/i"
+msgstr "/^n(o!?)?)?$/i"
+
+#. Description shown under label shown on widgets page
+#: swfput.php:3519
+msgid "Flash and HTML5 video for your widget areas"
+msgstr "Flash and HTML5 video for your widget areas"
+
+#: swfput.php:3670
+msgid "Widget title:"
+msgstr "Widget title:"
+
+#: swfput.php:3722
+msgid "Url or media library ID for flash video:"
+msgstr "Url or media library ID for flash video:"
+
+#: swfput.php:3737
+msgid "Url for flash video from uploads directory:"
+msgstr "Url for flash video from uploads directory:"
+
+#: swfput.php:3764
+msgid "Select ID from media library for flash video:"
+msgstr "Select ID from media library for flash video:"
+
+#: swfput.php:3799
+msgid "URLs for HTML5 video (.mp4, .webm, .ogv):"
+msgstr "URLs for HTML5 video (.mp4, .webm, .ogv):"
+
+#: swfput.php:3814
+msgid "Url for HTML5 video from uploads directory (appends):"
+msgstr "Url for HTML5 video from uploads directory (appends):"
+
+#: swfput.php:3841
+msgid "Select ID from media library for HTML5 video (appends):"
+msgstr "Select ID from media library for HTML5 video (appends):"
+
+#: swfput.php:3863
+msgid "Playpath (rtmp) or co-video (mp3):"
+msgstr "Playpath (rtmp) or co-video (mp3):"
+
+#: swfput.php:3951
+#, possible-php-format
+msgid "Width (default %u): "
+msgstr "Width (default %u): "
+
+#: swfput.php:3963
+#, possible-php-format
+msgid "Height (default %u): "
+msgstr "Height (default %u): "
+
+#: swfput.php:3975
+msgid "Mobile width (0 disables) :"
+msgstr "Mobile width (0 disables) :"
