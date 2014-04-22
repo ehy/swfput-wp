@@ -179,10 +179,22 @@ function fix_url($u) {
 
 		if ( $tsv === '' ) {
 			$tpr = '';
-		} else if ( isset($_SERVER['SERVER_PORT']) ) {
+		} else if ( false && isset($_SERVER['SERVER_PORT']) ) {
 			$tpt = '' . $_SERVER['SERVER_PORT'];
-			if ( ($tpr === 'http://' && $tpt !== '80')
-				|| ($tpr === 'https://' && $tpt !== '443') ) {
+			// cannot use this logic: assumption that https==443
+			// and http==80, and that specifying port for anything
+			// else is good, is a false assumption
+			if ( false && (($tpr === 'http://' && $tpt !== '80')
+				|| ($tpr === 'https://' && $tpt !== '443')) ) {
+				$tsv = explode(':', $tsv);
+				$tsv = $tsv[0] . ':' . $tpt;
+			// even this is n.g.: hosting hacks are prone to
+			// change server vars in unpredictable ways that do not
+			// match the form of a valid request to the host --
+			// so don't get clever here (and leave this code as
+			// a reminder) -- if name:port is needed, user must
+			// know that and provide suitable URLs.
+			} else if ( false && $tpt !== '80' && $tpt !== '443' ) {
 				$tsv = explode(':', $tsv);
 				$tsv = $tsv[0] . ':' . $tpt;
 			}
