@@ -3331,7 +3331,7 @@ class SWF_put_evh {
 		$t = explode('=', $str);
 		if ( ! strcasecmp(trim($t[0]), 'type') ) {
 			array_shift($t);
-			$str = trim(implode('=', $t), "'\" ");
+			$str = trim(implode('=', $t), "'\\\" ");
 		}
 		
 		// separate mime type and any codecs arg
@@ -3344,37 +3344,37 @@ class SWF_put_evh {
 			return '';
 		}
 		// no further check on type parts: beyond our purview
-		$ty = trim($ty[0]) . '/' . trim($ty[1]);
-
+		$ty = trim($ty[0], "'\\\" ") . '/' . trim($ty[1], "'\\\" ");
+	
 		// got type only
 		if ( count($t) < 2 ) {
 			return $ty;
 		}
 		
 		// codecs
-		$t = explode('=', trim($t[1]));
+		$t = explode('=', trim($t[1], "'\\\" "));
 		// if incorrect codecs arg, no value will probably work
 		if ( count($t) < 2 ) {
 			return $ty;
 		}
-		if ( strcasecmp($t[0] = trim($t[0]), 'codecs') ) {
+		if ( strcasecmp($t[0] = trim($t[0], "'\\\" "), 'codecs') ) {
 			// allow mistake in plural form
 			if ( strcasecmp($t[0], 'codec') ) {
 				return $ty;
 			}
 		}
-		
+	
 		// codecs args
-		$t = trim($t[1], "'\" ");
+		$t = trim($t[1], "'\\\" ");
 		$t = explode(',', $t);
-		
+	
 		// rebuild codecs args as comma sep'd value in the form
 		// that has been found to work in existing browsers;
 		// reuse $str for new value
-		$str = trim($t[0]);
+		$str = trim($t[0], "'\\\" ");
 		for ( $i = 1; $i < count($t); $i++ ) {
 			// NO SPACE after comma: browsers might reject source!
-			$str .= ',' . trim($t[$i]);
+			$str .= ',' . trim($t[$i], "'\\\" ");
 		}
 		
 		// NO QUOTES on codecs arg: browsers might reject source!
