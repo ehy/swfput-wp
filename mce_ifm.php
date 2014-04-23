@@ -205,6 +205,70 @@ function fix_url($u) {
 	return $u;
 }
 
+// normalize H5V type string from user input -- NOT using
+// W3.org form, which does not work in existing browsers
+// such as Opera (at least GNU/Linux), or older FFox (v 10+?)
+// W3 experimental H5 validator says form made here is in error,
+// but we assume that if approved and useful are a 
+// one-or-the-other choice then the latter is preferred
+function clean_h5vid_type($str) {
+	// help text instructs user NOT to give 'type='
+	// but just in case . . .
+	$t = explode('=', $str);
+	if ( ! strcasecmp(trim($t[0]), 'type') ) {
+		array_shift($t);
+		$str = trim(implode('=', $t), "'\" ");
+	}
+	
+	// separate mime type and any codecs arg
+	$t = explode(';', $str);
+	
+	// type
+	$ty = explode('/', $t[0]);
+	// if incorrect type form, no value will have to work
+	if ( count($ty) < 2 ) {
+		return '';
+	}
+	// no further check on type parts: beyond our purview
+	$ty = trim($ty[0]) . '/' . trim($ty[1]);
+
+	// got type only
+	if ( count($t) < 2 ) {
+		return $ty;
+	}
+	
+	// codecs
+	$t = explode('=', trim($t[1]));
+	// if incorrect codecs arg, no value will probably work
+	if ( count($t) < 2 ) {
+		return $ty;
+	}
+	if ( strcasecmp($t[0] = trim($t[0]), 'codecs') ) {
+		// allow mistake in plural form
+		if ( strcasecmp($t[0], 'codec') ) {
+			return $ty;
+		}
+	}
+	
+	// codecs args
+	$t = trim($t[1], "'\" ");
+	$t = explode(',', $t);
+	
+	// rebuild codecs args as comma sep'd value in the form
+	// that has been found to work in existing browsers;
+	// reuse $str for new value
+	$str = trim($t[0]);
+	for ( $i = 1; $i < count($t); $i++ ) {
+		// NO SPACE after comma: browsers might reject source!
+		$str .= ',' . trim($t[$i]);
+	}
+	
+	// NO QUOTES on codecs arg: browsers might reject source!
+	// This contradicts examples at W3, but ultimately the
+	// the browsers dictate what works
+	return sprintf("%s; codecs=%s", $ty, $str);
+}
+
 // now, setup for and do output
 $allvids = array();
 $vnum = 0;
@@ -266,7 +330,10 @@ if ( ($k = getwithdef('altvideo', '')) != '' ) {
 		$t = explode('?', trim($k));
 		$v = array('src' => maybe_get_attach(trim($t[0])));
 		if ( isset($t[1]) ) {
-			$v['type'] = trim($t[1]);
+			$t[1] = clean_h5vid_type($t[1]);
+			if ( $t[1] !== '' ) {
+				$v['type'] = $t[1];
+			}
 		}
 		$jatt['a_vid']['srcs'][] = $v;
 	}
