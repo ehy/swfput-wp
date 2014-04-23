@@ -3024,13 +3024,13 @@ class SWF_put_evh {
 		$playpath = ($esc == true) ? $fesc($playpath) : $playpath;
 		
 		// query vars
-		$qv = sprintf('ST=%s&WI=%u&HI=%u&IDV=%s&FN=%s&II=%s&F2=%s',
+		$qv = sprintf('ST=%s&amp;WI=%u&amp;HI=%u&amp;IDV=%s&amp;FN=%s&amp;II=%s&amp;F2=%s',
 			$cssurl, $w, $h, $playpath, $url, $iimage, $e2url);
-		$qv .= sprintf('&PL=%s&HB=%s&VL=%u&LP=%s&DB=%s',
+		$qv .= sprintf('&amp;PL=%s&amp;HB=%s&amp;VL=%u&amp;LP=%s&amp;DB=%s',
 			$play, $hidebar, $volume, $loop, $disablebar);
-		$qv .= sprintf('&AU=%s&AA=%s&DA=%s&PA=%s',
+		$qv .= sprintf('&amp;AU=%s&amp;AA=%s&amp;DA=%s&amp;PA=%s',
 			$audio, $aspectautoadj, $displayaspect, $pixelaspect);
-		$qv .= sprintf('&BH=%s',
+		$qv .= sprintf('&amp;BH=%s',
 			$barheight);
 
 		// if using the precompiled player the query vars should be
@@ -3160,7 +3160,7 @@ class SWF_put_evh {
 				$tv = explode('?', $src);
 				if ( isset($tv[1]) ) {
 					if ( ($tv[1] = trim($tv[1])) !== '' ) {
-						$jsa['type'] = self::ht($tv[1]);
+						$jsa['type'] = self::clean_h5vid_type($tv[1]);
 						$typ = sprintf(' type="%s"', $jsa['type']);
 					}
 					// leave off src
@@ -3240,8 +3240,8 @@ class SWF_put_evh {
 			$typ = $mtype ? $mtype :'application/x-shockwave-flash';
 
 			$obj = sprintf('
-			<object%s data="%s?%s" type="%s" %s width="%u" height="%u">
-			', $id, $uswf, $pv, $typ, "typemustmatch", $w, $h);
+			<object%s width="%u" height="%u" type="%s" data="%s?%s"%s>
+			', $id, $w, $h, $typ, $uswf, $pv, ''); // ' typemustmatch');
 
 			$jatt['obj']['data'] = $uswf . '?' . $pv;
 			$jatt['obj']['type'] = $typ;
@@ -3313,6 +3313,37 @@ class SWF_put_evh {
 		}
 		
 		return $aret;
+	}
+
+	// normalize H5V type string from user input -- NOT using
+	// W3.org form, which does not work in existing browsers
+	// such as Opera (at least GNU/Linux), or older FFox
+	public static function clean_h5vid_type($str) {
+		$t = explode(';', $str);
+		
+		$ty = trim($t[0]);
+		if ( count($t) < 2 ) {
+			return $ty;
+		}
+		
+		$t = explode('=', trim($t[1]));
+		if ( count($t) < 2 || strcasecmp(trim($t[0]), 'codecs') ) {
+			return $ty;
+		}
+		
+		$t = trim(trim($t[1]), '"' . "'");
+		$t = explode(',', $t);
+		
+		$str = trim($t[0]);
+		for ( $i = 1; $i < count($t); $i++ ) {
+			// NO SPACE after comma: browsers might reject source!
+			$str .= ',' . trim($t[$i]);
+		}
+		
+		// NO QUOTES on codecs arg: browsers might reject source!
+		// This contradicts examples at W3, but ultimately the
+		// the browsers dictate what works
+		return sprintf("%s; codecs=%s", $ty, $str);
 	}
 
 	// get a script element string for H5 video JS setup
@@ -3694,8 +3725,8 @@ class SWF_put_widget_evh extends WP_Widget {
 		$uswf = $this->plinst->get_swf_url();
 
 		$dw = $w + 3;
-		// use no class, but do use deprecated align
-		$dv = 'class="widget" align="center" style="width: '
+		// overdue: 2.1 removed deprecated align
+		$dv = 'class="widget" style="width: '
 			. $dw . 'px; max-width: 100%"';
 
 		extract($args);
@@ -3714,7 +3745,8 @@ class SWF_put_widget_evh extends WP_Widget {
 		}
 
 		if ( $cap ) {
-			$cap = '<p><span align="center">' .$cap. '</span></p>';
+			// overdue: 2.1 removed deprecated align
+			$cap = '<p><span>' . $cap . '</span></p>';
 		}
 
 		$ids  = $this->plinst->get_div_ids('widget-div');

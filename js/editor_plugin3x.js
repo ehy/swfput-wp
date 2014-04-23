@@ -374,7 +374,7 @@ function SWFPut_repl_nl(str) {
 
 		_sc_atts2qs : function(ats, cap) {
 			var dat = {};
-			var t = this, qs = '', sep = '';
+			var t = this, qs = '', sep = '', csep = '&amp;';
 			var defs = t.defs;
 
 			for ( var k in defs ) {
@@ -402,22 +402,22 @@ function SWFPut_repl_nl(str) {
 						// for new h5 video player vs. old WP plugin
 						dat['aspect'] = v;
 						qs += sep + 'aspect=' + encodeURIComponent(v);
-						sep = '&';
+						sep = csep;
 						break;
 					default:
 						break;
 				}
 
 				qs += sep + k + '=' + encodeURIComponent(v);
-				sep = '&';
+				sep = csep;
 			}
 			
 			if ( swfput_mceplug_inf !== undefined ) {
 				qs += sep
 					+ 'a=' + encodeURIComponent(swfput_mceplug_inf.a)
-					+ '&'
+					+ csep
 					+ 'i=' + encodeURIComponent(swfput_mceplug_inf.i)
-					+ '&'
+					+ csep
 					+ 'u=' + encodeURIComponent(swfput_mceplug_inf.u);
 			}
 			

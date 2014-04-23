@@ -338,7 +338,7 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 
 	var _sc_atts2qs = function(ats, cap) {
 		var dat = {};
-		var qs = '', sep = '';
+		var qs = '', sep = '', csep = '&amp;';
 
 		for ( var k in defs ) {
 			var v = defs[k];
@@ -365,22 +365,22 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 					// for new h5 video player vs. old WP plugin
 					dat['aspect'] = v;
 					qs += sep + 'aspect=' + encodeURIComponent(v);
-					sep = '&';
+					sep = csep;
 					break;
 				default:
 					break;
 			}
 
 			qs += sep + k + '=' + encodeURIComponent(v);
-			sep = '&';
+			sep = csep;
 		}
 		
 		if ( swfput_mceplug_inf !== undefined ) {
 			qs += sep
 				+ 'a=' + encodeURIComponent(swfput_mceplug_inf.a)
-				+ '&'
+				+ csep
 				+ 'i=' + encodeURIComponent(swfput_mceplug_inf.i)
-				+ '&'
+				+ csep
 				+ 'u=' + encodeURIComponent(swfput_mceplug_inf.u);
 		}
 		
