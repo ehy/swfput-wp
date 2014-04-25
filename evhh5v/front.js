@@ -43,7 +43,7 @@
  * 1. the HTML5 video should remain useful where JavaScript is disa-  *
  *    bled, in which case the browser-native interface should work    *
  * 2. eliminates much of the page markup that would be necessary, and *
- *    and useless (with whatever side-effects) without JavaScript.    *
+ *    and useless without JavaScript (with whatever side-effects).    *
  *                                                                    *
 \**********************************************************************/
 
@@ -56,10 +56,11 @@ function evhh5v_controlbar_elements(parms, fixups) {
 	var ivid = ip["vidid"];
 
 	// <video> we're associated with must be OK, or it's all pointless
-	var vidobj = document.getElementById(ivid);
+	var vidobj = evhh5v_controlbar_elements_check(parms, false);
 	if ( ! vidobj ) {
 		return;
 	}
+
 	// <video> is given a controls attribute for browsers
 	// with JS disabled; but, since we're executing JS and
 	// building a control bar, remove that attribute. With
@@ -228,6 +229,126 @@ function evhh5v_controlbar_elements(parms, fixups) {
 	}
 };
 
+// pre-check of video object; check types for at least
+// "maybe" can play; if none found, but found a fallback
+// <object> with id matching flash id in parms, then swap
+// flash into parent position
+// return false if altogether N.G., <video> object node elsewise
+function evhh5v_controlbar_elements_check(parms, vidobj) {
+	if ( ! vidobj ) {
+		vidobj = document.getElementById(parms["iparm"]["vidid"]);
+	}
+	if ( ! vidobj ) {
+		return false;
+	}
+
+	// flash fallback; might need this
+	var swfobj = false;
+
+	// sources
+	var ss = [];
+	ss.push(vidobj); // useful in "can play checks" below (src attr)
+	for ( var i = 0; i < vidobj.childNodes.length; i++ ) {
+		var t = vidobj.childNodes.item(i);
+
+		if ( t.nodeName == 'OBJECT' ) {
+			if ( parms.flashid !== undefined && parms.flashid === t.id ) {
+				swfobj = t;
+			}
+			continue;
+		}
+
+		if ( t.nodeName == 'SOURCE' ) {
+			ss.push(t);
+		}
+	}
+	
+	// can play checks
+	var maybe = 0, probably = 0, notype = 0;
+	for ( var i = 0; i < ss.length; i++ ) {
+		var add = false;
+		var o = ss[i];
+		var s = o.getAttribute('src');
+		var t = o.getAttribute('type');
+
+		if ( ! s || s.length < 1 ) {
+			continue;
+		}
+
+		if ( ! t || t.length < 1 ) {
+			// infer type from suffix; set tested is
+			// obviously subject to revision (expansion)
+			if ( s.match(/.*\.(mp4|m4v|mv4)[ \t]*$/i) ) {
+				t = 'video/mp4';
+				add = true;
+			} else if ( s.match(/.*\.(og[gv]|vorbis)[ \t]*$/i) ) {
+				t = 'video/ogg';
+				add = true;
+			} else if ( s.match(/.*\.(webm|wbm|vp[89])[ \t]*$/i) ) {
+				t = 'video/webm';
+				add = true;
+			}
+		}
+
+		if ( ! t || t.length < 1 ) {
+			notype++;
+			continue;
+		}
+
+		var can = vidobj.canPlayType(t);
+		if ( can == 'probably' ) {
+			probably++;
+		} else if ( can == 'maybe' ) {
+			maybe++;
+		} else {
+			add = false;
+		}
+
+		if ( add ) {
+			o.setAttribute('type', t);
+		}
+	}
+
+	// if we have even a 'maybe' then go ahead
+	if ( probably > 0 || maybe > 0 ) {
+		return vidobj;
+	}
+
+	// at this point there is no H5V source with a
+	// chance we like: if a flash <object> was found
+	// as a child (fallback content), then swap it into
+	// parenthood
+	if ( swfobj !== false ) {
+		var aux = vidobj.parentNode; // aux div for h5 vid
+		var par = aux.parentNode; // div wanted as parent
+		vidobj.removeChild(swfobj);
+		
+		var ch = [];
+		for ( var i = 0; i < swfobj.childNodes.length; i++ ) {
+			ch.push(swfobj.childNodes.item(i));
+		}
+		for ( var i = 0; i < ch.length; i++ ) {
+			var t = ch[i];
+
+			// only need to keep params
+			if ( t.nodeName == 'PARAM' ) {
+				continue;
+			}
+
+			// e.g. fallback img; make child of video
+			swfobj.removeChild(t);
+			vidobj.appendChild(t);
+		}
+
+		par.replaceChild(swfobj, aux);
+		swfobj.appendChild(aux);
+	}
+
+	// return determines whether controller and bar are built;
+	// a source, albeit of unknown type, makes it worth a try
+	return (notype > 0) ? vidobj : false;
+}
+
 
 /**********************************************************************\
  *                                                                    *
@@ -318,42 +439,41 @@ var evhh5v_sizer = function(dv, ob, av, ai, bld) {
 	this.wdiv = null;
 	this.bld = null;
 	this.inresize = 0;
-	if ( bld ) {
-		this.bld  = bld;
-		this.d    = bld.d;
-		this.o    = bld.o;
-		this.va_o = bld.va_o;
-		this.ia_o = bld.ia_o;
-		this.pad  = bld.pad;
-		this.wdiv = bld.wdiv;
-	} else {
-		this.d    = document.getElementById(dv);
-		if ( this.d ) {
-			this.o    = document.getElementById(ob);
-			this.va_o = document.getElementById(av);
-			this.ia_o = document.getElementById(ai);
-			var p = this._style(this.d, "padding-left");
-			if ( p )
-				this.pad = Math.max(this.pad, parseInt(p));
-			this.wdiv = this.d.offsetWidth;
-		}
+
+	// this object works with the element with id passed in dv,
+	// a <div> or possibly another element with the
+	// properties we need -- if the object cannot be had from
+	// its id, then this was constructed in error
+	this.d = document.getElementById(dv);
+	if ( ! this.d ) {
+		return;
 	}
-	if ( this.d ) {
-		// proportional image sizing is the trickiest bit here:
-		// we will need to use the ratio of the specified dimensions
-		if ( this.ia_o && this.ia_o.width > 1 ) {
-			this.ia_rat = this.ia_o.width / this.ia_o.height;
-		}
-		// need max-width or browser does not scale div
-		if ( this.d.style == undefined ||
-			 this.d.style.maxWidth == undefined ||
-			 this.d.style.maxWidth == "none" ||
-			 this.d.style.maxWidth == "" ) {
-			this.d.style.maxWidth = "100%";
-		}
-		// (ugly hack to get resize event: save _adj instances)
-		evhh5v_sizer_instances.push(this);
+
+	this.o    = document.getElementById(ob);
+	this.va_o = document.getElementById(av);
+	this.ia_o = document.getElementById(ai);
+
+	var p = this._style(this.d, "padding-left");
+	if ( p )
+		this.pad = Math.max(this.pad, parseInt(p));
+	this.wdiv = this.d.offsetWidth;
+
+	// proportional image sizing is the trickiest bit here:
+	// we will need to use the ratio of the specified dimensions
+	if ( this.ia_o && this.ia_o.width > 1 ) {
+		this.ia_rat = this.ia_o.width / this.ia_o.height;
 	}
+
+	// need max-width or browser does not scale div
+	if ( this.d.style == undefined ||
+		 this.d.style.maxWidth == undefined ||
+		 this.d.style.maxWidth == "none" ||
+		 this.d.style.maxWidth == "" ) {
+		this.d.style.maxWidth = "100%";
+	}
+
+	// (ugly hack to get resize event: save _adj instances)
+	evhh5v_sizer_instances.push(this);
 };
 evhh5v_sizer.prototype = {
 	// For H5 video using non-default control bar, this interacts
@@ -382,33 +502,41 @@ evhh5v_sizer.prototype = {
 		return evhh5v_getstyle(el, sty);
 	},
 	handle_resize : function () {
-		if ( this.d === null )
+		if ( ! this.d || this.inresize != 0 )
 			return;
-		if ( this.inresize != 0 )
-			return;
+
 		var dv = this.d;
 		var wo = this.wdiv;
 		var wn = dv.offsetWidth;
 		if ( wn == wo )
 			return;
 		this.wdiv = wn;
+
 		var p = this._style(dv, "padding-left");
 		if ( p ) {
 			this.pad = parseInt(p);
 		}
+
 		this.resize();
 	},
 	_int_rsz : function (o) {
 		var wd = this.wdiv;
-		if ( wd == null )
+		if ( ! wd  )
 			return;
 		wd -= this.pad * 2;
+
 		var wo = o.width;
 		if ( (wd - wo) == 0 )
 			return;
+
 		var r = wo / o.height;
-		o.height = o.pixelHeight = Math.round(wd / r);
-		o.width = o.pixelWidth = wd;
+		wo = Math.round(wd / r);
+		o.height = wo;
+		o.width  = wd;
+		if ( o.pixelHeight !== undefined ) {
+			o.pixelHeight = wo;
+			o.pixelWidth  = wd;
+		}
 	},
 	_int_imgrsz : function (o) { // for img: display proportionally
 		if ( o.complete !== undefined && ! o.complete ) {

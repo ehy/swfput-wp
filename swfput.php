@@ -355,7 +355,7 @@ class SWF_put_evh {
 			self::optuseming => self::defuseming
 		);
 		
-		if ( $chkonly !== true ) {
+		if ( $chkonly !== true && self::use_tinymce_plugin_ok() ) {
 			$items[self::opttinymce] = self::deftinymce;
 		}
 		
@@ -458,7 +458,8 @@ class SWF_put_evh {
 				self::optdispwdg,
 				$items[self::optdispwdg],
 				array($this, 'put_widget_opt'));
-		$fields[$nf++] = new $Cf(self::opttinymce,
+		if ( self::use_tinymce_plugin_ok() )
+			$fields[$nf++] = new $Cf(self::opttinymce,
 				self::wt(__('Video in post editor:', 'swfput_l10n')),
 				self::opttinymce,
 				$items[self::opttinymce],
@@ -1389,15 +1390,21 @@ class SWF_put_evh {
 			where "&lt;caption&gt;"
 			is any caption that was included with the shortcode,
 			or empty if there was no caption.
-			</p><p>
+			'
+			, 'swfput_l10n'));
+		printf('<p>%s</p>%s', $t, "\n");
+
+		if ( self::use_tinymce_plugin_ok() ) {
+			$t = self::wt(__('
 			The "Video in post editor" multiple choice option
 			controls the display of video in the post/page
 			editor. This is only effective if the "TinyMCE"
 			editor included with WordPress is in use, and only
 			when the "Visual" tab is selected.
 			'
-			, 'swfput_l10n'));
-		printf('<p>%s</p>%s', $t, "\n");
+				, 'swfput_l10n'));
+			printf('<p>%s</p>%s', $t, "\n");
+		}
 
 		echo '</div>';
 		?>
@@ -1603,6 +1610,13 @@ class SWF_put_evh {
 
 	// callback, put SWF in head?
 	public function put_tinymce_opt($a) {
+		if ( ! self::use_tinymce_plugin_ok() ) {
+			printf('<strong>%s</strong>%s',
+				self::wt(__('The SWFPut editor plugin is not supported in this installation', 'swfput_l10n')),
+				"\n");
+			return;
+		}
+
 		$tt = self::wt(__('When to display video in post editor', 'swfput_l10n'));
 		$k = self::opttinymce;
 		$group = self::opt_group;
@@ -2509,9 +2523,23 @@ class SWF_put_evh {
 	}
 	
 	// V. 1.0.9 added video display in the TinyMCE post/page editor,
+	// and this checks whether it is OK to use it, e.g.
+	// the current WP version is suitable.
+	public static function use_tinymce_plugin_ok() {
+		// tinymce version in 3.0.3 n.g. and next testing
+		// version of WP I have is 3.3.1
+		$v = (3 << 24) | (3 << 16) | (0 << 8) | 0;
+		return self::wpv_min($v);
+	}
+	
+	// V. 1.0.9 added video display in the TinyMCE post/page editor,
 	// and this checks the settings page option controlling when
 	// it is used, and returns boolean.
 	public static function use_tinymce_plugin() {
+		if ( ! self::use_tinymce_plugin_ok() ) {
+			return false;
+		}
+
 		$opt = self::get_tinymce_option();
 		
 		switch ( $opt ) {
@@ -2744,7 +2772,9 @@ class SWF_put_evh {
 
 	// get the place at head option
 	public static function get_tinymce_option() {
-		return self::opt_by_name(self::opttinymce);
+		if ( self::use_tinymce_plugin_ok() )
+			return self::opt_by_name(self::opttinymce);
+		return 'never';
 	}
 
 	// get the place at head option
@@ -3192,107 +3222,32 @@ class SWF_put_evh {
 			}
 
 			$h5vclose = sprintf("\n\t\t\t</video>\t%s\n\t\t\t</div>%s",
-				$this->get_h5vjs_tags($jatt['a_vid'], $ids[1]),
+				$this->get_h5vjs_tags($jatt['a_vid'], $id),
 				"<!-- aux -->\n\t\t\t"
 			);
 		} else {
 			$jatt['a_vid'] = '';
 		}
 
-		// Update 2013/09/23: update object element, separating
-		// MSIE, so that alternative elements can be added for
-		// no-flash browsers: previously, with the classid attribute
-		// within the object element, firefox (and others) would
-		// always fall through to the now-removed embed element;
-		// therefore, browser ID is attempted to find MSIE (in
-		// self::is_msie()) on the assumption that classid will
-		// be necessary to make that one work
-		// UPDATE: versions of MSIE calling themselves 'Trident'
-		// handle <object> w/o classid (frankly, I do not have
-		// a good picture of its necessity); the self::is_msie()
-		// call does not test 'Trident' and returns false, and
-		// so far so good.
+		// build in $obj the flash related elements
 		$obj = '';
 		
-		/* $jatt['obj'] was used in 1.0.7 for JS creation, removed 1.0.8
-		 * TODO: use or remove $jatt['obj']
-		 */
-		$jatt['obj'] = array(
-			'width'     => $w, 'height' => $h,
-			'id'        => $id,
-			'parm'      => array()
-		);
-
 		if ( $id != '' ) {
 			$id = sprintf(' id="%s"', $id);
 		}
 		if ( self::is_msie() ) { 
-			$jatt['obj']['ie'] = 'true';
-
 			$obj = sprintf('
 			<object%s classid="%s" codebase="%s" width="%u" height="%u">
 			<param name="data" value="%s?%s">
 			', $id, $classid, $codebase, $w, $h, $uswf, $pv);
-
-			$jatt['obj']['classid'] = $classid;
-			$jatt['obj']['codebase'] = $codebase;
-			$jatt['obj']['parm'][] = array(
-				'name' => 'data', 'value' => $uswf . '?' . $pv
-			);
 		} else {
-			$jatt['obj']['ie'] = 'false';
 			$typ = $mtype ? $mtype :'application/x-shockwave-flash';
 
 			$obj = sprintf('
 			<object%s width="%u" height="%u" type="%s" data="%s?%s"%s>
 			', $id, $w, $h, $typ, $uswf, $pv, ''); // ' typemustmatch');
-
-			$jatt['obj']['data'] = $uswf . '?' . $pv;
-			$jatt['obj']['type'] = $typ;
 		}
 
-		/* $jatt['obj']['parm'] is not being used; left in
-		 * place temporarily --
-		 * TODO: use or remove
-		$jatt['obj']['parm'][] = array(
-			'name' => 'play', 'value' => $play
-		);
-		$jatt['obj']['parm'][] = array(
-			'name' => 'quality', 'value' => $quality
-		);
-		$jatt['obj']['parm'][] = array(
-			'name' => 'allowFullScreen', 'value' => $allowfull
-		);
-		$jatt['obj']['parm'][] = array(
-			'name' => 'allowScriptAccess', 'value' => 'sameDomain'
-		);
-		$jatt['obj']['parm'][] = array(
-			'name' => 'flashvars', 'value' => $fv
-		);
-		$jatt['obj']['parm'][] = array(
-			'name' => 'src', 'value' => $uswf . '?' . $pv
-		);
-		$jatt['obj']['parm'][] = array(
-			'name' => 'name', 'value' => self::swfputdir
-		);
-		$jatt['obj']['parm'][] = array(
-			'name' => 'bgcolor', 'value' => '#000000'
-		);
-		$jatt['obj']['parm'][] = array(
-			'name' => 'align', 'value' => 'middle'
-		);
-
-		$ind = '';
-		foreach ( $jatt['obj']['parm'] as $v ) {
-			$obj .= sprintf('%s<param name="%s" value="%s">',
-				$ind, $v['name'], $v['value']);
-			$ind = "\n\t\t\t";
-		}
-		*/
-
-		/* $jatt['obj']['parm'] is not being used; comment
-		 * or remove this if it is put to use
-		 */
 		$obj .= sprintf('<param name="play" value="%s">
 			<param name="quality" value="%s">
 			<param name="allowFullScreen" value="%s">
@@ -3412,6 +3367,9 @@ class SWF_put_evh {
 		);
 		
 		$parms = array("iparm" => $iparm, "oparm" => $oparm);
+		if ( $flashid !== null && $flashid !== '' ) {
+			$parms['flashid'] = $flashid;
+		}
 
 		if ( $atts['fallback'] === 'false' ) {
 			return sprintf('
