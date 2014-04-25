@@ -264,7 +264,7 @@ function evhh5v_controlbar_elements_check(parms, vidobj) {
 	}
 	
 	// can play checks
-	var maybe = 0, probably = 0, notype = 0;
+	var maybe = 0, probably = 0, notype = 0, nsource = 0;
 	for ( var i = 0; i < ss.length; i++ ) {
 		var add = false;
 		var o = ss[i];
@@ -274,6 +274,7 @@ function evhh5v_controlbar_elements_check(parms, vidobj) {
 		if ( ! s || s.length < 1 ) {
 			continue;
 		}
+		nsource++;
 
 		if ( ! t || t.length < 1 ) {
 			// infer type from suffix; set tested is
@@ -311,6 +312,42 @@ function evhh5v_controlbar_elements_check(parms, vidobj) {
 
 	// if we have even a 'maybe' then go ahead
 	if ( probably > 0 || maybe > 0 ) {
+		if ( parms.h5overfl === undefined 
+			|| ( parms.h5overfl !== 'no' 
+				&& ( parms.h5overfl !== 'probably'
+					|| probably > 0 ) ) ) {
+			var aux = vidobj.parentNode; // aux div for h5 vid
+			var obj = aux.parentNode; // parent -- object?
+			
+			if ( obj.nodeName == 'OBJECT'
+				&& parms.flashid !== undefined
+					&& parms.flashid === obj.id ) {
+				var par = obj.parentNode;
+				obj.removeChild(aux);
+
+
+				var ch = [];
+				for ( var i = 0; i < vidobj.childNodes.length; i++ ) {
+					ch.push(vidobj.childNodes.item(i));
+				}
+				for ( var i = 0; i < ch.length; i++ ) {
+					var t = ch[i];
+		
+					// only need to keep sources
+					if ( t.nodeName == 'SOURCE' ) {
+						continue;
+					}
+		
+					// e.g. fallback img; make child of video
+					vidobj.removeChild(t);
+					obj.appendChild(t);
+				}
+		
+				par.replaceChild(aux, obj);
+				vidobj.appendChild(obj);
+			}
+		}
+
 		return vidobj;
 	}
 
@@ -345,8 +382,8 @@ function evhh5v_controlbar_elements_check(parms, vidobj) {
 	}
 
 	// return determines whether controller and bar are built;
-	// a source, albeit of unknown type, makes it worth a try
-	return (notype > 0) ? vidobj : false;
+	// a source, even of unknown type, makes it worth a try
+	return (nsource > 0) ? vidobj : false;
 }
 
 
