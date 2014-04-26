@@ -397,6 +397,44 @@ function add_filter(item, filter) {
 	item.filters = t;
 }
 
+// browser JS may call this to get an ack. Passes a value
+// which should be node's id. Return same value.
+function external_ack(the_arg) {
+	if ( external_ack_args === undefined ) {
+		external_ack_args = [];
+	}
+
+	external_ack_args.push(the_arg);
+
+	return the_arg;
+}
+
+// setup browser JS ack callback.
+function setup_external_ack() {
+	if ( external_ack_setup !== undefined ) {
+		return;
+	}
+
+	external_ack_setup = true;
+
+	try {
+		var xi;
+		xi = flash.external.ExternalInterface === undefined
+			? false : true;
+		if ( xi ) {
+			flash.external.ExternalInterface.addCallback("get_ack", this, external_ack);
+
+			return true;
+		}
+	} catch ( e ) {
+	}; // ming requires terminated try/catch
+
+	return false;
+}
+
+// do the above now
+setup_external_ack();
+
 // If there is a direct way to get browser user agent string in
 // flash, I haven't found it, so try an external JS function;
 // this might be unreliable, so caller should expect false return.

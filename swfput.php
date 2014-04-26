@@ -3371,7 +3371,7 @@ class SWF_put_evh {
 			$parms['flashid'] = $flashid;
 		}
 
-		if ( $atts['fallback'] === 'false' ) {
+		if ( true || $atts['fallback'] === 'false' ) {
 			return sprintf('
 			<script type="text/javascript">
 				evhh5v_controlbar_elements(%s, true);

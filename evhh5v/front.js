@@ -265,9 +265,9 @@ function evhh5v_controlbar_elements_check(parms, vidobj) {
 	
 	// can play checks
 	var maybe = 0, probably = 0, notype = 0, nsource = 0;
-	for ( var i = 0; i < ss.length; i++ ) {
+	while ( ss.length ) {
 		var add = false;
-		var o = ss[i];
+		var o = ss.shift();
 		var s = o.getAttribute('src');
 		var t = o.getAttribute('type');
 
@@ -312,42 +312,6 @@ function evhh5v_controlbar_elements_check(parms, vidobj) {
 
 	// if we have even a 'maybe' then go ahead
 	if ( probably > 0 || maybe > 0 ) {
-		if ( parms.h5overfl === undefined 
-			|| ( parms.h5overfl !== 'no' 
-				&& ( parms.h5overfl !== 'probably'
-					|| probably > 0 ) ) ) {
-			var aux = vidobj.parentNode; // aux div for h5 vid
-			var obj = aux.parentNode; // parent -- object?
-			
-			if ( obj.nodeName == 'OBJECT'
-				&& parms.flashid !== undefined
-					&& parms.flashid === obj.id ) {
-				var par = obj.parentNode;
-				obj.removeChild(aux);
-
-
-				var ch = [];
-				for ( var i = 0; i < vidobj.childNodes.length; i++ ) {
-					ch.push(vidobj.childNodes.item(i));
-				}
-				for ( var i = 0; i < ch.length; i++ ) {
-					var t = ch[i];
-		
-					// only need to keep sources
-					if ( t.nodeName == 'SOURCE' ) {
-						continue;
-					}
-		
-					// e.g. fallback img; make child of video
-					vidobj.removeChild(t);
-					obj.appendChild(t);
-				}
-		
-				par.replaceChild(aux, obj);
-				vidobj.appendChild(obj);
-			}
-		}
-
 		return vidobj;
 	}
 
@@ -364,8 +328,8 @@ function evhh5v_controlbar_elements_check(parms, vidobj) {
 		for ( var i = 0; i < swfobj.childNodes.length; i++ ) {
 			ch.push(swfobj.childNodes.item(i));
 		}
-		for ( var i = 0; i < ch.length; i++ ) {
-			var t = ch[i];
+		while ( ch.length ) {
+			var t = ch.shift();
 
 			// only need to keep params
 			if ( t.nodeName == 'PARAM' ) {
