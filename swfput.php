@@ -2922,6 +2922,10 @@ class SWF_put_evh {
 			$url = $defaulturl;
 			if ( $url === 'default' ) {
 				$url = $this->get_swf_default_video_url();
+			} else if ( $url === '' ) {
+				// allow caller to permit empty url by placing
+				// empty string in default
+				return $url;
 			}
 		}
 		if ( $url === '' ) {
@@ -2962,8 +2966,9 @@ class SWF_put_evh {
 		}
 
 		
-		$ut = $this->check_expand_video_url($url, $defaulturl);
-		if ( ! $ut ) {
+		//$ut = $this->check_expand_video_url($url, $defaulturl);
+		$ut = $this->check_expand_video_url($url, '');
+		if ( $ut === false ) {
 			self::errlog('rejected URL: "' . $url . '"');
 			return '<!-- SWF embedding declined:  URL displeasing -->';
 		}

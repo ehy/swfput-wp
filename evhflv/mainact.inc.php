@@ -409,8 +409,23 @@ function external_ack(the_arg) {
 	return the_arg;
 }
 
-// setup browser JS ack callback.
-function setup_external_ack() {
+// browser JS may call this to add video URLs; boolean enc
+// signifies it is encoded.
+function external_url(url, enc) {
+	if ( external_url_args === undefined ) {
+		external_url_args = [];
+		external_url_args_cur = 0;
+	}
+
+	external_url_args.push(
+		enc ? url : urlesc(url)
+	);
+
+	return external_url_args.length;
+}
+
+// setup browser callbacks.
+function setup_external_cb() {
 	if ( external_ack_setup !== undefined ) {
 		return;
 	}
@@ -422,7 +437,10 @@ function setup_external_ack() {
 		xi = flash.external.ExternalInterface === undefined
 			? false : true;
 		if ( xi ) {
-			flash.external.ExternalInterface.addCallback("get_ack", this, external_ack);
+			xi = flash.external.ExternalInterface;
+
+			xi.addCallback("get_ack", this, external_ack);
+			xi.addCallback("add_alt_url", this, external_url);
 
 			return true;
 		}
@@ -433,7 +451,7 @@ function setup_external_ack() {
 }
 
 // do the above now
-setup_external_ack();
+setup_external_cb();
 
 // If there is a direct way to get browser user agent string in
 // flash, I haven't found it, so try an external JS function;
@@ -1925,6 +1943,16 @@ function ConnectedStartVideo() {
 	video.attachVideo(stream);
 	video.menu = ctxmenu;
 	video.menu.hideBuiltInItems();
+
+	// bug: vurl === "/" can result when passed url arg is empty
+	if ( (vurl == null || vurl == "" || vurl === "/")
+		&& external_url_args != undefined
+		&& external_url_args.length ) {
+		vurl = external_url_args[external_url_args_cur];
+		adddbgtext(" EXTURL=='"+vurl+"'\n");
+	} else {
+		adddbgtext(" INTURL=='"+vurl+"'\n");
+	}
 
 	sound = new Sound();
 	if ( audb == true ) {

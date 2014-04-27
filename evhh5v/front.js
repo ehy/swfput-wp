@@ -233,7 +233,8 @@ function evhh5v_controlbar_elements(parms, fixups) {
 // "maybe" can play; if none found, but found a fallback
 // <object> with id matching flash id in parms, then swap
 // flash into parent position
-// return false if altogether N.G., <video> object node elsewise
+// return false if altogether N.G. or swapped with flash,
+// <video> object node elsewise
 function evhh5v_controlbar_elements_check(parms, vidobj) {
 	if ( ! vidobj ) {
 		vidobj = document.getElementById(parms["iparm"]["vidid"]);
@@ -263,10 +264,12 @@ function evhh5v_controlbar_elements_check(parms, vidobj) {
 		}
 	}
 	
-	// can play checks
+	// in type checks collect source that might be OK for flash
+	var sfs = [];
+	// do can play type checks
 	var maybe = 0, probably = 0, notype = 0, nsource = 0;
 	while ( ss.length ) {
-		var add = false;
+		var add = false, sff = false;
 		var o = ss.shift();
 		var s = o.getAttribute('src');
 		var t = o.getAttribute('type');
@@ -277,23 +280,30 @@ function evhh5v_controlbar_elements_check(parms, vidobj) {
 		nsource++;
 
 		if ( ! t || t.length < 1 ) {
-			// infer type from suffix; set tested is
+			// infer type from suffix; the set tested is
 			// obviously subject to revision (expansion)
 			if ( s.match(/.*\.(mp4|m4v|mv4)[ \t]*$/i) ) {
 				t = 'video/mp4';
 				add = true;
+				sff = s; sfs.push(sff);
 			} else if ( s.match(/.*\.(og[gv]|vorbis)[ \t]*$/i) ) {
 				t = 'video/ogg';
 				add = true;
 			} else if ( s.match(/.*\.(webm|wbm|vp[89])[ \t]*$/i) ) {
 				t = 'video/webm';
 				add = true;
+			} else if ( s.match(/.*\.(flv)[ \t]*$/i) ) {
+				sff = s; sfs.push(sff);
 			}
 		}
 
 		if ( ! t || t.length < 1 ) {
 			notype++;
 			continue;
+		}
+
+		if ( ! sff && t.match(/.*video\/(mp4|flv).*/i) ) {
+			sff = s; sfs.push(sff);
 		}
 
 		var can = vidobj.canPlayType(t);
@@ -343,7 +353,31 @@ function evhh5v_controlbar_elements_check(parms, vidobj) {
 
 		par.replaceChild(swfobj, aux);
 		swfobj.appendChild(aux);
+
+		// if flash-suitable types were found above, pass them
+		// to the flash player on window load for use at the
+		// player's descretion
+		if ( window.addEventListener )
+		window.addEventListener('load', function(e) {
+			var id = swfobj.id;
+			try {
+				if ( swfobj.get_ack(id) != id ) {
+					console.log('FAILED evhswf ack from "'+id+'"');
+					return;
+				}
+				
+				for ( var i = 0, mx = sfs.length; i < mx; i++ ) {
+					var t = encodeURI(sfs[i]);
+					swfobj.add_alt_url(t, true);
+				}
+			} catch ( ex ) {
+				console.log('EXCEPTION calling evhswf: "'+ex.message+'"');
+			}
+		}, false);
+
+		return false;
 	}
+	
 
 	// return determines whether controller and bar are built;
 	// a source, even of unknown type, makes it worth a try
