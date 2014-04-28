@@ -426,11 +426,10 @@ function external_url(url, enc) {
 
 // setup browser callbacks.
 function setup_external_cb() {
-	if ( external_ack_setup !== undefined ) {
+	if ( external_cbmethods_setup !== undefined ) {
 		return;
 	}
-
-	external_ack_setup = true;
+	external_cbmethods_setup = true;
 
 	try {
 		var xi;

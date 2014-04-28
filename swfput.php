@@ -234,7 +234,8 @@ class SWF_put_evh {
 	
 	// html5 video front-end js
 	const evhv5vjsdir  = 'evhh5v';
-	const evhv5vjsname = 'front.min.js';
+	//const evhv5vjsname = 'front.min.js';
+	const evhv5vjsname = 'front.js';
 	// swfput js front-end js name prefix:
 	const evhv5vjsnpfx = 'evhh5v';
 	// html5 video front-end css

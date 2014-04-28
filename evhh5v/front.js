@@ -251,15 +251,16 @@ function evhh5v_controlbar_elements_check(parms, vidobj) {
 	ss.push(vidobj); // useful in "can play checks" below (src attr)
 	for ( var i = 0; i < vidobj.childNodes.length; i++ ) {
 		var t = vidobj.childNodes.item(i);
+		var nnlc = t.nodeName.toLowerCase();
 
-		if ( t.nodeName == 'OBJECT' ) {
+		if ( nnlc == 'object' ) {
 			if ( parms.flashid !== undefined && parms.flashid === t.id ) {
-				swfobj = t;
+				swfobj = evhh5v_get_flashsupport() ? t : false;
 			}
 			continue;
 		}
 
-		if ( t.nodeName == 'SOURCE' ) {
+		if ( nnlc == 'source' ) {
 			ss.push(t);
 		}
 	}
@@ -340,9 +341,10 @@ function evhh5v_controlbar_elements_check(parms, vidobj) {
 		}
 		while ( ch.length ) {
 			var t = ch.shift();
+			var nnlc = t.nodeName.toLowerCase();
 
 			// only need to keep params
-			if ( t.nodeName == 'PARAM' ) {
+			if ( nnlc == 'param' ) {
 				continue;
 			}
 
@@ -378,6 +380,34 @@ function evhh5v_controlbar_elements_check(parms, vidobj) {
 		return false;
 	}
 	
+	// Now, there is no decent H5V source, and no flash object
+	// as fallback, but is this fallback to flash?
+	if ( evhh5v_get_flashsupport() ) {
+		swfobj = vidobj.parentNode.parentNode; // parent of aux div
+		if ( swfobj.nodeName.toLowerCase() === 'object'
+			&& parms.flashid === swfobj.id ) {
+			// yes, H5V is fallback, but flash is supported
+			if ( window.addEventListener )
+			window.addEventListener('load', function(e) {
+				var id = swfobj.id;
+				try {
+					if ( swfobj.get_ack(id) != id ) {
+						console.log('FAILED evhswf ack from "'+id+'"');
+						return;
+					}
+					
+					for ( var i = 0, mx = sfs.length; i < mx; i++ ) {
+						var t = encodeURI(sfs[i]);
+						swfobj.add_alt_url(t, true);
+					}
+				} catch ( ex ) {
+					console.log('EXCEPTION calling evhswf: "'+ex.message+'"');
+				}
+			}, false);
+
+			return false;
+		}
+	}
 
 	// return determines whether controller and bar are built;
 	// a source, even of unknown type, makes it worth a try
@@ -3197,6 +3227,13 @@ evhh5v_controller.prototype = {
 			return;
 		}
 		var ename = evt.type;
+
+		if ( false ) {
+			if ( that.evcnt === undefined ) that.evcnt = {};
+			if ( that.evcnt[ename] === undefined ) that.evcnt[ename] = 0;
+			that.evcnt[ename]++;
+		}
+
 		if ( that.handlermap[ename] != undefined ) {
 			for ( var i = 0; i < that.handlermap[ename].length; i++ ) {
 				if ( typeof that.handlermap[ename][i] == "function" ) {
@@ -3334,6 +3371,14 @@ evhh5v_controller.prototype = {
 		this.addEventListener(["seeked", "canplaythrough", "playing", "loadeddata", "ended"], function(e) {
 			this.hide_wait();
 			//console.log("WAIT SPINNER STOP: " + e.type);
+		}, false);
+		this.addEventListener(["ended"], function(e) {
+			if  ( this.evcnt !== undefined ) {
+				for ( var k in this.evcnt ) {
+					console.log("EVENT count for '"+k+"': " + this.evcnt[k]);
+					this.evcnt[k] = 0;
+				}
+			}
 		}, false);
 
 		this.addEventListener("play", function(e) {
@@ -3682,7 +3727,7 @@ evhh5v_controller.prototype = {
 	},
 	// procedure for state timer
 	do_state_timer : function() {
-		if ( this.ntick++ == 2147483647 ) {
+		if ( this.ntick++ === 2147483647 ) {
 			// nova-flow
 			this.ntick = 0;
 		}
@@ -3710,9 +3755,9 @@ evhh5v_controller.prototype = {
 			this.ptrtick = 0;
 		}
 
-		var intrvl2 = this.ntick & 1;
+		var prgupd = this.ntick & 1;
 		
-		if ( intrvl2 && ! (this._vid.paused || this._vid.ended) ) {
+		if ( prgupd && ! (this._vid.paused || this._vid.ended) ) {
 			this.play_progress_update();
 		}
 
@@ -3721,7 +3766,6 @@ evhh5v_controller.prototype = {
 			this.set_bar_y(this.bar_y);
 			// when bar is fully hidden also hide sound volume gadget
 			if ( this.yshowpos == this.bar_y ) {
-				//volgadget._visible = false;
 				this.hide_volctl();
 			}
 		} else if ( this.yshowpos < this.bar_y ) {
@@ -4221,7 +4265,7 @@ function evhh5v_fixup_elements(parms) {
 
 	if ( /Opera/i.test(navigator["userAgent"]) ) {
 		var t = document.getElementById(ip["auxdiv"]);
-		if ( t && t.parentNode && t.parentNode.nodeName.toLowerCase() === "object" ) {
+		if ( t && t.parentNode.nodeName.toLowerCase() === "object" ) {
 			var p = t.parentNode;
 			var d = p.parentNode;
 			p.removeChild(t);
@@ -4245,3 +4289,16 @@ var evhh5v_getstyle = function (el, sty) {
 	}
 	return v;
 };
+
+// check browser for swflash support
+var evhh5v_get_flashsupport = function (el, sty) {
+	if ( document.evhh5v_get_flashsupport_found === undefined ) {
+		if ( ! navigator.plugins["Shockwave Flash"] ) {
+			document.evhh5v_get_flashsupport_found = false;
+		} else {
+			document.evhh5v_get_flashsupport_found = true;
+		}
+	}
+	
+	return document.evhh5v_get_flashsupport_found;
+}
