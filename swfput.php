@@ -633,12 +633,12 @@ class SWF_put_evh {
 			</p>', 'swfput_l10n'),
 			__('Show verbose introductions', 'swfput_l10n'),
 			__('Save Settings', 'swfput_l10n')
-			)),
+			)) /*,
 			self::wt(sprintf(
 			__('<p>TODO: %s
 			</p>', 'swfput_l10n'),
 			__('WRITE TIPS', 'swfput_l10n')
-			))
+			)) */
 		);
 
 		// TRANSLATORS: first '%s' is the the phrase
