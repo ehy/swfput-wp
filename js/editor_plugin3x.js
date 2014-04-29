@@ -75,6 +75,20 @@ function SWFPut_repl_nl(str) {
 	var old  = (tmv < 4);
 	var fpo  = SWFPut_video_tmce_plugin_fpo_inst.fpo;
 
+	// small lib
+	var strcch = function(s, to_lc) {
+		if ( to_lc ) return s.toLowerCase();
+		return s.toUpperCase();
+	};
+	var str_lc = function(s) { return strcch(s, true); };
+	var str_uc = function(s) { return strcch(s, false); };
+	var strccmp = function(s, c) { return (str_lc(s) === str_lc(c)); };
+	// nodeName comp. is common, and case unreliable
+	var nN_lc = function(n) { return str_lc(n.nodeName); };
+	var nN_uc = function(n) { return str_uc(n.nodeName); };
+	var nNcmp = function(n, c) { return (nN_lc(n) === str_lc(c)); };
+	
+
 	tinymce.create('tinymce.plugins.SWFPut', {
 		url : '',
 		urlfm : '',
@@ -146,7 +160,8 @@ function SWFPut_repl_nl(str) {
 				ed.dom.events.add(ed.getBody(), 'mousedown', function(e) {
 					var parent;
 
-					if ( e.target.nodeName == 'IFRAME' && (parent = ed.dom.getParent(e.target, 'div.evhTemp')) ) {
+					if ( nNcmp(e.target, 'iframe')
+						&& (parent = ed.dom.getParent(e.target, 'div.evhTemp')) ) {
 						if ( tinymce.isGecko )
 							ed.selection.select(parent);
 						else if ( tinymce.isWebKit )
@@ -186,7 +201,7 @@ function SWFPut_repl_nl(str) {
 						return true;
 					}
 			
-					if ( n.nodeName == 'DD' ) {
+					if ( nNcmp(n, 'dd') ) {
 						return true;
 					}
 			
@@ -225,7 +240,7 @@ function SWFPut_repl_nl(str) {
 						return;
 					}
 		
-					if ( n.nodeName == 'DD' ) {
+					if ( nNcmp(n, 'dd') ) {
 						return;
 					}
 		
@@ -443,21 +458,6 @@ function SWFPut_repl_nl(str) {
 				cap = fpo.ent;
 			}
 
-			/*
-			// NOTE data-no-stripme="sigh": w/o this, if caption
-			// <dd> is empty, while <dl> might get stripped out!
-			var cls = 'wp-caption aligncenter';
-			var r = '';
-			r += '<dl id="dl-'+id+'" class="'+cls+'" style="'+sty+'" data-no-stripme="sigh">';
-			r += '<dt class="wp-caption-dt" id="dt-'+id+'" data-no-stripme="sigh">';
-			r += '<evhfrm id="'+id+'" class="evh-pseudo" '+att+' src="';
-			r += url + '?' + qs;
-			r += '"></evhfrm>';
-			r += '</dt>';
-			r += '<dd class="wp-caption-dd" id="dd-'+id+'" data-no-stripme="sigh">' + cap;
-			r += '</dd></dl>';
-			*/
-			
 			// for clarity, use separate vars for classes, accepting
 			// slightly more inefficiency in the concatenation chain
 			// [yearning for sprintf()]

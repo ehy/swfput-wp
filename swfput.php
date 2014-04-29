@@ -1237,7 +1237,7 @@ class SWF_put_evh {
 					break;
 				default:
 					$e = sprintf(
-						__('bad key in option validation: "%s"', 'swfput_l10n'
+						__('bad key in option validation: "%s"', 'swfput_l10n')
 						, $k);
 					self::errlog($e);
 					add_settings_error(self::ht($k),
