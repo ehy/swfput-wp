@@ -1199,9 +1199,9 @@ class SWF_put_evh {
 							$e = __('bad choice: "%s"', 'spambl_l10n');
 							$e = sprintf($e, $ot);
 							self::errlog($e);
-							add_settings_error(self::wt($k),
+							add_settings_error(self::ht($k),
 								sprintf('%s[%s]', self::opt_group, $k),
-								self::wt($e), 'error');
+								self::ht($e), 'error');
 							$a_out[$k] = $oo;
 							$nerr++;
 							break;
@@ -1225,9 +1225,9 @@ class SWF_put_evh {
 					if ( $ot != 'true' && $ot != 'false' ) {
 						$e = sprintf('bad option: %s[%s]', $k, $v);
 						self::errlog($e);
-						add_settings_error(self::wt($k),
+						add_settings_error(self::ht($k),
 							sprintf('%s[%s]', self::opt_group, $k),
-							self::wt($e), 'error');
+							self::ht($e), 'error');
 						$a_out[$k] = $oo;
 						$nerr++;
 					} else {
@@ -1238,10 +1238,10 @@ class SWF_put_evh {
 				default:
 					$e = "funny key in validate opts: '" . $k . "'";
 					self::errlog($e);
-					add_settings_error(self::wt($k),
+					add_settings_error(self::ht($k),
 						sprintf('%s[%s]',
 							self::opt_group, self::ht($k)),
-						self::wt($e), 'error');
+						self::ht($e), 'error');
 					$nerr++;
 			}
 		}
