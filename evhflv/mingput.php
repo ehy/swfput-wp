@@ -1194,7 +1194,7 @@ $t->addShape($butshape,
 $t->addShape($stopshape,
 	SWFBUTTON_UP | SWFBUTTON_DOWN | SWFBUTTON_OVER);
 $t->addShape($buthighlightshape, SWFBUTTON_OVER);
-$t->setAction(makeSWFAction("_root.stopVideo();"));
+$t->setAction(makeSWFAction("_root.stop_reset();"));
 add_panel_obj($t, "stopbut", $tx, $ty);
 // stop disabled
 $t = new SWFButton();
@@ -1464,6 +1464,7 @@ for ( $i = 0; $i < $wnfrms; $i++ ) {
 // (as is common practice) that displays large on screen; also
 // add a movie clip that will optionally load an image (in AScript)
 $initialmovie = new SWFMovieClip();
+$initialimage = new SWFMovieClip();
 $initialimg = new SWFMovieClip();
 $initialbut = new SWFButton();
 $initialbutA = 220;
@@ -1478,9 +1479,10 @@ $initialbut->addShape($t,
 	SWFBUTTON_HIT | SWFBUTTON_UP | SWFBUTTON_OVER);
 $initialbut->addAction(makeSWFAction("_root.initialbutHit();"),
 	SWFBUTTON_HIT);
-add_child_obj($initialmovie, $initialimg, "initialimg", 0, 0);
+add_child_obj($initialimage, $initialimg, "initialimg", 0, 0);
 add_child_obj($initialmovie, $initialbut, "initialbut", 0, 0);
 $initialmovie->nextFrame();
+$initialimage->nextFrame();
 
 // invisible background, just for unused clicks
 $bghndlrbut = new SWFButton();
@@ -1505,6 +1507,7 @@ add_movie_obj($bghndlrbut, "bghndlr", 0, 0);
 add_movie_obj(new SWFVideoStream(), "video", 0, 0);
 
 // add the initial play button/image movie to the movie
+add_movie_obj($initialimage, "iniimg", 0, 0);
 add_movie_obj($initialmovie, "inibut", $wndlength / 2, $wndheight / 2);
 
 // add the volume gadget to the movie

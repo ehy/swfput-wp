@@ -1348,6 +1348,9 @@ function resizeFace() {
 	wait._y = sh / 2;
 
 	// initial button/image adjustment (if not started yet)
+	if ( iniimg !== null ) {
+		iniimg.resize();
+	}
 	if ( inibut !== null ) {
 		inibut.resize();
 	}
@@ -1592,35 +1595,40 @@ function rm_scale_buttons() {
 	bbar.spkrmsw._x = w * offs;
 }
 
+var iniimg_resize = function () {
+	var m = this.initialimg;
+
+	if ( ! (m && m.ok) ) {
+		return;
+	}
+
+	var xs = m._xscale / 100;
+	var ys = m._yscale / 100;
+	var ia = (m._width * xs) / (m._height * ys);
+	var sa = Stage.width / Stage.height;
+	
+	m._x = 0;
+	m._y = 0;
+
+	if ( ! _root.iiproportion ) {
+		m._xscale = Stage.width / m._width * 100.0 * xs;
+		m._yscale = Stage.height / m._height * 100.0 * ys;
+	} else if ( sa > ia ) {
+		var sc = Stage.height / m._height * 100.0 * xs;
+		m._xscale = sc;
+		m._yscale = sc;
+		m._x += (Stage.width - m._width) / 2;
+	} else {
+		var sc = Stage.width / m._width * 100.0 * ys;
+		m._xscale = sc;
+		m._yscale = sc;
+		m._y += (Stage.height - m._height) / 2;
+	}
+};
+
 var inibut_resize = function () {
 	this._x = Stage.width / 2;
 	this._y = Stage.height / 2;
-
-	var m = this.initialimg;
-	if ( m && m.ok ) {
-		var xs = m._xscale / 100;
-		var ys = m._yscale / 100;
-		var ia = (m._width * xs) / (m._height * ys);
-		var sa = Stage.width / Stage.height;
-		
-		m._x = -this._x;
-		m._y = -this._y;
-
-		if ( ! _root.iiproportion ) {
-			m._xscale = Stage.width / m._width * 100.0 * xs;
-			m._yscale = Stage.height / m._height * 100.0 * ys;
-		} else if ( sa > ia ) {
-			var sc = Stage.height / m._height * 100.0 * xs;
-			m._xscale = sc;
-			m._yscale = sc;
-			m._x += (Stage.width - m._width) / 2;
-		} else {
-			var sc = Stage.width / m._width * 100.0 * ys;
-			m._xscale = sc;
-			m._yscale = sc;
-			m._y += (Stage.height - m._height) / 2;
-		}
-	}
 };
 
 // click callback for control bar background
@@ -1836,16 +1844,23 @@ togglepause = function() {
 	if ( inibut !== null ) {
 		//inibut.gotoAndStop(1);
 		inibut.stop();
-		inibut.initialbut.enabled = inibut.initialimg.enabled = false;
-		inibut.initialbut._visible = inibut.initialimg._visible = false;
+		inibut.initialbut.enabled  = false;
+		inibut.initialbut._visible = false;
 		inibut.enabled = false;
 		inibut._visible = false;
-		delete inibut.initialimg.imld;
-		inibut.initialimg = null;
 		inibut = null;
 	}
+	iniimg.initialimg.enabled = false;
+	iniimg.initialimg._visible = false;
 	togglepauseAudio(); togglepauseVideo();
 };
+
+function stop_reset() {
+	stopVideo();
+	if ( iniimg.initialimg && iniimg.initialimg.ok ) {
+		iniimg.initialimg._visible = iniimg.initialimg.enabled = true;
+	}
+}
 
 function stopVideo() {
 	isrunning = false;
@@ -2428,41 +2443,41 @@ adddbgtext("Flash v. " + flvers + "\n");
 
 // set up initial button, and image if url
 // TODO: make image proportional vs. fitted an option
-inibut.initialimg.ok = false;
 inibut.resize = inibut_resize;
 if ( brtmp || initpause ) {
 	inibut.initialbut.useHandCursor = true;
 	inibut._x = Stage.width / 2;
 	inibut._y = Stage.height / 2;
 	inibut.initialbut._visible = inibut.initialbut.enabled = true;
-	inibut.initialimg._visible = inibut.initialimg.enabled = false;
 	inibut._visible = inibut.enabled = true;
-	if ( iimage ) {
-		// initial image to display implies no load until start button
-		initpause = dopauseaud = dopause = false;
-		loadonload = false;
-		t = {
-			onLoadInit: function (m) {
-				var bv = bbar._visible; // load corrupts bbar drawing
-				bbar._visible = false;
-				m.ok = true;
-				inibut.resize();
-				m._visible = m.enabled = true;
-				bbar._visible = bv;
-			}
-		};
-		inibut.initialimg.imld = new MovieClipLoader();
-		inibut.initialimg.imld.addListener(t);
-		inibut.initialimg.imld.loadClip(iimage, inibut.initialimg);
-	}
 } else {
-	inibut.initialbut.enabled = inibut.initialimg.enabled = false;
-	inibut.initialbut._visible = inibut.initialimg._visible = false;
+	inibut.initialbut.enabled  = false;
+	inibut.initialbut._visible = false;
 	inibut.enabled = false;
 	inibut._visible = false;
-	inibut.initialimg = null;
 	inibut = null;
 	loadonload = true;
+}
+iniimg.initialimg.ok = false;
+iniimg.resize = iniimg_resize;
+if ( initpause && iimage ) {
+	// initial image to display implies no load until start button
+	initpause = dopauseaud = dopause = false;
+	loadonload = false;
+	t = {
+		onLoadInit: function (m) {
+			var bv = bbar._visible; // load corrupts bbar drawing
+			bbar._visible = false;
+			m.ok = true;
+			iniimg.resize();
+			inibut.resize();
+			m._visible = m.enabled = true;
+			bbar._visible = bv;
+		}
+	};
+	iniimg.initialimg.imld = new MovieClipLoader();
+	iniimg.initialimg.imld.addListener(t);
+	iniimg.initialimg.imld.loadClip(iimage, iniimg.initialimg);
 }
 
 // setup timer function
