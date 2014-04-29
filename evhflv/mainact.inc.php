@@ -1856,6 +1856,7 @@ togglepause = function() {
 
 function stop_reset() {
 	stopVideo();
+	video.clear();
 	if ( iniimg.initialimg && iniimg.initialimg.ok ) {
 		iniimg.initialimg._visible = iniimg.initialimg.enabled = true;
 	}
@@ -1874,7 +1875,6 @@ function stopVideo() {
 
 	// video is not deleted; it is setup by Ming and
 	// might be trouble if deleted and new'd
-	//video.clear();
 	video.attachVideo(null);
 
 	if ( sound != undefined && sound != null ) {
