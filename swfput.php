@@ -168,8 +168,9 @@ class SWF_put_evh {
 	const disp_msg    = 1;
 	const disp_widget = 2;
 	const disp_hdr    = 4;
-	// when to use video display in tinymce editot
-	const deftinymce  = 'always'; // always, nonmobile, never
+	// when to use video display in tinymce editor
+	// changed from always to nonmobile in 2.1.0
+	const deftinymce  = 'nonmobile'; // always, nonmobile, never
 	// more
 	const defcodemsg = 'true';  // posts
 	const defcodewdg = 'false'; // widgets no-admin
