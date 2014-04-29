@@ -161,7 +161,7 @@ class SWF_put_evh {
 	// this is hidden in settings page; used w/ JS for 'screen options'
 	const defscreen1 = 'true';
 	// put html5 video alternate as primary content?
-	const defh5vprim = 'false';
+	const defh5vprim = 'true'; // changed to true in 2.1.0
 	// display opts, widget, inline or both
 	 // 1==message | 2==widget | 4==header
 	const defdisplay  = 7;
@@ -3379,25 +3379,9 @@ class SWF_put_evh {
 			$parms['flashid'] = $flashid;
 		}
 
-		if ( true || $atts['fallback'] === 'false' ) {
-			return sprintf('
-			<script type="text/javascript">
-				evhh5v_controlbar_elements(%s, true);
-			</script>', json_encode($parms));
-		}
-		
-		// This is depressing . . . the test should be whether the
-		// outer <object> is exposed (showing, used) or the inner
-		// fallback content is exposed, regardless of the <object>
-		// content type; but, after ridiculous time searching, I
-		// cannot find any way to simply determine whether primary
-		// or fallback elements will be exposed. The plugin check will
-		// be less reliable.
 		return sprintf('
 			<script type="text/javascript">
-				if ( ! navigator.plugins["Shockwave Flash"] ) {
-					evhh5v_controlbar_elements(%s, true);
-				}
+				evhh5v_controlbar_elements(%s, true);
 			</script>', json_encode($parms));
 	}
 } // End class SWF_put_evh
