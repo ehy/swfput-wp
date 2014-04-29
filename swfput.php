@@ -1195,8 +1195,8 @@ class SWF_put_evh {
 							$a_out[$k] = $ot;
 							$nupd += ($ot === $oo) ? 0 : 1;
 							break;
-						default:               //'Set a value:'
-							$e = __('bad choice: "%s"', 'spambl_l10n');
+						default:
+							$e = __('bad choice: "%s"', 'swfput_l10n');
 							$e = sprintf($e, $ot);
 							self::errlog($e);
 							add_settings_error(self::ht($k),
@@ -1236,7 +1236,9 @@ class SWF_put_evh {
 					}
 					break;
 				default:
-					$e = "funny key in validate opts: '" . $k . "'";
+					$e = sprintf(
+						__('bad key in option validation: "%s"', 'swfput_l10n'
+						, $k);
 					self::errlog($e);
 					add_settings_error(self::ht($k),
 						sprintf('%s[%s]',
