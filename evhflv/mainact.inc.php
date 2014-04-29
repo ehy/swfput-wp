@@ -1842,7 +1842,6 @@ function togglepauseVideo() {
 
 togglepause = function() {
 	if ( inibut !== null ) {
-		//inibut.gotoAndStop(1);
 		inibut.stop();
 		inibut.initialbut.enabled  = false;
 		inibut.initialbut._visible = false;
@@ -1860,6 +1859,8 @@ function stop_reset() {
 	if ( iniimg.initialimg && iniimg.initialimg.ok ) {
 		iniimg.initialimg._visible = iniimg.initialimg.enabled = true;
 	}
+	// progress set consistent w/ new H5V player
+	bbar.progpl._width = 1;
 }
 
 function stopVideo() {
