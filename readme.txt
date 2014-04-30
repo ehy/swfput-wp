@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: video, video player, movies, tube, flash, flash video, html5, html5 video, graphics, movie, video content, a/v content
 Requires at least: 3.0.2
 Tested up to: 3.9
-Stable tag: 2.0
+Stable tag: 2.1
 Text Domain: swfput_l10n
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -199,6 +199,14 @@ Update: now it does. In the words of Emily Litella, "Never mind."
 == Changelog ==
 
 = 2.1 =
+* Several small bug fixes and improvements.
+* Now, by default HTML5 video will be placed as primary
+	content with flash as fallback.
+* Now, if the stop button is clicked the initial poster
+	image, if provided, should reappear.
+* Better handling of unsupported HTML5 video types: if
+	an MP4 was given it will passed to the flash player
+	when necessary.
 
 = 2.0 =
 * Video will now display in the TinyMCE "Visual" editor. This
@@ -364,6 +372,7 @@ Update: now it does. In the words of Emily Litella, "Never mind."
 == Upgrade Notice ==
 
 = 2.1 =
+* Several small bug fixes and improvements.
 
 = 2.0 =
 * New video display in editor, minor bug fixes.

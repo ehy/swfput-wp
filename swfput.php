@@ -1337,49 +1337,34 @@ class SWF_put_evh {
 		$t = self::wt(__('These options control video placement.
 			</p><p>
 			The first option, "HTML5 video primary,"
-			makes HTML5 video be placed as
-			primary (rather than fallback) content. If this
-			is selected then flash video
+			controls whether HTML5 video will be placed as
+			primary or fallback (alternate) content. If this
+			is set on then flash video
 			will be placed as fallback content when both
 			types have been specified.
-			Be aware that if the web browser supports HTML5 video
+			Note that if the web browser supports HTML5 video
 			but cannot play any of the video
-			types specified, it probably will
-			<em>not</em> fallback to flash video. That is,
-			placing flash video as fallback is only useful
-			for browsers that do not support the video
-			element. At this time the major graphical browsers
-			all support the HTML5 video element, so using this
-			option is effectively disabling the flash video
-			(except when HTML5 video was not specified at all).
+			types specified, the HTML5 video controller script
+			will try to swap fallback flash video to the
+			active role. This is useful
+			if flash video sources had been provided in
+			the setup form (or if .MP4 had been given
+			for HTML5 video, will be passed to the flash player
+			by the player script).
 			</p><p>
-			By default flash is primary and HTML5 video
-			is fallback content. The flash plugin seems to be
-			losing favor (although it remains a more consistent
-			and simple engine for a video player), and for some
-			platforms the plugin is not available. Even where available,
-			flash might be disabled by default by some browsers, or
-			the browser might
-			require user approval before flash is allowed to run.
+			By default HTML5 video is primary and flash video
+			is fallback content. (Prior to SWFPut 2.1 flash
+			would be placed as primary content by default.)
 			</p><p>
 			Note that at present the major graphical browsers
 			do <em>not</em> all support the same set of video
 			types for their HTML5 video players.
 			To reliably use HTML5 video as primary content,
-			you will need to prepare the video in .MP4, .OGG (.OGV),
+			it is best to prepare the video in .MP4, .OGG (.OGV),
 			and .WEBM container formats with suitable codecs.
 			(The posts/pages editor page has a help button which
 			should have a "SWFPut Video Form" tab
 			with more explanation.)
-			</p><p>
-			Generally, if you can provide the several formats needed
-			for good HTML5 support, using the "HTML5 video primary"
-			option should be a good idea. An MP4 will be among
-			those files, and that can be used for flash too (although
-			if you wish to be compatible with the free/open source
-			<em>Gnash</em> flash plugin you should use FLV).
-			If you cannot provide
-			all the formats, it might be better not to use this option.
 			</p><p>
 			The next two options allow the video content
 			to be completely disabled.
@@ -2971,7 +2956,7 @@ class SWF_put_evh {
 
 		
 		//$ut = $this->check_expand_video_url($url, $defaulturl);
-		$ut = $this->check_expand_video_url($url, '');
+		$flurl = $ut = $this->check_expand_video_url($url, '');
 		if ( $ut === false ) {
 			self::errlog('rejected URL: "' . $url . '"');
 			return '<!-- SWF embedding declined:  URL displeasing -->';
@@ -3122,6 +3107,9 @@ class SWF_put_evh {
 		$h5v_fallback = self::get_h5vprim_option() == 'false'
 			? true : false;
 		$h5v = $h5vclose = '';
+		if ( $altvideo == '' ) {
+			$altvideo = $flurl;
+		}
 		if ( $altvideo != '' ) {
 			// vars for alternate h5 video
 			$aspect = $displayaspect;

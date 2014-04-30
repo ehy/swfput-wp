@@ -94,23 +94,10 @@ function swfput_get_helptext($htmllink, $pdflink)
 	It is not necessary to fill both the flash and HTML5
 	video URL fields, but it is a good idea to do so
 	if you can prepare the video in the needed formats.
-	If you specify only one type, the other type of
-	video player is not produced in the page code.
-	If you do specify URLs for both flash and HTML5 video,
-	then the page code will have one as primary content,
-	and the other as "fallback" content. Fallback content
-	is shown by the web-browser only when the primary
-	content cannot be shown. For example, if flash is
-	primary content, but you have specified HTML5 content
-	too, then a visitor to your site who does not
-	have a flash plugin would see the HTML5 video player
-	if the browser supports it.
-	(Mobile browsers are less likely to have a flash
-	plugin than desktop-type browsers.)
 	</p><p>
-	By default, flash is made primary content with
-	HTML5 as fallback. You may make HTML5 be primary
-	and flash be fallback with the "HTML5 video primary"
+	By default, HTML5 is made primary content with
+	flash as fallback. You may make flash be primary
+	and HTML5 be fallback with the "HTML5 video primary"
 	option on the settings page. (Go to the "Settings"
 	menu and select "SWFPut Plugin" for the settings page.)
 	</p><p>
@@ -141,11 +128,10 @@ function swfput_get_helptext($htmllink, $pdflink)
 	<p>
 	In the example, where two codecs are specified there is
 	no space after the comma.
-	Some online examples
+	Some online examples, and even HTML specifaction pages,
 	show a space after the comma,
-	but some older
-	versions of <em>Firefox</em> will reject that
-	usage, so the space after the comma is best left out.
+	but browsers might reject that
+	usage, so SWFPut will normalize the codecs argument.
 	</p><p>
 	<h3>Use initial image as no-video alternate</h3>
 	This checkbox, if enabled (it is, by default) will
