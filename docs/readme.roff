@@ -26,13 +26,14 @@ There are two separate components:
 the video players, and the \fIWordPress\fP
 plugin proper.
 The video players are delivered to site visitors
-by the plugin in either an <object ...>
-block with a nested <video ...> element as
-fallback content, or inversely as a primary
-<video ...> with a nested <object ...>
-for flash fallback. The former arrangement
-is the default at present, and there is an
-option to enable the latter arrangement.
+by the plugin as either HTML5 video with
+a flash plugin program as
+fallback content, or inversely as flash video
+primary content with HTML5 video elements
+for fallback. The former arrangement
+is the default (as of version 2.1), but there is an
+option to enable the latter arrangement
+if flash is preferred.
 It is not necessary to provide for both
 types, one or the other type may be left out.
 .PP
@@ -50,20 +51,30 @@ be discussed in detail here.) The plugin adds to
 the post/page editor interfaces a full featured
 form to setup and add, or edit, or delete
 video objects, so the user does not need
-to be troubled with shortcodes (they will be visible
-in the editor; you will get used to them).
+to be troubled with shortcodes.
 The video widget has a similar full
 featured form.
 .PP
-The plugin does not depend on \fIJavaScript\fP,
-although it is used for the HTML5 video player,
+Video in posts may be displayed in the
+\fIWordPress\fP visual editor, if the
+default visual editor is used. If the
+default visual editor has been changed,
+for example by a plugin, the video display
+in the editor
+will probably not work. If there are problems,
+video display in the editor may be disabled
+on the \fBSWFPut\fP settings page.
+.PP
+\fBSWFPut\fP does not depend on \fIJavaScript\fP
+on the front end,
+but it is used for the HTML5 video player,
 and for proper resizing of the video display area.
 If \fIJavaScript\fP is not available, HTML5
 video will have the interface provided by the
 web browser, and the flash video will be
 largely unaffected (it only uses \fIJavaScript\fP
 to check whether it is running on a mobile platform).
-Display resizing will not be possible if
+\(lqResponsive\(rq display resizing will not be possible if
 \fIJavaScript\fP is not available, so reasonable
 dimensions should be given in the setup form.
 .PP
@@ -97,8 +108,9 @@ All necessary sources are included in the
 distributed archive, but the necessary
 build tools are not. The plugin is maintained
 with a POSIX makefile, which in turn
-expects a POSIX Bourne shell. Additionally,
-the \fIPHP\fP commandline interface with the
+expects a POSIX Bourne shell.
+Additional requirements are
+the \fIPHP\fP command-line interface with the
 \fIMing\fP extension
 to build the flash video player,
 \fIPERL\fP packages to minify \fIJavaScript\fP,
@@ -262,8 +274,8 @@ keyword; give only the value that should appear
 between quotes in the type argument,
 and although many web examples
 show a space after the comma separating the video and
-audio codec names, \fBFirefox\fP up to at least version 16
-will reject the source because of the space, so it should
+audio codec names, browsers might
+reject the source because of the space, so it should
 be left out)\**.
 .FS
 For example:
@@ -274,9 +286,7 @@ videos/cat.ogv?video/ogg; codecs=theora,vorbis\fR.
 .FE
 If more than one is given they will appear in order.
 The browser should use the first type
-that it supports (if any, and some older versions
-of browsers might not consider any source
-but the first to appear). The MP4, WEBM, and OGG
+that it supports. The MP4, WEBM, and OGG
 types have varied support among web browsers,
 so ideally all three formats should be provided.
 .IP \(bu
@@ -309,7 +319,7 @@ requiring only the playpath. This item has
 bearing on HTML5 video.
 .IP \(bu
 \fBUrl of initial image file (optional)\fP:
-An \fBHTTP\fP or \fBHTTPS\fP URL for an
+A URL for a `poster'
 image file may be placed here. When the player
 is loaded, if it is not set to play on load,
 this image is displayed until the play

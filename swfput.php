@@ -235,8 +235,8 @@ class SWF_put_evh {
 	
 	// html5 video front-end js
 	const evhv5vjsdir  = 'evhh5v';
-	//const evhv5vjsname = 'front.min.js';
-	const evhv5vjsname = 'front.js';
+	const evhv5vjsname = 'front.min.js';
+	//const evhv5vjsname = 'front.js';
 	// swfput js front-end js name prefix:
 	const evhv5vjsnpfx = 'evhh5v';
 	// html5 video front-end css
@@ -320,14 +320,8 @@ class SWF_put_evh {
 			add_filter('plugin_action_links_' . $name, $aa);
 		}
 
-		// some things are to be done in init hook: add
-		// hooks for shortcode and widget, and optionally
-		// posts processing to scan attachments, etc...
 		add_action('init', array($this, 'init_hook_func'));
 
-		// it's not enough to add this action in the activation hook;
-		// that alone does not work.  IAC administrative
-		// {de,}activate also controls the widget
 		add_action('widgets_init', array($cl, 'regi_widget'));//, 1);
 	}
 
@@ -3107,6 +3101,12 @@ class SWF_put_evh {
 		$h5v_fallback = self::get_h5vprim_option() == 'false'
 			? true : false;
 		$h5v = $h5vclose = '';
+
+		// altvideo is a misleading name from when H5 video was
+		// first added as fallback only. As of 2.1 it is primary
+		// content by default.
+		// IAC, if URLs were not specified, try flash URL which
+		// may be mp4 or flv; if it's flv then H5 will simply fail
 		if ( $altvideo == '' ) {
 			$altvideo = $flurl;
 		}

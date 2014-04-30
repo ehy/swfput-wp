@@ -201,7 +201,7 @@ Update: now it does. In the words of Emily Litella, "Never mind."
 = 2.1 =
 * Several small bug fixes and improvements.
 * Now, by default HTML5 video will be placed as primary
-	content with flash as fallback.
+	content with flash as fallback (see settings page).
 * Now, if the stop button is clicked the initial poster
 	image, if provided, should reappear.
 * Better handling of unsupported HTML5 video types: if
