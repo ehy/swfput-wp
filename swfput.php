@@ -3171,37 +3171,65 @@ class SWF_put_evh {
 				$vd .= sprintf(' poster="%s"', $jatt['a_vid']['poster']);
 			}
 			$vd .= sprintf(' width="%u" height="%u">', $w, $h);
-			// format for source elements
-			$fmt = "\n\t\t\t" . '<source src="%s"%s>';
+
 			// allow multiple video src, separated by pipe
 			$altvideo = trim($altvideo, " \t|");
 			$av = explode('|', $altvideo);
+
+			// format for source elements
+			$fmt = "\n\t\t\t" . '<source src="%s"%s>';
 			// place sources
 			foreach ( $av as $src ) {
-				$typ = '';
 				// allow '?' separated type string
 				if ( ($src = trim($src, " \t?")) === '' ) {
 					continue;
 				}
+
+				$typ = ''; // might remain empty (or not)
 				$jsa = array('type' => '');
 				$tv = explode('?', $src);
-				if ( isset($tv[1]) ) {
-					if ( ($tv[1] = trim($tv[1])) !== '' ) {
-						$jsa['type'] = self::clean_h5vid_type($tv[1]);
-						// clean_h5vid_type may return '' on error,
-						// but playback most often works w/o type
-						if ( $jsa['type'] !== '' ) {
-							$typ = sprintf(' type="%s"', $jsa['type']);
-						}
-					}
-					// leave off src
-					$src = trim($tv[0]);
-				}
+
+				// leave off src
+				$src = trim($tv[0]);
 				$ut = $this->check_expand_video_url($src, false);
 				if ( ! $ut ) {
 					self::errlog('rejected HTML video URL: "' . $src . '"');
 					continue;
 				}
+
+				// check user-supplied type
+				if ( ! isset($tv[1]) ) {
+					// not given: infer from suffix,
+					// patterns always subject to revision
+					$pats = array(
+						'/.*\.(mp4|m4v|mv4)$/i',
+						'/.*\.(og[gv]|vorbis)$/i',
+						'/.*\.(webm|wbm|vp[89])$/i'
+					);
+					if ( preg_match($pats[0], $ut) ) {
+						$tv[1] = 'video/mp4';
+					} else if ( preg_match($pats[1], $ut) ) {
+						$tv[1] = 'video/ogg';
+					} else if ( preg_match($pats[2], $ut) ) {
+						$tv[1] = 'video/webm';
+					}
+					// not fatal if not found
+					if ( isset($tv[1]) ) {
+						$jsa['type'] = $tv[1];
+						$typ = sprintf(' type="%s"', $jsa['type']);
+					}
+				} else {
+					if ( ($tv[1] = trim($tv[1])) !== '' ) {
+						$tv[1] = self::clean_h5vid_type($tv[1]);
+						// clean_h5vid_type may return '' on error,
+						// but playback most often works w/o type
+						if ( $tv[1] !== '' ) {
+							$jsa['type'] = $tv[1];
+							$typ = sprintf(' type="%s"', $jsa['type']);
+						}
+					}
+				}
+
 				$jsa['src'] = self::ht($ut);
 				$vd .= sprintf($fmt, $jsa['src'], $typ);
 				$jatt['a_vid']['srcs'][] = $jsa;

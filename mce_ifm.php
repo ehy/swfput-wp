@@ -329,7 +329,26 @@ if ( ($k = getwithdef('altvideo', '')) != '' ) {
 	foreach ( $a as $k ) {
 		$t = explode('?', trim($k));
 		$v = array('src' => maybe_get_attach(trim($t[0])));
-		if ( isset($t[1]) ) {
+		if ( ! isset($t[1]) ) {
+			// not given: infer from suffix,
+			// patterns always subject to revision
+			$pats = array(
+				'/.*\.(mp4|m4v|mv4)$/i',
+				'/.*\.(og[gv]|vorbis)$/i',
+				'/.*\.(webm|wbm|vp[89])$/i'
+			);
+			if ( preg_match($pats[0], $v['src']) ) {
+				$tv[1] = 'video/mp4';
+			} else if ( preg_match($pats[1], $v['src']) ) {
+				$tv[1] = 'video/ogg';
+			} else if ( preg_match($pats[2], $v['src']) ) {
+				$tv[1] = 'video/webm';
+			}
+			// not fatal if not found
+			if ( isset($tv[1]) ) {
+				$v['type'] = $tv[1];
+			}
+		} else {
 			$t[1] = clean_h5vid_type($t[1]);
 			if ( $t[1] !== '' ) {
 				$v['type'] = $t[1];
