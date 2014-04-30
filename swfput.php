@@ -1647,7 +1647,7 @@ class SWF_put_evh {
 
 	// callback, place "alternate" HTML <video> as primary content?
 	public function put_h5vprim_opt($a) {
-		$tt = self::wt(__('Place HTML5 "alternate" video as primary content', 'swfput_l10n'));
+		$tt = self::wt(__('Place HTML5 video as primary content', 'swfput_l10n'));
 		$k = self::opth5vprim;
 		$this->put_single_checkbox($a, $k, $tt);
 	}
