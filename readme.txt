@@ -198,6 +198,8 @@ Update: now it does. In the words of Emily Litella, "Never mind."
 
 == Changelog ==
 
+= 2.2 =
+
 = 2.1 =
 * Several small bug fixes and improvements.
 * Now, by default HTML5 video will be placed as primary
@@ -370,6 +372,8 @@ Update: now it does. In the words of Emily Litella, "Never mind."
 * Initial release.
 
 == Upgrade Notice ==
+
+= 2.2 =
 
 = 2.1 =
 * Several small bug fixes and improvements.
