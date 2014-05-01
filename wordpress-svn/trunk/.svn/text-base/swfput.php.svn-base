@@ -3,7 +3,7 @@
 Plugin Name: SWFPut
 Plugin URI: http://agalena.nfshost.com/b1/?page_id=46
 Description: Add Flash and HTML5 video to WordPress posts, pages, and widgets, from arbitrary URI's or media library ID's or files in your media upload directory tree (including uploads not in the WordPress media library).
-Version: 2.0
+Version: 2.1
 Author: Ed Hynan
 Author URI: http://agalena.nfshost.com/b1/
 License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
@@ -116,7 +116,7 @@ class SWF_put_evh {
 	const plugin_webpage = 'http://agalena.nfshost.com/b1/?page_id=46';
 	
 	// this version
-	const plugin_version = '2.0.0';
+	const plugin_version = '2.1.0';
 	
 	// the widget class name
 	const swfput_widget = 'SWF_put_widget_evh';
@@ -161,15 +161,16 @@ class SWF_put_evh {
 	// this is hidden in settings page; used w/ JS for 'screen options'
 	const defscreen1 = 'true';
 	// put html5 video alternate as primary content?
-	const defh5vprim = 'false';
+	const defh5vprim = 'true'; // changed to true in 2.1.0
 	// display opts, widget, inline or both
 	 // 1==message | 2==widget | 4==header
 	const defdisplay  = 7;
 	const disp_msg    = 1;
 	const disp_widget = 2;
 	const disp_hdr    = 4;
-	// when to use video display in tinymce editot
-	const deftinymce  = 'always'; // always, nonmobile, never
+	// when to use video display in tinymce editor
+	// changed from always to nonmobile in 2.1.0
+	const deftinymce  = 'nonmobile'; // always, nonmobile, never
 	// more
 	const defcodemsg = 'true';  // posts
 	const defcodewdg = 'false'; // widgets no-admin
@@ -235,6 +236,7 @@ class SWF_put_evh {
 	// html5 video front-end js
 	const evhv5vjsdir  = 'evhh5v';
 	const evhv5vjsname = 'front.min.js';
+	//const evhv5vjsname = 'front.js';
 	// swfput js front-end js name prefix:
 	const evhv5vjsnpfx = 'evhh5v';
 	// html5 video front-end css
@@ -318,14 +320,8 @@ class SWF_put_evh {
 			add_filter('plugin_action_links_' . $name, $aa);
 		}
 
-		// some things are to be done in init hook: add
-		// hooks for shortcode and widget, and optionally
-		// posts processing to scan attachments, etc...
 		add_action('init', array($this, 'init_hook_func'));
 
-		// it's not enough to add this action in the activation hook;
-		// that alone does not work.  IAC administrative
-		// {de,}activate also controls the widget
 		add_action('widgets_init', array($cl, 'regi_widget'));//, 1);
 	}
 
@@ -355,7 +351,7 @@ class SWF_put_evh {
 			self::optuseming => self::defuseming
 		);
 		
-		if ( $chkonly !== true ) {
+		if ( $chkonly !== true && self::use_tinymce_plugin_ok() ) {
 			$items[self::opttinymce] = self::deftinymce;
 		}
 		
@@ -458,7 +454,8 @@ class SWF_put_evh {
 				self::optdispwdg,
 				$items[self::optdispwdg],
 				array($this, 'put_widget_opt'));
-		$fields[$nf++] = new $Cf(self::opttinymce,
+		if ( self::use_tinymce_plugin_ok() )
+			$fields[$nf++] = new $Cf(self::opttinymce,
 				self::wt(__('Video in post editor:', 'swfput_l10n')),
 				self::opttinymce,
 				$items[self::opttinymce],
@@ -631,12 +628,12 @@ class SWF_put_evh {
 			</p>', 'swfput_l10n'),
 			__('Show verbose introductions', 'swfput_l10n'),
 			__('Save Settings', 'swfput_l10n')
-			)),
+			)) /*,
 			self::wt(sprintf(
 			__('<p>TODO: %s
 			</p>', 'swfput_l10n'),
 			__('WRITE TIPS', 'swfput_l10n')
-			))
+			)) */
 		);
 
 		// TRANSLATORS: first '%s' is the the phrase
@@ -1193,13 +1190,13 @@ class SWF_put_evh {
 							$a_out[$k] = $ot;
 							$nupd += ($ot === $oo) ? 0 : 1;
 							break;
-						default:               //'Set a value:'
-							$e = __('bad choice: "%s"', 'spambl_l10n');
+						default:
+							$e = __('bad choice: "%s"', 'swfput_l10n');
 							$e = sprintf($e, $ot);
 							self::errlog($e);
-							add_settings_error(self::wt($k),
+							add_settings_error(self::ht($k),
 								sprintf('%s[%s]', self::opt_group, $k),
-								self::wt($e), 'error');
+								self::ht($e), 'error');
 							$a_out[$k] = $oo;
 							$nerr++;
 							break;
@@ -1223,9 +1220,9 @@ class SWF_put_evh {
 					if ( $ot != 'true' && $ot != 'false' ) {
 						$e = sprintf('bad option: %s[%s]', $k, $v);
 						self::errlog($e);
-						add_settings_error(self::wt($k),
+						add_settings_error(self::ht($k),
 							sprintf('%s[%s]', self::opt_group, $k),
-							self::wt($e), 'error');
+							self::ht($e), 'error');
 						$a_out[$k] = $oo;
 						$nerr++;
 					} else {
@@ -1234,12 +1231,14 @@ class SWF_put_evh {
 					}
 					break;
 				default:
-					$e = "funny key in validate opts: '" . $k . "'";
+					$e = sprintf(
+						__('bad key in option validation: "%s"', 'swfput_l10n')
+						, $k);
 					self::errlog($e);
-					add_settings_error(self::wt($k),
+					add_settings_error(self::ht($k),
 						sprintf('%s[%s]',
 							self::opt_group, self::ht($k)),
-						self::wt($e), 'error');
+						self::ht($e), 'error');
 					$nerr++;
 			}
 		}
@@ -1332,49 +1331,34 @@ class SWF_put_evh {
 		$t = self::wt(__('These options control video placement.
 			</p><p>
 			The first option, "HTML5 video primary,"
-			makes HTML5 video be placed as
-			primary (rather than fallback) content. If this
-			is selected then flash video
+			controls whether HTML5 video will be placed as
+			primary or fallback (alternate) content. If this
+			is set on then flash video
 			will be placed as fallback content when both
 			types have been specified.
-			Be aware that if the web browser supports HTML5 video
+			Note that if the web browser supports HTML5 video
 			but cannot play any of the video
-			types specified, it probably will
-			<em>not</em> fallback to flash video. That is,
-			placing flash video as fallback is only useful
-			for browsers that do not support the video
-			element. At this time the major graphical browsers
-			all support the HTML5 video element, so using this
-			option is effectively disabling the flash video
-			(except when HTML5 video was not specified at all).
+			types specified, the HTML5 video controller script
+			will try to swap fallback flash video to the
+			active role. This is useful
+			if flash video sources had been provided in
+			the setup form (or if .MP4 had been given
+			for HTML5 video, will be passed to the flash player
+			by the player script).
 			</p><p>
-			By default flash is primary and HTML5 video
-			is fallback content. The flash plugin seems to be
-			losing favor (although it remains a more consistent
-			and simple engine for a video player), and for some
-			platforms the plugin is not available. Even where available,
-			flash might be disabled by default by some browsers, or
-			the browser might
-			require user approval before flash is allowed to run.
+			By default HTML5 video is primary and flash video
+			is fallback content. (Prior to SWFPut 2.1 flash
+			would be placed as primary content by default.)
 			</p><p>
 			Note that at present the major graphical browsers
 			do <em>not</em> all support the same set of video
 			types for their HTML5 video players.
 			To reliably use HTML5 video as primary content,
-			you will need to prepare the video in .MP4, .OGG (.OGV),
+			it is best to prepare the video in .MP4, .OGG (.OGV),
 			and .WEBM container formats with suitable codecs.
 			(The posts/pages editor page has a help button which
 			should have a "SWFPut Video Form" tab
 			with more explanation.)
-			</p><p>
-			Generally, if you can provide the several formats needed
-			for good HTML5 support, using the "HTML5 video primary"
-			option should be a good idea. An MP4 will be among
-			those files, and that can be used for flash too (although
-			if you wish to be compatible with the free/open source
-			<em>Gnash</em> flash plugin you should use FLV).
-			If you cannot provide
-			all the formats, it might be better not to use this option.
 			</p><p>
 			The next two options allow the video content
 			to be completely disabled.
@@ -1389,15 +1373,21 @@ class SWF_put_evh {
 			where "&lt;caption&gt;"
 			is any caption that was included with the shortcode,
 			or empty if there was no caption.
-			</p><p>
+			'
+			, 'swfput_l10n'));
+		printf('<p>%s</p>%s', $t, "\n");
+
+		if ( self::use_tinymce_plugin_ok() ) {
+			$t = self::wt(__('
 			The "Video in post editor" multiple choice option
 			controls the display of video in the post/page
 			editor. This is only effective if the "TinyMCE"
 			editor included with WordPress is in use, and only
 			when the "Visual" tab is selected.
 			'
-			, 'swfput_l10n'));
-		printf('<p>%s</p>%s', $t, "\n");
+				, 'swfput_l10n'));
+			printf('<p>%s</p>%s', $t, "\n");
+		}
 
 		echo '</div>';
 		?>
@@ -1603,6 +1593,13 @@ class SWF_put_evh {
 
 	// callback, put SWF in head?
 	public function put_tinymce_opt($a) {
+		if ( ! self::use_tinymce_plugin_ok() ) {
+			printf('<strong>%s</strong>%s',
+				self::wt(__('The SWFPut editor plugin is not supported in this installation', 'swfput_l10n')),
+				"\n");
+			return;
+		}
+
 		$tt = self::wt(__('When to display video in post editor', 'swfput_l10n'));
 		$k = self::opttinymce;
 		$group = self::opt_group;
@@ -1650,7 +1647,7 @@ class SWF_put_evh {
 
 	// callback, place "alternate" HTML <video> as primary content?
 	public function put_h5vprim_opt($a) {
-		$tt = self::wt(__('Place HTML5 "alternate" video as primary content', 'swfput_l10n'));
+		$tt = self::wt(__('Place HTML5 video as primary content', 'swfput_l10n'));
 		$k = self::opth5vprim;
 		$this->put_single_checkbox($a, $k, $tt);
 	}
@@ -2509,9 +2506,23 @@ class SWF_put_evh {
 	}
 	
 	// V. 1.0.9 added video display in the TinyMCE post/page editor,
+	// and this checks whether it is OK to use it, e.g.
+	// the current WP version is suitable.
+	public static function use_tinymce_plugin_ok() {
+		// tinymce version in 3.0.3 n.g. and next testing
+		// version of WP I have is 3.3.1
+		$v = (3 << 24) | (3 << 16) | (0 << 8) | 0;
+		return self::wpv_min($v);
+	}
+	
+	// V. 1.0.9 added video display in the TinyMCE post/page editor,
 	// and this checks the settings page option controlling when
 	// it is used, and returns boolean.
 	public static function use_tinymce_plugin() {
+		if ( ! self::use_tinymce_plugin_ok() ) {
+			return false;
+		}
+
 		$opt = self::get_tinymce_option();
 		
 		switch ( $opt ) {
@@ -2744,7 +2755,9 @@ class SWF_put_evh {
 
 	// get the place at head option
 	public static function get_tinymce_option() {
-		return self::opt_by_name(self::opttinymce);
+		if ( self::use_tinymce_plugin_ok() )
+			return self::opt_by_name(self::opttinymce);
+		return 'never';
 	}
 
 	// get the place at head option
@@ -2892,6 +2905,10 @@ class SWF_put_evh {
 			$url = $defaulturl;
 			if ( $url === 'default' ) {
 				$url = $this->get_swf_default_video_url();
+			} else if ( $url === '' ) {
+				// allow caller to permit empty url by placing
+				// empty string in default
+				return $url;
 			}
 		}
 		if ( $url === '' ) {
@@ -2932,8 +2949,9 @@ class SWF_put_evh {
 		}
 
 		
-		$ut = $this->check_expand_video_url($url, $defaulturl);
-		if ( ! $ut ) {
+		//$ut = $this->check_expand_video_url($url, $defaulturl);
+		$flurl = $ut = $this->check_expand_video_url($url, '');
+		if ( $ut === false ) {
 			self::errlog('rejected URL: "' . $url . '"');
 			return '<!-- SWF embedding declined:  URL displeasing -->';
 		}
@@ -3024,13 +3042,13 @@ class SWF_put_evh {
 		$playpath = ($esc == true) ? $fesc($playpath) : $playpath;
 		
 		// query vars
-		$qv = sprintf('ST=%s&WI=%u&HI=%u&IDV=%s&FN=%s&II=%s&F2=%s',
+		$qv = sprintf('ST=%s&amp;WI=%u&amp;HI=%u&amp;IDV=%s&amp;FN=%s&amp;II=%s&amp;F2=%s',
 			$cssurl, $w, $h, $playpath, $url, $iimage, $e2url);
-		$qv .= sprintf('&PL=%s&HB=%s&VL=%u&LP=%s&DB=%s',
+		$qv .= sprintf('&amp;PL=%s&amp;HB=%s&amp;VL=%u&amp;LP=%s&amp;DB=%s',
 			$play, $hidebar, $volume, $loop, $disablebar);
-		$qv .= sprintf('&AU=%s&AA=%s&DA=%s&PA=%s',
+		$qv .= sprintf('&amp;AU=%s&amp;AA=%s&amp;DA=%s&amp;PA=%s',
 			$audio, $aspectautoadj, $displayaspect, $pixelaspect);
-		$qv .= sprintf('&BH=%s',
+		$qv .= sprintf('&amp;BH=%s',
 			$barheight);
 
 		// if using the precompiled player the query vars should be
@@ -3083,6 +3101,15 @@ class SWF_put_evh {
 		$h5v_fallback = self::get_h5vprim_option() == 'false'
 			? true : false;
 		$h5v = $h5vclose = '';
+
+		// altvideo is a misleading name from when H5 video was
+		// first added as fallback only. As of 2.1 it is primary
+		// content by default.
+		// IAC, if URLs were not specified, try flash URL which
+		// may be mp4 or flv; if it's flv then H5 will simply fail
+		if ( $altvideo == '' ) {
+			$altvideo = $flurl;
+		}
 		if ( $altvideo != '' ) {
 			// vars for alternate h5 video
 			$aspect = $displayaspect;
@@ -3144,33 +3171,65 @@ class SWF_put_evh {
 				$vd .= sprintf(' poster="%s"', $jatt['a_vid']['poster']);
 			}
 			$vd .= sprintf(' width="%u" height="%u">', $w, $h);
-			// format for source elements
-			$fmt = "\n\t\t\t" . '<source src="%s"%s>';
+
 			// allow multiple video src, separated by pipe
 			$altvideo = trim($altvideo, " \t|");
 			$av = explode('|', $altvideo);
+
+			// format for source elements
+			$fmt = "\n\t\t\t" . '<source src="%s"%s>';
 			// place sources
 			foreach ( $av as $src ) {
-				$typ = '';
 				// allow '?' separated type string
 				if ( ($src = trim($src, " \t?")) === '' ) {
 					continue;
 				}
+
+				$typ = ''; // might remain empty (or not)
 				$jsa = array('type' => '');
 				$tv = explode('?', $src);
-				if ( isset($tv[1]) ) {
-					if ( ($tv[1] = trim($tv[1])) !== '' ) {
-						$jsa['type'] = self::ht($tv[1]);
-						$typ = sprintf(' type="%s"', $jsa['type']);
-					}
-					// leave off src
-					$src = trim($tv[0]);
-				}
+
+				// leave off src
+				$src = trim($tv[0]);
 				$ut = $this->check_expand_video_url($src, false);
 				if ( ! $ut ) {
 					self::errlog('rejected HTML video URL: "' . $src . '"');
 					continue;
 				}
+
+				// check user-supplied type
+				if ( ! isset($tv[1]) ) {
+					// not given: infer from suffix,
+					// patterns always subject to revision
+					$pats = array(
+						'/.*\.(mp4|m4v|mv4)$/i',
+						'/.*\.(og[gv]|vorbis)$/i',
+						'/.*\.(webm|wbm|vp[89])$/i'
+					);
+					if ( preg_match($pats[0], $ut) ) {
+						$tv[1] = 'video/mp4';
+					} else if ( preg_match($pats[1], $ut) ) {
+						$tv[1] = 'video/ogg';
+					} else if ( preg_match($pats[2], $ut) ) {
+						$tv[1] = 'video/webm';
+					}
+					// not fatal if not found
+					if ( isset($tv[1]) ) {
+						$jsa['type'] = $tv[1];
+						$typ = sprintf(' type="%s"', $jsa['type']);
+					}
+				} else {
+					if ( ($tv[1] = trim($tv[1])) !== '' ) {
+						$tv[1] = self::clean_h5vid_type($tv[1]);
+						// clean_h5vid_type may return '' on error,
+						// but playback most often works w/o type
+						if ( $tv[1] !== '' ) {
+							$jsa['type'] = $tv[1];
+							$typ = sprintf(' type="%s"', $jsa['type']);
+						}
+					}
+				}
+
 				$jsa['src'] = self::ht($ut);
 				$vd .= sprintf($fmt, $jsa['src'], $typ);
 				$jatt['a_vid']['srcs'][] = $jsa;
@@ -3188,107 +3247,32 @@ class SWF_put_evh {
 			}
 
 			$h5vclose = sprintf("\n\t\t\t</video>\t%s\n\t\t\t</div>%s",
-				$this->get_h5vjs_tags($jatt['a_vid'], $ids[1]),
+				$this->get_h5vjs_tags($jatt['a_vid'], $id),
 				"<!-- aux -->\n\t\t\t"
 			);
 		} else {
 			$jatt['a_vid'] = '';
 		}
 
-		// Update 2013/09/23: update object element, separating
-		// MSIE, so that alternative elements can be added for
-		// no-flash browsers: previously, with the classid attribute
-		// within the object element, firefox (and others) would
-		// always fall through to the now-removed embed element;
-		// therefore, browser ID is attempted to find MSIE (in
-		// self::is_msie()) on the assumption that classid will
-		// be necessary to make that one work
-		// UPDATE: versions of MSIE calling themselves 'Trident'
-		// handle <object> w/o classid (frankly, I do not have
-		// a good picture of its necessity); the self::is_msie()
-		// call does not test 'Trident' and returns false, and
-		// so far so good.
+		// build in $obj the flash related elements
 		$obj = '';
 		
-		/* $jatt['obj'] was used in 1.0.7 for JS creation, removed 1.0.8
-		 * TODO: use or remove $jatt['obj']
-		 */
-		$jatt['obj'] = array(
-			'width'     => $w, 'height' => $h,
-			'id'        => $id,
-			'parm'      => array()
-		);
-
 		if ( $id != '' ) {
 			$id = sprintf(' id="%s"', $id);
 		}
 		if ( self::is_msie() ) { 
-			$jatt['obj']['ie'] = 'true';
-
 			$obj = sprintf('
 			<object%s classid="%s" codebase="%s" width="%u" height="%u">
 			<param name="data" value="%s?%s">
 			', $id, $classid, $codebase, $w, $h, $uswf, $pv);
-
-			$jatt['obj']['classid'] = $classid;
-			$jatt['obj']['codebase'] = $codebase;
-			$jatt['obj']['parm'][] = array(
-				'name' => 'data', 'value' => $uswf . '?' . $pv
-			);
 		} else {
-			$jatt['obj']['ie'] = 'false';
 			$typ = $mtype ? $mtype :'application/x-shockwave-flash';
 
 			$obj = sprintf('
-			<object%s data="%s?%s" type="%s" %s width="%u" height="%u">
-			', $id, $uswf, $pv, $typ, "typemustmatch", $w, $h);
-
-			$jatt['obj']['data'] = $uswf . '?' . $pv;
-			$jatt['obj']['type'] = $typ;
+			<object%s width="%u" height="%u" type="%s" data="%s?%s"%s>
+			', $id, $w, $h, $typ, $uswf, $pv, ''); // ' typemustmatch');
 		}
 
-		/* $jatt['obj']['parm'] is not being used; left in
-		 * place temporarily --
-		 * TODO: use or remove
-		$jatt['obj']['parm'][] = array(
-			'name' => 'play', 'value' => $play
-		);
-		$jatt['obj']['parm'][] = array(
-			'name' => 'quality', 'value' => $quality
-		);
-		$jatt['obj']['parm'][] = array(
-			'name' => 'allowFullScreen', 'value' => $allowfull
-		);
-		$jatt['obj']['parm'][] = array(
-			'name' => 'allowScriptAccess', 'value' => 'sameDomain'
-		);
-		$jatt['obj']['parm'][] = array(
-			'name' => 'flashvars', 'value' => $fv
-		);
-		$jatt['obj']['parm'][] = array(
-			'name' => 'src', 'value' => $uswf . '?' . $pv
-		);
-		$jatt['obj']['parm'][] = array(
-			'name' => 'name', 'value' => self::swfputdir
-		);
-		$jatt['obj']['parm'][] = array(
-			'name' => 'bgcolor', 'value' => '#000000'
-		);
-		$jatt['obj']['parm'][] = array(
-			'name' => 'align', 'value' => 'middle'
-		);
-
-		$ind = '';
-		foreach ( $jatt['obj']['parm'] as $v ) {
-			$obj .= sprintf('%s<param name="%s" value="%s">',
-				$ind, $v['name'], $v['value']);
-			$ind = "\n\t\t\t";
-		}
-		*/
-
-		/* $jatt['obj']['parm'] is not being used; comment
-		 * or remove this if it is put to use
-		 */
 		$obj .= sprintf('<param name="play" value="%s">
 			<param name="quality" value="%s">
 			<param name="allowFullScreen" value="%s">
@@ -3313,6 +3297,70 @@ class SWF_put_evh {
 		}
 		
 		return $aret;
+	}
+
+	// normalize H5V type string from user input -- NOT using
+	// W3.org form, which does not work in existing browsers
+	// such as Opera (at least GNU/Linux), or older FFox (v 10+?)
+	// W3 experimental H5 validator says form made here is in error,
+	// but we assume that if approved and useful are a 
+	// one-or-the-other choice then the latter is preferred
+	public static function clean_h5vid_type($str) {
+		// help text instructs user NOT to give 'type='
+		// but just in case . . .
+		$t = explode('=', $str);
+		if ( ! strcasecmp(trim($t[0]), 'type') ) {
+			array_shift($t);
+			$str = trim(implode('=', $t), "'\\\" ");
+		}
+		
+		// separate mime type and any codecs arg
+		$t = explode(';', $str);
+		
+		// type
+		$ty = explode('/', $t[0]);
+		// if incorrect type form, no value will have to work
+		if ( count($ty) < 2 ) {
+			return '';
+		}
+		// no further check on type parts: beyond our purview
+		$ty = trim($ty[0], "'\\\" ") . '/' . trim($ty[1], "'\\\" ");
+	
+		// got type only
+		if ( count($t) < 2 ) {
+			return $ty;
+		}
+		
+		// codecs
+		$t = explode('=', trim($t[1], "'\\\" "));
+		// if incorrect codecs arg, no value will probably work
+		if ( count($t) < 2 ) {
+			return $ty;
+		}
+		if ( strcasecmp($t[0] = trim($t[0], "'\\\" "), 'codecs') ) {
+			// allow mistake in plural form
+			if ( strcasecmp($t[0], 'codec') ) {
+				return $ty;
+			}
+		}
+	
+		// codecs args
+		$t = trim($t[1], "'\\\" ");
+		$t = explode(',', $t);
+	
+		// rebuild codecs args as comma sep'd value in the form
+		// that has been found to work in existing browsers;
+		// reuse $str for new value
+		$str = trim($t[0], "'\\\" ");
+		for ( $i = 1; $i < count($t); $i++ ) {
+			// NO SPACE after comma: browsers might reject source!
+			$str .= ',' . trim($t[$i], "'\\\" ");
+		}
+		
+		// NO QUOTES on codecs arg: browsers might reject source!
+		// This contradicts examples at W3, but ultimately the
+		// the browsers dictate what works
+		return sprintf("%s; codecs=%s", $ty, $str);
 	}
 
 	// get a script element string for H5 video JS setup
@@ -3344,26 +3392,13 @@ class SWF_put_evh {
 		);
 		
 		$parms = array("iparm" => $iparm, "oparm" => $oparm);
-
-		if ( $atts['fallback'] === 'false' ) {
-			return sprintf('
-			<script type="text/javascript">
-				evhh5v_controlbar_elements(%s, true);
-			</script>', json_encode($parms));
+		if ( $flashid !== null && $flashid !== '' ) {
+			$parms['flashid'] = $flashid;
 		}
-		
-		// This is depressing . . . the test should be whether the
-		// outer <object> is exposed (showing, used) or the inner
-		// fallback content is exposed, regardless of the <object>
-		// content type; but, after ridiculous time searching, I
-		// cannot find any way to simply determine whether primary
-		// or fallback elements will be exposed. The plugin check will
-		// be less reliable.
+
 		return sprintf('
 			<script type="text/javascript">
-				if ( ! navigator.plugins["Shockwave Flash"] ) {
-					evhh5v_controlbar_elements(%s, true);
-				}
+				evhh5v_controlbar_elements(%s, true);
 			</script>', json_encode($parms));
 	}
 } // End class SWF_put_evh
@@ -3694,8 +3729,8 @@ class SWF_put_widget_evh extends WP_Widget {
 		$uswf = $this->plinst->get_swf_url();
 
 		$dw = $w + 3;
-		// use no class, but do use deprecated align
-		$dv = 'class="widget" align="center" style="width: '
+		// overdue: 2.1 removed deprecated align
+		$dv = 'class="widget" style="width: '
 			. $dw . 'px; max-width: 100%"';
 
 		extract($args);
@@ -3714,7 +3749,8 @@ class SWF_put_widget_evh extends WP_Widget {
 		}
 
 		if ( $cap ) {
-			$cap = '<p><span align="center">' .$cap. '</span></p>';
+			// overdue: 2.1 removed deprecated align
+			$cap = '<p><span>' . $cap . '</span></p>';
 		}
 
 		$ids  = $this->plinst->get_div_ids('widget-div');

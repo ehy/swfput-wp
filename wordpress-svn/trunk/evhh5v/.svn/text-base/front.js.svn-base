@@ -43,7 +43,7 @@
  * 1. the HTML5 video should remain useful where JavaScript is disa-  *
  *    bled, in which case the browser-native interface should work    *
  * 2. eliminates much of the page markup that would be necessary, and *
- *    and useless (with whatever side-effects) without JavaScript.    *
+ *    and useless without JavaScript (with whatever side-effects).    *
  *                                                                    *
 \**********************************************************************/
 
@@ -56,10 +56,11 @@ function evhh5v_controlbar_elements(parms, fixups) {
 	var ivid = ip["vidid"];
 
 	// <video> we're associated with must be OK, or it's all pointless
-	var vidobj = document.getElementById(ivid);
+	var vidobj = evhh5v_controlbar_elements_check(parms, false);
 	if ( ! vidobj ) {
 		return;
 	}
+
 	// <video> is given a controls attribute for browsers
 	// with JS disabled; but, since we're executing JS and
 	// building a control bar, remove that attribute. With
@@ -228,6 +229,197 @@ function evhh5v_controlbar_elements(parms, fixups) {
 	}
 };
 
+// pre-check of video object; check types for at least
+// "maybe" can play; if none found, but found a fallback
+// <object> with id matching flash id in parms, then swap
+// flash into parent position
+// return false if altogether N.G. or swapped with flash,
+// <video> object node elsewise
+function evhh5v_controlbar_elements_check(parms, vidobj) {
+	if ( ! vidobj ) {
+		vidobj = document.getElementById(parms["iparm"]["vidid"]);
+	}
+	if ( ! vidobj ) {
+		return false;
+	}
+
+	// flash fallback; might need this
+	var swfobj = false;
+
+	// sources
+	var ss = [];
+	ss.push(vidobj); // useful in "can play checks" below (src attr)
+	for ( var i = 0; i < vidobj.childNodes.length; i++ ) {
+		var t = vidobj.childNodes.item(i);
+		var nnlc = t.nodeName.toLowerCase();
+
+		if ( nnlc == 'object' ) {
+			if ( parms.flashid !== undefined && parms.flashid === t.id ) {
+				swfobj = evhh5v_get_flashsupport() ? t : false;
+			}
+			continue;
+		}
+
+		if ( nnlc == 'source' ) {
+			ss.push(t);
+		}
+	}
+	
+	// in type checks collect source that might be OK for flash
+	var sfs = [];
+	// do can play type checks
+	var maybe = 0, probably = 0, notype = 0, nsource = 0;
+	while ( ss.length ) {
+		var add = false, sff = false;
+		var o = ss.shift();
+		var s = o.getAttribute('src');
+		var t = o.getAttribute('type');
+
+		if ( ! s || s.length < 1 ) {
+			continue;
+		}
+		nsource++;
+
+		if ( ! t || t.length < 1 ) {
+			// infer type from suffix; the set tested is
+			// obviously subject to revision (expansion)
+			if ( s.match(/.*\.(mp4|m4v|mv4)[ \t]*$/i) ) {
+				t = 'video/mp4';
+				add = true;
+				sff = s; sfs.push(sff);
+			} else if ( s.match(/.*\.(og[gv]|vorbis)[ \t]*$/i) ) {
+				t = 'video/ogg';
+				add = true;
+			} else if ( s.match(/.*\.(webm|wbm|vp[89])[ \t]*$/i) ) {
+				t = 'video/webm';
+				add = true;
+			} else if ( s.match(/.*\.(flv)[ \t]*$/i) ) {
+				sff = s; sfs.push(sff);
+			}
+		}
+
+		if ( ! t || t.length < 1 ) {
+			notype++;
+			continue;
+		}
+
+		if ( ! sff && t.match(/.*video\/(mp4|flv).*/i) ) {
+			sff = s; sfs.push(sff);
+		}
+
+		var can = vidobj.canPlayType(t);
+		if ( can == 'probably' ) {
+			probably++;
+		} else if ( can == 'maybe' ) {
+			maybe++;
+		} else {
+			add = false;
+		}
+
+		// by the spec changing a source at this point should be
+		// ineffective, but whether it is ineffective in some
+		// browser is unknown, and it is harmless; IAC, it can be
+		// referred to in future, and in fact our controller stop()
+		// function creates a new vid and copies attrs/children,
+		// and it will be effective there.
+		if ( add ) {
+			o.setAttribute('type', t);
+		}
+	}
+
+	// if we have even a 'maybe' then go ahead
+	if ( probably > 0 || maybe > 0 ) {
+		return vidobj;
+	}
+
+	// at this point there is no H5V source with a
+	// chance we like: if a flash <object> was found
+	// as a child (fallback content), then swap it into
+	// parenthood
+	if ( swfobj !== false ) {
+		var aux = vidobj.parentNode; // aux div for h5 vid
+		var par = aux.parentNode; // div wanted as parent
+		vidobj.removeChild(swfobj);
+		
+		var ch = [];
+		for ( var i = 0; i < swfobj.childNodes.length; i++ ) {
+			ch.push(swfobj.childNodes.item(i));
+		}
+		while ( ch.length ) {
+			var t = ch.shift();
+			var nnlc = t.nodeName.toLowerCase();
+
+			// only need to keep params
+			if ( nnlc == 'param' ) {
+				continue;
+			}
+
+			// e.g. fallback img; make child of video
+			swfobj.removeChild(t);
+			vidobj.appendChild(t);
+		}
+
+		par.replaceChild(swfobj, aux);
+		swfobj.appendChild(aux);
+
+		// if flash-suitable types were found above, pass them
+		// to the flash player on window load for use at the
+		// player's discretion
+		if ( window.addEventListener )
+		window.addEventListener('load', function(e) {
+			var id = swfobj.id;
+			try {
+				if ( swfobj.get_ack(id) != id ) {
+					console.log('FAILED evhswf ack from "'+id+'"');
+					return;
+				}
+				
+				for ( var i = 0, mx = sfs.length; i < mx; i++ ) {
+					var t = encodeURI(sfs[i]);
+					swfobj.add_alt_url(t, true);
+				}
+			} catch ( ex ) {
+				console.log('EXCEPTION calling evhswf: "'+ex.message+'"');
+			}
+		}, false);
+
+		return false;
+	}
+	
+	// Now, there is no decent H5V source, and no flash object
+	// as fallback, but is this video fallback for flash?
+	if ( parms.flashid && evhh5v_get_flashsupport() ) {
+		swfobj = vidobj.parentNode.parentNode; // parent of aux div
+		if ( swfobj.nodeName.toLowerCase() === 'object'
+			&& parms.flashid === swfobj.id ) {
+			// yes, H5V is fallback, but flash is supported
+			if ( window.addEventListener )
+			window.addEventListener('load', function(e) {
+				var id = swfobj.id;
+				try {
+					if ( swfobj.get_ack(id) != id ) {
+						console.log('FAILED evhswf ack from "'+id+'"');
+						return;
+					}
+					
+					for ( var i = 0, mx = sfs.length; i < mx; i++ ) {
+						var t = encodeURI(sfs[i]);
+						swfobj.add_alt_url(t, true);
+					}
+				} catch ( ex ) {
+					console.log('EXCEPTION calling evhswf: "'+ex.message+'"');
+				}
+			}, false);
+
+			return false;
+		}
+	}
+
+	// return determines whether controller and bar are built;
+	// a source, even of unknown type, makes it worth a try
+	return (nsource > 0) ? vidobj : false;
+}
+
 
 /**********************************************************************\
  *                                                                    *
@@ -318,42 +510,41 @@ var evhh5v_sizer = function(dv, ob, av, ai, bld) {
 	this.wdiv = null;
 	this.bld = null;
 	this.inresize = 0;
-	if ( bld ) {
-		this.bld  = bld;
-		this.d    = bld.d;
-		this.o    = bld.o;
-		this.va_o = bld.va_o;
-		this.ia_o = bld.ia_o;
-		this.pad  = bld.pad;
-		this.wdiv = bld.wdiv;
-	} else {
-		this.d    = document.getElementById(dv);
-		if ( this.d ) {
-			this.o    = document.getElementById(ob);
-			this.va_o = document.getElementById(av);
-			this.ia_o = document.getElementById(ai);
-			var p = this._style(this.d, "padding-left");
-			if ( p )
-				this.pad = Math.max(this.pad, parseInt(p));
-			this.wdiv = this.d.offsetWidth;
-		}
+
+	// this object works with the element with id passed in dv,
+	// a <div> or possibly another element with the
+	// properties we need -- if the object cannot be had from
+	// its id, then this was constructed in error
+	this.d = document.getElementById(dv);
+	if ( ! this.d ) {
+		return;
 	}
-	if ( this.d ) {
-		// proportional image sizing is the trickiest bit here:
-		// we will need to use the ratio of the specified dimensions
-		if ( this.ia_o && this.ia_o.width > 1 ) {
-			this.ia_rat = this.ia_o.width / this.ia_o.height;
-		}
-		// need max-width or browser does not scale div
-		if ( this.d.style == undefined ||
-			 this.d.style.maxWidth == undefined ||
-			 this.d.style.maxWidth == "none" ||
-			 this.d.style.maxWidth == "" ) {
-			this.d.style.maxWidth = "100%";
-		}
-		// (ugly hack to get resize event: save _adj instances)
-		evhh5v_sizer_instances.push(this);
+
+	this.o    = document.getElementById(ob);
+	this.va_o = document.getElementById(av);
+	this.ia_o = document.getElementById(ai);
+
+	var p = this._style(this.d, "padding-left");
+	if ( p )
+		this.pad = Math.max(this.pad, parseInt(p));
+	this.wdiv = this.d.offsetWidth;
+
+	// proportional image sizing is the trickiest bit here:
+	// we will need to use the ratio of the specified dimensions
+	if ( this.ia_o && this.ia_o.width > 1 ) {
+		this.ia_rat = this.ia_o.width / this.ia_o.height;
 	}
+
+	// need max-width or browser does not scale div
+	if ( this.d.style == undefined ||
+		 this.d.style.maxWidth == undefined ||
+		 this.d.style.maxWidth == "none" ||
+		 this.d.style.maxWidth == "" ) {
+		this.d.style.maxWidth = "100%";
+	}
+
+	// (ugly hack to get resize event: save _adj instances)
+	evhh5v_sizer_instances.push(this);
 };
 evhh5v_sizer.prototype = {
 	// For H5 video using non-default control bar, this interacts
@@ -382,33 +573,41 @@ evhh5v_sizer.prototype = {
 		return evhh5v_getstyle(el, sty);
 	},
 	handle_resize : function () {
-		if ( this.d === null )
+		if ( ! this.d || this.inresize != 0 )
 			return;
-		if ( this.inresize != 0 )
-			return;
+
 		var dv = this.d;
 		var wo = this.wdiv;
 		var wn = dv.offsetWidth;
 		if ( wn == wo )
 			return;
 		this.wdiv = wn;
+
 		var p = this._style(dv, "padding-left");
 		if ( p ) {
 			this.pad = parseInt(p);
 		}
+
 		this.resize();
 	},
 	_int_rsz : function (o) {
 		var wd = this.wdiv;
-		if ( wd == null )
+		if ( ! wd  )
 			return;
 		wd -= this.pad * 2;
+
 		var wo = o.width;
 		if ( (wd - wo) == 0 )
 			return;
+
 		var r = wo / o.height;
-		o.height = o.pixelHeight = Math.round(wd / r);
-		o.width = o.pixelWidth = wd;
+		wo = Math.round(wd / r);
+		o.height = wo;
+		o.width  = wd;
+		if ( o.pixelHeight !== undefined ) {
+			o.pixelHeight = wo;
+			o.pixelWidth  = wd;
+		}
 	},
 	_int_imgrsz : function (o) { // for img: display proportionally
 		if ( o.complete !== undefined && ! o.complete ) {
@@ -524,7 +723,7 @@ var evhh5v_fullscreen = {
 
 	// private, no moleste
 	//
-	// private methods
+	// methods
 	handle_evt : function(kevt, fun, elm) {
 		var n = "on" + this.map_val(kevt);
 		var el = elm === undefined ? document : elm;
@@ -565,7 +764,7 @@ var evhh5v_fullscreen = {
 		throw ReferenceError(str == undefined ? this.def_msg : str);
 	},
 
-	// private members
+	// members
 	def_msg : "fullscreen mode is not available",
 	idxmap : {
 		"request" : 0, "exit" : 1, "element" : 2,
@@ -2270,7 +2469,7 @@ mk : function() {
 		this.var_init();
 		nw = this.barlength;
 		var pnw = this.progressbarlength;
-		//console.log("NEWLEN " + w + ", NEW BAR LEN " + pnw);
+
 		// temp workaround until length calc is fixed:
 		this._pl_len = w;
 	
@@ -2740,7 +2939,9 @@ evhh5v_controller.prototype = {
 	},
 	// put any video poster on canvas, if in use; or, current frame if paused
 	put_canvas_poster : function() {
-		if ( ! this.playing && this.is_canvas && isFinite(this._vid.currentTime) && this._vid.currentTime > 0 ) {
+		if ( ! this.playing && this.is_canvas
+			&& isFinite(this._vid.currentTime)
+			&& this._vid.currentTime > 0 ) {
 			this.canvas_clear();
 			this.put_canvas_frame_single();
 		} else if ( this.is_canvas && this._cnv_poster != undefined  && ! this.playing ) {
@@ -2903,38 +3104,6 @@ evhh5v_controller.prototype = {
 		clearInterval(this.frame_timer);
 		this.frame_timer = false;
 	},
-	/*
-	put_canvas_frame : function() {
-		if ( ! this.is_canvas || this._vid.paused || this._vid.ended ) {
-			return;
-		}
-		
-		this._ctx.drawImage(this._vid, this._x, this._y, this._width, this._height);
-		
-		var that = this;
-		// the timeout takes arg is ms., so ideally an arg of 33 would
-		// get ~30 fps, but of course timers do not necessarily
-		// deliver on time; therefore the rate is increased to
-		// reduce the apparent 'dropped frames' -- a price is
-		// paid in cpu load, but this does not seem too bad on
-		// modern hardware -- an Intel quad core circa 2009 shows,
-		// by merely casual observation, mind you, roughly 10-15
-		// pct[*] more on one core compared to straight H5 video with
-		// arg 16 (~60 fps); simply using arg 33 the load is not
-		// noticeably greater, but playback is noticeably jerky
-		// [*] this varies widely with browsers and conditions and
-		// only gives the most vague idea
-		// TODO: allow user control by parameter
-		this.frame_timer = setTimeout(function () {
-			that.put_canvas_frame();
-		}, this.canvas_frame_timeout);
-	},
-	end_canvas_frame : function() {
-		if ( ! this.frame_timer ) return;
-		clearTimeout(this.frame_timer);
-		this.frame_timer = false;
-	},
-	 */
 	canvas_frame_timeout : 16,
 	// put a *single* frame on the canvas, e.g. when trying to get
 	// poster to appear
@@ -2978,7 +3147,6 @@ evhh5v_controller.prototype = {
 
 		this.setup_aspect_factors(); this.put_canvas_poster();
 		if ( this.ctlbar.evhh5v_controlbar ) {
-console.log('CALL resize_bar: w == ' + v + ', h == ' + this.barheight);
 			this.ctlbar.evhh5v_controlbar.resize_bar(v, this.barheight);
 			this.play_progress_update();
 		}
@@ -3035,16 +3203,35 @@ console.log('CALL resize_bar: w == ' + v + ', h == ' + this.barheight);
 			return;
 		}
 		var ename = evt.type;
-		if ( that.handlermap[ename] != undefined ) {
-			for ( var i = 0; i < that.handlermap[ename].length; i++ ) {
-				if ( typeof that.handlermap[ename][i] == "function" ) {
-					that.handlermap[ename][i].call(that, evt);
-					//console.log("DISPATCHED event: " + ename);
+		var map = that.handlermap;
+
+		/* debugging
+			if ( that.evcnt === undefined ) that.evcnt = {};
+			if ( that.evcnt[ename] === undefined ) that.evcnt[ename] = 0;
+			that.evcnt[ename]++;
+		*/
+
+		if ( map[ename] != undefined ) {
+			for ( var i = 0, mx = map[ename].length; i < mx; i++ ) {
+				var f = map[ename][i];
+				if ( f && typeof (f) == "function" ) {
+					f.call(that, evt);
 				}
 			}
 		}
 	},
-	// event handler installer
+	// event handler installer -- installs from current handlermap
+	// on obj arg; e.g., if stop() replaces video object
+	_obj_add_evt : function(obj, bubool) {
+		if ( typeof (bubool) !== "boolean" ) {
+			bubool = false;
+		}
+
+		for ( var k in this.handlermap ) {
+			obj.addEventListener(k, this.callbk, bubool);
+		}
+	},
+	// event handler installer -- internal for addEventListener below
 	add_evt : function(ename, callbk, bubool) {
 		var inst = false;
 		if ( this.handlermap[ename] == undefined ) {
@@ -3056,64 +3243,23 @@ console.log('CALL resize_bar: w == ' + v + ', h == ' + this.barheight);
 			this._vid.addEventListener(ename, this.callbk, bubool);
 		}
 	},
-	// add event handler call: filter events, use internal handler
-	// take one event name, or array of names and install for each
+	// add event handler call: like DOM objects method, except
+	// name arg will accept array of strings, or one string
+	// Note: may be called any number of times for same events
+	// to install several handlers for each, *but* the bubble boolean
+	// *only has effect* with the first installation 
 	addEventListener : function(ename, callbk, bubool) {
-		var t;
-		if ( typeof ename === "string" ) {
-			t = [ename];
-		} else if ( ename instanceof Array ) {
-			t = ename.slice(0);
+		if ( typeof (bubool) !== "boolean" ) {
+			bubool = false;
 		}
-		for ( var i = 0; i < t.length; i++ ) {
-			this.add_evt(t[i], callbk, bubool);
-			/* This big switch was from early development; later
-			 * just a reference for events. For now, leave it and
-			 * let minimizer strip it out.
-			switch ( t[i] ) {
-				// video
-				case "loadstart":
-				case "progress":
-				case "suspend":
-				case "abort":
-				case "error":
-				case "emptied":
-				case "stalled":
-				case "loadedmetadata":
-				case "loadeddata":
-				case "canplay":
-				case "canplaythrough":
-				case "playing":
-				case "waiting":
-				case "seeking":
-				case "seeked":
-				case "ended":
-				case "durationchange":
-				case "timeupdate":
-				case "play":
-				case "pause":
-				case "ratechange":
-				case "resize":
-				case "volumechange":
-				// others:
-				case "click":
-				case "touchstart":
-				case "touchend":
-				case "touchmove":
-				case "touchenter":
-				case "touchleave":
-				case "touchcancel":
-				case "mouseover":
-				case "mouseout":
-				case "mousemove":
-				case "keyup":
-				case "keydown":
-					this.add_evt(t[i], callbk, bubool);
-					break;
-				default:
-					console.log('evhh5v_controller: unexpected event added: "' + ename + '"');
+
+		if ( typeof ename === "string" ) {
+			this.add_evt(ename, callbk, bubool);
+		} else if ( ename instanceof Array ) {
+			var mx = ename.length;
+			for ( var i = 0; i < mx; i++ ) {
+				this.add_evt(ename[i], callbk, bubool);
 			}
-			*/
 		}
 	},
 	// events
@@ -3173,9 +3319,16 @@ console.log('CALL resize_bar: w == ' + v + ', h == ' + this.barheight);
 			this.hide_wait();
 			//console.log("WAIT SPINNER STOP: " + e.type);
 		}, false);
+		this.addEventListener(["ended"], function(e) {
+			if  ( this.evcnt !== undefined ) {
+				for ( var k in this.evcnt ) {
+					console.log("EVENT count for '"+k+"': " + this.evcnt[k]);
+					this.evcnt[k] = 0;
+				}
+			}
+		}, false);
 
 		this.addEventListener("play", function(e) {
-			//console.log("Event: " + e.type);
 			this.get_canvas_context();
 			this.canvas_clear();
 			this.has_been_played = true;
@@ -3187,13 +3340,25 @@ console.log('CALL resize_bar: w == ' + v + ', h == ' + this.barheight);
 			this.bar.stopbtn_enab();
 			this.showhideBar(this.doshowbar = false);
 		}, false);
+
 		this.addEventListener("pause", function(e) {
 			this.end_canvas_frame();
 			this.playing = false;
 			this.bar.show_playico();
 			this.bar.stopbtn_enab();
-			//this.showhideBar(this.doshowbar = true);
 			this.hide_wait();
+
+			// the stop() proc wants to replace the video
+			// object, and pauses it first; but replacement
+			// would occur before a pause event is delivered,
+			// so it will place its work in a function object
+			// assigned to this.stop_invoked_proc which is
+			// called here as needed
+			if ( this.stop_invoked_proc ) {
+				var f = this.stop_invoked_proc;
+				this.stop_invoked_proc = false;
+				f.call(this);
+			}
 		}, false);
 
 		this.addEventListener("playing", function(e) {
@@ -3244,9 +3409,11 @@ console.log('CALL resize_bar: w == ' + v + ', h == ' + this.barheight);
 				// src change; as yet this code does not support such).
 				// Update: Chromium 24 beta and 35 unstable are
 				// generating "resize" -- why?
-				console.log("Got RESIZE: w == " + 
-					this._vid.videoWidth + ", h == " +
-					this._vid.videoHeight);
+				if ( false ) {
+					console.log("Got RESIZE: w == " + 
+						this._vid.videoWidth + ", h == " +
+						this._vid.videoHeight);
+				}
 			}
 			// a little brute force display adjustment to metadata
 			this.setup_aspect_factors();
@@ -3339,7 +3506,6 @@ console.log('CALL resize_bar: w == ' + v + ', h == ' + this.barheight);
 			this.bar.show_playico();
 			this.bar.progress_pl(1);
 			this.bar.show_dl_inactive();
-			//this.showhideBar(this.doshowbar = true);
 		}, false);
 
 		var msevt = [
@@ -3361,12 +3527,12 @@ console.log('CALL resize_bar: w == ' + v + ', h == ' + this.barheight);
 					// because this might also be handle by parent div
 					e.stopPropagation();
 
-					if ( this.webkit_mousebug1 ) {
+					if ( this.rekonq_mousebug ) {
 						// the test above is due to a bug in the
 						// rekonq browser (Ubuntu 12.04) in which
 						// the mouse_hide() in the ticker function
 						// causes a mousemove event! So, the ticker
-						// sets this.webkit_mousebug1 to a positive
+						// sets this.rekonq_mousebug to a positive
 						// and decrements it to 0, avoiding the
 						// cycle. Sheesh.
 						return;
@@ -3398,9 +3564,6 @@ console.log('CALL resize_bar: w == ' + v + ', h == ' + this.barheight);
 					this.mouse_show();
 					this.ptrtick = 0;
 
-					/* if ( volgadget.vbarbut.mousedown ) {
-						volgadget.vbarbut.onMouseMove();
-					} */
 					break;
 				case "click":
 					// because this might also be handle by parent div
@@ -3520,7 +3683,7 @@ console.log('CALL resize_bar: w == ' + v + ', h == ' + this.barheight);
 	},
 	// procedure for state timer
 	do_state_timer : function() {
-		if ( this.ntick++ == 2147483647 ) {
+		if ( this.ntick++ === 2147483647 ) {
 			// nova-flow
 			this.ntick = 0;
 		}
@@ -3530,14 +3693,14 @@ console.log('CALL resize_bar: w == ' + v + ', h == ' + this.barheight);
 			// rekonq browser (Ubuntu 12.04) in which
 			// the mouse_hide() in the this function
 			// causes a mousemove event! So, the ticker
-			// sets this.webkit_mousebug1 to a positive
+			// sets this.rekonq_mousebug to a positive
 			// and decrements it to 0, avoiding the
 			// cycle. Sheesh.
-			if ( this.webkit_mousebug1 )
-				this.webkit_mousebug1--;
+			if ( this.rekonq_mousebug )
+				this.rekonq_mousebug--;
 	
 			if ( ++this.ptrtick >= this.ptrtickmax ) {
-				this.webkit_mousebug1 = parseInt(this.ptrtickmax/10);
+				this.rekonq_mousebug = parseInt(this.ptrtickmax/10);
 				this.mouse_hide();
 				if ( this.doshowbartime ) {
 					this.showhideBar(this.doshowbar = false);
@@ -3548,9 +3711,9 @@ console.log('CALL resize_bar: w == ' + v + ', h == ' + this.barheight);
 			this.ptrtick = 0;
 		}
 
-		var intrvl2 = this.ntick & 1;
+		var prgupd = this.ntick & 1;
 		
-		if ( intrvl2 && ! (this._vid.paused || this._vid.ended) ) {
+		if ( prgupd && ! (this._vid.paused || this._vid.ended) ) {
 			this.play_progress_update();
 		}
 
@@ -3559,7 +3722,6 @@ console.log('CALL resize_bar: w == ' + v + ', h == ' + this.barheight);
 			this.set_bar_y(this.bar_y);
 			// when bar is fully hidden also hide sound volume gadget
 			if ( this.yshowpos == this.bar_y ) {
-				//volgadget._visible = false;
 				this.hide_volctl();
 			}
 		} else if ( this.yshowpos < this.bar_y ) {
@@ -3700,11 +3862,15 @@ console.log('CALL resize_bar: w == ' + v + ', h == ' + this.barheight);
 	stop : function() {
 		this.stop_forced = true;
 		this.hide_wait();
-		this._vid.pause();
+		
+		// put our work in a function object to be invoked in
+		// pause event handler (with this as this)
+		var proc = function() {
 
 		// make new similar video
 		var tv = document.createElement('video');
-		var att = ["poster", "loop", "width", "height", "id", "class", "name"];
+		var att = ["loop", "width", "height", "id", "class", "name"];
+		var poster = this._vid.getAttribute("poster");
 		while ( att.length ) {
 			var tn = att.shift();
 			var ta;
@@ -3712,10 +3878,17 @@ console.log('CALL resize_bar: w == ' + v + ', h == ' + this.barheight);
 			tv.setAttribute(tn, ta);
 		}
 
-		// regardless of original value, it seems that after user
-		// hits stop, the only reasonable 'preload' is 'none' --
-		// and obviously 'autostart' is not wanted
-		tv.setAttribute("preload", "none");
+		// before swfput 2.1 preload was always set to "none" but
+		// it seems to be impossible to get the new video object
+		// to display the poster if it is set to none, even though
+		// the poster is displayed on original page parse even
+		// when preload is none. So, try using "metadata" with which
+		// the poster is displayed, and hope (probably vainly) that
+		// it does not cause a net fetch due to caching, or that
+		// at least fetch will be small and quick.
+		tv.setAttribute("preload", this.gotmetadata?"metadata":"none");
+
+		// copy nodes
 		while ( this._vid.hasChildNodes() ) {
 			var tn = this._vid.firstChild.cloneNode(true);
 			tv.appendChild(tn);
@@ -3741,18 +3914,28 @@ console.log('CALL resize_bar: w == ' + v + ', h == ' + this.barheight);
 		this._vid = tv;
 		this._vid.evhh5v_controller = this;
 		this.setup_aspect_factors();
-		this.install_handlers(true);
+		this._obj_add_evt(this._vid);
 		this.gotmetadata = this.playing = false;
+		if ( poster ) {
+			this._vid.setAttribute("poster", poster);
+		}
 		this.put_canvas_poster();
 
 		// control bar maintenance
 		this.bar.show_playico();
 		this.bar.progress_pl(1);
-		// simple call to disable stop button is ineffective (ffox),
-		// probably because we're within the click handler of that
-		// same button; so, do it with a timeout
-		var that = this;
-		setTimeout(function() { that.bar.stopbtn_disab(); }, 256);
+		this.bar.stopbtn_disab();
+
+		}; // end function object
+
+		// if not paused or ended, pause calls the function,
+		// but otherwise we call it here
+		if ( this._vid.paused || this._vid.ended ) {
+			proc.call(this);
+		} else {
+			this.stop_invoked_proc = proc;
+			this._vid.pause();
+		}
 	},
 	// the scale button: default is to display w/ scale to fit on
 	// one or both ords; this allows vid to show at 'natural' size
@@ -4059,7 +4242,7 @@ function evhh5v_fixup_elements(parms) {
 
 	if ( /Opera/i.test(navigator["userAgent"]) ) {
 		var t = document.getElementById(ip["auxdiv"]);
-		if ( t && t.parentNode && t.parentNode.nodeName.toLowerCase() === "object" ) {
+		if ( t && t.parentNode.nodeName.toLowerCase() === "object" ) {
 			var p = t.parentNode;
 			var d = p.parentNode;
 			p.removeChild(t);
@@ -4083,3 +4266,16 @@ var evhh5v_getstyle = function (el, sty) {
 	}
 	return v;
 };
+
+// check browser for swflash support
+var evhh5v_get_flashsupport = function (el, sty) {
+	if ( document.evhh5v_get_flashsupport_found === undefined ) {
+		if ( ! navigator.plugins["Shockwave Flash"] ) {
+			document.evhh5v_get_flashsupport_found = false;
+		} else {
+			document.evhh5v_get_flashsupport_found = true;
+		}
+	}
+	
+	return document.evhh5v_get_flashsupport_found;
+}

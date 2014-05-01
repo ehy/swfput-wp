@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.21 -->
-<!-- CreationDate: Sat Apr 19 09:57:38 2014 -->
+<!-- CreationDate: Thu May  1 11:21:32 2014 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -52,14 +52,14 @@ flash plugin and and the HTML video element, and the means
 to configure the players with video sources and playback
 attributes. There are two separate components: the video
 players, and the <i>WordPress</i> plugin proper. The video
-players are delivered to site visitors by the plugin in
-either an &lt;object ...&gt; block with a nested &lt;video
-...&gt; element as fallback content, or inversely as a
-primary &lt;video ...&gt; with a nested &lt;object ...&gt;
-for flash fallback. The former arrangement is the default at
-present, and there is an option to enable the latter
-arrangement. It is not necessary to provide for both types,
-one or the other type may be left out.</p>
+players are delivered to site visitors by the plugin as
+either HTML5 video with a flash plugin program as fallback
+content, or inversely as flash video primary content with
+HTML5 video elements for fallback. The former arrangement is
+the default (as of version 2.1), but there is an option to
+enable the latter arrangement if flash is preferred. It is
+not necessary to provide for both types, one or the other
+type may be left out.</p>
 
 <p style="margin-top: 1em">Video objects may be placed in
 posts and pages, or in the widget areas supported by your
@@ -71,20 +71,27 @@ shortcodes <i>not</i> be hand-edited, and they will not be
 discussed in detail here.) The plugin adds to the post/page
 editor interfaces a full featured form to setup and add, or
 edit, or delete video objects, so the user does not need to
-be troubled with shortcodes (they will be visible in the
-editor; you will get used to them). The video widget has a
-similar full featured form.</p>
+be troubled with shortcodes. The video widget has a similar
+full featured form.</p>
 
-<p style="margin-top: 1em">The plugin does not depend on
-<i>JavaScript</i>, although it is used for the HTML5 video
-player, and for proper resizing of the video display area.
-If <i>JavaScript</i> is not available, HTML5 video will have
-the interface provided by the web browser, and the flash
-video will be largely unaffected (it only uses
+<p style="margin-top: 1em">Video in posts may be displayed
+in the <i>WordPress</i> visual editor, if the default visual
+editor is used. If the default visual editor has been
+changed, for example by a plugin, the video display in the
+editor will probably not work. If there are problems, video
+display in the editor may be disabled on the <b>SWFPut</b>
+settings page.</p>
+
+<p style="margin-top: 1em"><b>SWFPut</b> does not depend on
+<i>JavaScript</i> on the front end, but it is used for the
+HTML5 video player, and for proper resizing of the video
+display area. If <i>JavaScript</i> is not available, HTML5
+video will have the interface provided by the web browser,
+and the flash video will be largely unaffected (it only uses
 <i>JavaScript</i> to check whether it is running on a mobile
-platform). Display resizing will not be possible if
-<i>JavaScript</i> is not available, so reasonable dimensions
-should be given in the setup form.</p>
+platform). &ldquo;Responsive&rdquo; display resizing will
+not be possible if <i>JavaScript</i> is not available, so
+reasonable dimensions should be given in the setup form.</p>
 
 <p style="margin-top: 1em">The <b>SWFPut</b> flash video
 player has been coded to work well with the free
@@ -114,13 +121,14 @@ player or plugin.)</p>
 included in the distributed archive, but the necessary build
 tools are not. The plugin is maintained with a POSIX
 makefile, which in turn expects a POSIX Bourne shell.
-Additionally, the <i>PHP</i> commandline interface with the
-<i>Ming</i> extension to build the flash video player,
-<i>PERL</i> packages to minify <i>JavaScript</i>, <i>GNU</i>
-gettext for localization sources, <i>GNU</i> groff (and a
-small C program) to make the forms of this document, the
-portable <i>Info-ZIP</i> zip command to make the archive,
-and various POSIX tools such as sed.</p>
+Additional requirements are the <i>PHP</i> command-line
+interface with the <i>Ming</i> extension to build the flash
+video player, <i>PERL</i> packages to minify
+<i>JavaScript</i>, <i>GNU</i> gettext for localization
+sources, <i>GNU</i> groff (and a small C program) to make
+the forms of this document, the portable <i>Info-ZIP</i> zip
+command to make the archive, and various POSIX tools such as
+sed.</p>
 
 <p style="margin-top: 1em">The actual plugin is composed of
 <i>PHP</i> code, and does not require compilation or link
@@ -341,9 +349,9 @@ character (do not include the &lsquo;<tt>type</tt>&rsquo;
 keyword; give only the value that should appear between
 quotes in the type argument, and although many web examples
 show a space after the comma separating the video and audio
-codec names, <b>Firefox</b> up to at least version 16 will
-reject the source because of the space, so it should be left
-out) <small><small>1</small></small> .</p></td></tr>
+codec names, browsers might reject the source because of the
+space, so it should be left out)
+<small><small>1</small></small> .</p></td></tr>
 </table>
 
 <p style="margin-left:20%; margin-top: 1em"><cite>For
@@ -354,11 +362,9 @@ codecs=theora,vorbis</tt>. </cite></p>
 
 <p style="margin-left:20%; margin-top: 1em">If more than
 one is given they will appear in order. The browser should
-use the first type that it supports (if any, and some older
-versions of browsers might not consider any source but the
-first to appear). The MP4, WEBM, and OGG types have varied
-support among web browsers, so ideally all three formats
-should be provided.</p>
+use the first type that it supports. The MP4, WEBM, and OGG
+types have varied support among web browsers, so ideally all
+three formats should be provided.</p>
 
 <table width="100%" border="0" rules="none" frame="void"
        cellspacing="0" cellpadding="0">
@@ -422,11 +428,11 @@ only the playpath. This item has bearing on HTML5 video.</p></td></tr>
 
 
 <p style="margin-top: 1em"><b>Url of initial image file
-(optional)</b>: An <b>HTTP</b> or <b>HTTPS</b> URL for an
-image file may be placed here. When the player is loaded, if
-it is not set to play on load, this image is displayed until
-the play button is invoked. Accepted image types are
-<b>JPEG</b>, <b>PNG</b>, and <b>GIF</b>.</p></td></tr>
+(optional)</b>: A URL for a &lsquo;poster&rsquo; image file
+may be placed here. When the player is loaded, if it is not
+set to play on load, this image is displayed until the play
+button is invoked. Accepted image types are <b>JPEG</b>,
+<b>PNG</b>, and <b>GIF</b>.</p></td></tr>
 <tr valign="top" align="left">
 <td width="10%"></td>
 <td width="2%">

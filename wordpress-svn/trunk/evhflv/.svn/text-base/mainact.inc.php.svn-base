@@ -21,7 +21,7 @@
 
 /*
 * Description: SWF video app with PHP/Ming, main A/S include
-* Version: 1.0.9
+* Version: 2.1
 * Author: Ed Hynan
 * License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
 */
@@ -396,6 +396,85 @@ function add_filter(item, filter) {
 	t.push(filter);
 	item.filters = t;
 }
+
+// browser JS may call this to get an ack. Passes a value
+// which should be node's id. Return same value.
+function external_ack(the_arg) {
+	if ( external_ack_args === undefined ) {
+		external_ack_args = [];
+	}
+
+	external_ack_args.push(the_arg);
+
+	return the_arg;
+}
+
+// browser JS may call this to add video URLs; boolean enc
+// signifies it is encoded.
+function external_url(url, enc) {
+	if ( external_url_args === undefined ) {
+		external_url_args = [];
+		external_url_args_cur = 0;
+	}
+
+	external_url_args.push(
+		enc ? url : urlesc(url)
+	);
+
+	return external_url_args.length;
+}
+
+// call this *only* from stream error --
+// it increments so other calls will foul the index
+function has_external_url() {
+	if ( external_url_args === undefined ) {
+		return false;
+	}
+	if ( ++external_url_args_cur >= external_url_args.length ) {
+		external_url_args_cur = 0;
+		return false; // false now, but cycle again with new click
+	}
+	return true;
+}
+
+// get current URL w/o diddling data structure directly
+function cur_external_url() {
+	if ( external_url_args === undefined ) {
+		return '';
+	}
+	if ( external_url_args_cur >= external_url_args.length ) {
+		return '';
+	}
+	return external_url_args[external_url_args_cur];
+}
+
+// setup browser callbacks.
+function setup_external_cb() {
+	if ( external_cbmethods_setup !== undefined ) {
+		return;
+	}
+	external_cbmethods_setup = true;
+
+	try {
+		var xi;
+		xi = flash.external.ExternalInterface === undefined
+			? false : true;
+		if ( xi ) {
+			xi = flash.external.ExternalInterface;
+
+			xi.addCallback("get_ack", this, external_ack);
+			xi.addCallback("add_alt_url", this, external_url);
+
+			return true;
+		}
+	} catch ( e ) {
+	}; // ming requires terminated try/catch
+
+	return false;
+}
+
+// do the above now
+setup_external_cb();
 
 // If there is a direct way to get browser user agent string in
 // flash, I haven't found it, so try an external JS function;
@@ -933,6 +1012,7 @@ stream_onMetaData = function(info) {
 };
 
 connection_onStatus = function(stat) {
+adddbgtext("connection_onStatus Got onStat: "+stat.code+"\n");
 	switch ( stat.code ) {
 	case 'NetConnection.Connect.Rejected':
 		adddbgtext("Got stat.code 'NetConnection.Connect.Rejected'\n");
@@ -1011,6 +1091,8 @@ stream_onStatus = function(stat) {
 		return;
 	}
 
+	var t;
+
 	switch ( stat.code ) {
 	case 'NetStream.Seek.Notify':
 		if ( ! dopause ) {
@@ -1059,9 +1141,13 @@ stream_onStatus = function(stat) {
 		stopVideo();
 		break;
 	case 'NetStream.Play.StreamNotFound':
-		not_found();
+		t = has_external_url();
+		if ( ! t )
+			not_found();
 		stopWait();
 		stopVideo();
+		if ( t )
+			startVideo();
 		break;
 	case 'NetStream.Seek.InvalidTime':
 		// TODO: what should be done here?
@@ -1293,6 +1379,9 @@ function resizeFace() {
 	wait._y = sh / 2;
 
 	// initial button/image adjustment (if not started yet)
+	if ( iniimg !== null ) {
+		iniimg.resize();
+	}
 	if ( inibut !== null ) {
 		inibut.resize();
 	}
@@ -1537,35 +1626,40 @@ function rm_scale_buttons() {
 	bbar.spkrmsw._x = w * offs;
 }
 
+var iniimg_resize = function () {
+	var m = this.initialimg;
+
+	if ( ! (m && m.ok) ) {
+		return;
+	}
+
+	var xs = m._xscale / 100;
+	var ys = m._yscale / 100;
+	var ia = (m._width * xs) / (m._height * ys);
+	var sa = Stage.width / Stage.height;
+	
+	m._x = 0;
+	m._y = 0;
+
+	if ( ! _root.iiproportion ) {
+		m._xscale = Stage.width / m._width * 100.0 * xs;
+		m._yscale = Stage.height / m._height * 100.0 * ys;
+	} else if ( sa > ia ) {
+		var sc = Stage.height / m._height * 100.0 * xs;
+		m._xscale = sc;
+		m._yscale = sc;
+		m._x += (Stage.width - m._width) / 2;
+	} else {
+		var sc = Stage.width / m._width * 100.0 * ys;
+		m._xscale = sc;
+		m._yscale = sc;
+		m._y += (Stage.height - m._height) / 2;
+	}
+};
+
 var inibut_resize = function () {
 	this._x = Stage.width / 2;
 	this._y = Stage.height / 2;
-
-	var m = this.initialimg;
-	if ( m && m.ok ) {
-		var xs = m._xscale / 100;
-		var ys = m._yscale / 100;
-		var ia = (m._width * xs) / (m._height * ys);
-		var sa = Stage.width / Stage.height;
-		
-		m._x = -this._x;
-		m._y = -this._y;
-
-		if ( ! _root.iiproportion ) {
-			m._xscale = Stage.width / m._width * 100.0 * xs;
-			m._yscale = Stage.height / m._height * 100.0 * ys;
-		} else if ( sa > ia ) {
-			var sc = Stage.height / m._height * 100.0 * xs;
-			m._xscale = sc;
-			m._yscale = sc;
-			m._x += (Stage.width - m._width) / 2;
-		} else {
-			var sc = Stage.width / m._width * 100.0 * ys;
-			m._xscale = sc;
-			m._yscale = sc;
-			m._y += (Stage.height - m._height) / 2;
-		}
-	}
 };
 
 // click callback for control bar background
@@ -1581,22 +1675,23 @@ function initialbutHit () {
 
 // click callback for timeline progress bar
 function plprogHit () {
-	var px = bbar.progpb._xmouse;
+	var px = bbar.progpb._xmouse, len = const_pbar_len;
 	last_ct = 0;
 
 	if ( audb == true && audio_duration ) {
-		// see comment above the definition of const_pbar_len
-		var pos = Math.floor(audio_duration / adiv * px / const_pbar_len);
+		// see comment above the definition of len
+		var pos = Math.floor(audio_duration / adiv * px / len);
 		sound.stop();
 		// last_ct, isrunning are handled in seek.Notify for NetStream,
-		// but for Sound must be handled here (no similar evants)
+		// but for Sound must be handled here (no similar events)
 		last_ct = 0;
 		isrunning = true;
 		sound.start(pos);
 		adddbgtext(" APOS: " + pos + "\n");
 	} else if ( audb == false && stream_duration ) {
-		// see comment above the definition of const_pbar_len
-		stream.seek(stream_duration * px / const_pbar_len);
+		var skto = stream_duration * px / len;
+		// see comment above the definition of len
+		stream.seek(skto);
 	} else if ( audb == false ) {
 		// TODO: better options for seeking in 'sizeless' streams
 		var off = px > (bbar.progpb._width / 2) ? 30 : -30;
@@ -1605,8 +1700,8 @@ function plprogHit () {
 }
 
 function showhideBar(bshow) {
-	var show = Stage.height - bbar._height - barypadding; //barpadding;
-	var hide = show + bbar._height + barypadding * 2; //barpadding * 2;
+	var show = Stage.height - bbar._height - barypadding;
+	var hide = show + bbar._height + barypadding * 2;
 	var p = bshow ? show : hide;
 	var y = bbar._y;
 
@@ -1779,18 +1874,27 @@ function togglepauseVideo() {
 
 togglepause = function() {
 	if ( inibut !== null ) {
-		//inibut.gotoAndStop(1);
 		inibut.stop();
-		inibut.initialbut.enabled = inibut.initialimg.enabled = false;
-		inibut.initialbut._visible = inibut.initialimg._visible = false;
+		inibut.initialbut.enabled  = false;
+		inibut.initialbut._visible = false;
 		inibut.enabled = false;
 		inibut._visible = false;
-		delete inibut.initialimg.imld;
-		inibut.initialimg = null;
 		inibut = null;
 	}
+	iniimg.initialimg.enabled = false;
+	iniimg.initialimg._visible = false;
 	togglepauseAudio(); togglepauseVideo();
 };
+
+function stop_reset() {
+	stopVideo();
+	video.clear();
+	if ( iniimg.initialimg && iniimg.initialimg.ok ) {
+		iniimg.initialimg._visible = iniimg.initialimg.enabled = true;
+	}
+	// progress set consistent w/ new H5V player
+	bbar.progpl._width = 1;
+}
 
 function stopVideo() {
 	isrunning = false;
@@ -1803,7 +1907,6 @@ function stopVideo() {
 
 	// video is not deleted; it is setup by Ming and
 	// might be trouble if deleted and new'd
-	//video.clear();
 	video.attachVideo(null);
 
 	if ( sound != undefined && sound != null ) {
@@ -1887,6 +1990,9 @@ function ConnectedStartVideo() {
 	video.attachVideo(stream);
 	video.menu = ctxmenu;
 	video.menu.hideBuiltInItems();
+
+	vurl = cur_external_url();
+	adddbgtext(" CUR URL=='"+vurl+"'\n");
 
 	sound = new Sound();
 	if ( audb == true ) {
@@ -2183,6 +2289,13 @@ if ( (vurl == null || vurl == "") && _level0.FN != undefined ) {
 	adddbgtext(" FN: '" + _level0.FN + "'\n");
 	adddbgtext(" HI: '" + _level0.HI + "'\n");
 	adddbgtext(" WI: '" + _level0.WI + "'\n");
+	// bug when SWFPut has empty URL arg:
+	if ( vurl === '/' ) {
+		vurl = '';
+	}
+	// put url in data that can also be added to externally,
+	// it is taken from there
+	external_url(vurl, true);
 }
 adddbgtext(" vurl: '" + vurl + "'\n");
 
@@ -2363,41 +2476,41 @@ adddbgtext("Flash v. " + flvers + "\n");
 
 // set up initial button, and image if url
 // TODO: make image proportional vs. fitted an option
-inibut.initialimg.ok = false;
 inibut.resize = inibut_resize;
 if ( brtmp || initpause ) {
 	inibut.initialbut.useHandCursor = true;
 	inibut._x = Stage.width / 2;
 	inibut._y = Stage.height / 2;
 	inibut.initialbut._visible = inibut.initialbut.enabled = true;
-	inibut.initialimg._visible = inibut.initialimg.enabled = false;
 	inibut._visible = inibut.enabled = true;
-	if ( iimage ) {
-		// initial image to display implies no load until start button
-		initpause = dopauseaud = dopause = false;
-		loadonload = false;
-		t = {
-			onLoadInit: function (m) {
-				var bv = bbar._visible; // load corrupts bbar drawing
-				bbar._visible = false;
-				m.ok = true;
-				inibut.resize();
-				m._visible = m.enabled = true;
-				bbar._visible = bv;
-			}
-		};
-		inibut.initialimg.imld = new MovieClipLoader();
-		inibut.initialimg.imld.addListener(t);
-		inibut.initialimg.imld.loadClip(iimage, inibut.initialimg);
-	}
 } else {
-	inibut.initialbut.enabled = inibut.initialimg.enabled = false;
-	inibut.initialbut._visible = inibut.initialimg._visible = false;
+	inibut.initialbut.enabled  = false;
+	inibut.initialbut._visible = false;
 	inibut.enabled = false;
 	inibut._visible = false;
-	inibut.initialimg = null;
 	inibut = null;
 	loadonload = true;
+}
+iniimg.initialimg.ok = false;
+iniimg.resize = iniimg_resize;
+if ( initpause && iimage ) {
+	// initial image to display implies no load until start button
+	initpause = dopauseaud = dopause = false;
+	loadonload = false;
+	t = {
+		onLoadInit: function (m) {
+			var bv = bbar._visible; // load corrupts bbar drawing
+			bbar._visible = false;
+			m.ok = true;
+			iniimg.resize();
+			inibut.resize();
+			m._visible = m.enabled = true;
+			bbar._visible = bv;
+		}
+	};
+	iniimg.initialimg.imld = new MovieClipLoader();
+	iniimg.initialimg.imld.addListener(t);
+	iniimg.initialimg.imld.loadClip(iimage, iniimg.initialimg);
 }
 
 // setup timer function

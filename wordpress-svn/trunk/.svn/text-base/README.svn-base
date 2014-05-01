@@ -28,13 +28,13 @@
     sources  and  playback  attributes.   There are two separate
     components: the video  players,  and  the  WordPress  plugin
     proper.  The video players are delivered to site visitors by
-    the plugin in either an <object ...>  block  with  a  nested
-    <video  ...>  element as fallback content, or inversely as a
-    primary <video ...> with a nested  <object  ...>  for  flash
-    fallback.  The former arrangement is the default at present,
-    and there is an option to enable the latter arrangement.  It
-    is not necessary to provide for both types, one or the other
-    type may be left out.
+    the plugin as either HTML5 video with a flash plugin program
+    as  fallback  content,  or  inversely as flash video primary
+    content with HTML5 video elements for fallback.  The  former
+    arrangement is the default (as of version 2.1), but there is
+    an option to enable the latter arrangement if flash is  pre-
+    ferred.   It is not necessary to provide for both types, one
+    or the other type may be left out.
 
          Video objects may be placed in posts and pages,  or  in
     the  widget  areas supported by your theme (i.e., the plugin
@@ -45,19 +45,19 @@
     they will not be discussed in detail here.) The plugin  adds
     to  the  post/page editor interfaces a full featured form to
     setup and add, or edit, or delete video objects, so the user
-    does  not  need to be troubled with shortcodes (they will be
-    visible in the editor; you will  get  used  to  them).   The
-    video widget has a similar full featured form.
+    does  not  need  to  be troubled with shortcodes.  The video
+    widget has a similar full featured form.
 
-         The  plugin  does not depend on JavaScript, although it
-    is used for the HTML5 video player, and for proper  resizing
-    of  the video display area.  If JavaScript is not available,
-    HTML5 video will have the  interface  provided  by  the  web
-    browser,  and the flash video will be largely unaffected (it
-    only uses JavaScript to check whether it  is  running  on  a
-    mobile  platform).  Display resizing will not be possible if
-    JavaScript is not available, so reasonable dimensions should
-    be given in the setup form.
+         Video in posts may be displayed in the WordPress visual
+    editor, if the default visual editor is used. If the default
+    visual editor has been changed, for example by a plugin, the
+    video display in the editor will probably not work. If there
+    are problems, video display in the editor may be disabled on
+    the SWFPut settings page.
+
+
+
+
 
 
 
@@ -69,6 +69,16 @@
 
                                  -2-
 
+
+         SWFPut  does not depend on JavaScript on the front end,
+    but it is used for the HTML5 video player,  and  for  proper
+    resizing  of  the  video display area.  If JavaScript is not
+    available, HTML5 video will have the interface  provided  by
+    the  web  browser, and the flash video will be largely unaf-
+    fected (it only uses JavaScript to check whether it is  run-
+    ning  on  a mobile platform).  "Responsive" display resizing
+    will not be possible if JavaScript is not available, so rea-
+    sonable dimensions should be given in the setup form.
 
          The  SWFPut  flash  video player has been coded to work
     well with the free Gnash web browser plugin, as well as  the
@@ -91,13 +101,13 @@
          All  necessary  sources are included in the distributed
     archive, but the necessary build tools are not.  The  plugin
     is maintained with a POSIX makefile, which in turn expects a
-    POSIX Bourne shell. Additionally, the PHP commandline inter-
-    face  with  the  Ming  extension  to  build  the flash video
-    player, PERL packages to minify JavaScript, GNU gettext  for
-    localization  sources,  GNU groff (and a small C program) to
-    make the forms of this document, the portable  Info-ZIP  zip
-    command to make the archive, and various POSIX tools such as
-    sed.
+    POSIX Bourne shell.  Additional  requirements  are  the  PHP
+    command-line  interface with the Ming extension to build the
+    flash video player, PERL packages to minify JavaScript,  GNU
+    gettext  for  localization sources, GNU groff (and a small C
+    program) to make the forms of this  document,  the  portable
+    Info-ZIP  zip command to make the archive, and various POSIX
+    tools such as sed.
 
          The actual plugin is composed of PHP code, and does not
     require compilation or link editing.  The flash video player
@@ -108,6 +118,23 @@
          The Makefile default target  builds  as  necessary  and
     then  creates the ZIP file.  The Makefile is the build docu-
     mentation.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                 -3-
+
 
     3.  Usage
 
@@ -124,16 +151,6 @@
     bar of each section has a button that will hide or show that
     section,  which  might  help  if  the  height of the form is
     greater than that of the display.
-
-
-
-
-
-
-
-
-
-                                 -3-
 
 
          3.1.  Form Buttons
@@ -172,6 +189,19 @@
               hand, so that field is not cleared.
 
 
+
+
+
+
+
+
+
+
+
+
+                                 -4-
+
+
          3.2.  Form Sections
 
 
@@ -190,17 +220,6 @@
               HTTPS, and RTMP.  Support for RTMP is only partial
               and  very  limited.  See  "Playpath (rtmp)" below.
               Acceptable file (media) types are FLV, MP4.
-
-
-
-
-
-
-
-
-
-                                 -4-
-
 
          o    Select flash video  URL  from  uploads  directory:
               This  is a drop-down list from which the URL field
@@ -229,28 +248,9 @@
               give only the value  that  should  appear  between
               quotes in the type argument, and although many web
               examples show a space after the  comma  separating
-              the  video and audio codec names, Firefox up to at
-              least version 16 will reject the source because of
-              the  space,  so  it should be left out)1.  If more
-              than one is given they will appear in order.   The
-              browser should use the first type that it supports
-              (if any, and some older versions of browsers might
-              not  consider any source but the first to appear).
-              The MP4, WEBM, and OGG types have  varied  support
-              among  web  browsers, so ideally all three formats
-              should be provided.
-
-         o    Select HTML5 video  URL  from  uploads  directory:
-              (See next item below.)
-
-         o    Select  ID  for  HTML5  video  from media library:
-              These selection items work much like the similarly
-              named items pertaining to flash URLs, as described
-              above. These show files with MP4 or OGG or OGV  or
-              WEBM  extensions,  suitable  for  the  HTML5 video
-              player. An important difference is that  when  you
-              make  a  selection,  the  entry field is appended,
-              rather than replaced, on the assumption  that  you
+              the  video  and  audio codec names, browsers might
+              reject the source because  of  the  space,  so  it
+              should  be  left out)1.  If more than one is given
     -----------
       1 For example:
     videos/cat.mp4?video/mp4|
@@ -268,6 +268,23 @@
                                  -5-
 
 
+              they will appear in order.  The browser should use
+              the  first  type  that it supports. The MP4, WEBM,
+              and  OGG  types  have  varied  support  among  web
+              browsers,  so  ideally all three formats should be
+              provided.
+
+         o    Select HTML5 video  URL  from  uploads  directory:
+              (See next item below.)
+
+         o    Select  ID  for  HTML5  video  from media library:
+              These selection items work much like the similarly
+              named items pertaining to flash URLs, as described
+              above. These show files with MP4 or OGG or OGV  or
+              WEBM  extensions,  suitable  for  the  HTML5 video
+              player. An important difference is that  when  you
+              make  a  selection,  the  entry field is appended,
+              rather than replaced, on the assumption  that  you
               are  adding  multiple  resources for the necessary
               HTML5 video formats. When the URL field content is
               appended, a `|' (pipe) character is used as a sep-
@@ -280,12 +297,12 @@
               are supported: those requiring only the  playpath.
               This item has bearing on HTML5 video.
 
-         o    Url  of  initial image file (optional): An HTTP or
-              HTTPS URL for an image file may  be  placed  here.
-              When  the  player  is  loaded, if it is not set to
-              play on load, this image is  displayed  until  the
-              play  button  is invoked. Accepted image types are
-              JPEG, PNG, and GIF.
+         o    Url  of initial image file (optional): A URL for a
+              `poster' image file may be placed here.  When  the
+              player  is  loaded,  if  it  is not set to play on
+              load, this image is displayed until the play  but-
+              ton  is  invoked.  Accepted  image types are JPEG,
+              PNG, and GIF.
 
          o    Load image from uploads directory: This is a drop-
               down  list  from  which  the "Url of initial image
@@ -305,6 +322,18 @@
               media  database,  and  presents the suitable file-
               names with their media IDs.
 
+
+
+
+
+
+
+
+
+
+                                 -6-
+
+
          o    Use initial image as  no-video  alternate:  If  an
               initial image was given, then also use it as fall-
               back display when video  is  not  supported.  This
@@ -322,18 +351,6 @@
               400x300, then setting these to fields  to  320x240
               would  look  good  (the  width:height ratio is the
               same). In any case,  the  player  will  scale  the
-
-
-
-
-
-
-
-
-
-                                 -6-
-
-
               video  to fit within its display, but it maintains
               the aspect ratio, so horizontal or vertical  black
               (unused)  areas  will  be  visible  if  the aspect
@@ -371,6 +388,18 @@
               one  of  the  DVD-Video  pixel  sizes. This is not
               suitable for widescreen DVD-Video, which  has  one
               of  the  expected  DVD-Video  pixel  sizes, but is
+
+
+
+
+
+
+
+
+
+                                 -7-
+
+
               meant to be displayed with a 16:9 aspect.
 
          o    Display aspect: Set the  intended  display  aspect
@@ -388,18 +417,6 @@
               ratio  rather  than  the  display  aspect  in  the
               unlikely  event  that  that  value is more readily
               available. For example, video  prepared  for  NTSC
-
-
-
-
-
-
-
-
-
-                                 -7-
-
-
               DVD  at 720x480 pixels intended for standard (4:3)
               display has a pixel aspect ratio of  8:9,  and  at
               352x240  a pixel aspect ratio of 10:11.  As above,
@@ -436,8 +453,20 @@
          o    Hide control bar initially: This  will  cause  the
               control bar to hide a few seconds after the player
               loads (e.g., so that it does not obscure  an  ini-
-              tial  image). Note that this also changes the con-
-              trol bar behavior in general: the  bar  will  show
+              tial  image).  Note  that  this  also  changes the
+
+
+
+
+
+
+
+
+
+                                 -8-
+
+
+              control bar behavior in general: the bar will show
               whenever  mouse  movement  is  detected within the
               embedded window, and hide  again  when  there  has
               been  no  mouse  movement for a few seconds.  When
@@ -450,21 +479,6 @@
               the browser or plugin often  fails  to  deliver  a
               `mouse  has  left' event to the player program, so
               hiding the bar is not always reliable).
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                 -8-
-
 
          o    Hide and disable control bar: Enable this  if  the
               media should play through without interruption.
@@ -504,20 +518,6 @@
     COPYING, which should be present in the top-level  directory
     of   the  distribution  archive;  or,  see  the  license  at
     http://www.gnu.org/licenses/.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

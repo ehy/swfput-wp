@@ -80,6 +80,20 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 	urlfm[urlfm.length - 1] = 'mce_ifm.php'; // iframe doc
 	urlfm = urlfm.join('/');
 
+	// small lib
+	var strcch = function(s, to_lc) {
+		if ( to_lc ) return s.toLowerCase();
+		return s.toUpperCase();
+	};
+	var str_lc = function(s) { return strcch(s, true); };
+	var str_uc = function(s) { return strcch(s, false); };
+	var strccmp = function(s, c) { return (str_lc(s) === str_lc(c)); };
+	// nodeName comp. is common, and case unreliable
+	var nN_lc = function(n) { return str_lc(n.nodeName); };
+	var nN_uc = function(n) { return str_uc(n.nodeName); };
+	var nNcmp = function(n, c) { return (nN_lc(n) === str_lc(c)); };
+	
+
 	var defs  = {
 		url: "",
 		cssurl: "",
@@ -115,7 +129,7 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 	ed.on('mousedown', function(e) {
 		var parent;
 
-		if ( e.target.nodeName == 'IFRAME'
+		if ( nNcmp(e.target, 'iframe')
 			&& (parent = ed.dom.getParent(e.target, 'div.evhTemp')) ) {
 			if ( tinymce.isGecko )
 				ed.selection.select(parent);
@@ -149,7 +163,7 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 			return true;
 		}
 
-		if ( n.nodeName == 'DD' ) {
+		if ( nNcmp(n, 'dd') ) {
 			return;
 		}
 
@@ -204,7 +218,7 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 				return;
 			}
 
-			if ( n.nodeName == 'DD' ) {
+			if ( nNcmp(n, 'dd') ) {
 				return;
 			}
 
@@ -338,7 +352,7 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 
 	var _sc_atts2qs = function(ats, cap) {
 		var dat = {};
-		var qs = '', sep = '';
+		var qs = '', sep = '', csep = '&amp;';
 
 		for ( var k in defs ) {
 			var v = defs[k];
@@ -365,22 +379,22 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 					// for new h5 video player vs. old WP plugin
 					dat['aspect'] = v;
 					qs += sep + 'aspect=' + encodeURIComponent(v);
-					sep = '&';
+					sep = csep;
 					break;
 				default:
 					break;
 			}
 
 			qs += sep + k + '=' + encodeURIComponent(v);
-			sep = '&';
+			sep = csep;
 		}
 		
 		if ( swfput_mceplug_inf !== undefined ) {
 			qs += sep
 				+ 'a=' + encodeURIComponent(swfput_mceplug_inf.a)
-				+ '&'
+				+ csep
 				+ 'i=' + encodeURIComponent(swfput_mceplug_inf.i)
-				+ '&'
+				+ csep
 				+ 'u=' + encodeURIComponent(swfput_mceplug_inf.u);
 		}
 		
