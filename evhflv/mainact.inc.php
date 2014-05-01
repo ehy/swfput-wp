@@ -424,6 +424,30 @@ function external_url(url, enc) {
 	return external_url_args.length;
 }
 
+// call this *only* from stream error --
+// it increments so other calls will foul the index
+function has_external_url() {
+	if ( external_url_args === undefined ) {
+		return false;
+	}
+	if ( ++external_url_args_cur >= external_url_args.length ) {
+		external_url_args_cur = 0;
+		return false; // false now, but cycle again with new click
+	}
+	return true;
+}
+
+// get current URL w/o diddling data structure directly
+function cur_external_url() {
+	if ( external_url_args === undefined ) {
+		return '';
+	}
+	if ( external_url_args_cur >= external_url_args.length ) {
+		return '';
+	}
+	return external_url_args[external_url_args_cur];
+}
+
 // setup browser callbacks.
 function setup_external_cb() {
 	if ( external_cbmethods_setup !== undefined ) {
@@ -988,6 +1012,7 @@ stream_onMetaData = function(info) {
 };
 
 connection_onStatus = function(stat) {
+adddbgtext("connection_onStatus Got onStat: "+stat.code+"\n");
 	switch ( stat.code ) {
 	case 'NetConnection.Connect.Rejected':
 		adddbgtext("Got stat.code 'NetConnection.Connect.Rejected'\n");
@@ -1066,6 +1091,8 @@ stream_onStatus = function(stat) {
 		return;
 	}
 
+	var t;
+
 	switch ( stat.code ) {
 	case 'NetStream.Seek.Notify':
 		if ( ! dopause ) {
@@ -1114,9 +1141,13 @@ stream_onStatus = function(stat) {
 		stopVideo();
 		break;
 	case 'NetStream.Play.StreamNotFound':
-		not_found();
+		t = has_external_url();
+		if ( ! t )
+			not_found();
 		stopWait();
 		stopVideo();
+		if ( t )
+			startVideo();
 		break;
 	case 'NetStream.Seek.InvalidTime':
 		// TODO: what should be done here?
@@ -1644,22 +1675,23 @@ function initialbutHit () {
 
 // click callback for timeline progress bar
 function plprogHit () {
-	var px = bbar.progpb._xmouse;
+	var px = bbar.progpb._xmouse, len = const_pbar_len;
 	last_ct = 0;
 
 	if ( audb == true && audio_duration ) {
-		// see comment above the definition of const_pbar_len
-		var pos = Math.floor(audio_duration / adiv * px / const_pbar_len);
+		// see comment above the definition of len
+		var pos = Math.floor(audio_duration / adiv * px / len);
 		sound.stop();
 		// last_ct, isrunning are handled in seek.Notify for NetStream,
-		// but for Sound must be handled here (no similar evants)
+		// but for Sound must be handled here (no similar events)
 		last_ct = 0;
 		isrunning = true;
 		sound.start(pos);
 		adddbgtext(" APOS: " + pos + "\n");
 	} else if ( audb == false && stream_duration ) {
-		// see comment above the definition of const_pbar_len
-		stream.seek(stream_duration * px / const_pbar_len);
+		var skto = stream_duration * px / len;
+		// see comment above the definition of len
+		stream.seek(skto);
 	} else if ( audb == false ) {
 		// TODO: better options for seeking in 'sizeless' streams
 		var off = px > (bbar.progpb._width / 2) ? 30 : -30;
@@ -1668,8 +1700,8 @@ function plprogHit () {
 }
 
 function showhideBar(bshow) {
-	var show = Stage.height - bbar._height - barypadding; //barpadding;
-	var hide = show + bbar._height + barypadding * 2; //barpadding * 2;
+	var show = Stage.height - bbar._height - barypadding;
+	var hide = show + bbar._height + barypadding * 2;
 	var p = bshow ? show : hide;
 	var y = bbar._y;
 
@@ -1959,15 +1991,8 @@ function ConnectedStartVideo() {
 	video.menu = ctxmenu;
 	video.menu.hideBuiltInItems();
 
-	// bug: vurl === "/" can result when passed url arg is empty
-	if ( (vurl == null || vurl == "" || vurl === "/")
-		&& external_url_args != undefined
-		&& external_url_args.length ) {
-		vurl = external_url_args[external_url_args_cur];
-		adddbgtext(" EXTURL=='"+vurl+"'\n");
-	} else {
-		adddbgtext(" INTURL=='"+vurl+"'\n");
-	}
+	vurl = cur_external_url();
+	adddbgtext(" CUR URL=='"+vurl+"'\n");
 
 	sound = new Sound();
 	if ( audb == true ) {
@@ -2264,6 +2289,13 @@ if ( (vurl == null || vurl == "") && _level0.FN != undefined ) {
 	adddbgtext(" FN: '" + _level0.FN + "'\n");
 	adddbgtext(" HI: '" + _level0.HI + "'\n");
 	adddbgtext(" WI: '" + _level0.WI + "'\n");
+	// bug when SWFPut has empty URL arg:
+	if ( vurl === '/' ) {
+		vurl = '';
+	}
+	// put url in data that can also be added to externally,
+	// it is taken from there
+	external_url(vurl, true);
 }
 adddbgtext(" vurl: '" + vurl + "'\n");
 
