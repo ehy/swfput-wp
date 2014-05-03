@@ -332,7 +332,13 @@ function SWFPut_repl_nl(str) {
 					'class' : cl.indexOf('evh-pseudo') >= 0 ? cl : (cl+' evh-pseudo'),
 					'width' : w,
 					'height' : h,
-					'sandbox' : "allow-same-origin allow-pointer-lock allow-scripts",
+				// Argh!: Chromium 3.4 breaks with the sandbox attr.,
+				// refusing to run scipts in the iframe. Up to 3.3
+				// it was OK. Web search shows that chromium devs
+				// have been dithering about this for some time.
+				// IAC, source is never cross-origin or in any way
+				// unknown. Removed.
+					//'sandbox' : "allow-same-origin allow-pointer-lock allow-scripts",
 					//'allowfullscreen' : '',
 					//'seamless' : '',
 					'src' : s
