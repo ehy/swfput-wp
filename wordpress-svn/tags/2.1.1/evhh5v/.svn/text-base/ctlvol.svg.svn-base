@@ -1,0 +1,79 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" class="cbarsvg"
+	 id="svg_ctlvol" visibility="hidden">
+	<script type="text/javascript">
+	<![CDATA[
+		// FFox returns HTMLCollection, chromium/webkit returns NodeList
+		function getparams () {
+			var parms = {};
+			// As usual MSIE is n.g.: it cannot grok this . . .
+			if ( document.defaultView.frameElement && document.defaultView.frameElement.getElementsByTagName ) {
+				var t = document.defaultView.frameElement.getElementsByTagName("param");
+				for ( var i = 0; i < t.length; i++ ) {
+					var nd = t.item(i);
+					parms[nd.name] = nd.value;
+				}
+			// . . . but luckily this is understood; it's from a
+			// query string on the svg URL, so obviously the using
+			// document code gets an extra complication too.
+			} else if ( document.defaultView.location.href ) {
+				var q = document.defaultView.location.href.split('?')[1].split('&');
+				for ( var i = 0; i < q.length; i++ ) {
+					var u = q[i].split('=');
+					parms[u[0]] = u[1];
+				}
+			} else {
+				parent.console.log("cannot get object params in svg script; browser is obsolete or broken");
+			}
+			parms.root_svg = document.getElementById("svg_ctlvol");
+			parms.docu_svg = document;
+			return parms;
+		}
+
+		// put the params for this in data structure maintained in
+		// parent document, where it is hooked up as needed
+		var params = getparams();
+		if ( params && (typeof parent.evhh5v_put_ctlbarmap) == "function" ) {
+			parent.evhh5v_put_ctlbarmap(params);
+		}
+
+		// these must be passed back to parent; things like
+		// setAttribute() don't work in this context
+		function setvisi(id, typ) {
+			return parent.evhh5v_setvisi(document.getElementById(id), typ);
+		};
+		function svg_click(obj) {
+			return parent.evhh5v_svg_click(obj, params);
+		};
+	]]>
+	</script>
+	<style type="text/css">
+	<![CDATA[
+		.btn, .svgbutt { cursor: pointer; }
+		.bgarea { fill: rgb(20,20,25); stroke: rgb(20,20,25);
+			stroke-width:20px;
+			stroke-linecap:round;
+			stroke-linejoin:round;
+			opacity: 0.55;
+		}
+		.ico { fill:rgb(240,240,255); stroke:none; opacity: 0.863; }
+		.icoline { fill:none; stroke:rgb(240,240,255);
+			stroke-width:9px;
+			stroke-linecap:round;
+			stroke-linejoin:round;
+			opacity: 0.863;
+		}
+		.fgslide { fill: rgb(245,210,215); }
+		.bgslide { fill: rgb(20,0,5); }
+		.fgslide, .bgslide { cursor: pointer;
+			stroke: none;
+			opacity: 0.47;
+		}
+	]]>
+	</style>
+	<g id="g_all_ini">
+		<g id="g_slider"></g>
+	</g>
+</svg>
+	
