@@ -325,18 +325,19 @@ function maybe_get_attach($a) {
 $jatt['a_vid']['poster'] = maybe_get_attach($jatt['a_vid']['poster']);
 
 if ( ($k = getwithdef('altvideo', '')) != '' ) {
+	// patterns always subject to revision
+	$pats = array(
+		'/.*\.(mp4|m4v|mv4)$/i',
+		'/.*\.(og[gv]|vorbis)$/i',
+		'/.*\.(webm|wbm|vp[89])$/i'
+	);
+
 	$a = explode('|', $k);
 	foreach ( $a as $k ) {
 		$t = explode('?', trim($k));
 		$v = array('src' => maybe_get_attach(trim($t[0])));
 		if ( ! isset($t[1]) ) {
 			// not given: infer from suffix,
-			// patterns always subject to revision
-			$pats = array(
-				'/.*\.(mp4|m4v|mv4)$/i',
-				'/.*\.(og[gv]|vorbis)$/i',
-				'/.*\.(webm|wbm|vp[89])$/i'
-			);
 			if ( preg_match($pats[0], $v['src']) ) {
 				$tv[1] = 'video/mp4';
 			} else if ( preg_match($pats[1], $v['src']) ) {
@@ -357,6 +358,7 @@ if ( ($k = getwithdef('altvideo', '')) != '' ) {
 		$jatt['a_vid']['srcs'][] = $v;
 	}
 }
+
 $fl_url = maybe_get_attach(trim(getwithdef('url', '')));
 if ( preg_match('/.+\.(mp4|m4v)$/i', $fl_url) ) {
 	$jatt['a_vid']['srcs'][] =
