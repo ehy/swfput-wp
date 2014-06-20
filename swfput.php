@@ -2499,8 +2499,14 @@ class SWF_put_evh {
 	public static function is_msie() {
 		static $is_so = null;
 		if ( $is_so === null ) {
-			$r = preg_match('/\bMSIE\b/', $_SERVER['HTTP_USER_AGENT']);
-			$is_so = $r ? true : false;
+			// Occasionally 'HTTP_USER_AGENT' is not set in $_SERVER,
+			// and if that is the case, just say yes.
+			if ( ! isset($_SERVER['HTTP_USER_AGENT']) ) {
+				$is_so = true;
+			} else {
+				$r = preg_match('/\bMSIE\b/', $_SERVER['HTTP_USER_AGENT']);
+				$is_so = $r ? true : false;
+			}
 		}
 		return $is_so;
 	}
