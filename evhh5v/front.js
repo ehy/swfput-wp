@@ -1,5 +1,5 @@
 /*
- *      editor_plugin3x.js
+ *      front.js
  *      
  *      Copyright 2014 Ed Hynan <edhynan@gmail.com>
  *      
