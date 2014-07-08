@@ -2219,7 +2219,7 @@ class SWF_put_evh {
 		if ( $content != null ) {
 			$c = do_shortcode($content);
 			$pr->setvalue('caption', $c);
-			$c = '<p class="wp-caption-text">' . $c . '</p>';
+			$c = '<span class="wp-caption-text">' . $c . '</span>';
 		}
 
 		$ids = $this->get_div_ids($code);
