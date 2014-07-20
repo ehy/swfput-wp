@@ -380,10 +380,10 @@ $allvids[] = $jatt;
 	<script type="text/javascript" src="<?php echo $jsurl ?>"></script>
 	<style>
 		.main-div {
-			margin: 0px;
-			outline: 0px;
-			padding: 0px 0px;
-			border: 0px;
+			margin:  0;
+			outline: 0;
+			padding: 0;
+			border:  0;
 			background-color: black;
 		}
 	</style>
