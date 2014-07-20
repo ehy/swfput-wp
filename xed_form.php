@@ -422,6 +422,3 @@ $dvii = $id . '_idiv';
 	?>
 
 	</div></div>
-
-	<?php
-?>
