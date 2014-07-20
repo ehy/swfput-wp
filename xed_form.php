@@ -1,6 +1,98 @@
 <?php
-	// begin form
-	?>
+/*
+ *      xed_form.php
+ *      
+ *      Copyright 2014 Ed Hynan <edhynan@gmail.com>
+ *      
+ *      This program is free software; you can redistribute it and/or modify
+ *      it under the terms of the GNU General Public License as published by
+ *      the Free Software Foundation; specifically version 3 of the License.
+ *      
+ *      This program is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU General Public License for more details.
+ *      
+ *      You should have received a copy of the GNU General Public License
+ *      along with this program; if not, write to the Free Software
+ *      Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ *      MA 02110-1301, USA.
+ */
+
+/* text editor: use real tabs of 4 column width, LF line ends */
+/* human coder: keep line length <= 72 columns; break at params */
+
+/*
+ * These are the original contents of method 
+ * swfput.php:<main class>::put_xed_form(),
+ * now moved here to reduce size of main unit --
+ * this file is require'd and efficiency is not a concern
+ * since the code only runs when admin selects a posts
+ * or page page, (and then just once:).
+ */
+
+// method entry: 'automatics' etc.
+$sc = self::shortcode;
+// file select by ext pattern
+$mpat = self::get_mfilter_pat();
+// files array from uploads dirs (empty if none)
+$rhu = self::r_find_uploads($mpat['m'], true);
+$af = &$rhu['uploadfiles'];
+$au = &$rhu['uploadsdir'];
+$aa = &$rhu['medialib'];
+// url base for upload dirs files
+$ub = rtrim($au['baseurl'], '/') . '/';
+// directory base for upload dirs files
+$up = rtrim($au['basedir'], '/') . '/';
+// id base for form and js
+$id = 'SWFPut_putswf_video';
+// label format string
+$lbfmt = '<label for="%s_%s">%s</label>';
+// table <input type="text"> format string
+$infmt = '<input type="text" size="40" style="width:%u%%;" name="%sX%sX" id="%s_%s" value="%s" />';
+// table <input type="checkbox"> format string
+$ckfmt = '<input type="checkbox" name="%sX%sX" id="%s_%s" value="%s" %s/>';
+// js function object
+$job = $id . '_inst';
+// form buttons format string
+$bjfmt = '<input type="button" class="button" onclick="return %s.%s;" value="%s" />';
+// form <select > format string
+$slfmt = '<select name="%sX%sX" id="%s_%s" style="width:%u%%;" onchange="return %s.%s;">' . "\n";
+// form <select > <optgroup > format string
+$sgfmt = '<optgroup label="%s">' . "\n";
+// form <select > <option > format string
+$sofmt = '<option value="%s">%s</option>' . "\n";
+// js send form values to editor method
+$jfu = "send_xed(this.form,'{$id}','caption','{$sc}')";
+// js reset form to defaults method
+$jfur = "reset_fm(this.form,'{$id}')";
+// js fill form from editor if possible
+$jfuf = "from_xed(this.form,'{$id}','caption','{$sc}')";
+// js replace last found shortcode in editor
+$jfuc = "repl_xed(this.form,'{$id}','caption','{$sc}')";
+// js delete last found shortcode from editor
+$jfud = "rmsc_xed(this.form,'{$id}','caption','{$sc}')";
+// js to copy from select/dropdown to text input
+$jfsl = "form_cpval(this.form,'%s','%s','%s')";
+// js to append from select/dropdown to text input
+$jfap = "form_apval(this.form,'%s','%s','%s')";
+// input text widths, wide, narrow
+$iw = 100; $in = 8; // was: $in = 16;
+// incr var for sliding divs
+$ndiv = 0;
+// button format for sliding divs
+$dbfmt = '<input type="button" class="button" id="%s" value="%s" onclick="%s.%s" />';
+// button values for sliding divs
+$dbvhi = self::wt(__('Hide', 'swfput_l10n'));
+$dbvsh = self::wt(__('Show', 'swfput_l10n'));
+// js to show/hide sliding divs
+$jdsh = "hideshow('%s', this.id, '{$dbvhi}', '{$dbvsh}')";
+// class and base of id for sliding divs
+$dvio = $id . '_odiv';
+$dvii = $id . '_idiv';
+
+// begin form
+?>
 	<!-- form buttons, in a table -->
 	<table id="<?php echo $id . '_buttons'; ?>"><tr><td>
 		<span  class="submit">
