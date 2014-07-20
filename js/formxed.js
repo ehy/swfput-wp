@@ -672,7 +672,7 @@ SWFPut_putswf_video_xed.prototype = {
 		all.each(function () {
 			var v;
 			var k = this.name.substring(len, this.name.length - 1);
-			if ( this.type == "checkbox" || this.type == "radio" ) {
+			if ( this.type == "checkbox" ) {
 				v = this.checked == undefined ? '' : this.checked;
 				v = v == '' ? 'false' : 'true';
 				if ( $this['defs'][k] == undefined ) {
@@ -680,7 +680,7 @@ SWFPut_putswf_video_xed.prototype = {
 				} else {
 					$this['map'][k] = v == $this['defs'][k] ? '' : v;
 				}
-			} else if ( this.type == "text" ) {
+			} else if ( this.type == "text" || this.type == "radio" ) {
 				v = this.value;
 				if ( $this['defs'][k] != undefined ) {
 					if ( $this['defs'][k] == v ) {
@@ -716,9 +716,9 @@ SWFPut_putswf_video_xed.prototype = {
 			var v;
 			var k = this.name.substring(len, this.name.length - 1);
 			if ( (v = $this[mapname][k]) != undefined ) {
-				if ( this.type == "checkbox" || this.type == "radio" ) {
+				if ( this.type == "checkbox" ) {
 					this.checked = v == 'true' ? 'checked' : '';
-				} else if ( this.type == "text" ) {
+				} else if ( this.type == "text" || this.type == "radio" ) {
 					if ( true || v != '' ) {
 						this.value = v;
 					}
