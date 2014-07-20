@@ -410,7 +410,7 @@ $dvii = $id . '_idiv';
 		$l = self::wt($v);
 		$tv = ($k === $cur) ? ' checked="checked"' : '';
 		printf("\t".'<label>&nbsp; %s <input id="%s_%s" name="%sX%sX" value="%s"%s type="radio"></label>'."\n",
-			$l, $id, $val, $id, $val, $val, $tv
+			$l, $id, $val, $id, $val, $k, $tv
 		);
 	}
 	?>

@@ -418,7 +418,7 @@ $jafmt .= 'return false;';
 		$tl = $wt($v);
 		$tv = ($k === $val) ? ' checked="checked"' : '';
 		printf("\t".'<label><input id="%s" name="%s" value="%s"%s type="radio">&nbsp;%s</label><br />'."\n",
-			$id, $nm, $val, $tv, $tl
+			$id, $nm, $k, $tv, $tl
 		);
 	}
 	?>
