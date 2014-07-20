@@ -3070,7 +3070,10 @@ class SWF_params_evh {
 		'defaultplaypath' => '',
 		// <object>
 		'classid' => 'clsid:d27cdb6e-ae6d-11cf-96b8-444553540000',
-		'codebase' => 'http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,115,0'
+		'codebase' => 'http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,115,0',
+		// align, for alignment class in markup:
+		// left, center, right, none
+		'align' => 'center'
 	);
 
 	protected $inst = null; // modifiable copy per instance
@@ -3232,6 +3235,19 @@ class SWF_params_evh {
 					$i[$k] = $m[1] . ':' . $m[2];
 				} else {
 					$i[$k] = $v;
+				}
+				break;
+			// strings with a set of valid values that can be checked
+			case 'align':
+				switch ( $t ) {
+					case 'left':
+					case 'right':
+					case 'center':
+					case 'none':
+						break;
+					default:
+						$i[$k] = $v;
+						break;
 				}
 				break;
 			// varied complex strings; not sanitized here
