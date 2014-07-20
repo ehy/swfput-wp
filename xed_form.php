@@ -389,6 +389,27 @@ $dvii = $id . '_idiv';
 		echo self::wt(__('Behavior', 'swfput_l10n')); ?></span></h3>
 	<div class="<?php echo $dvii; ?>" id="<?php echo $dvin; ?>">
 	
+	<?php // EH: 20.07.2014 -- added align options
+	$val = 'align';
+	$l = self::wt(__('Alignment (in page or post): ', 'swfput_l10n'));
+	$aval = array(
+		'left' => array(__('left', 'swfput_l10n'), ''),
+		'center' => array(__('center', 'swfput_l10n'), ''),
+		'right' => array(__('right', 'swfput_l10n'), ''),
+		'none' => array(__('none', 'swfput_l10n'), ''),
+	);
+	printf($lbfmt, $id, $val, $l);
+	foreach ( $aval as $k => $v ) {
+		$l = $v[0];
+		$tv = ($k === $$val) ? ' checked="checked"' : '';
+		printf("\t".'<label><input id="%s_%s" name="%sX%sX" value="%s"%s type="radio">&nbsp;%s</label><br />'."\n",
+			$id, $val, $id, $val, $val, $tv, $l
+		);
+	}
+	?>
+	</p>
+
+
 	<?php $els = array(
 		array('volume', '<p>', '</p>', $in, 'inp',
 			__('Initial volume (0-100): ', 'swfput_l10n')),

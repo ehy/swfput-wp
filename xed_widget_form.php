@@ -412,12 +412,12 @@ $jafmt .= 'return false;';
 		'none' => array(__('none', 'swfput_l10n'), ''),
 	);
 	?>
-	<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
+	<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label><br />
 	<?php
 	foreach ( $aval as $k => $v ) {
-		$tl = $v[0];
+		$tl = $wt($v[0]);
 		$tv = ($k === $val) ? ' checked="checked"' : '';
-		printf("\t".'<label><input id="%s" name="%s" value="%s"%s type="radio">&nbsp;%s</label><br>'."\n",
+		printf("\t".'<label><input id="%s" name="%s" value="%s"%s type="radio">&nbsp;%s</label><br />'."\n",
 			$id, $nm, $val, $tv, $tl
 		);
 	}
