@@ -393,16 +393,16 @@ $dvii = $id . '_idiv';
 	$val = 'align';
 	$l = self::wt(__('Alignment (in page or post): ', 'swfput_l10n'));
 	$aval = array(
-		'left' => array(__('left', 'swfput_l10n'), ''),
-		'center' => array(__('center', 'swfput_l10n'), ''),
-		'right' => array(__('right', 'swfput_l10n'), ''),
-		'none' => array(__('none', 'swfput_l10n'), ''),
+		'left' => __('left', 'swfput_l10n'),
+		'center' => __('center', 'swfput_l10n'),
+		'right' => __('right', 'swfput_l10n'),
+		'none' => __('none', 'swfput_l10n')
 	);
 	printf($lbfmt, $id, $val, $l);
 	foreach ( $aval as $k => $v ) {
-		$l = $v[0];
+		$l = self::wt($v);
 		$tv = ($k === $$val) ? ' checked="checked"' : '';
-		printf("\t".'<label><input id="%s_%s" name="%sX%sX" value="%s"%s type="radio">&nbsp;%s</label><br />'."\n",
+		printf("\t".'<label><input id="%s_%s" name="%sX%sX" value="%s"%s type="radio">&nbsp;%s</label>'."\n",
 			$id, $val, $id, $val, $val, $tv, $l
 		);
 	}
