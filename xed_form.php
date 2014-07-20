@@ -32,6 +32,12 @@
  */
 
 // method entry: 'automatics' etc.
+
+// cap check is done at registration of this callback
+$pr = self::swfput_params;
+$pr = new $pr();
+extract($pr->getparams());
+
 $sc = self::shortcode;
 // file select by ext pattern
 $mpat = self::get_mfilter_pat();
@@ -391,6 +397,7 @@ $dvii = $id . '_idiv';
 	
 	<?php // EH: 20.07.2014 -- added align options
 	$val = 'align';
+	$cur = isset($$val) ? $$val : $pr->getdefault('align');
 	$l = self::wt(__('Alignment (in page or post): ', 'swfput_l10n'));
 	$aval = array(
 		'left' => __('left', 'swfput_l10n'),
@@ -401,7 +408,7 @@ $dvii = $id . '_idiv';
 	printf($lbfmt, $id, $val, $l);
 	foreach ( $aval as $k => $v ) {
 		$l = self::wt($v);
-		$tv = ($k === $$val) ? ' checked="checked"' : '';
+		$tv = ($k === $cur) ? ' checked="checked"' : '';
 		printf("\t".'<label>&nbsp; %s <input id="%s_%s" name="%sX%sX" value="%s"%s type="radio"></label>'."\n",
 			$l, $id, $val, $id, $val, $val, $tv
 		);

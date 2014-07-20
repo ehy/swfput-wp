@@ -1701,11 +1701,6 @@ class SWF_put_evh {
 	// put form that with some js will help with shortcodes in
 	// the WP post editor
 	public static function put_xed_form() {
-		// cap check is done at registration of this callback
-		$pr = self::swfput_params;
-		$pr = new $pr();
-		extract($pr->getparams());
-
 		// EH: 20.07.2014
 		// Form markup and code moved to file xed_form.php
 		require 'xed_form.php';
@@ -3440,6 +3435,9 @@ class SWF_put_widget_evh extends WP_Widget {
 		}
 		if ( ! $i['height'] ) {
 			$i['height'] = self::defheight;
+		}
+		if ( ! $i['align'] ) {
+			$i['align'] = $pr->getdefault('align');
 		}
 
 		return $i;
