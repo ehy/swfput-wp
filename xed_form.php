@@ -402,8 +402,8 @@ $dvii = $id . '_idiv';
 	foreach ( $aval as $k => $v ) {
 		$l = self::wt($v);
 		$tv = ($k === $$val) ? ' checked="checked"' : '';
-		printf("\t".'<label><input id="%s_%s" name="%sX%sX" value="%s"%s type="radio">&nbsp;%s</label>'."\n",
-			$id, $val, $id, $val, $val, $tv, $l
+		printf("\t".'<label>&nbsp;%s<input id="%s_%s" name="%sX%sX" value="%s"%s type="radio"></label>'."\n",
+			$l, $id, $val, $id, $val, $val, $tv
 		);
 	}
 	?>
