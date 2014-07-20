@@ -1763,14 +1763,17 @@ class SWF_put_evh {
 
 		$dw = $w + 3;
 
-		// use no class, but do use deprecated align
-		$dv = 'align="center" style="width: '
+		// EH: 2.2
+		// use class widget, do not use deprecated align
+		$dv = 'class="widget align' 
+			. $pr->getvalue('align'). '" style="width: '
 			. $dw . 'px; max-width: 100%"';
 		$c = '';
 		// Note '!=' -- not '!=='
 		if ( $content != null ) {
 			$c = do_shortcode($content);
-			$c = '</p><p><span align="center">' . $c . '</span></p><p>';
+			$c = '</p><p><span class="caption">'
+				. $c . '</span></p><p>';
 		}
 
 		$ids = $this->get_div_ids($code);
@@ -1823,7 +1826,8 @@ class SWF_put_evh {
 		$dw = $w + 0;
 
 		// use class that WP uses for e.g. images
-		$dv = ' class="wp-caption aligncenter"';
+		$dv = ' class="wp-caption align'
+			. $pr->getvalue('align') . '"';
 		$dv .= ' style="width: '.$dw.'px; max-width: 100%"';
 		$c = '';
 		// Note '!=' -- not '!=='
@@ -1879,7 +1883,8 @@ class SWF_put_evh {
 					$em  = $this->get_player_elements($swf, $pr, $ids);
 
 					$dv = 'style="width: '.($w+0).'px; max-width: 100%"'
-						. ' class="wp-caption aligncenter"';
+						. ' class="wp-caption align'
+						. $pr->setvalue('align') . '"';
 					$code = 'swfput_div';
 					$s = $this->get_div($ids, $dv, '', $em) . $sep;
 					$out .= $s . $line . $sep;
@@ -3363,7 +3368,9 @@ class SWF_put_widget_evh extends WP_Widget {
 
 		$dw = $w + 3;
 		// overdue: 2.1 removed deprecated align
-		$dv = 'class="widget" style="width: '
+		// added 2.2: $pr->getvalue('align')
+		$dv = 'class="widget align' . $pr->getvalue('align')
+			.'" style="width: '
 			. $dw . 'px; max-width: 100%"';
 
 		extract($args);
@@ -3383,7 +3390,8 @@ class SWF_put_widget_evh extends WP_Widget {
 
 		if ( $cap ) {
 			// overdue: 2.1 removed deprecated align
-			$cap = '<p><span>' . $cap . '</span></p>';
+			$cap = '<p><span class="caption">'
+				. $cap . '</span></p>';
 		}
 
 		$ids  = $this->plinst->get_div_ids('widget-div');

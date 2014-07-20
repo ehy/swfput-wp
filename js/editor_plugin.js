@@ -119,7 +119,8 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 		playpath: "",
 		altvideo: "",
 		classid: "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000",
-		codebase: "http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,115,0"
+		codebase: "http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,115,0",
+		align: "center"		
 	};
 
 	ed.on('init', function() {
@@ -380,6 +381,7 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 				case 'playpath':
 				case 'classid':
 				case 'codebase':
+				case 'align':
 					continue;
 				case 'displayaspect':
 					// for new h5 video player vs. old WP plugin
@@ -428,7 +430,7 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 		// for clarity, use separate vars for classes, accepting
 		// slightly more inefficiency in the concatenation chain
 		// [yearning for sprintf()]
-		var cls = ' aligncenter';
+		var cls = ' align' + dat.align;
 		var cldl = 'wp-caption evh-pseudo-dl ' + cls;
 		var cldt = 'wp-caption-dt evh-pseudo-dt';
 		var cldd = 'wp-caption-dd evh-pseudo-dd';

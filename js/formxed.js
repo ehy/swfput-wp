@@ -108,7 +108,8 @@ SWFPut_putswf_video_xed.prototype = {
 		playpath: "",
 		altvideo: "",
 		classid: "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000",
-		codebase: "http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,115,0"
+		codebase: "http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,115,0",
+		align: "center"
 	},
 	ltrim : function(s, ch) {
 		var c = (ch === undefined) ? " " : ch;
@@ -217,6 +218,19 @@ SWFPut_putswf_video_xed.prototype = {
 					this['map'][k] = m[1] + ':' + m[2];
 				} else {
 					this['map'][k] = v;
+				}
+				break;
+			// strings with a set of valid values that can be checked
+			case 'align':
+				switch ( t ) {
+					case 'left':
+					case 'right':
+					case 'center':
+					case 'none':
+						break;
+					default:
+						this['map'][k] = v;
+						break;
 				}
 				break;
 			// varied complex strings; not sanitized here
