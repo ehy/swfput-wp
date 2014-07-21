@@ -716,9 +716,9 @@ SWFPut_putswf_video_xed.prototype = {
 			var v;
 			var k = this.name.substring(len, this.name.length - 1);
 			if ( (v = $this[mapname][k]) != undefined ) {
-				if ( this.type == "checkbox" ) {
+				if ( this.type == "checkbox" || this.type == "radio" ) {
 					this.checked = v == 'true' ? 'checked' : '';
-				} else if ( this.type == "text" || this.type == "radio" ) {
+				} else if ( this.type == "text" ) {
 					if ( true || v != '' ) {
 						this.value = v;
 					}
