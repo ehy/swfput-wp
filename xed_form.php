@@ -395,6 +395,7 @@ $dvii = $id . '_idiv';
 		echo self::wt(__('Behavior', 'swfput_l10n')); ?></span></h3>
 	<div class="<?php echo $dvii; ?>" id="<?php echo $dvin; ?>">
 	
+	<p>
 	<?php // EH: 20.07.2014 -- added align options
 	$val = 'align';
 	$cur = isset($$val) ? $$val : $pr->getdefault('align');
@@ -405,11 +406,11 @@ $dvii = $id . '_idiv';
 		'right' => __('right', 'swfput_l10n'),
 		'none' => __('none', 'swfput_l10n')
 	);
-	printf($lbfmt, $id, $val, $l);
+	printf($lbfmt."\n", $id, $val, $l);
 	foreach ( $aval as $k => $v ) {
 		$l = self::wt($v);
 		$tv = ($k === $cur) ? ' checked="checked"' : '';
-		printf("\t".'<label>&nbsp; %s <input id="%s_%s" name="%sX%sX" value="%s"%s type="radio"></label>'."\n",
+		printf("\t".'<label>&nbsp; %s <input id="%s_%s" name="%sX%sX" value="%s"%s type="radio" /></label>'."\n",
 			$l, $id, $val, $id, $val, $k, $tv
 		);
 	}

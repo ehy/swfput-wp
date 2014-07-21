@@ -438,6 +438,33 @@ As above, `0' disables this field.
 .NH 3
 Behavior
 .IP \(bu
+\fBAlignment\fP:
+This is an exclusive selection with options
+`left,' `center,' `right,' and `none.'
+The default is \fIcenter\fP.
+This option will set
+the alignment of the video display within
+the page or post by adding a CSS class
+called one of
+`.alignleft,' `.aligncenter,'
+`.alignright,' or `.alignnone.'
+A \fIWordPress\fP theme should provide
+CSS definitions for the first three of
+those classes. The fourth, .\fIalignnone\fP,
+is meant to use the alignment that the
+video markup inherits, whatever it might be.
+(If there is a CSS definition
+for .\fIalignnone\fP hopefully it will
+have a sensible effect.)
+Because this option works with classes,
+which depend on CSS definitions, it is
+ultimately the user's \fIWordPress\fP
+theme that provide the effect of this option.
+For example, if a theme provides a left or right
+margin for the `.widget' class, then this plugin's
+video widget might not align according to this
+option.
+.IP \(bu
 \fBInitial volume\fP:
 The video player has a volume control
 that visitors can adjust, but this

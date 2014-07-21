@@ -680,7 +680,7 @@ SWFPut_putswf_video_xed.prototype = {
 				} else {
 					$this['map'][k] = v == $this['defs'][k] ? '' : v;
 				}
-			} else if ( this.type == "text" || this.type == "radio" ) {
+			} else if ( this.type == "text" ) {
 				v = this.value;
 				if ( $this['defs'][k] != undefined ) {
 					if ( $this['defs'][k] == v ) {
@@ -695,6 +695,11 @@ SWFPut_putswf_video_xed.prototype = {
 					v = '';
 				}
 				$this['map'][k] = v;
+			} else if ( this.type == "radio" ) {
+				if ( this.checked !== undefined && this.checked ) {
+					v = this.value;
+					$this['map'][k] = v;
+				}
 			}
 		});
 		this.sanitize();
@@ -716,7 +721,7 @@ SWFPut_putswf_video_xed.prototype = {
 			var v;
 			var k = this.name.substring(len, this.name.length - 1);
 			if ( (v = $this[mapname][k]) != undefined ) {
-				if ( this.type == "checkbox" || this.type == "radio" ) {
+				if ( this.type == "checkbox" ) {
 					this.checked = v == 'true' ? 'checked' : '';
 				} else if ( this.type == "text" ) {
 					if ( true || v != '' ) {
@@ -728,6 +733,10 @@ SWFPut_putswf_video_xed.prototype = {
 						v = '';
 						this.value = v;
 					}
+				} else if ( this.type == "radio" && this.value == v ) {
+					this.checked = 'checked';
+				} else if ( this.type == "radio" ) {
+					this.checked = '';
 				}
 			}
 		});

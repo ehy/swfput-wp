@@ -417,7 +417,7 @@ $jafmt .= 'return false;';
 	foreach ( $aval as $k => $v ) {
 		$tl = $wt($v);
 		$tv = ($k === $val) ? ' checked="checked"' : '';
-		printf("\t".'<label><input id="%s" name="%s" value="%s"%s type="radio">&nbsp;%s</label><br />'."\n",
+		printf("\t".'<label><input id="%s" name="%s" value="%s"%s type="radio" />&nbsp;%s</label><br />'."\n",
 			$id, $nm, $k, $tv, $tl
 		);
 	}

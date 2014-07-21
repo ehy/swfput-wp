@@ -200,6 +200,9 @@ Update: now it does. In the words of Emily Litella, "Never mind."
 == Changelog ==
 
 = 2.2 =
+* Added long overdue alignment option.
+* Some code cleanups and reorganization.
+* Check with WordPress 4.0: OK.
 
 = 2.1.1 =
 * This release is called "Sigh" and its only change is a
@@ -391,6 +394,8 @@ Update: now it does. In the words of Emily Litella, "Never mind."
 == Upgrade Notice ==
 
 = 2.2 =
+* Confirmed working with WP 4.0.
+* Added alignment option.
 
 = 2.1.1 =
 * Chromium 3,4 broken iframe handling will not run scripts
