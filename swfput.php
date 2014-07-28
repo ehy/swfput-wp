@@ -1906,19 +1906,27 @@ class SWF_put_evh {
 	// $divids are returned from get_div_ids($base),
 	// $divatts are appended to <div> after id,
 	// $cap is caption within <div> below video, and
-	// $vidtags are the array returned by get_player_elements()
+	// $vidtags are the array returned by get_player_elements(),
+	// with key 'el'; caller may also add 'enter' and 'leave'
+	// to place markup after the opening and before the closing
+	// of the div
 	public function get_div($divids, $divatts, $cap, $vidtags) {
 		$opfx = self::evhv5vjsnpfx;
 
 		$dv = sprintf('id="%s" %s', $divids[0], $divatts);
 
 		return sprintf('
-			<div %s>%s%s
-			</div><!-- %s -->
+			<div %s>
+			%s%s%s
+			%s</div><!-- %s -->
 			<script type="text/javascript">
 				new %s_sizer("%s", "%s", "%s", "%s", false);
 			</script>',
-			$dv, $vidtags['el'], $cap, $divids[0],
+			$dv,
+			isset($vidtags['enter']) ? $vidtags['enter'] : '',
+			$vidtags['el'], $cap,
+			isset($vidtags['leave']) ? $vidtags['leave'] : '',
+			$divids[0],
 			$opfx, $divids[0], $divids[1], $divids[2], $divids[3]);
 	}
 
@@ -3283,7 +3291,7 @@ class SWF_put_widget_evh extends WP_Widget {
 	const swfput_plugin = 'SWF_put_evh';
 	// params helper class name
 	const swfput_params = 'SWF_params_evh';
-	// an instance of the main plugun class
+	// an instance of the main plugin class
 	protected $plinst;
 	
 	// default width should not be wider than sidebar, but
@@ -3360,13 +3368,13 @@ class SWF_put_widget_evh extends WP_Widget {
 
 		$cap = $this->plinst->wt($pr->getvalue('caption'));
 		$uswf = $this->plinst->get_swf_url();
-
-		$dw = $w + 3;
-		// overdue: 2.1 removed deprecated align
 		// added 2.2: $pr->getvalue('align')
-		$dv = 'class="widget align' . $pr->getvalue('align')
-			.'" style="width: '
-			. $dw . 'px; max-width: 100%"';
+		$aln = 'align' . $pr->getvalue('align');
+
+		// overdue: 2.1 removed deprecated align
+		$dv = sprintf(
+			'class="widget %s" style="width: %upx; max-width: 100%%"',
+			$aln, $w);
 
 		extract($args);
 
@@ -3379,20 +3387,25 @@ class SWF_put_widget_evh extends WP_Widget {
 
 		echo $before_widget;
 
+		// 2.2: title is now assigned to $elem['enter'] (below) which
+		// places it just after opening of enclosing div in get_div()
+		// so, no more "echo $before_title . $title . $after_title;"
+		// but, before and after are still needed
 		if ( $title ) {
-			echo $before_title . $title . $after_title;
+			$title = $before_title . $title . $after_title;
 		}
 
 		if ( $cap ) {
-			// overdue: 2.1 removed deprecated align
-			$cap = '<p><span class="caption">'
-				. $cap . '</span></p>';
+			$cap = '<p><span class="caption">' . $cap . '</span></p>';
 		}
 
+		// setup and print inner video div
 		$ids  = $this->plinst->get_div_ids('widget-div');
-		$em   = $this->plinst->get_player_elements($uswf, $pr, $ids);
-
-		printf('%s', $this->plinst->get_div($ids, $dv, $cap, $em));
+		$elem = $this->plinst->get_player_elements($uswf, $pr, $ids);
+		if ( $title ) {
+			$elem['enter'] = $title;
+		}
+		printf('%s', $this->plinst->get_div($ids, $dv, $cap, $elem));
 
 		echo $after_widget;
 	}
