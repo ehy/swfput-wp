@@ -3396,7 +3396,8 @@ class SWF_put_widget_evh extends WP_Widget {
 		}
 
 		if ( $cap ) {
-			$cap = '<p><span class="caption">' . $cap . '</span></p>';
+			$cap = '<p class="caption"><span class="caption-span">'
+				. $cap . '</span></p>';
 		}
 
 		// setup and print inner video div
