@@ -2573,7 +2573,6 @@ class SWF_put_evh {
 			$fesc = 'urlencode';
 		}
 
-		
 		//$ut = $this->check_expand_video_url($url, $defaulturl);
 		$flurl = $ut = $this->check_expand_video_url($url, '');
 		if ( $ut === false ) {
@@ -2651,6 +2650,7 @@ class SWF_put_evh {
 				}
 			}
 		}
+
 		$iimgunesc = ''; // $iimage not escaped: see below
 		if ( $iimage !== '' ) {
 			$achk['rxpath'] = '/.*\.(swf|png|jpg|jpeg|gif)$/i';
@@ -2664,6 +2664,24 @@ class SWF_put_evh {
 			}
 			$iimage = ($esc == true) ? $fesc($ut) : $ut;
 		}
+
+		// prepare the preload attr: one special value 'image'
+		if ( ! isset($preload) ) {
+			$preload = '';
+		}
+		switch ( $preload ) {
+			case 'none':
+			case 'metadata':
+			case 'auto':
+				break;
+			case 'image':
+				$preload = ($iimgunesc == '') ? 'metadata' : 'none';
+				break;
+			default:
+				$preload = $par->getdefault('preload');
+				break;
+		}
+		
 		$playpath = ($esc == true) ? $fesc($playpath) : $playpath;
 		
 		// query vars
@@ -2739,7 +2757,8 @@ class SWF_put_evh {
 			// vars for alternate h5 video
 			$aspect = $displayaspect;
 			$barwidth = $w;
-			$vstd = compact("play", "loop", "volume",
+			$vstd = compact(
+				"play", "loop", "volume", "preload",
 				"hidebar", "disablebar",
 				"aspectautoadj", "aspect",
 				"displayaspect", "pixelaspect",
@@ -2754,7 +2773,7 @@ class SWF_put_evh {
 				'id'        => $idav,
 				'poster'    => self::ht($iimgunesc),
 				'controls'  => 'true',
-				'preload'   => 'none',
+				'preload'   => $preload,
 				'autoplay'  => $play, // CHECK for h5v player
 				'loop'      => $loop,
 				'srcs'      => array(),
@@ -2775,7 +2794,8 @@ class SWF_put_evh {
 			// div added in 1.0.8 for new h5 video program
 			// TODO: move css classname to class-constant
 			$vd = "\n\t\t\t".'<div'.$vdid.' class="evhh5v_vidobjdiv">';
-			$vd .= "\n\t\t\t".'<video'.$viid.' controls preload="none"';
+			$vd .= "\n\t\t\t".'<video'.$viid.' controls';
+			$vd .= ' preload="' . $preload . '"';
 			// cannot use autoplay attr.: video will be played, even
 			// when <video> is placed as fallback content and flash is
 			// loaded in the primary <object>! In fact, fallback content
@@ -3081,7 +3101,8 @@ class SWF_params_evh {
 		'codebase' => 'http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,115,0',
 		// align, for alignment class in markup:
 		// left, center, right, none
-		'align' => 'center'
+		'align' => 'center',
+		'preload' => 'image'
 	);
 
 	protected $inst = null; // modifiable copy per instance
@@ -3252,6 +3273,18 @@ class SWF_params_evh {
 					case 'right':
 					case 'center':
 					case 'none':
+						break;
+					default:
+						$i[$k] = $v;
+						break;
+				}
+				break;
+			case 'preload':
+				switch ( $t ) {
+					case 'none':
+					case 'metadata':
+					case 'auto':
+					case 'image':
 						break;
 					default:
 						$i[$k] = $v;

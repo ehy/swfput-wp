@@ -51,14 +51,24 @@
 // of the html5 video player; arg is a map[*] of map,
 // ready for literal use. [* map as in assoc. array]
 function evhh5v_controlbar_elements(parms, fixups) {
-	var ip = parms["iparm"];
-	var num = ip["uniq"];
-	var ivid = ip["vidid"];
-
 	// <video> we're associated with must be OK, or it's all pointless
 	var vidobj = evhh5v_controlbar_elements_check(parms, false);
 	if ( ! vidobj ) {
 		return;
+	}
+
+	var ip = parms["iparm"];
+	var num = ip["uniq"];
+	var ivid = ip["vidid"];
+	// additional parameters
+	var op = parms["oparm"];
+
+	// left on its own a preload attribute (other than none)
+	// will not behave as expected due to timing and event sequence
+	// reordering caused by our diddling -- set it to none and
+	// let it be handled elswhere
+	if ( op["std"]["preload"] !== "none" ) {
+		vidobj.setAttribute("preload", "none");
 	}
 
 	// <video> is given a controls attribute for browsers
@@ -79,7 +89,7 @@ function evhh5v_controlbar_elements(parms, fixups) {
 		"parent" : ip["barobjid"] ? ip["barobjid"] : "evhh5v_ctlbar_obj_" + num,
 		"role" : ip["role"] ? ip["role"] : "bar"
 	};
-	var op = parms["oparm"];
+
 	if ( ! op["uniq"] ) {
 		op["uniq"] = {};
 	}
@@ -2794,6 +2804,8 @@ evhh5v_controller.prototype = {
 			// loadedmetadata event handler
 			this._vid.setAttribute("preload", "metadata");
 		} else {
+			this._vid.setAttribute("preload", this.params["preload"]);
+
 			// initial play button: this continues with a recursive
 			// timer, which will adjust for size changes albeit with
 			// a lag, until play() has been done once (and is then
@@ -2824,6 +2836,17 @@ evhh5v_controller.prototype = {
 
 		if ( this.autoplay ) {
 			this.play();
+		}
+
+		// on metadata receipt, if not playing, H5 video might show
+		// a video frame like a poster, if there is no poster attr.
+		// If a canvas is used here, any such frame must be drawn
+		// explicitely. Doing so is consistent with H5 video intent.
+		if ( this.is_canvas && ! this.playing && ! this._cnv_poster ) {
+			if ( this._vid.getAttribute("preload") !== "none" ) {
+				this.canvas_clear();
+				this.put_canvas_frame_single_timeout(50);
+			}
 		}
 	},
 
@@ -3112,6 +3135,12 @@ evhh5v_controller.prototype = {
 		if ( this.is_canvas && (ctx = this.get_canvas_context()) ) {
 			ctx.drawImage(this._vid, this._x, this._y, this._width, this._height);
 		}
+	},
+	put_canvas_frame_single_timeout : function(timeout) {
+		var that = this;
+		this.canvas_frame_single_timer = setTimeout(function () {
+			that.put_canvas_frame_single();
+		}, timeout == undefined ? 50 : timeout);
 	},
 	setpad : function(pad) {
 		this.pad = pad;
@@ -3824,7 +3853,8 @@ evhh5v_controller.prototype = {
 		this._vid.currentTime = t;
 		this.bar.progress_pl(t / d);
 		if ( ! this.playing ) {
-			this.put_canvas_frame_single();
+			this.put_canvas_frame_single_timeout();
+			//this.put_canvas_frame_single();
 		}
 	},
 

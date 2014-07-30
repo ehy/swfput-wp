@@ -417,6 +417,30 @@ $jafmt .= 'return false;';
 	foreach ( $aval as $k => $v ) {
 		$tl = $wt($v);
 		$tv = ($k === $val) ? ' checked="checked"' : '';
+		printf("\t".'&nbsp;&nbsp;<label>%s&nbsp;<input id="%s" name="%s" value="%s"%s type="radio" /></label>'."\n",
+			$tl, $id, $nm, $k, $tv
+		);
+	}
+	?>
+	</p>
+
+	<?php // EH: 20.07.2014 -- added preload options
+	$val = $instance['preload'];
+	$id = $this->get_field_id('preload');
+	$nm = $this->get_field_name('preload');
+	$tl = $wt(__('Video preload: ', 'swfput_l10n'));
+	$aval = array(
+		'none' => __('none', 'swfput_l10n'),
+		'metadata' => __('metadata', 'swfput_l10n'),
+		'auto' => __('auto', 'swfput_l10n'),
+		'image' => __('per initial image: "none" or "preload"', 'swfput_l10n')
+	);
+	?>
+	<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label><br />
+	<?php
+	foreach ( $aval as $k => $v ) {
+		$tl = $wt($v);
+		$tv = ($k === $val) ? ' checked="checked"' : '';
 		printf("\t".'<label><input id="%s" name="%s" value="%s"%s type="radio" />&nbsp;%s</label><br />'."\n",
 			$id, $nm, $k, $tv, $tl
 		);

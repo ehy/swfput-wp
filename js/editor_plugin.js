@@ -120,7 +120,8 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 		altvideo: "",
 		classid: "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000",
 		codebase: "http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,115,0",
-		align: "center"		
+		align: "center",	
+		preload: "image"
 	};
 
 	ed.on('init', function() {
@@ -381,7 +382,6 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 				case 'playpath':
 				case 'classid':
 				case 'codebase':
-				case 'align':
 					continue;
 				case 'displayaspect':
 					// for new h5 video player vs. old WP plugin

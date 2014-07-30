@@ -109,7 +109,8 @@ SWFPut_putswf_video_xed.prototype = {
 		altvideo: "",
 		classid: "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000",
 		codebase: "http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,115,0",
-		align: "center"
+		align: "center",
+		preload: "image"
 	},
 	ltrim : function(s, ch) {
 		var c = (ch === undefined) ? " " : ch;
@@ -227,6 +228,18 @@ SWFPut_putswf_video_xed.prototype = {
 					case 'right':
 					case 'center':
 					case 'none':
+						break;
+					default:
+						this['map'][k] = v;
+						break;
+				}
+				break;
+			case 'preload':
+				switch ( t ) {
+					case 'none':
+					case 'metadata':
+					case 'auto':
+					case 'image':
 						break;
 					default:
 						this['map'][k] = v;
