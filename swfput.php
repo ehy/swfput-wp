@@ -2691,8 +2691,8 @@ class SWF_put_evh {
 			$play, $hidebar, $volume, $loop, $disablebar);
 		$qv .= sprintf('&amp;AU=%s&amp;AA=%s&amp;DA=%s&amp;PA=%s',
 			$audio, $aspectautoadj, $displayaspect, $pixelaspect);
-		$qv .= sprintf('&amp;BH=%s',
-			$barheight);
+		$qv .= sprintf('&amp;BH=%s&amp;PLD=%s',
+			$barheight, $preload);
 
 		// if using the precompiled player the query vars should be
 		// written to 'flashvars' so that the player can access them;

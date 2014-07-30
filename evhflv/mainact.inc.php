@@ -1894,6 +1894,12 @@ function stop_reset() {
 	}
 	// progress set consistent w/ new H5V player
 	bbar.progpl._width = 1;
+
+	// set initital fram display if preload was given (and not "none")
+	if ( loadpre ) {
+		loadonload = dopause = initpause = true;
+		startVideo();
+	}
 }
 
 function stopVideo() {
@@ -2305,6 +2311,14 @@ if ( (iimage == null || iimage == "") && _level0.II != undefined ) {
 	adddbgtext(" II: '" + _level0.II + "'\n");
 }
 
+// 30.07.2014 'preload' in params?
+if ( (iimage == null || iimage == "") && _level0.PLD != undefined ) {
+	if ( _level0.PLD != "none" ) {
+		loadpre = true;
+	}
+	adddbgtext(" PLD preload: '" + _level0.PLD + "'\n");
+}
+
 // Misc. Gnash hacks
 if ( flvers.indexOf("10,1,999,0") >= 0 ) {
 	adddbgtext("Gnash bug hacks . . .\n");
@@ -2511,6 +2525,11 @@ if ( initpause && iimage ) {
 	iniimg.initialimg.imld = new MovieClipLoader();
 	iniimg.initialimg.imld.addListener(t);
 	iniimg.initialimg.imld.loadClip(iimage, iniimg.initialimg);
+}
+
+// set initital fram display if preload was given (and not "none")
+if ( loadpre ) {
+	loadonload = dopause = initpause = true;
 }
 
 // setup timer function
