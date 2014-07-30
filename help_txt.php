@@ -171,6 +171,49 @@ function swfput_get_helptext($htmllink, $pdflink)
 	The default value for this field, 0,
 	disables this feature, and it has no effect if
 	a mobile browser is not detected.
+	</p><p>
+	<h3>Video preload</h3>
+	This "radio" type option is in the Behavior section
+	of the form. HTML5 video allows a "preload" attribute
+	with a value of "none" or "metadata" or "auto." This
+	option provides those items and one special selection:
+	"per initial image." This special selection will use
+	"none" if an "initial image file" is set (in the Media
+	section of the form), or "metadata" if an initial
+	image (poster) is not set.
+	</p><p>
+	The "metadata" selection tells the browser that it
+	may fetch a small part of the video file that
+	includes information such as dimensions, duration,
+	codec types, and so on.
+	The "metadata" selection can be useful because with
+	it a browser might also receive some of the video
+	frames, and so it may display one as a \'poster\'
+	if the poster attribute is not set. (Whether a
+	frame displayed this way is suitable is not certain.)
+	If "none" is selected the browser will not fetch
+	any of the video until it is played, and so without
+	an initial image, the video region on the page will
+	be solid black until played.
+	</p><p>
+	The "auto" selection should be avoided unless you
+	know what it does and that you need it. This is
+	because with "auto" the browser may choose to
+	fetch the entire video even before the visitor
+	actively plays the video. Video files can be
+	quite large, and a large unsolicited download
+	might be unkind to your site\'s visitors; it
+	might even cause a visitor additional charges
+	depending on their connection service. Also
+	consider your server and network load.
+	</p><p>
+	The flash player does not have similar attributes,
+	but will behave similarly with regard to an
+	initial image: if one was not set, and the
+	preload option is not "none," then the player
+	will start playback and let it advance for a
+	small random period, and then pause playback,
+	leaving a visible frame to act as a \'poster.\'
 	</p>', 'swfput_l10n');
 
 	return sprintf($fmt, $htmllink, $pdflink);
