@@ -207,6 +207,13 @@ Update: now it does. In the words of Emily Litella, "Never mind."
 	named (in english) "per initial image", which will use "none"
 	if if an initial image (poster) is set, or else "metadata" so
 	that the browser may display a frame of video as a poster.
+	NOTE: the new default is "per initial image" which will
+	change the behavior of existing videos that do not have
+	an initial image (or 'poster'): they will now have the
+	preload="metadata" attribute, so the browser will make a
+	small unsolicited fetch from the video, and might display
+	a frame. If that is unwanted, the preload option should
+	be set to "none."
 * Some code cleanups and reorganization.
 * Check with WordPress 4.0: OK.
 
