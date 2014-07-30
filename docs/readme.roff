@@ -466,11 +466,11 @@ video widget might not align according to this
 option.
 .IP \(bu
 \fBVideo preload\fP:
-This exclusive selection is in the \fBBehavior\fP section
-of the form. HTML5 video allows a \(lqpreload\(rq attribute
+This is an exclusive selection.
+HTML5 video allows a \(lqpreload\(rq attribute
 with a value of \(lqnone\(rq
-or \(lqmetadata\(rq or \(lqauto.\(rq This
-option provides those items and one special selection:
+or \(lqmetadata\(rq or \(lqauto.\(rq This option
+provides those three values and one special selection:
 \(lqper initial image.\(rq This special selection will use
 \(lqnone\(rq if an \(lqinitial image file\(rq
 is set (in the \fBMedia\fP
@@ -488,9 +488,10 @@ retrieve too much data.
 .FE
 This can be useful because
 a browser might also receive some of the video
-frames, and so it may display one as a `poster.'
+frames, and so it may display one frame as a `poster.'
 (Whether a
 frame displayed this way is suitable is not certain.)
+.IP
 If \(lqnone\(rq is selected the browser will not fetch
 any of the video until it is played, and so without
 an initial image, the video region on the page will

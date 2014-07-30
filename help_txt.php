@@ -191,6 +191,7 @@ function swfput_get_helptext($htmllink, $pdflink)
 	frames, and so it may display one as a \'poster\'
 	if the poster attribute is not set. (Whether a
 	frame displayed this way is suitable is not certain.)
+	</p><p>
 	If "none" is selected the browser will not fetch
 	any of the video until it is played, and so without
 	an initial image, the video region on the page will
