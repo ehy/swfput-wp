@@ -201,6 +201,12 @@ Update: now it does. In the words of Emily Litella, "Never mind."
 
 = 2.2 =
 * Added long overdue alignment option.
+* Added video preload option. Before now, the video element was always
+	given preload="none". Now, the specification values "none",
+	"metadata", and "auto" may be selected, or one special option
+	named (in english) "per initial image", which will use "none"
+	if if an initial image (poster) is set, or else "metadata" so
+	that the browser may display a frame of video as a poster.
 * Some code cleanups and reorganization.
 * Check with WordPress 4.0: OK.
 
@@ -396,6 +402,7 @@ Update: now it does. In the words of Emily Litella, "Never mind."
 = 2.2 =
 * Confirmed working with WP 4.0.
 * Added alignment option.
+* Added video preload option.
 
 = 2.1.1 =
 * Chromium 3,4 broken iframe handling will not run scripts
