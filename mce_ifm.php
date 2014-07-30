@@ -282,7 +282,7 @@ $jatt['a_vid'] = array(
 	'id'        => getwithdef('id', 'vh5_n_' . $vnum++),
 	'poster'    => getwithdef('iimage', ''),
 	'controls'  => 'true',
-	'preload'   => 'none',
+	'preload'   => getwithdef('preload', 'image'),
 	'autoplay'  => getwithdef('play', 'false'),
 	'loop'      => getwithdef('loop', 'false'),
 	'srcs'      => array(),
@@ -291,7 +291,19 @@ $jatt['a_vid'] = array(
 	'aspect'	=> getwithdef('aspect', '0')
 );
 
-$vstdk = array('play', 'loop', 'volume',
+switch ( $jatt['a_vid']['preload'] ) {
+	case 'none':
+	case 'metadata':
+	case 'auto':
+		break;
+	case 'image':
+	default:
+		$preload = $jatt['a_vid']['poster'] == '' ? 'metadata' : 'none';
+		break;
+}
+
+$vstdk = array(
+	'play', 'loop', 'volume', 'preload',
 	'hidebar', 'disablebar',
 	'aspectautoadj', 'aspect',
 	'displayaspect', 'pixelaspect',

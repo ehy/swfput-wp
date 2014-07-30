@@ -2667,7 +2667,7 @@ class SWF_put_evh {
 
 		// prepare the preload attr: one special value 'image'
 		if ( ! isset($preload) ) {
-			$preload = '';
+			$preload = $par->getdefault('preload');
 		}
 		switch ( $preload ) {
 			case 'none':
@@ -2675,10 +2675,8 @@ class SWF_put_evh {
 			case 'auto':
 				break;
 			case 'image':
-				$preload = ($iimgunesc == '') ? 'metadata' : 'none';
-				break;
 			default:
-				$preload = $par->getdefault('preload');
+				$preload = ($iimgunesc == '') ? 'metadata' : 'none';
 				break;
 		}
 		
