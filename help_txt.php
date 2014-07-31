@@ -173,23 +173,23 @@ function swfput_get_helptext($htmllink, $pdflink)
 	a mobile browser is not detected.
 	</p><p>
 	<h3>Video preload</h3>
-	This "radio" type option is in the Behavior section
+	This "radio" type option is in the <b>Behavior</b> section
 	of the form. HTML5 video allows a "preload" attribute
 	with a value of "none" or "metadata" or "auto." This
-	option provides those items and one special selection:
+	option provides those three values and one special selection:
 	"per initial image." This special selection will use
-	"none" if an "initial image file" is set (in the Media
+	"none" if an "initial image file" is set (in the <b>Media</b>
 	section of the form), or "metadata" if an initial
-	image (poster) is not set.
+	image, <i>poster</i>, is not set.
 	</p><p>
 	The "metadata" selection tells the browser that it
 	may fetch a small part of the video file that
 	includes information such as dimensions, duration,
-	codec types, and so on.
-	The "metadata" selection can be useful because with
+	codec types.
+	This can be useful because with
 	it a browser might also receive some of the video
-	frames, and so it may display one as a \'poster\'
-	if the poster attribute is not set. (Whether a
+	frames, and so it may display one frame as a \'poster.\'
+	(Whether a
 	frame displayed this way is suitable is not certain.)
 	</p><p>
 	If "none" is selected the browser will not fetch

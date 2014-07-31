@@ -359,43 +359,54 @@ supported. This option is on by default.
 Dimensions
 .IP \(bu
 \fBPixel Width \(mu Height\fP:
-set these to the desired size of the
+Set these to the desired size of the
 video player's embedded window.
 This does not need to be the same
 as the display size of the video to be played,
 but the appearance will be best if the \fIaspect\fP
 of the player's display is the same as the
 display aspect of the video. For example,
-if set for a video with a size of 400\(mu300,
-then setting these to fields to 320\(mu240
-would look good (the width:height ratio is the
-same). In any case, the player will scale the
+with a video of a size of 400\(mu300
+setting these to fields to 320\(mu240
+would look good, as the width:height ratios are the
+same.
+.IP
+The player will scale the
 video to fit within its display, but it maintains
 the aspect ratio, so horizontal or vertical
 black (unused) areas will be visible if the
 aspect ratios do not match.
+.IP
 These dimensions are not fixed unless scripts
-are disabled. Where scripting is available,
+are disabled in the browser.
+Where scripting is available,
 the video display area is resized in concert
 with changes that the browser applies to the
 surrounding elements. This is particularly
 important on mobile platforms, where the browser
 will probably make extreme size adjustments
-for the small display size (This behavior might
-depend on the current theme). 
+for the small display size.
+This \(lqresponsive\(rq behavior will
+depend on the current theme being responsive. 
 .IP \(bu
 \fBMobile width\fP:
 This is to provide a width to use only
 if a mobile browser is detected; the height is automatically
 proportional, according to the regular
 \(lq\fBPixel Width \(mu Height\fP\(rq
-dimensions described above. This might
-be used for widgets placed on the sidebar, because the
+dimensions described above.
+.IP
+This might be most useful for
+widgets placed on a `sidebar,' because a
 sidebar might be placed below, rather than beside, the main
-content. In this case more space might be available, and
-larger display might be suitable. This feature is disabled
-with a value of '0,' which is the default, and has no effect
-if the browser is not identified as being on a mobile platform.
+content. In this case more effective
+display width might be available, and
+a wider display might be suitable.
+This feature is disabled
+with a value of '0,' which is the default,
+and has no effect
+if the browser provides a user agent string
+not known as a mobile platform.
 .IP \(bu
 \fBAuto aspect\fP:
 This enables a feature meant to be helpful
@@ -456,6 +467,7 @@ video markup inherits, whatever it might be.
 (If there is a CSS definition
 for .\fIalignnone\fP hopefully it will
 have a sensible effect.)
+.IP
 Because this option works with classes,
 which depend on CSS definitions, it is
 ultimately the user's \fIWordPress\fP
@@ -518,7 +530,7 @@ leaving a visible frame to act as a `poster.'
 .IP \(bu
 \fBInitial volume\fP:
 The video player has a volume control
-that visitors can adjust, but this
+that visitors can adjust. This
 field will set a default volume. If
 the web browser flash plugin is permitted
 to save values locally on a visitor's
@@ -533,15 +545,21 @@ This will cause the video
 to begin playing as soon as the
 player program is loaded. When this
 is not set, the player waits for the
-play button. (Above, it was stated
-that if scripting is not available,
-HTML5 video would have the default
+play button.
+.IP
+Above, it was stated
+that if scripting is not available
+in the web browser,
+HTML5 video will have the default
 appearance and behavior provided by
-the web browser. This play on load
+the web browser. The play on load
 option will not be in effect in that
 case, because while the video element
 can take an autoplay attribute, that
-cannot work the scripted HTML5 player.)
+cannot reliably work with the scripted
+HTML5 player since it might begin before
+the script gains control of the
+video element.
 .IP \(bu
 \fBLoop play\fP:
 This will cause the medium to play again
@@ -560,6 +578,7 @@ whenever mouse movement is detected
 within the embedded window, and hide
 again when there has been no mouse
 movement for a few seconds.
+.IP
 When this is not set, the control
 bar is left showing when the player
 loads, and thereafter is always
