@@ -180,7 +180,7 @@ function swfput_get_helptext($htmllink, $pdflink)
 	"per initial image." This special selection will use
 	"none" if an "initial image file" is set (in the <b>Media</b>
 	section of the form), or "metadata" if an initial
-	image, <i>poster</i>, is not set.
+	image, or <i>poster</i>, is not set.
 	</p><p>
 	The "metadata" selection tells the browser that it
 	may fetch a small part of the video file that
