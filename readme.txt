@@ -153,8 +153,8 @@ flash video player in more detail.
 
 = How do give feedback to the developer? =
 Post a comment at
-http://agalena.nfshost.com/b1/swfput-flash-video-player-plugin-for-wordpress-sites
-or email edhynan at gmail, or of course go the the SWFPut
+http://agalena.nfshost.com/b1/swfput-html5-flash-wordpress-plugin
+or email edhynan at gmail dot com, or of course go the the SWFPut
 WordPress page at https://wordpress.org/support/plugin/swfput
 and select the "Support" tab.
 

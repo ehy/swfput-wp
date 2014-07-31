@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: SWFPut
-Plugin URI: http://agalena.nfshost.com/b1/swfput-flash-video-player-plugin-for-wordpress-sites
+Plugin URI: http://agalena.nfshost.com/b1/swfput-html5-flash-wordpress-plugin
 Description: Add Flash and HTML5 video to WordPress posts, pages, and widgets, from arbitrary URI's or media library ID's or files in your media upload directory tree (including uploads not in the WordPress media library).
 Version: 2.2
 Author: Ed Hynan
@@ -113,7 +113,7 @@ endif;
 if ( ! class_exists('SWF_put_evh') ) :
 class SWF_put_evh {
 	// web page as of release
-	const plugin_webpage = 'http://agalena.nfshost.com/b1/swfput-flash-video-player-plugin-for-wordpress-sites';
+	const plugin_webpage = 'http://agalena.nfshost.com/b1/swfput-html5-flash-wordpress-plugin';
 	
 	// this version
 	const plugin_version = '2.2.0';
