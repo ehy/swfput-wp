@@ -39,27 +39,85 @@ test -d trunk || fail WTF: fail test -d trunk
 
 svn up || fail fail svn up, what\'s up with that\?
 
-# OK, do it. The only diff 'tween trunk and the prepared
-# stuff is the .svn directory, but generally the package
-# has no dot dirs of regfiles, so consider any .* in
-# trunk to belong to svn. With this simplicity, a mere
-# move and rename should do the trick.
+# OK, do it.
 # Optionally backup trunk for safety.
 test Xyes = X"$TRUNK_BACKUP" && \
 	{ tar cf - trunk | gzip > ../trunk-bak.tgz || \
 	fail could not backup trunk; }
-# use a loop so each op can be checked
-for F in trunk/.* ; do
-	TF=${F#*/}; test X. = X"$TF" || test X.. = X"$TF" && continue
-	mv "$F" "$ZD" || fail failed to mv "$F" "$ZD"
-	e2 SUCCEEDED moving "$F" "$ZD"
-done
-# Now just move new stuff into place
-rm -rf trunk; test -d trunk && {
-	fail failed to remove trunk: NOTE THAT DOTFILES WERE MOVED TO "$ZD"
-}
-mv "$ZD" trunk || fail fail mv "$ZD" trunk
+
+# remove removed directories
+find trunk -type d -print | while read -r F; do
+	test Xtrunk = X"$F" && continue
+	# hyper paranoia: guard against bad order (i.e. already rm'd)
+	test -d "$F" || continue
+
+	FF=${F#*/}
+	DD=${FF%%/*}
+	test X.svn = X"$FF" || test X.svn = X"$DD" && continue
+
+	O="$ZD/$FF"
+	test -d "$O" && continue
+
+	# was removed in current, so remove
+	svn rm --force "$F" || fail fail svn rm --force "$F"
+done || fail failed unused directory removal
+
+# remove removed files
+find trunk -type f -print | while read -r F; do
+	FF=${F#*/}
+	DD=${FF%%/*}
+	test X.svn = X"$FF" || test X.svn = X"$DD" && continue
+
+	O="$ZD/$FF"
+	test -f "$O" && continue
+
+	# was removed in current, so remove
+	svn rm "$F" || fail fail svn rm "$F"
+done || fail failed unused file removal
+
+# add new directories
+find "$ZD" -type d -print | while read -r F; do
+	test X"$ZD" = X"$F" && continue
+	FF=${F#*/}
+	O=trunk/"$FF"
+
+	test -d "$O" && continue
+	test -e "$O" && \
+		fail BAD: \""$O"\" exists, but is not a directory, but it needs to be\!
+
+	# it's needed
+	svn mkdir --parents "$O" || fail fail svn mkdir --parents "$O"
+done || fail failed adding new directories
+
+# add new files
+find "$ZD" -type f -print | while read -r F; do
+	FF=${F#*/}
+	O=trunk/"$FF"
+
+	test -f "$O" && continue
+	test -e "$O" && \
+		fail BAD: \""$O"\" exists, but is not a regular file, but it needs to be\!
+
+	# it's needed
+	cp -p "$F" "$O" || fail fail cp -p "$F" "$O"
+	svn add "$O" || fail fail svn add "$O"
+done || fail failed adding new files
+
+# update modified files
+find "$ZD" -type f -print | while read -r F; do
+	FF=${F#*/}
+	O=trunk/"$FF"
+
+	test -f "$O" || \
+		fail BAD: \""$O"\" does not exist, or is not a regular file, but it needs to be\!
+	cmp "$F" "$O" && continue
+
+	# it's needed
+	cp -f -p "$F" "$O" || fail fail cp -f -p "$F" "$O"
+done || fail failed updating changed files
+
 # Looks good
+rm -rf "$ZD" || fail failed to remove "$ZD"
 svn up || fail OY\! failed final svn up\!
 e2 YIP\! all done successfully.
 ls -ld trunk
