@@ -13,9 +13,23 @@ SWFPut provides video players for posts and pages and widget areas, as both HTML
 
 == Description ==
 
-SWFPut provides video players for posts and pages, and
-in widget areas with an included video widget. SWFPut makes
-video setup easy and flexible by providing
+SWFPut provides 'responsive' video for posts and pages.
+SWFPut make the presentation of video reliable for your
+visitors: several conditions are handled well, such as
+the uneven support for HTML5 video formats in the major
+browsers, the possible lack of support for either HTML5
+video or flash video in the visitor's browser, and even
+the possiblilty that JavaScript might be disabled in your
+visitor's browser.
+
+In addition to video for posts and pages, SWFPut provides
+a video widget for use in widget areas, such as a sidebar.
+
+SWFPut video is 'responsive': it should display at a
+suitable size on your visitor's device, whether large
+or small (a responsive WordPress is necessary).
+
+SWFPut makes video setup easy and flexible by providing
 a full featured form with sensible defaults.
 For posts and pages, the form appears in a new "metabox"
 on the editor page. For widgets, the form appears with
@@ -24,7 +38,7 @@ video objects, the form will continue to be useful for
 making changes (or, if you wish, to delete the video).
 
 In WordPress versions 3.3 and greater, video added by
-SWFPut will be visible in the visual editor.
+SWFPut will be visible in the post/page visual editor.
 
 As many video objects as you wish can be placed in posts
 pages, and of course the widget supports as many instances
@@ -60,9 +74,9 @@ Here are some features of SWFPut to consider:
 	for off-site of 3rd party resources.
 
 *	SWFPut does not interfere with the appearance of
-	a site: a video is presented much like an image
+	a site: a video is presented jsut as an image
 	(such as .png or .jpg) is, with the same sort of
-	style and optional caption. The appearance of the
+	style, and optional caption. The appearance of the
 	video control interface, or control bar, is simple
 	and quiet so it should not clash with site design.
 
@@ -80,7 +94,7 @@ Here are some features of SWFPut to consider:
 *	The core features of the flash video player program
 	included with SWFPut have been verified to work with
 	the Gnash free-software browser plugin, which is good
-	because non-free binary-only software is bad. (At the
+	if you care about free/libre software users. (At the
 	time of this writing, Gnash does not handle the MP4
 	video container format, so it is preferable that you
 	prepare flash video in the FLV container, even using the
@@ -94,7 +108,7 @@ Here are some features of SWFPut to consider:
 	un-minified version is included, so you may modify it.
 	In fact, the zip archive available at the WordPress
 	repository includes all sources, although a POSIX/Unix
-	environment is required to build.
+	environment with certain tools is required to build.
 
 *	Localization sources are included; hopefully, polyglot
 	users will help with translations.
@@ -243,8 +257,9 @@ and basic features.
 = How do contact to the developer? =
 
 Post a comment at
-http://agalena.nfshost.com/b1/swfput-html5-flash-wordpress-plugin
-or email edhynan at gmail dot com, or of course go the the SWFPut
+http://agalena.nfshost.com/b1/swfput-html5-flash-wordpress-plugin/
+or email edhynan at the email provider 'gmail' with the
+top level domain 'com', or of course go the the SWFPut
 WordPress page at https://wordpress.org/support/plugin/swfput
 and select the "Support" tab.
 
@@ -266,7 +281,7 @@ to leave a comment with the URLs of your using pages.
 == Changelog ==
 
 = 2.2 =
-* Added long overdue alignment option.
+* Added long overdue alignment options.
 * Added video preload option. Before now, the video element was always
 	given preload="none". Now, the specification values "none",
 	"metadata", and "auto" may be selected, or one special option
@@ -277,11 +292,13 @@ to leave a comment with the URLs of your using pages.
 	change the behavior of existing videos that do not have
 	an initial image (or 'poster'): they will now have the
 	preload="metadata" attribute, so the browser will make a
-	small unsolicited fetch from the video, and might display
+	small unsolicited fetch from the server, and might display
 	a frame. If that is unwanted, the preload option should
 	be set to "none."
 * Some code cleanups and reorganization.
-* Check with WordPress 4.0: OK.
+* Check with WordPress 4.0: OK. (Actually, WordPress 4.0-beta3,
+	and in the unlikely event that a problem arises with the
+	real WP 4.0 release, it will be addressed in a minor revision.)
 
 = 2.1.1 =
 * This release is called "Sigh" and its only change is a

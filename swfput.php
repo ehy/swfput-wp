@@ -42,7 +42,7 @@ Text Domain: swfput_l10n
 // check for naughty direct invocation; w/o this we'd soon die
 // from undefined WP functions anyway, but let's check anyway
 if ( basename(__FILE__) == basename($_SERVER['SCRIPT_FILENAME']) ) {
-	die("Oh, you naughty boy||girl||other!\n");
+	die("No, do not invoke this directly.\n");
 }
 
 // supporting classes found in files named "${cl}.inc.php"
@@ -82,9 +82,7 @@ endif;
 if ( ! function_exists( 'swfput_php52_htmlent' ) ) :
 function swfput_php52_htmlent ($text, $cset = null)
 {
-	// try to use get_option('blog_charset') only once;
-	// it's not cheap enough even with WP's cache for
-	// the number of times this might be called
+	// try to use get_option('blog_charset') only once
 	static $_blog_charset = null;
 	if ( $_blog_charset === null ) {
 		$_blog_charset = get_option('blog_charset');
