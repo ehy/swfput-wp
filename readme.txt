@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: video, video player, movies, tube, flash, flash video, html5, html5 video, graphics, movie, video content, a/v content
 Requires at least: 3.0.2
 Tested up to: 4.0
-Stable tag: 2.2
+Stable tag: 2.2.1
 Text Domain: swfput_l10n
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -14,7 +14,7 @@ SWFPut provides video players for posts and pages and widget areas, as both HTML
 == Description ==
 
 SWFPut provides 'responsive' video for posts and pages.
-SWFPut make the presentation of video reliable for your
+SWFPut makes the presentation of video reliable for your
 visitors: several conditions are handled well, such as
 the uneven support for HTML5 video formats in the major
 browsers, the possible lack of support for either HTML5
@@ -27,7 +27,7 @@ a video widget for use in widget areas, such as a sidebar.
 
 SWFPut video is 'responsive': it should display at a
 suitable size on your visitor's device, whether large
-or small (a responsive WordPress is necessary).
+or small (a responsive WordPress theme is necessary).
 
 SWFPut makes video setup easy and flexible by providing
 a full featured form with sensible defaults.
