@@ -1,0 +1,67 @@
+#! /bin/sh
+#
+# place current state of things in $SVNLOCAL/trunk and update
+#
+
+PROG=${0##*/}
+PROJ=swfput
+
+: ${TRUNK_BACKUP:=yes}
+
+THISD=$PWD
+#SVNLOCAL="$THISD"/wordpress-svn
+SVNLOCAL="$THISD"/wordpress-repo
+
+e2 () { printf '%s: %s\n' "$PROG" "$*" 1>&2; }
+fail () { e2 "$@"; exit 1; }
+
+test -d "$SVNLOCAL" || fail cannot find "$SVNLOCAL", where am I\?
+
+VRS=$(/bin/sh ./version.sh) || fail OOPS no goodness with version.sh
+
+ZD="${PROJ}-${VRS}"
+ZF="${ZD}.zip"
+
+make cleanall && make && test -f "$ZF" \
+	|| fail cannot make and stuff like that
+
+ZF="../$ZF"
+
+cd "$SVNLOCAL" || fail cd "$SVNLOCAL" failure
+
+## may fail OK
+rm -rf "$ZD" || echo >/dev/null
+
+unzip "$ZF" || fail fail unzip "$ZF"
+test -d "$ZD" || fail WTF: fail test -d "$ZD"
+
+test -d trunk || fail WTF: fail test -d trunk
+
+svn up || fail fail svn up, what\'s up with that\?
+
+# OK, do it. The only diff 'tween trunk and the prepared
+# stuff is the .svn directory, but generally the package
+# has no dot dirs of regfiles, so consider any .* in
+# trunk to belong to svn. With this simplicity, a mere
+# move and rename should do the trick.
+# Optionally backup trunk for safety.
+test Xyes = X"$TRUNK_BACKUP" && \
+	{ tar cf - trunk | gzip > ../trunk-bak.tgz || \
+	fail could not backup trunk; }
+# use a loop so each op can be checked
+for F in trunk/.* ; do
+	TF=${F#*/}; test X. = X"$TF" || test X.. = X"$TF" && continue
+	mv "$F" "$ZD" || fail failed to mv "$F" "$ZD"
+	e2 SUCCEEDED moving "$F" "$ZD"
+done
+# Now just move new stuff into place
+rm -rf trunk; test -d trunk && {
+	fail failed to remove trunk: NOTE THAT DOTFILES WERE MOVED TO "$ZD"
+}
+mv "$ZD" trunk || fail fail mv "$ZD" trunk
+# Looks good
+svn up || fail OY\! failed final svn up\!
+e2 YIP\! all done successfully.
+ls -ld trunk
+exit 0
+
