@@ -114,7 +114,7 @@ class SWF_put_evh {
 	const plugin_webpage = 'http://agalena.nfshost.com/b1/swfput-html5-flash-wordpress-plugin';
 	
 	// this version
-	const plugin_version = '2.2.0';
+	const plugin_version = '2.2.2';
 	
 	// the widget class name
 	const swfput_widget = 'SWF_put_widget_evh';
