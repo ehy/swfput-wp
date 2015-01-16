@@ -3,7 +3,7 @@
 Plugin Name: SWFPut
 Plugin URI: http://agalena.nfshost.com/b1/swfput-html5-flash-wordpress-plugin
 Description: Add Flash and HTML5 video to WordPress posts, pages, and widgets, from arbitrary URI's or media library ID's or files in your media upload directory tree (including uploads not in the WordPress media library).
-Version: 2.2.1
+Version: 2.2.2
 Author: Ed Hynan
 Author URI: http://agalena.nfshost.com/b1/
 License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
@@ -198,7 +198,7 @@ class SWF_put_evh {
 	// swfput program css name
 	const swfputcssname = 'obj.css';
 	// swfput default video name
-	const swfputdefvid = 'default.flv';
+	const swfputdefvid = 'default.mp4';
 	// swfput program binary path
 	protected $swfputbin;
 	// swfput program php+ming script path
@@ -275,7 +275,7 @@ class SWF_put_evh {
 		$this->swfputphp = plugins_url($t, $pf);
 		$t = self::swfputdir . '/' . self::swfputcssname;
 		$this->swfputcss = plugins_url($t, $pf);
-		$t = self::swfputdir . '/' . self::swfputdefvid;
+		$t = /* self::swfputdir . '/' . */ self::swfputdefvid;
 		$this->swfputvid = plugins_url($t, $pf);
 		$t = self::settings_jsdir . '/' . self::settings_jsname;
 		$this->settings_js = plugins_url($t, $pf);
@@ -2534,9 +2534,6 @@ class SWF_put_evh {
 				return $url;
 			}
 		}
-		if ( $url === '' ) {
-			return false;
-		}
 		
 		$achk = array(
 			'requirehost' => false, // can use orig host
@@ -2572,10 +2569,11 @@ class SWF_put_evh {
 		}
 
 		//$ut = $this->check_expand_video_url($url, $defaulturl);
-		$flurl = $ut = $this->check_expand_video_url($url, '');
+		$flurl = $ut = $this->check_expand_video_url($url);
 		if ( $ut === false ) {
 			self::errlog('rejected URL: "' . $url . '"');
-			return '<!-- SWF embedding declined:  URL displeasing -->';
+			$flurl = $ut = $this->check_expand_video_url('');
+			//return '<!-- SWF embedding declined:  URL displeasing -->';
 		}
 
 		// escaping: note url used here is itself a query arg
@@ -2632,7 +2630,8 @@ class SWF_put_evh {
 		$ut = $this->check_expand_video_url($cssurl, false);
 		if ( ! $ut ) {
 			self::errlog('rejected URL: "' . $url . '"');
-			return '<!-- SWF embedding declined:  URL displeasing -->';
+			$ut = $this->get_swf_css_url();
+			//return '<!-- SWF embedding declined:  URL displeasing -->';
 		}
 		if ( ! $ut ) {
 			self::errlog('rejected css URL: "' . $cssurl . '"');
@@ -2832,7 +2831,7 @@ class SWF_put_evh {
 
 				// leave off src
 				$src = trim($tv[0]);
-				$ut = $this->check_expand_video_url($src, false);
+				$ut = $this->check_expand_video_url($src);
 				if ( ! $ut ) {
 					self::errlog('rejected HTML video URL: "' . $src . '"');
 					continue;

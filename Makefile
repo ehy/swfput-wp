@@ -1,7 +1,7 @@
 #! /usr/bin/make -f
 # License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
 
-PRJVERS = 2.2.1
+PRJVERS = 2.2.2
 PRJSTEM = swfput
 PRJNAME = $(PRJSTEM)-$(PRJVERS)
 
@@ -45,13 +45,13 @@ MINGS = mingput.php
 MINGA = mainact.inc.php
 MINGC = obj.css
 SSRCS = $(SDIRI)/$(MINGS) $(SDIRI)/$(MINGA) $(SDIRI)/$(MINGC)
+SDEFS = default.mp4
 SBINS = $(SDIRI)/$(MNAME).swf
-SDEFS = $(SDIRI)/default.flv
 
 ALSO = Makefile COPYING version.sh
 #READS= README README.tty README.tt8 README.pdf README.html
 READS= README README.pdf README.html
-ZALL = ${SRCS} ${ALSO} ${READS} readme.txt
+ZALL = ${SRCS} ${ALSO} ${READS} ${SDEFS} readme.txt
 ZSALL = ${SSRCS} #${SBINS}
 ZDIR = $(H5DIR) $(SDIRI) $(JSDIR) $(LCDIR) $(DOCSD)
 BINALL = ${SBINS} ${JSBIN}
