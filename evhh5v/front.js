@@ -4039,6 +4039,11 @@ evhh5v_controller.prototype = {
 	togglevolctl : function() {
 		// delay pointer/bar hiding for volume interaction
 		this.ptrtick = 0;
+
+		if ( this.volctl_showing == undefined ) {
+			this.volctl_showing = false;
+		}
+
 		if ( ! this.volctl_showing ) {
 			this.show_volctl();
 		} else {
