@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: video, video player, movies, tube, flash, flash video, html5, html5 video, graphics, movie, video content, a/v content
 Requires at least: 3.0.2
 Tested up to: 4.1
-Stable tag: 2.2.2.1
+Stable tag: 2.9
 Text Domain: swfput_l10n
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -280,6 +280,9 @@ to leave a comment with the URLs of your using pages.
 
 == Changelog ==
 
+= 2.9 =
+* 
+
 = 2.2.2.1 =
 * Sigh. Just added a forgotten file (from 2.2.2). The default
 	video (mentioned in the 2.2.2 entry, below) would be
@@ -514,6 +517,9 @@ to leave a comment with the URLs of your using pages.
 * Initial release.
 
 == Upgrade Notice ==
+
+= 2.9 =
+* 
 
 = 2.2.2.1 =
 * Sigh. Just added a forgotten file (from 2.2.2).
