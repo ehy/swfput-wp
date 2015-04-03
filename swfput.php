@@ -189,6 +189,9 @@ class SWF_put_evh {
 	// Settings page object
 	protected $spg = null;
 
+	// php include file sub-directory
+	const includedir = 'php-inc';
+
 	// swfput program directory
 	const swfputdir = 'evhflv';
 	// swfput program binary name
@@ -928,7 +931,7 @@ class SWF_put_evh {
 			return;
 		}
 		
-		$fn = rtrim(dirname(__FILE__), '/') . '/wpabspath.php';
+		$fn = self::mk_pluginsubpath('wpabspath.php');
 		$fh = fopen($fn, 'r+b');
 		if ( ! $fh ) {
 			return;
@@ -1964,6 +1967,22 @@ class SWF_put_evh {
 		return $pf;
 	}
 	
+	
+	// use mk_plugindir() and append separator and argument
+	// $addlpath which is expected to name a subdir, a file,
+	// both, or empty string (default) to get the dir w/ sep.
+	public static function mk_pluginsubpath($addlpath = '') {
+		return self::mk_plugindir() . '/' . ltrim($addlpath, '/');
+	}
+
+	// use mk_pluginsubpath() to get plugin's include dir,
+	// append $addlpath which is expected to name a file,
+	// or empty string (default) to get the dir w/ sep.
+	public static function mk_pluginincpath($addlpath = '') {
+		$d = self::includedir;
+		return self::mk_pluginsubpath($d) . '/' . ltrim($addlpath, '/');
+	}
+
 	// help for plugin file path/name; __FILE__ alone
 	// is not good enough -- see comment in body of mk_plugindir()
 	public static function mk_pluginfile() {
@@ -1971,18 +1990,16 @@ class SWF_put_evh {
 			return self::$pluginfile;
 		}
 	
-		$pf = self::mk_plugindir();
-		$ff = basename(__FILE__);
+		$pf = self::mk_pluginsubpath(basename(__FILE__));
 		
 		// store and return corrected file path
-		return self::$pluginfile = $pf . '/' . $ff;
+		return self::$pluginfile = $pf;
 	}
 	
 	// help for swf player file path/name; it is
 	// contained in the plugin directory
 	public static function mk_playerdir() {
-		$pd = self::mk_plugindir();
-		return $pd . '/' . self::swfputdir;
+		return self::mk_pluginsubpath(self::swfputdir);
 	}
 
 	// help for swf player file path/name; it is
@@ -3060,254 +3077,9 @@ endif; // if ( ! class_exists('SWF_put_evh') ) :
  * values are all strings, even if empty or numeric etc.
  */
 if ( ! class_exists('SWF_params_evh') ) :
-class SWF_params_evh {
-	protected static $defs = array(
-		'caption' => '',		   // added for forms, not embed object
-		'url' => '',
-		'defaulturl' => 'default', // subs. distributed default file
-		'defrtmpurl' => 'rtmp://cp82347.live.edgefcs.net/live', //akamai
-		'cssurl' => '',
-		'iimage' => '',
-		'width' => '240',
-		'height' => '180',
-		'mobiwidth' => '0',        // width if ( wp_is_mobile() )
-		'audio' => 'false',        // source is audio; (mp3 is detected)
-		'aspectautoadj' => 'true', // adj. common sizes, e.g. 720x480
-		'displayaspect' => '0',    // needed if pixels are not square
-		'pixelaspect' => '0',      // use if display aspect unknown
-		'volume' => '50',          // if host has no saved setting
-		'play' => 'false',         // play (or pause) on load
-		'hidebar' => 'true',       // initially hide control bar
-		'disablebar' => 'false',   // disable and hide control bar
-		'iimgbg' => 'true',        // use iimage arg as alt. img element
-		'barheight' => '36',
-		'quality' => 'high',
-		'allowfull' => 'true',
-		'allowxdom' => 'false',
-		'loop' => 'false',
-		'mtype' => 'application/x-shockwave-flash',
-		// rtmp
-		'playpath' => '',
-		// alternative <video> within object
-		'altvideo' => '',
-		'defaultplaypath' => '',
-		// <object>
-		'classid' => 'clsid:d27cdb6e-ae6d-11cf-96b8-444553540000',
-		'codebase' => 'http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,115,0',
-		// align, for alignment class in markup:
-		// left, center, right, none
-		'align' => 'center',
-		'preload' => 'image'
-	);
-
-	protected $inst = null; // modifiable copy per instance
-	
-	public function __construct($copy = null) {
-		$this->inst = self::$defs;
-		if ( is_array($copy) )
-			$this->setarray($copy);
-	}
-	
-	public static function getdefs() { return self::$defs; }
-	public function getparams() { return $this->inst; }
-	public function getkeys() { return array_keys($this->inst); }
-	public function getvalues() { return array_values($this->inst); }
-	public function getvalue($key) {
-		if ( array_key_exists($key, $this->inst) ) {
-			return $this->inst[$key];
-		}
-		return null;
-	}
-	public function getdefault($key) {
-		if ( array_key_exists($key, self::$defs) ) {
-			return self::$defs[$key];
-		}
-		return null;
-	}
-	public function setvalue($key, $val) {
-		if ( array_key_exists($key, $this->inst) ) {
-			$t = $this->inst[$key];
-			$this->inst[$key] = $val;
-			return $t;
-		}
-		return null;
-	}
-	public function setnewvalue($key, $val) {
-		if ( array_key_exists($key, $this->inst) ) {
-			$t = $this->inst[$key];
-		} else {
-			$t = $val;
-		}
-		$this->inst[$key] = $val;
-		return $t;
-	}
-	public function setdefault($key) {
-		if ( array_key_exists($key, self::$defs) ) {
-			$t = $this->inst[$key];
-			$this->inst[$key] = self::$defs[$key];
-			return $t;
-		}
-		return null;
-	}
-	public function setarray($ar) {
-		// array_replace is new w/ 5.3; want 5.2 here
-		//$this->inst = array_replace($this->inst, $ar);
-		// so . . .
-		foreach ( $ar as $k => $v ) {
-			if ( array_key_exists($k, self::$defs) ) {
-				$this->inst[$k] = $v;
-			}
-		}
-		return $this;
-	}
-	public function setnewarray($ar) {
-		// array_replace is new w/ 5.3; want 5.2 here
-		//$this->inst = array_replace($this->inst, $ar);
-		// so . . .
-		foreach ( $ar as $k => $v ) {
-			$this->inst[$k] = $v;
-		}
-		return $this;
-	}
-	public function cmpval($key) {
-		return (self::$defs[$key] === $this->inst[$key]);
-	}
-	public function sanitize($fuzz = true) {
-		$i = &$this->inst;
-		// check against default keys; if instance map has
-		// other keys, leave them
-		foreach ( self::$defs as $k => $v ) {
-			if ( ! array_key_exists($k, $i) ) {
-				$i[$k] = $v;
-				continue;
-			}
-			$t = trim(' ' . $i[$k]);
-			switch ( $k ) {
-			// strings that must present positive integers
-			case 'width':
-			case 'height':
-			case 'mobiwidth':
-			case 'volume':
-			case 'barheight':
-				if ( $k === 'barheight' && $t === 'default' ) {
-					continue;
-				}
-				if ( $fuzz === true && preg_match('/^\+?[0-9]+/',$t) ) {
-					$t = sprintf('%u', absint($t));
-				}
-				if ( ! preg_match('/^[0-9]+$/', $t) ) {
-					$t = $v;
-				}
-				$i[$k] = $t;
-				break;
-			// strings that must present booleans
-			case 'audio':
-			case 'aspectautoadj':
-			case 'play':
-			case 'hidebar':
-			case 'disablebar':
-			case 'iimgbg':
-			case 'allowfull':
-			case 'allowxdom':
-			case 'loop':
-				$t = strtolower($t);
-				if ( $t !== 'true' && $t !== 'false' ) {
-					if ( $fuzz === true ) {
-						// TRANSLATORS perl-type regular expression
-						// that matches a 'yes'
-						$xt = __('/^?y(e((s|ah)!?)?)?$/i', 'swfput_l10n');
-						// TRANSLATORS perl-type regular expression
-						// that matches a 'no'
-						$xf = __('/^n(o!?)?)?$/i', 'swfput_l10n');
-						if ( is_numeric($t) ) {
-							$t = $t == 0 ? 'false' : 'true';
-						} else if ( preg_match($xf, $t) ) {
-							$t = 'false';
-						} else if ( preg_match($xt, $t) ) {
-							$t = 'true';
-						} else {
-							$t = $v;
-						}
-					} else {
-						$t = $v;
-					}
-				}
-				$i[$k] = $t;
-				break;
-			// special format: ratio strings
-			case 'displayaspect':
-			case 'pixelaspect':
-				// exception: these allow one alpha as special flag,
-				// or 0 to disable
-				if ( preg_match('/^[A-Z0]$/i', $t) ) {
-					$i[$k] = $t;
-					break;
-				}
-				if ( $fuzz === true ) {
-					$sep = '[Xx[:punct:][:space:]]+';
-				} else {
-					$sep = '[Xx:]';
-				}
-				// exception: allow FLOAT or FLOATsep1
-				$px = '/^\+?([0-9]+(\.[0-9]+)?)(' . $sep . '([0-9]+(\.[0-9]+)?))?$/';
-				// wanted: INTsepINT;
-				$pw  = '/^([0-9]+)' . $sep . '([0-9]+)$/';
-				$m = array();
-				if ( preg_match($px, $t, $m) ) {
-					$i[$k] = $m[1] . ($m[4] ? (':' . $m[4]) : ':1');
-				} else if ( preg_match($pw, $t, $m) ) {
-					$i[$k] = $m[1] . ':' . $m[2];
-				} else {
-					$i[$k] = $v;
-				}
-				break;
-			// strings with a set of valid values that can be checked
-			case 'align':
-				switch ( $t ) {
-					case 'left':
-					case 'right':
-					case 'center':
-					case 'none':
-						break;
-					default:
-						$i[$k] = $v;
-						break;
-				}
-				break;
-			case 'preload':
-				switch ( $t ) {
-					case 'none':
-					case 'metadata':
-					case 'auto':
-					case 'image':
-						break;
-					default:
-						$i[$k] = $v;
-						break;
-				}
-				break;
-			// varied complex strings; not sanitized here
-			case 'caption':
-			case 'url':
-			case 'cssurl':
-			case 'iimage':
-			case 'mtype':
-			case 'playpath':
-			case 'altvideo':
-			case 'classid':
-			case 'codebase':
-				break;
-			// for reference defaults discard any changes,
-			// e.g. 'defaulturl'
-			default:
-				$i[$k] = $v;
-				break;
-			}
-		}
-	}
-} // End class SWF_params_evh
+ require_once SWF_put_evh::mk_pluginincpath('class-SWF-params-evh.php');
 else :
-	wp_die('class name conflict: SWF_params_evh in ' . __FILE__);
+ wp_die('class name conflict: SWF_params_evh in ' . __FILE__);
 endif; // if ( ! class_exists('SWF_params_evh') ) :
 
 /**

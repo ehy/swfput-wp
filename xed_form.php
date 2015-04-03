@@ -31,11 +31,18 @@
  * or page page, (and then just once:).
  */
 
-// method entry: 'automatics' etc.
+// method block entry: 'automatics' etc.
 
 // cap check is done at registration of this callback
-$pr = self::swfput_params;
+$pr = self::swfput_params; // 'SWF_params_evh' until changed ;-)
 $pr = new $pr();
+// Note on extract(): WP core had used this magic function extensively,
+// but somewhere between 3.6 and 4.1 all uses were removed and not
+// only one exists in 4.0, as is it now thought to make unreadble
+// code.
+// I'm leaving this one here: for comprehension see
+// 'class SWF_params_evh' and look at the defaults array keys --
+// this use is merely filling the form elements defaults
 extract($pr->getparams());
 
 $sc = self::shortcode;
