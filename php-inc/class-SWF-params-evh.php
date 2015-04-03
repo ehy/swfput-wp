@@ -29,7 +29,6 @@
  * The sanitize() method is the largest and as name suggests,
  * constrains applied parameter values.
  */
-
 class SWF_params_evh {
 	protected static $defs = array(
 		'caption' => '',		   // added for forms, not embed object
