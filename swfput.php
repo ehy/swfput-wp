@@ -837,7 +837,7 @@ class SWF_put_evh {
 		$v = (3 << 24) | (3 << 16) | (0 << 8) | 0;
 		$ok = self::wpv_min($v);
 
-		include 'help_txt.php';
+		include self::mk_pluginincpath('help_txt.php');
 		$hlptxt = swfput_get_helptext(self::$helphtml, self::$helppdf);
 
 		// put help tab content, for 3.3.0 or greater . . .
@@ -1704,7 +1704,7 @@ class SWF_put_evh {
 	public static function put_xed_form() {
 		// EH: 20.07.2014
 		// Form markup and code moved to file xed_form.php
-		require 'xed_form.php';
+		require self::mk_pluginincpath('xed_form.php');
 	}
 
 	// wrap do_shortcode() to set a flag for the callback
@@ -3260,7 +3260,8 @@ class SWF_put_widget_evh extends WP_Widget {
 	public function form($instance) {
 		// EH: 20.07.2014
 		// code and markup moved into file xed_widget_form.php
-		require 'xed_widget_form.php';
+		// method is static, but use '->' to avoid NAME::
+		require $this->plinst->mk_pluginincpath('xed_widget_form.php');
 	}
 } // End class SWF_put_widget_evh
 else :
