@@ -20,6 +20,7 @@ SRCS = ${PRJSTEM}.php \
 
 INCLD = php-inc
 INCS  = ${INCLD}/class-SWF-params-evh.php \
+	${INCLD}/class-SWF-put-widget-evh.php \
 	${INCLD}/xed_form.php \
 	${INCLD}/xed_widget_form.php \
 	${INCLD}/help_txt.php 
