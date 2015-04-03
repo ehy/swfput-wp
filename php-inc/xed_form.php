@@ -36,14 +36,47 @@
 // cap check is done at registration of this callback
 $pr = self::swfput_params; // 'SWF_params_evh' until changed ;-)
 $pr = new $pr();
-// Note on extract(): WP core had used this magic function extensively,
-// but somewhere between 3.6 and 4.1 all uses were removed and not
-// only one exists in 4.0, as is it now thought to make unreadble
-// code.
-// I'm leaving this one here: for comprehension see
-// 'class SWF_params_evh' and look at the defaults array keys --
-// this use is merely filling the form elements defaults
-extract($pr->getparams());
+//extract($pr->getparams());
+// when this was 1st written WP core used extract() freely, but
+// it is now a function non grata: one named concern is
+// readability; obscure origin of vars seen in code, so readers:
+// the array elements in the explicit extraction below may
+// appear as variable names later.
+$_args = $pr->getparams();
+foreach(array(
+	'caption',
+	'url',
+	'defaulturl',
+	'defrtmpurl',
+	'cssurl',
+	'iimage',
+	'width',
+	'height',
+	'mobiwidth',
+	'audio',
+	'aspectautoadj',
+	'displayaspect',
+	'pixelaspect',
+	'volume',
+	'play',
+	'hidebar',
+	'disablebar',
+	'iimgbg',
+	'barheight',
+	'quality',
+	'allowfull',
+	'allowxdom',
+	'loop',
+	'mtype',
+	'playpath',
+	'altvideo',
+	'defaultplaypath',
+	'classid',
+	'codebase',
+	'align',
+	'preload') as $k) {
+	$$k = $_args[$k];
+}
 
 $sc = self::shortcode;
 // file select by ext pattern

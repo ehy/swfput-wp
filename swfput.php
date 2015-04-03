@@ -2420,12 +2420,32 @@ class SWF_put_evh {
 	 * check that URL passed in query is OK; re{encode,escape}
 	 * $args is array of booleans, plus two regex pats -- all optional
 	 * requirehost, requirepath, rejuser, rejport, rejquery, rejfrag +
-	 * rxproto, rxpath (regex search patterns); true requirehost
-	 * implies proto is required
+	 * rxproto, rxpath (regex search patterns); consider requirehost to
+	 * imply proto is required
 	 * $fesc is escaping function for path, if wanted; e.g. urlencode()
 	 */
 	public static function check_url($url, $args = array(), $fesc = '') {
-		extract($args);
+		//extract($args);
+		// when this was 1st written WP core used extract() freely, but
+		// it is now a function non grata: one named concern is
+		// readability; obscure origin of vars seen in code, so readers:
+		// the array elements in the explicit extraction below will
+		// appear as variable names later.
+		foreach(array(
+			'requirehost',
+			'requirepath',
+			'rejuser',
+			'rejport',
+			'rejquery',
+			'rejfrag',
+			'rxproto',
+			'rxpath',
+			'requirehost') as $k) {
+			if ( isset($args[$k]) ) {
+				$$k = $args[$k];
+			}
+		}
+
 		$ourl = '';
 		$p = '/';
 		$ua = parse_url($url);
@@ -2564,7 +2584,48 @@ class SWF_put_evh {
 
 	// return array with media elements as string in ['el']
 	public function get_player_elements($uswf, $par, $ids = null) {
-		extract($par->getparams());
+		//extract($par->getparams());
+		// when this was 1st written WP core used extract() freely, but
+		// it is now a function non grata: one named concern is
+		// readability; obscure origin of vars seen in code, so readers:
+		// the array elements in the explicit extraction below may
+		// appear as variable names later.
+		$args = $par->getparams();
+		foreach(array(
+			'caption',
+			'url',
+			'defaulturl',
+			'defrtmpurl',
+			'cssurl',
+			'iimage',
+			'width',
+			'height',
+			'mobiwidth',
+			'audio',
+			'aspectautoadj',
+			'displayaspect',
+			'pixelaspect',
+			'volume',
+			'play',
+			'hidebar',
+			'disablebar',
+			'iimgbg',
+			'barheight',
+			'quality',
+			'allowfull',
+			'allowxdom',
+			'loop',
+			'mtype',
+			'playpath',
+			'altvideo',
+			'defaultplaypath',
+			'classid',
+			'codebase',
+			'align',
+			'preload') as $k) {
+			$$k = $args[$k];
+		}
+
 		$ming = self::should_use_ming();
 		$esc = true;
 		

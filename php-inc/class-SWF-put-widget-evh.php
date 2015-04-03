@@ -116,8 +116,20 @@ class SWF_put_widget_evh extends WP_Widget {
 			'class="widget %s" style="width: %upx; max-width: 100%%"',
 			$aln, $w);
 
-		extract($args);
-
+		//extract($args);
+		// when this was 1st written WP core used extract() freely, but
+		// it is now a function non grata: one named concern is
+		// readability; obscure origin of vars seen in code, so readers:
+		// the array elements in the explicit extraction below will
+		// appear as variable names later.
+		foreach(array(
+			'before_widget',
+			'after_widget',
+			'before_title',
+			'after_title') as $k) {
+			$$k = isset($args[$k]) ? $args[$k] : '';
+		}
+	
 		// note *no default* for title; allow empty title so that
 		// user may place this below another widget with
 		// apparent continuity (subject to filters)

@@ -106,7 +106,27 @@ endif; // if ( ! function_exists('upathencode') :
 if ( ! function_exists('check_url_arg') ) :
 function check_url_arg($url, $args = array())
 {
-	extract($args);
+	//extract($args);
+	// when this was 1st written WP core used extract() freely, but
+	// it is now a function non grata: one named concern is
+	// readability; obscure origin of vars seen in code, so readers:
+	// the array elements in the explicit extraction below will
+	// appear as variable names later.
+	foreach(array(
+		'requirehost',
+		'requirepath',
+		'rejuser',
+		'rejport',
+		'rejquery',
+		'rejfrag',
+		'rxproto',
+		'rxpath',
+		'requirehost') as $k) {
+		if ( isset($args[$k]) ) {
+			$$k = $args[$k];
+		}
+	}
+
 	$vurl = '';
 	$p = '/';
 	$ua = parse_url($url);
