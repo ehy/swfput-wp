@@ -57,6 +57,26 @@ SWFPut_video_tmce_plugin_fpo_obj = function() {
 		
 		this.fpo = this._fpo;
 	}
+	
+	// COOPT this, since it's here
+	var btn = document.getElementById('evhvid-putvid-input-0');
+	if ( btn != undefined ) {
+		btn.onclick = 'return false;';
+		btn.addEventListener(
+			'click',
+			function (e) {
+				// must stop event due to way WP/jquery is handling
+				// it propagated to ancestor element selected on
+				// class .insert-media, which our button must use
+				// for CSS snazziness
+				e.stopPropagation();
+				e.preventDefault();
+				btn.blur();
+				SWFPut_add_button_func(btn);
+			},
+			false
+		);
+	}
 };
 SWFPut_video_tmce_plugin_fpo_obj.prototype = {};
 var SWFPut_video_tmce_plugin_fpo_inst = 
@@ -68,6 +88,15 @@ function SWFPut_repl_nl(str) {
 		/\r\n/g, '\n').replace(
 			/\r/g, '\n').replace(
 				/\n/g, '<br />');
+};
+	
+// Our button (next to "Add Media") calls this
+function SWFPut_add_button_func(btn) {
+	var tid = btn.id;
+
+	alert('Got click on ' + tid);
+
+	return false;
 };
 	
 tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
@@ -299,6 +328,7 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 			rep.attr({
 				'id' : id,
 				'class' : cl.indexOf('evh-pseudo') >= 0 ? cl : (cl+' evh-pseudo'),
+				'frameborder' : '0', // overdue update v 2.9
 				'width' : w,
 				'height' : h,
 				// Argh!: Chromium 3.4 breaks with the sandbox attr.,

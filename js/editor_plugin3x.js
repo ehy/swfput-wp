@@ -332,6 +332,7 @@ function SWFPut_repl_nl(str) {
 				rep.attr({
 					'id' : id,
 					'class' : cl.indexOf('evh-pseudo') >= 0 ? cl : (cl+' evh-pseudo'),
+					'frameborder' : '0', // overdue update v 2.9
 					'width' : w,
 					'height' : h,
 				// Argh!: Chromium 3.4 breaks with the sandbox attr.,

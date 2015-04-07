@@ -436,7 +436,7 @@ class SWF_put_evh {
 					. '</a>',
 				array($this, 'put_general_desc'));
 
-		// placement section: (posts, sidebar, header)
+		// placement section: (posts, sidebar)
 		$nf = 0;
 		$fields = array();
 		$fields[$nf++] = new $Cf(self::opth5vprim,
@@ -454,19 +454,13 @@ class SWF_put_evh {
 				self::optdispwdg,
 				$items[self::optdispwdg],
 				array($this, 'put_widget_opt'));
-		if ( self::use_tinymce_plugin_ok() )
+		if ( self::use_tinymce_plugin_ok() ) {
 			$fields[$nf++] = new $Cf(self::opttinymce,
 				self::wt(__('Video in post editor:', 'swfput_l10n')),
 				self::opttinymce,
 				$items[self::opttinymce],
 				array($this, 'put_tinymce_opt'));
-		// commented: from early false assumption that header
-		// could be easily hooked:
-		//$fields[$nf++] = new $Cf(self::optdisphdr,
-				//self::wt(__('Place in header area:', 'swfput_l10n')),
-				//self::optdisphdr,
-				//$items[self::optdisphdr],
-				//array($this, 'put_inhead_opt'));
+		}
 
 		// section object includes description callback
 		$sections[$ns++] = new $Cs($fields,
@@ -746,8 +740,36 @@ class SWF_put_evh {
 				add_filter('mce_external_plugins', $aa);
 				$aa = array(__CLASS__, 'filter_mce_init');
 				add_filter('tiny_mce_before_init', $aa);
+				// v 2.9: stick a media 'button' too, for
+				// for snazzy JS dialog presentation of the
+				// metabox form (or something like it)
+				$aa = array(__CLASS__, 'action_media_button');
+				add_action('media_buttons', $aa);
 			}
 		}
+	}
+
+	// action to add media button, like core 'Add Media'
+	public static function action_media_button($editor_id = 'content') {
+		static $is1st = 0;
+		// Initially, lift code from wp-admin/includes/media.php
+		// function media_buttons()
+
+		$img = '<span class="wp-media-buttons-icon"></span> ';
+
+		$id_attr = ' id="evhvid-putvid-input-' . $is1st++ . '"';
+		//$id_attr .= ' onclick="SWFPut_add_button_func(this);"';
+		printf(
+		'<a href="%s"%s class="%s" data-editor="%s" title="%s">%s</a>',
+			'#', //'javascript:SWFPut_add_button_func(this);',
+			$id_attr,
+			'button insert-media add_media',
+			esc_attr($editor_id),
+			esc_attr__('Add SWFPut Video', 'swfput_l10n'),
+			$img .  __('Add SWFPut Video', 'swfput_l10n')
+		);
+
+		$is1st = false;
 	}
 
 	// filter for any mce plugin init settings needs (and testing)
