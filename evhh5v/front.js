@@ -35,6 +35,17 @@
  */
 
 
+/*
+ * Notes on implementation:
+ * Code herein is straight {ECMA,Java}script, working directly
+ * with the DOM.
+ * 
+ * There are no libraries used.  It is intended that this code
+ * might be reused in whole or in part in an arbitrary context,
+ * including possible constraints on acceptable libraries.
+ * 
+ */
+
 
 /**********************************************************************\
  *                                                                    *
@@ -4136,7 +4147,10 @@ evhh5v_controller.prototype = {
 		}
 	},
 
-	// handle control bar click per object.id
+	// handle control bar click per object.id -- obj is probably
+	// a button on the control bar with expected id; but, no
+	// other property than id should be used so that this method
+	// may be invoked like foo.button_click({id: 'stop'});
 	button_click : function(obj) {
 		switch ( obj.id ) {
 			case "playpause":

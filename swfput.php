@@ -232,6 +232,9 @@ class SWF_put_evh {
 	// swfput js shortcode editor helper name
 	const swfxpljsname = 'editor_plugin.min.js';
 	const swfxpljsname3x = 'editor_plugin3x.min.js';
+	// experimental starting wp 4.1 -- using WP media _.Backbone stuff
+	// 'wpmt' for wp media template
+	const swfwpmtsname = 'putswf_tpl.php';
 	
 	// html5 video front-end js
 	const evhv5vjsdir  = 'evhh5v';
@@ -250,6 +253,8 @@ class SWF_put_evh {
 	const evhv5vsvg_but = 'ctrbut.svg';
 	// set to map of svg file names -> URL
 	protected $evhv5v_svgs;
+	// for mce ajax fueled display; experimental WP 4.1, swfput 2.9
+	protected $evhv5v_data;
 	
 	// hold an instance
 	private static $instance;
@@ -729,6 +734,7 @@ class SWF_put_evh {
 	// on init, e.g. mce plugin in the post-related pages
 	public static function hook_admin_init() {
 		if ( self::use_tinymce_plugin() ) {
+			$cl = __CLASS__;
 			// tinymce version in 3.0.3 n.g. and next testing
 			// version of WP I have is 3.3.1
 			$v = (3 << 24) | (3 << 16) | (0 << 8) | 0;
@@ -736,15 +742,70 @@ class SWF_put_evh {
 	
 			if ( $ok && current_user_can( 'edit_posts' )
 				&& current_user_can( 'edit_pages' ) ) {
-				$aa = array(__CLASS__, 'add_mceplugin_js');
+				$aa = array($cl, 'add_mceplugin_js');
 				add_filter('mce_external_plugins', $aa);
-				$aa = array(__CLASS__, 'filter_mce_init');
+				$aa = array($cl, 'filter_mce_init');
 				add_filter('tiny_mce_before_init', $aa);
+			}
+
+			// next actions are for new features tested w/
+			// WP 4.1.1
+			$v = (4 << 24) | (1 << 16) | (1 << 8) | 0;
+			$ok = self::wpv_min($v);
+	
+			if ( $ok && current_user_can( 'edit_posts' )
+				&& current_user_can( 'edit_pages' ) ) {
 				// v 2.9: stick a media 'button' too, for
 				// for snazzy JS dialog presentation of the
 				// metabox form (or something like it)
-				$aa = array(__CLASS__, 'action_media_button');
+				$aa = array($cl, 'action_media_button');
 				add_action('media_buttons', $aa);
+
+				if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+					$pf = self::mk_pluginfile();
+					$inst = self::get_instance();
+					
+					$inst->evhv5v_data = array(
+						'styles'  => array(),
+						'scripts' => array(),
+					);
+
+					$t = self::evhv5vcssdir . '/' . self::evhv5vcssname
+					    . '?ver=' . self::plugin_version;
+					$stfile = plugins_url($t, $pf);
+					$inst->evhv5v_data['styles'][] = $stfile;
+
+					$t = self::evhv5vjsdir . '/' . self::evhv5vjsname
+					    . '?ver=' . self::plugin_version;
+					$jsfile = plugins_url($t, $pf);
+					$inst->evhv5v_data['scripts'][] = $jsfile;
+
+					if ( ! is_array($inst->evhv5v_svgs) ) {
+						$t = self::evhv5vsvgdir;
+						$inst->evhv5v_svgs = array(
+							self::evhv5vsvg_bar =>
+								plugins_url($t . '/' .
+									self::evhv5vsvg_bar, $pf),
+							self::evhv5vsvg_vol =>
+								plugins_url($t . '/' .
+									self::evhv5vsvg_vol, $pf),
+							self::evhv5vsvg_but =>
+								plugins_url($t . '/' .
+									self::evhv5vsvg_but, $pf)
+						);
+					}
+
+					$af = 'parse_putswf_video_shortcode';
+					$ah = 'wp_ajax_' . $af;
+					$aa = array($cl, $af);
+					add_action($ah, $aa);
+				} else {
+					// this is not needed on ajax invoke; just main page
+					$af = 'put_putswf_video_editor_template';
+					$ah = 'print_media_templates';
+					$aa = array($cl, $af);
+					add_action($ah, $aa);
+				}
 			}
 		}
 	}
@@ -843,6 +904,15 @@ class SWF_put_evh {
 				}
 		
 				$info = array('a' => ABSPATH, 'i' => $rn, 'u' => $u);
+
+				// Added 2.9: experimental tinymce display w/
+				// WP 4.1.1 -- do not even try w/ < 4.1; moreover,
+				// an option to disable this is a todo --
+				// TODO: make option for this.
+				$v = (4 << 24) | (1 << 16) | (1 << 8) | 0;
+				$ok = self::wpv_min($v);
+				$info['_bbone_mvc_opt'] = $ok ? 'true' : 'false';
+
 				printf('
 					<script type="text/javascript">
 						var swfput_mceplug_inf = %s;
@@ -1026,6 +1096,75 @@ class SWF_put_evh {
 			$cl = self::swfput_widget;
 			unregister_widget($cl);
 		}
+	}
+
+	// EXPERIMENTAL 4.1 --
+	// action hook for 'print_media_templates' --
+	// put wp media template(s) for video in editor
+	public static function put_putswf_video_editor_template () {
+		$tfile = self::swfwpmtsname;
+
+		$t     = self::settings_jsdir . '/' . $tfile;
+		$tfile = self::mk_plugindir() . '/' . $t;
+
+		include $tfile;
+	}
+
+	// EXPERIMENTAL 4.1 --
+	// copied from wp_ajax_parse_media_shortcode()
+	// in wp-admin/includes/ajax-actions.php
+	// and altered as necessary
+	public static function parse_putswf_video_shortcode () {
+		global $post, $wp_scripts;
+
+		if ( ! $post = get_post( (int) $_POST['post_ID'] ) ) {
+			wp_send_json_error();
+		}
+	
+		if ( empty( $_POST['shortcode'] )
+		     || ! current_user_can( 'edit_post', $post->ID ) ) {
+			wp_send_json_error();
+		}
+	
+		setup_postdata( $post );
+		$shortcode = do_shortcode( wp_unslash( $_POST['shortcode'] ) );
+	
+		if ( empty( $shortcode ) ) {
+			wp_send_json_error( array(
+				'type' => 'no-items',
+				'message' => __( 'No items found.' ),
+			) );
+		}
+	
+		$head = '';
+		$inst = self::get_instance();
+		$a_st = $inst->evhv5v_data['styles'];
+		$a_sc = $inst->evhv5v_data['scripts'];
+
+		foreach ( $a_st as $style ) {
+			$head .= '<link type="text/css" rel="stylesheet" href="'
+				. $style
+				. '"></link>';
+		}
+	
+		foreach ( $a_sc as $script ) {
+			$head .= '<script type="text/javascript" src="'
+				. $script
+				. '"></script>';
+		}
+	
+		if ( ! empty( $wp_scripts ) ) {
+			$wp_scripts->done = array();
+		}
+	
+		ob_start();
+	
+		echo $shortcode;
+	
+		wp_send_json_success( array(
+			'head' => $head,
+			'body' => ob_get_clean()
+		) );
 	}
 
 	// the 'init' hook callback

@@ -33,9 +33,8 @@
 // placeholder token data: regretable hack for SWFPut video
 // plugin for the tinymce, with WordPress; this is to hold
 // place in a <dd> element which normally holds a caption,
-// but when there is no caption, because tinymce strips out
-// or refuses to render a whole <dl> when a <dd> is empty
-SWFPut_video_tmce_plugin_fpo_obj = function() {
+// but when there is no caption.
+var SWFPut_video_tmce_plugin_fpo_obj = function() {
 	if ( this._fpo === undefined
 	  && SWFPut_putswf_video_inst !== undefined ) {
 		this.fpo = SWFPut_putswf_video_inst.fpo;

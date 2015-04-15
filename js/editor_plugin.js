@@ -31,17 +31,18 @@
  */
 
 //
-// placeholder token data: regretable hack for SWFPut video
-// plugin for the tinymce, with WordPress; this is to hold
-// place in a <dd> element which normally holds a caption,
-// but when there is no caption, because tinymce strips out
-// or refuses to render a whole <dl> when a <dd> is empty
-SWFPut_video_tmce_plugin_fpo_obj = function() {
+// A utitlity for this code, i.e. stuff in one place
+//
+var SWFPut_video_utility_obj_def = function() {
+	// placeholder token data: regretable hack for SWFPut video
+	// plugin for the tinymce, with WordPress; this is to hold
+	// place in a <dd> element which normally holds a caption,
+	// but when there is no caption.
 	if ( this._fpo === undefined
 	  && SWFPut_putswf_video_inst !== undefined ) {
 		this.fpo = SWFPut_putswf_video_inst.fpo;
 	} else if ( this.fpo === undefined ) {
-		SWFPut_video_tmce_plugin_fpo_obj.prototype._fpo = {};
+		SWFPut_video_utility_obj_def.prototype._fpo = {};
 		var t = this._fpo;
 		t.cmt = '<!-- do not strip me -->';
 		t.ent = t.cmt;
@@ -58,7 +59,7 @@ SWFPut_video_tmce_plugin_fpo_obj = function() {
 		this.fpo = this._fpo;
 	}
 	
-	// COOPT this, since it's here
+	// help the Add button
 	var btn = document.getElementById('evhvid-putvid-input-0');
 	if ( btn != undefined ) {
 		btn.onclick = 'return false;';
@@ -77,53 +78,13 @@ SWFPut_video_tmce_plugin_fpo_obj = function() {
 			false
 		);
 	}
+
+	// use tinymce plugin, or new _+Backbone-based wp.media mvc code
+	this._bbone_mvc_opt =
+	    swfput_mceplug_inf._bbone_mvc_opt === 'true' ? true : false;
 };
-SWFPut_video_tmce_plugin_fpo_obj.prototype = {};
-var SWFPut_video_tmce_plugin_fpo_inst = 
-	new SWFPut_video_tmce_plugin_fpo_obj();
-
-// Utility used in plugin
-function SWFPut_repl_nl(str) {
-	return str.replace(
-		/\r\n/g, '\n').replace(
-			/\r/g, '\n').replace(
-				/\n/g, '<br />');
-};
-	
-// Our button (next to "Add Media") calls this
-function SWFPut_add_button_func(btn) {
-	var tid = btn.id;
-
-	alert('Got click on ' + tid);
-
-	return false;
-};
-	
-tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
-	var Node  = tinymce.html.Node;
-	var ed    = editor;
-	var url   = plurl;
-	var urlfm = url.split('/');
-	var fpo   = SWFPut_video_tmce_plugin_fpo_inst.fpo;
-
-	urlfm[urlfm.length - 1] = 'mce_ifm.php'; // iframe doc
-	urlfm = urlfm.join('/');
-
-	// small lib
-	var strcch = function(s, to_lc) {
-		if ( to_lc ) return s.toLowerCase();
-		return s.toUpperCase();
-	};
-	var str_lc = function(s) { return strcch(s, true); };
-	var str_uc = function(s) { return strcch(s, false); };
-	var strccmp = function(s, c) { return (str_lc(s) === str_lc(c)); };
-	// nodeName comp. is common, and case unreliable
-	var nN_lc = function(n) { return str_lc(n.nodeName); };
-	var nN_uc = function(n) { return str_uc(n.nodeName); };
-	var nNcmp = function(n, c) { return (nN_lc(n) === str_lc(c)); };
-	
-
-	var defs  = {
+SWFPut_video_utility_obj_def.prototype = {
+	defprops  : {
 		url: "",
 		cssurl: "",
 		iimage: "",
@@ -151,7 +112,833 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 		codebase: "http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,115,0",
 		align: "center",	
 		preload: "image"
+	}
+};
+var SWFPut_video_utility_obj = 
+	new SWFPut_video_utility_obj_def();
+
+// Utility used in plugin
+function SWFPut_repl_nl(str) {
+	return str.replace(
+		/\r\n/g, '\n').replace(
+			/\r/g, '\n').replace(
+				/\n/g, '<br />');
+};
+	
+// Our button (next to "Add Media") calls this
+function SWFPut_add_button_func(btn) {
+	var tid = btn.id;
+
+	alert('Got click on ' + tid);
+
+	return false;
+};
+
+// Experimental mvc thing
+if ( SWFPut_video_utility_obj._bbone_mvc_opt === true
+     && typeof wp.mce.views.register === 'function' ) {
+
+// MVC
+(function(wp, $, _, Backbone) {
+	var mce			= wp.mce;
+
+	var view_def	= mce.putswfMixin = {
+		View: _.extend( {}, mce.av.View, {
+			overlay: true,
+
+			action: 'parse_putswf_video_shortcode',
+
+			initialize: function( options ) {
+				var self = this;
+
+				this.shortcode = options.shortcode;
+
+				_.bindAll( this, 'setIframes', 'setNodes', 'fetch', 'stopPlayers' );
+				$( this ).on( 'ready', this.setNodes );
+
+				$( document ).on( 'media:edit', this.stopPlayers );
+
+				this.fetch();
+
+				this.getEditors( function( editor ) {
+					editor.on( 'hide', self.stopPlayers );
+				});
+			}
+			,
+			// setIframes copied from mce-view.js for broken call
+			// to MutationObserver.observe() --
+			// arg 1 was iframeDoc.body but body lacks interface Node,
+			// passing iframeDoc works (Document implements Node)
+			// -- copy is good because e.g. can add styles
+			setIframes: function ( head, body ) {
+				var MutationObserver = window.MutationObserver
+					|| window.WebKitMutationObserver
+					|| window.MozMutationObserver || false,
+					importStyles = true; //this.type === 'putswf_video';
+	
+				if ( head || body.indexOf( '<script' ) !== -1 ) {
+					this.getNodes( function ( editor, node, content ) {
+						var dom = editor.dom,
+							styles = '',
+							bodyClasses = editor.getBody().className || '',
+							iframe, iframeDoc, i, resize;
+	
+						content.innerHTML = '';
+						head = head || '';
+	
+						if ( importStyles ) {
+							if ( ! wp.mce.views.sandboxStyles ) {
+								tinymce.each( dom.$( 'link[rel="stylesheet"]', editor.getDoc().head ), function( link ) {
+									if ( link.href && link.href.indexOf( 'skins/lightgray/content.min.css' ) === -1 &&
+										link.href.indexOf( 'skins/wordpress/wp-content.css' ) === -1 ) {
+	
+										styles += dom.getOuterHTML( link ) + '\n';
+									}
+								});
+	
+								wp.mce.views.sandboxStyles = styles;
+							} else {
+								styles = wp.mce.views.sandboxStyles;
+							}
+						}
+	
+						// Seems Firefox needs a bit of time to insert/set the view nodes, or the iframe will fail
+						// especially when switching Text => Visual.
+						setTimeout( function() {
+							iframe = dom.add( content, 'iframe', {
+								src: tinymce.Env.ie ? 'javascript:""' : '',
+								frameBorder: '0',
+								allowTransparency: 'true',
+								scrolling: 'no',
+								'class': 'wpview-sandbox',
+								style: {
+									width: '100%',
+									display: 'block'
+								}
+							} );
+	
+							iframeDoc = iframe.contentWindow.document;
+	
+							iframeDoc.open();
+							iframeDoc.write(
+								'<!DOCTYPE html>' +
+								'<html>' +
+									'<head>' +
+										'<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />' +
+										head +
+										styles +
+										'<style>' +
+											'html {' +
+												'background: transparent;' +
+												'padding: 0;' +
+												'margin: 0;' +
+											'}' +
+											'body#wpview-iframe-sandbox {' +
+												'background: transparent;' +
+												'padding: 1px 0 !important;' +
+												'margin: -1px 0 0 !important;' +
+											'}' +
+											'body#wpview-iframe-sandbox:before,' +
+											'body#wpview-iframe-sandbox:after {' +
+												'display: none;' +
+												'content: "";' +
+											'}' +
+											'.alignleft {' +
+											'display: inline;' +
+											'float: left;' +
+											'margin-right: 1.5em; }' +
+											'' +
+											'.alignright {' +
+											'display: inline;' +
+											'float: right;' +
+											'margin-left: 1.5em; }' +
+											'' +
+											'.aligncenter {' +
+											'clear: both;' +
+											'display: block;' +
+											'margin: 0 auto; }' +
+											'' +
+											'.alignright .caption {' +
+											'padding-bottom: 0;' +
+											'margin-bottom: 0; }' +
+											'' +
+											'.alignleft .caption {' +
+											'padding-bottom: 0;' +
+											'margin-bottom: 0; }' +
+											'' +
+											'.aligncenter .caption {' +
+											'padding-bottom: 0;' +
+											'margin-bottom: 0.75rem; }' +
+										'</style>' +
+									'</head>' +
+									'<body id="wpview-iframe-sandbox" class="' + bodyClasses + '">' +
+										body +
+									'</body>' +
+								'</html>'
+							);
+							iframeDoc.close();
+	
+							resize = function() {
+								// Make sure the iframe still exists.
+								iframe.contentWindow && $( iframe ).height( $( iframeDoc.body ).height() );
+							};
+	
+							try {
+								if ( MutationObserver ) {
+									//was iframeDoc.body -- not a Node iface (FFox);
+									var nod = iframeDoc;
+
+									new MutationObserver( _.debounce( function() {
+										resize();
+									}, 100 ) )
+									.observe( nod, {
+										attributes: true,
+										childList: true,
+										subtree: true
+									} );
+								} else {
+									throw ReferenceError('MutationObserver not supported');
+								}
+							} catch ( exptn ) {
+								console.log('Exception: ' + exptn.message);
+								for ( i = 1; i < 6; i++ ) {
+									setTimeout( resize, i * 700 );
+								}
+							}
+	
+							if ( importStyles ) {
+								editor.on( 'wp-body-class-change', function() {
+									iframeDoc.body.className = editor.getBody().className;
+								});
+							}
+						}, 50 );
+					});
+				} else {
+				       this.setContent( body );
+				}
+			}
+            ,
+			setNodes: function () {
+					if ( this.parsed ) {
+							this.setIframes( this.parsed.head, this.parsed.body );
+					} else {
+							this.fail();
+					}
+			}
+			,
+			fetch: function () {
+				var self = this;
+
+				wp.ajax.send( this.action, {
+					data: {
+						post_ID: $( '#post_ID' ).val() || 0,
+						type: this.shortcode.tag,
+						shortcode: this.shortcode.string()
+					}
+				} )
+				.done( function( response ) {
+					if ( response ) {
+						self.parsed = response;
+						self.setIframes( response.head, response.body );
+					} else {
+						self.fail( true );
+					}
+				} )
+				.fail( function( response ) {
+					self.fail( response || true );
+				} );
+			}
+			/**/,
+			fail: function( error ) {
+					if ( ! this.error ) {
+							if ( error ) {
+									this.error = error;
+							} else {
+									return;
+							}
+					}
+
+					if ( this.error.message ) {
+							if ( ( this.error.type === 'not-embeddable' && this.type === 'embed' ) || this.error.type === 'not-ssl' ||
+									this.error.type === 'no-items' ) {
+
+									this.setError( this.error.message, 'admin-media' );
+							} else {
+									this.setContent( '<p>' + this.original + '</p>', 'replace' );
+							}
+					} else if ( this.error.statusText ) {
+							this.setError( this.error.statusText, 'admin-media' );
+					} else if ( this.original ) {
+							this.setContent( '<p>' + this.original + '</p>', 'replace' );
+					}
+			}
+			,
+			stopPlayers: function( remove ) {
+				var rem = remove; // unused:  === 'remove';
+
+				this.getNodes( function( editor, node, content ) {
+					var p, win,
+						iframe = $( 'iframe.wpview-sandbox', content ).get(0);
+
+					if ( iframe && ( win = iframe.contentWindow ) && win.evhh5v_sizer_instances ) {
+						try {
+							for ( p in win.evhh5v_sizer_instances ) {
+								var v = p.va_o;
+
+								if ( v ) {
+									v.button_click({id: 'stop'});
+								}
+							}
+						} catch( er ) {}
+					}
+				});
+			}
+			,
+			unbind: function() {
+				this.stopPlayers( 'remove' );
+			}
+		})
+	}; // var view_def	= mce.putswfMixin = {
+
+
+	mce.views.register( 'putswf_video', _.extend( {}, view_def, {
+		state: 'putswf_video-details',
+		/*
+		*/
+		toView: function( content ) {
+			var match = wp.shortcode.next( this.type, content );
+			
+			if ( ! match ) {
+				return;
+			}
+			
+		console.log('registered-toView:: content == ' + content);
+			return {
+				index: match.index,
+				content: match.content,
+				options: {
+					shortcode: match.shortcode,
+					//height: auto
+				}
+			};
+		}
+		,
+		/**
+		 * Called when a TinyMCE view is clicked for editing.
+		 * - Parses the shortcode out of the element's data attribute
+		 * - Calls the `edit` method on the shortcode model
+		 * - Launches the model window
+		 * - Bind's an `update` callback which updates the element's data attribute
+		 *   re-renders the view
+		 *
+		 * @param {HTMLElement} node
+		 */
+		edit: function( node ) {
+			var media = wp.media[ this.type ],
+				self = this,
+				frame, data, callback;
+
+		//console.log('registered-view::edit typeof node == ' + typeof node);
+		//for ( var _attr in node ) {
+		//	console.log('node.'+_attr+" == '> "+node[_attr]+" <'");
+		//}
+
+			$( document ).trigger( 'media:edit' );
+
+			data = window.decodeURIComponent( $( node ).attr('data-wpview-text') );
+		console.log('registered-view::edit data == ' + data);
+			frame = media.edit( data );
+			frame.on( 'close', function() {
+				frame.detach();
+			} );
+
+			callback = function( selection ) {
+				var shortcode = wp.media[ self.type ].shortcode( selection ).string();
+				$( node ).attr( 'data-wpview-text', window.encodeURIComponent( shortcode ) );
+				wp.mce.views.refreshView( self, shortcode );
+				frame.detach();
+			};
+			if ( _.isArray( self.state ) ) {
+				_.each( self.state, function (state) {
+					frame.state( state ).on( 'update', callback );
+				} );
+			} else {
+				frame.state( self.state ).on( 'update', callback );
+			}
+			frame.open();
+		}
+		/*
+		,
+		*/
+	} ) ); // mce.views.register( 'putswf_video', _.extend( {}, view_def, {
+
+	var media = wp.media,
+		baseSettings = SWFPut_video_utility_obj.defprops,
+		l10n = {}; //typeof _wpMediaViewsL10n === 'undefined' ? {} : _wpMediaViewsL10n;
+
+	// MODEL: available as 'data.model' within frame content template
+	media.model.putswf_postMedia = Backbone.Model.extend({
+		constructor: function() {
+console.log('CALLED: 19: media.model.putswf_postMedia::ctor -- ' + arguments);
+for ( var a in arguments ) {
+	console.log('arguments['+a+'] == >"'+arguments[a]+'"<');
+}
+			Backbone.Model.apply(this, arguments);
+		}
+		,
+
+		initialize: function() {
+console.log('CALLED: 20: media.model.putswf_postMedia::initialize -- ' + this.attributes);
+for ( var a in this.attributes ) {
+	console.log('putswf_postMedia.attributes['+a+'] == >"'+this.attributes[a]+'"<');
+}
+			this.attachment = false;
+		},
+
+		setSource: function( attachment ) {
+console.log('CALLED: 21: media.model.putswf_postMedia::setSource');
+			this.attachment = attachment;
+			this.extension = attachment.get( 'filename' ).split('.').pop();
+
+			if ( this.get( 'src' ) && this.extension === this.get( 'src' ).split('.').pop() ) {
+				this.unset( 'src' );
+			}
+
+			if ( _.contains( wp.media.view.settings.embedExts, this.extension ) ) {
+				this.set( this.extension, this.attachment.get( 'url' ) );
+			} else {
+				this.unset( this.extension );
+			}
+		},
+
+		changeAttachment: function( attachment ) {
+console.log('CALLED: 22: media.model.putswf_postMedia::changeAttachment');
+			var self = this;
+
+			this.setSource( attachment );
+
+			this.unset( 'src' );
+			_.each( _.without( wp.media.view.settings.embedExts, this.extension ), function( ext ) {
+				self.unset( ext );
+			} );
+		}
+	}); // media.model.putswf_postMedia = Backbone.Model.extend({
+
+	media.view.MediaFrame.Putswf_mediaDetails = media.view.MediaFrame.MediaDetails.extend({ // = media.view.MediaFrame.Select.extend({
+		defaults: {
+			id:      'media',
+			url:     '',
+			menu:    'media-details',
+			content: 'media-details',
+			toolbar: 'media-details',
+			type:    'link',
+			priority: 121 // 120
+		},
+
+		constructor: function() {
+console.log('CALLED: 11: media.view.MediaFrame.Putswf_mediaDetails::ctor -- ' + arguments[0]);
+for ( var a in arguments[0] ) {
+	console.log('arguments[0]['+a+'] == >"'+arguments[0][a]+'"<');
+}
+			media.view.MediaFrame.MediaDetails.apply(this, arguments);
+			//media.view.MediaFrame.Putswf_mediaDetails.prototype.initialize.apply(this, arguments);
+		}
+		,
+
+		initialize: function( options ) {
+			this.DetailsView = options.DetailsView;
+			this.cancelText = options.cancelText;
+			this.addText = options.addText;
+console.log('CALLED: 12: media.view.MediaFrame.Putswf_mediaDetails::initialize -- ' + arguments);
+for ( var a in options ) {
+	console.log('options['+a+'] == >"'+options[a]+'"<');
+}
+
+			this.media = new media.model.putswf_postMedia( options.metadata ); //PostMedia( options.metadata );
+			this.options.selection = new media.model.Selection( this.media.attachment, { multiple: false } );
+			media.view.MediaFrame.MediaDetails.prototype.initialize.apply( this, arguments );
+		}
+		,
+
+		bindHandlers: function() {
+			var menu = this.defaults.menu;
+
+			media.view.MediaFrame.Select.prototype.bindHandlers.apply( this, arguments );
+
+			//this.on( 'menu:create:' + menu, this.createMenu, this );
+			this.on( 'content:render:' + menu, this.renderDetailsContent, this );
+			//this.on( 'menu:render:' + menu, this.renderMenu, this );
+			//this.on( 'toolbar:render:' + menu, this.renderDetailsToolbar, this );
+		},
+
+		renderDetailsContent: function() {
+			var attach = this.state().media.attachment;
+			var view = new this.DetailsView({
+				controller: this,
+				model: this.state().media,
+				attachment: this.state().media.attachment // attach //
+			}).render();
+
+			this.content.set( view );
+console.log('CALLED: 10: media.view.MediaFrame.Putswf_mediaDetails::renderDetailsContent attachment == ' + attach);
+		}
+		//,
+
+	}); // media.view.MediaFrame.Putswf_mediaDetails = media.view.MediaFrame.MediaDetails.extend({ // = media.view.MediaFrame.Select.extend({
+
+	// NOTE on "template:" below: it is underscares compiled, and the
+	// the default compilation operators are overridden by WP in
+	// "options":
+     //19                         options = {
+     //20                                 evaluate:    /<#([\s\S]+?)#>/g,
+     //21                                 interpolate: /\{\{\{([\s\S]+?)\}\}\}/g,
+     //22                                 escape:      /\{\{([^\}]+?)\}\}(?!\})/g,
+     //23                                 variable:    'data'
+     //24                         };
+	// Lines above are from wp-includes/js/wp-util.js
+	// -- see "http://underscorejs.org/#template"
+	media.view.Putswf_videoDetails = media.view.MediaFrame.Putswf_mediaDetails.extend({
+	//media.view.Putswf_videoDetails = media.view.SWFPutDetails.extend({
+		className: 'putswf_video-mediaframe-details',
+		template:  media.template('putswf_video-details'),
+
+		initialize: function() {
+			//_.bindAll(this, 'success');
+			//this.players = [];
+			//this.listenTo( this.controller, 'close', wp.media.putswf_mixin.unsetPlayers );
+			//this.on( 'ready', this.setPlayer );
+			this.on( 'media:setting:remove', wp.media.putswf_mixin.unsetPlayers, this );
+			//this.on( 'media:setting:remove', this.render );
+			//this.on( 'media:setting:remove', this.setPlayer );
+			//this.events = _.extend( this.events, {
+			//	'click .remove-setting' : 'removeSetting',
+			//	'change .content-track' : 'setTracks',
+			//	'click .remove-track' : 'setTracks',
+			//	'click .add-media-source' : 'addSource'
+			//} );
+
+			media.view.MediaFrame.Putswf_mediaDetails.prototype.initialize.apply( this, arguments );
+		},
+
+		setMedia: function() {
+			var v1 = this.$('.evhh5v_vidobjdiv'),
+				v2 = this.$('.wp-putswf_video-shortcode'),
+				video = v1 || v2,
+				found = video.find( 'source' ) || video.find( 'canvas' );
+console.log('CALLED: 31 media.view.Putswf_videoDetails::setMedia');
+console.log('video == ' + (video == v1 ? '.evhh5v_vidobjdiv' : '.wp-putswf_video-shortcode'));
+
+			if ( found ) {
+				video.show();
+			} else {
+				video.hide();
+				this.media = false;
+			}
+			//if ( video.find( 'source' ).length ) {
+			//	if ( video.is(':hidden') ) {
+			//		video.show();
+			//	}
+            //
+			//	if ( ! video.hasClass('youtube-video') ) {
+			//		this.media = media.view.MediaFrame.Putswf_mediaDetails.prepareSrc( video.get(0) );
+			//	} else {
+			//		this.media = video.get(0);
+			//	}
+			//} else {
+			//	video.hide();
+			//	this.media = false;
+			//}
+
+			return this;
+		}
+	});
+
+	// TITLE
+	media.controller.Putswf_videoDetails = media.controller.State.extend({
+		defaults: {
+			id: 'putswf_video-details', //'putswf_video', //
+			toolbar: 'putswf_video-details',
+			title: 'SWFPut Video Details', //l10n.putswf_videoDetailsTitle,
+			content: 'putswf_video-details',
+			menu: 'putswf_video-details',
+			router: false,
+			priority: 60
+		},
+
+		initialize: function( options ) {
+console.log('CONTROLLER: media.controller.Putswf_videoDetails::initialize -- ' + arguments);
+			this.media = options.media;
+			media.controller.State.prototype.initialize.apply( this, arguments );
+		}
+	});
+
+	// media.view.MediaFrame.Putswf_mediaDetails
+	media.view.MediaFrame.Putswf_videoDetails = media.view.MediaFrame.MediaDetails.extend({
+		defaults: {
+			id:      'putswf_video',
+			url:     '',
+			menu:    'putswf_video-details',
+			content: 'putswf_video-details',
+			toolbar: 'putswf_video-details',
+			type:    'link',
+			title:    'SWFPut Video -- media.view.MediaFrame.Putswf_videoDetails', //l10n.putswf_videoDetailsTitle,
+			priority: 120
+		},
+
+		initialize: function( options ) {
+			this.media = options.media;
+console.log('CALLED: 1 media.view.MediaFrame.Putswf_videoDetails::initialize');
+			options.DetailsView = media.view.Putswf_videoDetails;
+			options.cancelText = 'Cancel'; //l10n.putswf_videoDetailsCancel;
+			options.addText = 'Add'; //l10n.putswf_videoAddSourceTitle;
+			media.view.MediaFrame.MediaDetails.prototype.initialize.call( this, options );
+		},
+
+		bindHandlers: function() {
+console.log('CALLED: 3 media.view.MediaFrame.Putswf_videoDetails::bindHandlers');
+			media.view.MediaFrame.MediaDetails.prototype.bindHandlers.apply( this, arguments );
+			//media.view.MediaFrame.Putswf_videoDetails.prototype.bindHandlers.apply( this, arguments );
+
+			this.on( 'toolbar:render:replace-putswf_video', this.renderReplaceToolbar, this );
+			this.on( 'toolbar:render:add-putswf_video-source', this.renderAddSourceToolbar, this );
+			//this.on( 'toolbar:render:select-poster-image', this.renderSelectPosterImageToolbar, this );
+			//this.on( 'toolbar:render:add-track', this.renderAddTrackToolbar, this );
+		},
+
+		createStates: function() {
+console.log('CALLED: 2 media.view.MediaFrame.Putswf_videoDetails::createStates');
+			this.states.add([
+				new media.controller.Putswf_videoDetails({
+					media: this.media
+				}),
+            
+				new media.controller.MediaLibrary( {
+					type: 'video',
+					id: 'replace-putswf_video',
+					title: 'Replace Media', //l10n.putswf_videoReplaceTitle,
+					toolbar: 'replace-putswf_video',
+					media: this.media,
+					menu: 'putswf_video-details'
+				} ),
+            
+				new media.controller.MediaLibrary( {
+					type: 'putswf_video',
+					id: 'add-putswf_video-source',
+					title: 'Add Media', //l10n.putswf_videoAddSourceTitle,
+					toolbar: 'add-putswf_video-source',
+					media: this.media,
+					menu: false
+				} ),
+			]);
+		},
+
+		renderSelectPosterImageToolbar: function() {
+			this.setPrimaryButton( l10n.putswf_videoSelectPosterImageTitle, function( controller, state ) {
+				var urls = [], attachment = state.get( 'selection' ).single();
+
+				controller.media.set( 'poster', attachment.get( 'url' ) );
+				state.trigger( 'set-poster-image', controller.media.toJSON() );
+
+				_.each( wp.media.view.settings.embedExts, function (ext) {
+					if ( controller.media.get( ext ) ) {
+						urls.push( controller.media.get( ext ) );
+					}
+				} );
+
+				wp.ajax.send( 'set-attachment-thumbnail', {
+					data : {
+						urls: urls,
+						thumbnail_id: attachment.get( 'id' )
+					}
+				} );
+			} );
+		},
+
+		renderReplaceToolbar: function() {
+			this.setPrimaryButton( l10n.replace, function( controller, state ) {
+				var attachment = state.get( 'selection' ).single();
+console.log('CALLED: 52 renderReplaceToolbar -- att == ' + attachment);
+				controller.media.changeAttachment( attachment );
+				state.trigger( 'replace', controller.media.toJSON() );
+			} );
+		},
+
+		renderAddTrackToolbar: function() {
+			this.setPrimaryButton( l10n.putswf_videoAddTrackTitle, function( controller, state ) {
+				var attachment = state.get( 'selection' ).single(),
+					content = controller.media.get( 'content' );
+
+				if ( -1 === content.indexOf( attachment.get( 'url' ) ) ) {
+					content += [
+						'<track srclang="en" label="English"kind="subtitles" src="',
+						attachment.get( 'url' ),
+						'" />'
+					].join('');
+
+					controller.media.set( 'content', content );
+				}
+				state.trigger( 'add-track', controller.media.toJSON() );
+			} );
+		}
+		,
+		renderAddSourceToolbar: function() {
+			this.setPrimaryButton( this.addText, function( controller, state ) {
+				var attachment = state.get( 'selection' ).single();
+				controller.media.setSource( attachment );
+				state.trigger( 'add-source', controller.media.toJSON() );
+			} );
+		}
+	});
+
+	wp.media.putswf_mixin = {
+		putswfSettings: baseSettings,
+
+		removeAllPlayers: function() {
+			var p;
+
+			//if ( window.mejs && window.mejs.players ) {
+			//	for ( p in window.mejs.players ) {
+			//		window.mejs.players[p].pause();
+			//		this.removePlayer( window.mejs.players[p] );
+			//	}
+			//}
+		},
+
+		/**
+		 * Override the MediaElement method for removing a player.
+		 *	MediaElement tries to pull the audio/video tag out of
+		 *	its container and re-add it to the DOM.
+		 */
+		removePlayer: function(t) {
+			//var featureIndex, feature;
+            //
+			//if ( ! t.options ) {
+			//	return;
+			//}
+            //
+			//// invoke features cleanup
+			//for ( featureIndex in t.options.features ) {
+			//	feature = t.options.features[featureIndex];
+			//	if ( t['clean' + feature] ) {
+			//		try {
+			//			t['clean' + feature](t);
+			//		} catch (e) {}
+			//	}
+			//}
+            //
+			//if ( ! t.isDynamic ) {
+			//	t.$node.remove();
+			//}
+            //
+			//if ( 'native' !== t.media.pluginType ) {
+			//	t.media.remove();
+			//}
+            //
+			//delete window.mejs.players[t.id];
+            //
+			//t.container.remove();
+			//t.globalUnbind();
+			//delete t.node.player;
+		},
+		/**
+		 * Allows any class that has set 'player' to a MediaElementPlayer
+		 *  instance to remove the player when listening to events.
+		 *
+		 *  Examples: modal closes, shortcode properties are removed, etc.
+		 */
+		unsetPlayers : function() {
+			//if ( this.players && this.players.length ) {
+			//	_.each( this.players, function (player) {
+			//		player.pause();
+			//		wp.media.putswf_mixin.removePlayer( player );
+			//	} );
+			//	this.players = [];
+			//}
+		}
+	}; // wp.media.putswf_mixin = {
+
+	wp.media.putswf_video = {
+		coerce : wp.media.coerce,
+
+		defaults : baseSettings,
+
+		edit : function( data ) {
+			var frame,
+				shortcode = wp.shortcode.next( 'putswf_video', data ).shortcode,
+				attrs, aext,
+				MediaFrame = media.view.MediaFrame;
+
+			attrs = shortcode.attrs.named;
+			attrs.content = shortcode.content;
+			attrs.shortcode = shortcode;
+			aext = {
+				frame: 'putswf_video', //'video', //
+				state: 'putswf_video-details',
+				metadata: _.defaults( attrs, this.defaults )
+			};
+
+console.log('FRAME (1): "frame" meta == ' + attrs.shortcode.string());
+			frame = new media.view.MediaFrame.Putswf_videoDetails( aext );
+			//frame = new media.view.MediaFrame.Putswf_mediaDetails( aext );
+			
+console.log('FRAME (2): "frame" meta == ' + aext.metadata);
+			media.frame = frame;
+
+			return frame;
+		},
+
+		shortcode : function( model ) {
+			var self = this, content;
+console.log('CALLED: 1 wp.media.putswf_video::shortcode; model type ' + typeof model);
+
+			_.each( this.defaults, function( value, key ) {
+				model[ key ] = self.coerce( model, key );
+
+				if ( value === model[ key ] ) {
+					delete model[ key ];
+				}
+			});
+
+			content = model.content;
+			delete model.content;
+
+			return new wp.shortcode({
+				tag: 'putswf_video',
+				attrs: model,
+				content: content
+			});
+		}
 	};
+
+}(wp, jQuery, _, Backbone));
+
+} else { // if ( typeof wp.mce.views.register
+// Tried and true, but uses old metabox form
+tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
+	var Node  = tinymce.html.Node;
+	var ed    = editor;
+	var url   = plurl;
+	var urlfm = url.split('/');
+	var fpo   = SWFPut_video_utility_obj.fpo;
+
+	urlfm[urlfm.length - 1] = 'mce_ifm.php'; // iframe doc
+	urlfm = urlfm.join('/');
+
+	// small lib
+	var strcch = function(s, to_lc) {
+		if ( to_lc ) return s.toLowerCase();
+		return s.toUpperCase();
+	};
+	var str_lc = function(s) { return strcch(s, true); };
+	var str_uc = function(s) { return strcch(s, false); };
+	var strccmp = function(s, c) { return (str_lc(s) === str_lc(c)); };
+	// nodeName comp. is common, and case unreliable
+	var nN_lc = function(n) { return str_lc(n.nodeName); };
+	var nN_uc = function(n) { return str_uc(n.nodeName); };
+	var nNcmp = function(n, c) { return (nN_lc(n) === str_lc(c)); };
+	
+
+	var defs  = SWFPut_video_utility_obj.defprops;
 
 	ed.on('init', function() {
 	});
@@ -565,3 +1352,5 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 	};
 		
 });
+
+} // if ( typeof wp.mce.views.register
