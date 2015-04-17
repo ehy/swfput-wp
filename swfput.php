@@ -578,7 +578,7 @@ class SWF_put_evh {
 		if ( ! is_array($a) ) {
 			$a = array();
 		}
-		// checkbox id will 'verbose_show-hide'
+		// checkbox id will be 'verbose_show-hide'
 		$a['verbose_show'] = __('Section introductions', 'swfput_l10n');
 		return $a;
 	}

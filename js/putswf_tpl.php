@@ -28,6 +28,13 @@
  * Underscores/Backbone, but using the operator overloads WP
  * defines in wp-includes/js/wp-util.js; it is used from there.
  */
+
+/**
+ *  scripts here have an object available named "data" with
+ *  property objects controller, model, attchment, selection,
+ *  mode, title, modal, uploader, library, multiple, and
+ *  state ( == library)
+ */
 ?>
 <script type="text/html" id="tmpl-putswf_video-details">
 	<#
@@ -35,18 +42,7 @@
 		dvif = false,
 		head = '',
 		cont = '',
-		_putswf_mk_shortcode = function(sc, atts, cap) {
-			var c = cap || '', s = '[' + sc,
-			    defs = SWFPut_video_utility_obj.defprops;
-			for ( var t in atts ) {
-				if ( defs[t] === undefined ) {
-					continue;
-				}
-				
-				s += ' ' + t + '="' + atts[t] + '"';
-			}
-			return s + ']' + c + '[/' + sc + ']'
-		},
+		_putswf_mk_shortcode = wp.media.putswf_video._mk_shortcode,
 		_putswf__putfrm = function () {
 			var _tifd = '', _tif = '';
 			setTimeout( function () {
@@ -64,6 +60,7 @@
 				}
 				
 				_tif = document.createElement('iframe');
+				ifrm = _tif;
 				_tifd.appendChild(_tif);
 				_tif.setAttribute('id', 'putswf-dlg-content-iframe');
 				_tif.setAttribute('style', 'width:100%; height:'+h+'px;');
@@ -122,25 +119,33 @@
 						'<body id="putswf-iframe-body-wrapper" class="aint-got-none">' +
 							'<div id="putswf-iframe-content-wrapper">' +
 								cont +
+								'<br/><span>&nbsp;</span>' +
 							'</div>' +
 						'</body>' +
 					'</html>'
 				); 
 				_tif.document.close();
-				ifrm = _tif;
 	
-				var resize = function() {
-					if ( ifrm && ifrm.document ) {
-						var h = jQuery( ifrm.document.body ).height();
-						jQuery( ifrm ).height( h );
+				var mutobsvr = window.MutationObserver
+					|| window.WebKitMutationObserver
+					|| window.MozMutationObserver || false,
+				    resize = function() {
+					if ( ifrm && _tif ) {
+						var hd = jQuery( _tif.document.body ).height(),
+						    hf = jQuery( ifrm ).height();
+						// BUG: need some padding
+						hd += 4;
+						if ( hf < hd ) {
+							jQuery( ifrm ).height( hd );
+						}
 					}
 				};
 
 				try {
-					if ( MutationObserver ) {
-						var nod = ifrm.document;
+					if ( mutobsvr ) {
+						var nod = _tif.document;
 
-						new MutationObserver( _.debounce( function() {
+						new mutobsvr( _.debounce( function() {
 							resize();
 						}, 100 ) )
 						.observe( nod, {
@@ -159,12 +164,129 @@
 				}
 			}, 50 );
 		},
+		_putswf_frolic_in_data = function (d) {
+			var self = this,
+			    oldatts = d.model.attributes,
+			    newatts = (d.attachment && d.attachment.attributes)
+			        ? d.attachment.attributes : false,
+			    sctag   = oldatts.shortcode.tag,
+			    caption = ( newatts && newatts.caption )
+			        ? newatts.caption : oldatts.content
+			    vid_add =
+			        ( newatts && newatts.putswf_action === 'add_video' )
+			        ? true : false,
+			    vid_rpl =
+			        ( newatts && newatts.putswf_action === 'replace_video' )
+			        ? true : false,
+			    vid_op = vid_add || vid_rpl || false,
+			    // HACK: multi obj tagged onto single() obj
+			    // for 'Add video' multiple selection
+			    multi = newatts.putswf_attach_all || false;
+
+			// Media frame poster tab
+			if ( newatts && newatts.putswf_action === 'poster' ) {
+				var uri =
+				    newatts.id || newatts.url || newatts.link || '';
+				oldatts.iimage = uri;
+			}
+			
+			// Media frame add/replace video tab
+			if ( vid_op ) {
+				if ( vid_rpl ) {
+					// TEMP until cation option
+					oldatts.content = caption;
+				}
+
+				if ( newatts && (newatts.id || newatts.url) || multi ) {
+					var m = newatts.id || newatts.url,
+					    t = newatts.subtype
+					        ? (newatts.subtype.split('-').pop())
+					        : (newatts.filename
+					            ? newatts.filename.split('.').pop()
+					            : false
+					        );
+
+					oldatts.altvideo = oldatts.altvideo || '';
+					
+					if ( ! multi && t && t.toLowerCase() === 'flv' ) {
+						oldatts.url = m;
+						oldatts.altvideo = '';
+					} else {
+						if ( vid_rpl ) {
+							if ( t && t.toLowerCase() === 'flv' ) {
+								oldatts.url = m;
+								oldatts.altvideo = '';
+							} else {
+								oldatts.altvideo = m;
+								oldatts.url = '';
+							}
+						} else {
+							// for html5 video, shortcode attr accepts
+							// '|' separated list -- presumably the
+							// same video in the supported types
+							// (but not necessarily so)
+							var am = [];
+
+							if ( newatts.putswf_attach_all ) {
+								var ta = newatts.putswf_attach_all.toArray();
+
+								for ( var i = 0; i < ta.length; i++ ) {
+									var tatt = ta[i].attributes,
+								        t = tatt.subtype
+								            ? ( tatt.subtype.split('-').pop())
+								            : ( tatt.filename
+								                    ? tatt.filename.split('.').pop()
+								                    : false );
+
+									am[i] = {
+										uri: tatt.id || tatt.url,
+										flv: ( t && t.toLowerCase() === 'flv' ) === true
+									};
+								}
+							} else {
+								am[0] = {
+									uri: m,
+									flv: ( t && t.toLowerCase() === 'flv' ) === true
+								};
+							}
+
+							for ( var i = 0; i < am.length; i++ ) {
+								var o;
+								
+								m = am[i].uri;
+								
+								if ( am[i].flv ) {
+									oldatts.url = m; // last one wins
+									continue;
+								}
+								
+								if ( oldatts.altvideo.indexOf(m) >= 0 ) {
+									continue;
+								}
+								
+								o = oldatts.altvideo.length > 0
+								    ? (oldatts.altvideo + '|') : '';
+								
+								oldatts.altvideo = o + m;
+							}
+						}
+					}
+				}
+			} else {
+				caption = oldatts.content;
+			}
+
+			return {
+				code: _putswf_mk_shortcode(sctag, oldatts, caption),
+				tag:  sctag
+			};
+		},
 		_putswf_fetch = function () {
 			var self = this,
 			    pid = jQuery( '#post_ID' ).val() || 0,
-			    sctag = data.model.attributes.shortcode.tag,
-			    caption = data.model.attributes.content,
-			    scstr = _putswf_mk_shortcode(sctag, data.model.attributes, caption);
+			    atts = _putswf_frolic_in_data(data),
+			    sctag = atts.tag,
+			    scstr = atts.code;
 
 			wp.ajax.send( 'parse_putswf_video_shortcode', {
 				data: {
@@ -177,7 +299,6 @@
 				if ( response ) {
  					head = response.head;
 					cont = response.body;
-					//console.log('.DONE OK: HEAD: ' + head);
 				} else {
 					head = false;
 					cont = '<p>FAIL to get wp_ajax response</p>'
@@ -199,22 +320,24 @@
 	</div>
 	<#
 	if ( false ) {
-		var dat = data.model;
-		for ( var t in dat ) {
-			console.log("TMPL: dat."+t+" == "+dat[t]);
-		}
-		dat = data.model.attributes;
-		for ( var t in dat ) {
-			console.log("ATTR: dat."+t+" == "+dat[t]);
-		}
-		dat = data.model.attributes.shortcode;
-		for ( var t in dat ) {
-			console.log("SCOD: dat."+t+" == "+dat[t]);
-		}
-		console.log("SCOD.string: dat.string() == " + dat.string());
-		dat = data;
-		for ( var t in dat ) {
-			console.log("DATA: dat."+t+" == "+dat[t]);
+		//var dat = data.model;
+		//for ( var t in dat ) {
+		//	console.log("TMPL: dat."+t+" == "+dat[t]);
+		//}
+		//dat = data.model.attributes;
+		//for ( var t in dat ) {
+		//	console.log("ATTR: dat."+t+" == "+dat[t]);
+		//}
+		//dat = data.model.attributes.shortcode;
+		//for ( var t in dat ) {
+		//	console.log("SCOD: dat."+t+" == "+dat[t]);
+		//}
+		//console.log("SCOD.string: dat.string() == " + dat.string());
+		if ( data.attachment.attributes ) {
+			var dat = data.attachment.attributes;
+			for ( var t in dat ) {
+				console.log("DATA: dat."+t+" == "+dat[t]);
+			}
 		}
 	}
 	#>

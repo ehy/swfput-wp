@@ -174,7 +174,7 @@ if ( SWFPut_video_utility_obj._bbone_mvc_opt === true
 				var MutationObserver = window.MutationObserver
 					|| window.WebKitMutationObserver
 					|| window.MozMutationObserver || false,
-					importStyles = true; //this.type === 'putswf_video';
+					importStyles = true;
 	
 				if ( head || body.indexOf( '<script' ) !== -1 ) {
 					this.getNodes( function ( editor, node, content ) {
@@ -373,8 +373,8 @@ if ( SWFPut_video_utility_obj._bbone_mvc_opt === true
 					}
 			}
 			,
-			stopPlayers: function( remove ) {
-				var rem = remove; // unused:  === 'remove';
+			stopPlayers: function( event_arg ) {
+				var rem = event_arg; // might be Event or string
 
 				this.getNodes( function( editor, node, content ) {
 					var p, win,
@@ -383,13 +383,24 @@ if ( SWFPut_video_utility_obj._bbone_mvc_opt === true
 					if ( iframe && ( win = iframe.contentWindow ) && win.evhh5v_sizer_instances ) {
 						try {
 							for ( p in win.evhh5v_sizer_instances ) {
-								var v = p.va_o;
+								var v = win.evhh5v_sizer_instances[p].va_o;
 
 								if ( v ) {
-									v.button_click({id: 'stop'});
+									// use 'stop()' or 'pause()'
+									// the latter is gentler
+									v.pause();
 								}
 							}
-						} catch( er ) {}
+						} catch( er ) {
+							var e = err.message;
+							console.log('SWFPut in stopPlayers: ' + e);
+						}
+						
+						if ( rem === 'remove' ) {
+							console.log('UNBIND -- STOP PLAYERS');
+							delete iframe.contentWindow;
+							delete iframe;
+						}
 					}
 				});
 			}
@@ -412,13 +423,11 @@ if ( SWFPut_video_utility_obj._bbone_mvc_opt === true
 				return;
 			}
 			
-		console.log('registered-toView:: content == ' + content);
 			return {
 				index: match.index,
 				content: match.content,
 				options: {
 					shortcode: match.shortcode,
-					//height: auto
 				}
 			};
 		}
@@ -438,15 +447,9 @@ if ( SWFPut_video_utility_obj._bbone_mvc_opt === true
 				self = this,
 				frame, data, callback;
 
-		//console.log('registered-view::edit typeof node == ' + typeof node);
-		//for ( var _attr in node ) {
-		//	console.log('node.'+_attr+" == '> "+node[_attr]+" <'");
-		//}
-
 			$( document ).trigger( 'media:edit' );
 
 			data = window.decodeURIComponent( $( node ).attr('data-wpview-text') );
-		console.log('registered-view::edit data == ' + data);
 			frame = media.edit( data );
 			frame.on( 'close', function() {
 				frame.detach();
@@ -458,6 +461,7 @@ if ( SWFPut_video_utility_obj._bbone_mvc_opt === true
 				wp.mce.views.refreshView( self, shortcode );
 				frame.detach();
 			};
+
 			if ( _.isArray( self.state ) ) {
 				_.each( self.state, function (state) {
 					frame.state( state ).on( 'update', callback );
@@ -465,34 +469,35 @@ if ( SWFPut_video_utility_obj._bbone_mvc_opt === true
 			} else {
 				frame.state( self.state ).on( 'update', callback );
 			}
+
 			frame.open();
 		}
-		/*
-		,
-		*/
 	} ) ); // mce.views.register( 'putswf_video', _.extend( {}, view_def, {
 
 	var media = wp.media,
 		baseSettings = SWFPut_video_utility_obj.defprops,
-		l10n = {}; //typeof _wpMediaViewsL10n === 'undefined' ? {} : _wpMediaViewsL10n;
+		l10n = typeof _wpMediaViewsL10n === 'undefined' ? {} : _wpMediaViewsL10n;
 
 	// MODEL: available as 'data.model' within frame content template
 	media.model.putswf_postMedia = Backbone.Model.extend({
-		constructor: function() {
-console.log('CALLED: 19: media.model.putswf_postMedia::ctor -- ' + arguments);
-for ( var a in arguments ) {
-	console.log('arguments['+a+'] == >"'+arguments[a]+'"<');
-}
-			Backbone.Model.apply(this, arguments);
-		}
-		,
+//		constructor: function() {
+//console.log('CALLED: 19: media.model.putswf_postMedia::ctor -- ' + arguments);
+//for ( var a in arguments ) {
+//	console.log('arguments['+a+'] == >"'+arguments[a]+'"<');
+//}
+//			Backbone.Model.apply(this, arguments);
+//		}
+//		,
 
 		initialize: function() {
-console.log('CALLED: 20: media.model.putswf_postMedia::initialize -- ' + this.attributes);
-for ( var a in this.attributes ) {
-	console.log('putswf_postMedia.attributes['+a+'] == >"'+this.attributes[a]+'"<');
-}
 			this.attachment = false;
+
+console.log('CALLED: 20: media.model.putswf_postMedia::initialize');
+for ( var a in arguments ) {
+	console.log('CALLED: 20  arguments['+a+'] == >"'+arguments[a]+'"<');
+}
+
+			Backbone.Model.prototype.initialize( arguments );
 		},
 
 		setSource: function( attachment ) {
@@ -524,6 +529,7 @@ console.log('CALLED: 22: media.model.putswf_postMedia::changeAttachment');
 		}
 	}); // media.model.putswf_postMedia = Backbone.Model.extend({
 
+	// media.view.MediaFrame.Select -> media.view.MediaFrame.MediaDetails
 	media.view.MediaFrame.Putswf_mediaDetails = media.view.MediaFrame.MediaDetails.extend({ // = media.view.MediaFrame.Select.extend({
 		defaults: {
 			id:      'media',
@@ -535,27 +541,18 @@ console.log('CALLED: 22: media.model.putswf_postMedia::changeAttachment');
 			priority: 121 // 120
 		},
 
-		constructor: function() {
-console.log('CALLED: 11: media.view.MediaFrame.Putswf_mediaDetails::ctor -- ' + arguments[0]);
-for ( var a in arguments[0] ) {
-	console.log('arguments[0]['+a+'] == >"'+arguments[0][a]+'"<');
-}
-			media.view.MediaFrame.MediaDetails.apply(this, arguments);
-			//media.view.MediaFrame.Putswf_mediaDetails.prototype.initialize.apply(this, arguments);
-		}
-		,
-
 		initialize: function( options ) {
+			var controller = options.controller || false,
+			    model = options.model || false,
+			    attachment = options.attachment || false;
+			
 			this.DetailsView = options.DetailsView;
 			this.cancelText = options.cancelText;
 			this.addText = options.addText;
 console.log('CALLED: 12: media.view.MediaFrame.Putswf_mediaDetails::initialize -- ' + arguments);
-for ( var a in options ) {
-	console.log('options['+a+'] == >"'+options[a]+'"<');
-}
 
 			this.media = new media.model.putswf_postMedia( options.metadata ); //PostMedia( options.metadata );
-			this.options.selection = new media.model.Selection( this.media.attachment, { multiple: false } );
+			this.options.selection = new media.model.Selection( this.media.attachment, { multiple: true } );// { multiple: false } ); //
 			media.view.MediaFrame.MediaDetails.prototype.initialize.apply( this, arguments );
 		}
 		,
@@ -563,7 +560,8 @@ for ( var a in options ) {
 		bindHandlers: function() {
 			var menu = this.defaults.menu;
 
-			media.view.MediaFrame.Select.prototype.bindHandlers.apply( this, arguments );
+			//media.view.MediaFrame.Select.prototype.bindHandlers.apply( this, arguments );
+			media.view.MediaFrame.MediaDetails.prototype.bindHandlers.apply( this, arguments );
 
 			//this.on( 'menu:create:' + menu, this.createMenu, this );
 			this.on( 'content:render:' + menu, this.renderDetailsContent, this );
@@ -670,6 +668,24 @@ console.log('CONTROLLER: media.controller.Putswf_videoDetails::initialize -- ' +
 			this.media = options.media;
 			media.controller.State.prototype.initialize.apply( this, arguments );
 		}
+
+//		,
+//		setSource: function( attachment ) {
+//console.log('CONTROLLER setSource: ');
+//			this.attachment = attachment;
+//			this.extension = attachment.get( 'filename' ).split('.').pop();
+//
+//			if ( this.get( 'src' ) && this.extension === this.get( 'src' ).split('.').pop() ) {
+//				this.unset( 'src' );
+//			}
+//
+//			if ( _.contains( wp.media.view.settings.embedExts, this.extension ) ) {
+//				this.set( this.extension, this.attachment.get( 'url' ) );
+//			} else {
+//				this.unset( this.extension );
+//			}
+//		}
+
 	});
 
 	// media.view.MediaFrame.Putswf_mediaDetails
@@ -681,37 +697,33 @@ console.log('CONTROLLER: media.controller.Putswf_videoDetails::initialize -- ' +
 			content: 'putswf_video-details',
 			toolbar: 'putswf_video-details',
 			type:    'link',
-			title:    'SWFPut Video -- media.view.MediaFrame.Putswf_videoDetails', //l10n.putswf_videoDetailsTitle,
+			title:    'SWFPut Video -- Media', //l10n.putswf_videoDetailsTitle,
 			priority: 120
 		},
 
 		initialize: function( options ) {
 			this.media = options.media;
-console.log('CALLED: 1 media.view.MediaFrame.Putswf_videoDetails::initialize');
 			options.DetailsView = media.view.Putswf_videoDetails;
-			options.cancelText = 'Cancel'; //l10n.putswf_videoDetailsCancel;
-			options.addText = 'Add'; //l10n.putswf_videoAddSourceTitle;
+			options.cancelText = 'Cancel Edit'; //l10n.putswf_videoDetailsCancel;
+			options.addText = 'Add Video'; //l10n.putswf_videoAddSourceTitle;
 			media.view.MediaFrame.MediaDetails.prototype.initialize.call( this, options );
 		},
 
 		bindHandlers: function() {
-console.log('CALLED: 3 media.view.MediaFrame.Putswf_videoDetails::bindHandlers');
 			media.view.MediaFrame.MediaDetails.prototype.bindHandlers.apply( this, arguments );
-			//media.view.MediaFrame.Putswf_videoDetails.prototype.bindHandlers.apply( this, arguments );
 
 			this.on( 'toolbar:render:replace-putswf_video', this.renderReplaceToolbar, this );
 			this.on( 'toolbar:render:add-putswf_video-source', this.renderAddSourceToolbar, this );
-			//this.on( 'toolbar:render:select-poster-image', this.renderSelectPosterImageToolbar, this );
+			this.on( 'toolbar:render:putswf_poster-image', this.renderSelectPosterImageToolbar, this );
 			//this.on( 'toolbar:render:add-track', this.renderAddTrackToolbar, this );
 		},
 
 		createStates: function() {
-console.log('CALLED: 2 media.view.MediaFrame.Putswf_videoDetails::createStates');
 			this.states.add([
-				new media.controller.Putswf_videoDetails({
+				new media.controller.Putswf_videoDetails( {
 					media: this.media
-				}),
-            
+				} ),
+
 				new media.controller.MediaLibrary( {
 					type: 'video',
 					id: 'replace-putswf_video',
@@ -722,72 +734,88 @@ console.log('CALLED: 2 media.view.MediaFrame.Putswf_videoDetails::createStates')
 				} ),
             
 				new media.controller.MediaLibrary( {
-					type: 'putswf_video',
+					type: 'video',
 					id: 'add-putswf_video-source',
 					title: 'Add Media', //l10n.putswf_videoAddSourceTitle,
 					toolbar: 'add-putswf_video-source',
 					media: this.media,
-					menu: false
+					multiple: true,
+					//syncSelection: true,
+					menu: 'putswf_video-details'
+					//menu: false
+				} ),
+            
+				new media.controller.MediaLibrary( {
+					type: 'image',
+					id: 'select-poster-image',
+					title: l10n.SelectPosterImageTitle
+					    ? l10n.SelectPosterImageTitle
+					    : 'Set Initial (poster) Image',
+					toolbar: 'putswf_poster-image',
+					media: this.media,
+					menu: 'putswf_video-details'
 				} ),
 			]);
 		},
 
 		renderSelectPosterImageToolbar: function() {
-			this.setPrimaryButton( l10n.putswf_videoSelectPosterImageTitle, function( controller, state ) {
-				var urls = [], attachment = state.get( 'selection' ).single();
-
-				controller.media.set( 'poster', attachment.get( 'url' ) );
-				state.trigger( 'set-poster-image', controller.media.toJSON() );
-
-				_.each( wp.media.view.settings.embedExts, function (ext) {
-					if ( controller.media.get( ext ) ) {
-						urls.push( controller.media.get( ext ) );
-					}
-				} );
-
-				wp.ajax.send( 'set-attachment-thumbnail', {
-					data : {
-						urls: urls,
-						thumbnail_id: attachment.get( 'id' )
-					}
-				} );
-			} );
-		},
-
-		renderReplaceToolbar: function() {
-			this.setPrimaryButton( l10n.replace, function( controller, state ) {
+			this.setPrimaryButton( 'Select Poster Image', function( controller, state ) {
 				var attachment = state.get( 'selection' ).single();
-console.log('CALLED: 52 renderReplaceToolbar -- att == ' + attachment);
+
+				attachment.attributes.putswf_action = 'poster';
 				controller.media.changeAttachment( attachment );
 				state.trigger( 'replace', controller.media.toJSON() );
 			} );
 		},
 
-		renderAddTrackToolbar: function() {
-			this.setPrimaryButton( l10n.putswf_videoAddTrackTitle, function( controller, state ) {
-				var attachment = state.get( 'selection' ).single(),
-					content = controller.media.get( 'content' );
+		renderReplaceToolbar: function() {
+			this.setPrimaryButton( 'Replace Video', function( controller, state ) {
+				var attachment = state.get( 'selection' ).single();
 
-				if ( -1 === content.indexOf( attachment.get( 'url' ) ) ) {
-					content += [
-						'<track srclang="en" label="English"kind="subtitles" src="',
-						attachment.get( 'url' ),
-						'" />'
-					].join('');
-
-					controller.media.set( 'content', content );
-				}
-				state.trigger( 'add-track', controller.media.toJSON() );
+				attachment.attributes.putswf_action = 'replace_video';
+				controller.media.changeAttachment( attachment );
+				state.trigger( 'replace', controller.media.toJSON() );
 			} );
-		}
-		,
+		},
+
 		renderAddSourceToolbar: function() {
 			this.setPrimaryButton( this.addText, function( controller, state ) {
-				var attachment = state.get( 'selection' ).single();
+				var attachment = state.get( 'selection' ).single(); //; //
+				var attach_all = state.get( 'selection' ) || false;
+
+				attachment.attributes.putswf_action = 'add_video';
+				// w/ multiple add the full del monte --
+				// dirty hack unto blech -- but there are errors w/
+				// the multiple selection I haven't figured out yet
+				if ( attach_all && attach_all.multiple ) {
+					attachment.attributes.putswf_attach_all = attach_all;
+				} else {
+					console.log('MEDIA ADD ATTACH__ALL == '+ attach_all);
+				}
+
 				controller.media.setSource( attachment );
 				state.trigger( 'add-source', controller.media.toJSON() );
 			} );
-		}
+		},
+		
+		//renderAddTrackToolbar: function() {
+		//	this.setPrimaryButton( 'Add Subtitles', function( controller, state ) {
+		//		var attachment = state.get( 'selection' ).single(),
+		//			content = controller.media.get( 'content' );
+        //
+		//		if ( -1 === content.indexOf( attachment.get( 'url' ) ) ) {
+		//			content += [
+		//				'<track srclang="en" label="English"kind="subtitles" src="',
+		//				attachment.get( 'url' ),
+		//				'" />'
+		//			].join('');
+        //
+		//			controller.media.set( 'content', content );
+		//		}
+		//		state.trigger( 'add-track', controller.media.toJSON() );
+		//	} );
+		//}
+		//,
 	});
 
 	wp.media.putswf_mixin = {
@@ -858,9 +886,34 @@ console.log('CALLED: 52 renderReplaceToolbar -- att == ' + attachment);
 	}; // wp.media.putswf_mixin = {
 
 	wp.media.putswf_video = {
-		coerce : wp.media.coerce,
+		//coerce : wp.media.coerce,
 
 		defaults : baseSettings,
+
+		_mk_shortcode : function(sc, atts, cap) {
+			var c = cap || '', s = '[' + sc,
+			    defs = wp.media.putswf_video.defaults;
+			for ( var t in atts ) {
+				if ( defs[ t ] === undefined ) {
+					continue;
+				}
+				
+				s += ' ' + t + '="' + atts[t] + '"';
+			}
+			return s + ']' + c + '[/' + sc + ']'
+		},
+
+		_atts_filter : function(atts) {
+			var defs = wp.media.putswf_video.defaults;
+			
+			for ( var t in atts ) {
+				if ( defs[ t ] === undefined ) {
+					delete atts[ t ];
+				}
+			}
+			
+			return atts;
+		},
 
 		edit : function( data ) {
 			var frame,
@@ -872,39 +925,27 @@ console.log('CALLED: 52 renderReplaceToolbar -- att == ' + attachment);
 			attrs.content = shortcode.content;
 			attrs.shortcode = shortcode;
 			aext = {
-				frame: 'putswf_video', //'video', //
+				frame: 'putswf_video',
 				state: 'putswf_video-details',
 				metadata: _.defaults( attrs, this.defaults )
 			};
 
-console.log('FRAME (1): "frame" meta == ' + attrs.shortcode.string());
 			frame = new media.view.MediaFrame.Putswf_videoDetails( aext );
-			//frame = new media.view.MediaFrame.Putswf_mediaDetails( aext );
 			
-console.log('FRAME (2): "frame" meta == ' + aext.metadata);
 			media.frame = frame;
 
 			return frame;
 		},
 
-		shortcode : function( model ) {
-			var self = this, content;
-console.log('CALLED: 1 wp.media.putswf_video::shortcode; model type ' + typeof model);
+		shortcode : function( model_atts ) {
+			var content, sc;
 
-			_.each( this.defaults, function( value, key ) {
-				model[ key ] = self.coerce( model, key );
-
-				if ( value === model[ key ] ) {
-					delete model[ key ];
-				}
-			});
-
-			content = model.content;
-			delete model.content;
+			content = model_atts.content;
+			sc = model_atts.shortcode.tag;
 
 			return new wp.shortcode({
-				tag: 'putswf_video',
-				attrs: model,
+				tag: sc,
+				attrs: wp.media.putswf_video._atts_filter(model_atts),
 				content: content
 			});
 		}
