@@ -112,10 +112,141 @@ SWFPut_video_utility_obj_def.prototype = {
 		codebase: "http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,115,0",
 		align: "center",	
 		preload: "image"
+	},
+	
+	// the WP media root object, 'wp'
+	_wp: wp || false,
+	
+	// use wp ajax to fetch attachment data from attachment id integer
+	// -- result_cb is a function to call with results, arg 1 is id
+	// arg 2 is object status: true == ok + response,
+	// null == ok w/o response,
+	// or false on fail, and response
+	// this returns status object w/ status == 0 for pending;
+	// if saved test again for res.status !== 0
+	attachment_data_by_id: function(id, result_cb) {
+		var pid = id,
+		    res = { status: 0, response: null };
+
+		if ( this._wp ) { // 'wp_ajax_get_attachment'
+			this._wp.ajax.send( 'get-attachment', {
+				data: {
+					id: pid
+				}
+			} )
+			.done( function( response ) {
+				res.status = response ? true : null;
+				res.response = response;
+				if ( result_cb && typeof result_cb === 'function' ) {
+					result_cb(id, res);
+				}
+			} )
+			.fail( function( response ) {
+				res.status = false;
+				res.response = response;
+				if ( result_cb && typeof result_cb === 'function' ) {
+					result_cb(id, res);
+				}
+			} );
+		}
+	},
+	
+	// object to hold attachements keyed by attachment id
+	attachments: {},
+	
+	// get an attachment obj from attachments, or by ajax if needed
+	// -- 1st arg is id, 2nd is existing obj to (re)place in table and
+	// is optional, 3rd is an optional callback taking the 2 args
+	// described for 'attachment_data_by_id' plus a 3rd convenience
+	// arg -- the cache object
+	//
+	// -- returns attachment object if possible, false on error, and
+	// null on ajax call with result pending
+	get_attachment_by_id: function(id, attach_put, result_cb) {
+		if ( this.attachments.id === undefined ) {
+			if ( attach_put !== undefined && attach_put ) {
+				this.attachments.id = attach_put;
+				return attach_put;
+			} else {
+				var obj = this.attachments, cb = result_cb || false;
+
+				this.attachment_data_by_id(id, function (_id, _res) {
+					if ( _res.status === true ) {
+						obj[_id] = _res.response;
+					} else {
+						obj[_id] = false;
+					}
+					if ( typeof cb === 'function' ) {
+						cb(_id, _res, obj);
+					}
+				} );
+
+				return null;
+			}
+		} else {
+			if ( attach_put !== undefined && attach_put ) {
+				this.attachments.id = attach_put;
+			}
+			return this.attachments.id;
+		}
+		
+		return false;
 	}
 };
 var SWFPut_video_utility_obj = 
-	new SWFPut_video_utility_obj_def();
+	new SWFPut_video_utility_obj_def(wp || false);
+
+// get an attachment obj from attachments, or by ajax if needed
+// -- 1st arg is id, 2nd is existing obj to (re)place in table and
+// is optional
+function SWFPut_get_attachment_by_id(id, attach_put, result_cb) {
+	return SWFPut_video_utility_obj
+	    ? SWFPut_video_utility_obj.get_attachment_by_id(id, attach_put, result_cb || false)
+	    : false;
+}
+
+// specific to putswf shortcode attr url and altvideo.
+// and iimage -- these might have a URL or WP
+// attachment ID -- in the latter case get the
+// wp "attachment" object w/ ajax and cache the
+// objs for later use
+function SWFPut_cache_shortcode_ids(sc, cb) {
+	var aatt = [
+		sc.get( 'url' ),
+		sc.get( 'altvideo' ),
+		sc.get( 'iimage' )
+	], _cb = (cb && typeof cb === 'function') ? cb : false;
+
+	_.each(aatt, function(s) {
+		if ( s != undefined ) {
+			_.each(s.split('|'), function(t) {
+				var m = t.match(/^[ \t]*([0-9]+)[ \t]*$/);
+				if ( m && m[1] ) {
+					//aid.push(m[1]);
+					var res = SWFPut_get_attachment_by_id(m[1], false, _cb);
+					
+					if ( res !== null && _cb !== false ) {
+						var o = SWFPut_video_utility_obj.attachments;
+						cb(m[1], o[m[1]], o);
+					}
+				}
+			} );
+		}
+	} );
+
+	//_.each(aid, function(id) {
+	//	SWFPut_get_attachment_by_id(id);
+	//} );
+	//for ( var i = 0; i < aid.length; i++ ) {
+	//	var id = aid[i];
+	//	
+	//	SWFPut_get_attachment_by_id(id, false, function(_id, res, o){
+	//		console.log(
+	//		'CB ATTACH stat '+res.status+' for id '+_id+' -- url '+o[_id].url
+	//		);
+	//	});
+	//}
+}
 
 // Utility used in plugin
 function SWFPut_repl_nl(str) {
@@ -134,13 +265,16 @@ function SWFPut_add_button_func(btn) {
 	return false;
 };
 
-// Experimental mvc thing
+// Experimental wp mediad based presentation in/of editor thing
 if ( SWFPut_video_utility_obj._bbone_mvc_opt === true
      && typeof wp.mce.views.register === 'function' ) {
 
 // MVC
 (function(wp, $, _, Backbone) {
-	var mce			= wp.mce;
+	var media = wp.media,
+		baseSettings = SWFPut_video_utility_obj.defprops,
+		l10n = typeof _wpMediaViewsL10n === 'undefined' ? {} : _wpMediaViewsL10n,
+	    mce			= wp.mce;
 
 	var view_def	= mce.putswfMixin = {
 		View: _.extend( {}, mce.av.View, {
@@ -152,6 +286,7 @@ if ( SWFPut_video_utility_obj._bbone_mvc_opt === true
 				var self = this;
 
 				this.shortcode = options.shortcode;
+				this.cache_shortcode_ids(this.shortcode);
 
 				_.bindAll( this, 'setIframes', 'setNodes', 'fetch', 'stopPlayers' );
 				$( this ).on( 'ready', this.setNodes );
@@ -163,8 +298,47 @@ if ( SWFPut_video_utility_obj._bbone_mvc_opt === true
 				this.getEditors( function( editor ) {
 					editor.on( 'hide', self.stopPlayers );
 				});
-			}
-			,
+			},
+			
+			// specific to putswf shortcode attr url and altvideo.
+			// and iimage -- these might have a URL or WP
+			// attachment ID -- in the latter case get the
+			// wp "attachment" object w/ ajax and cache the
+			// objs for later use
+			cache_shortcode_ids: SWFPut_cache_shortcode_ids,
+			//cache_shortcode_ids: function(sc) {
+			//	var aatt = [
+			//		sc.get( 'url' ),
+			//		sc.get( 'altvideo' ),
+			//		sc.get( 'iimage' )
+			//	], aid = [];
+            //
+			//	_.each(aatt, function(s) {
+			//		if ( s != undefined ) {
+			//			_.each(s.split('|'), function(t) {
+			//				var m = t.match(/^[ \t]*([0-9]+)[ \t]*$/);
+			//				if ( m && m[1] ) {
+			//					aid.push(m[1]);
+			//					//SWFPut_get_attachment_by_id(m[1]);
+			//				}
+			//			} );
+			//		}
+			//	} );
+            //
+			//	_.each(aid, function(id) {
+			//		SWFPut_get_attachment_by_id(id);
+			//	} );
+			//	//for ( var i = 0; i < aid.length; i++ ) {
+			//	//	var id = aid[i];
+			//	//	
+			//	//	SWFPut_get_attachment_by_id(id, false, function(_id, res, o){
+			//	//		console.log(
+			//	//		'CB ATTACH stat '+res.status+' for id '+_id+' -- url '+o[_id].url
+			//	//		);
+			//	//	});
+			//	//}
+			//},
+
 			// setIframes copied from mce-view.js for broken call
 			// to MutationObserver.observe() --
 			// arg 1 was iframeDoc.body but body lacks interface Node,
@@ -474,34 +648,50 @@ if ( SWFPut_video_utility_obj._bbone_mvc_opt === true
 		}
 	} ) ); // mce.views.register( 'putswf_video', _.extend( {}, view_def, {
 
-	var media = wp.media,
-		baseSettings = SWFPut_video_utility_obj.defprops,
-		l10n = typeof _wpMediaViewsL10n === 'undefined' ? {} : _wpMediaViewsL10n;
 
 	// MODEL: available as 'data.model' within frame content template
 	media.model.putswf_postMedia = Backbone.Model.extend({
-//		constructor: function() {
-//console.log('CALLED: 19: media.model.putswf_postMedia::ctor -- ' + arguments);
-//for ( var a in arguments ) {
-//	console.log('arguments['+a+'] == >"'+arguments[a]+'"<');
-//}
-//			Backbone.Model.apply(this, arguments);
-//		}
-//		,
 
-		initialize: function() {
+		SWFPut_cltag: 'media.model.putswf_postMedia',
+
+		// called with shortcode attributes including shortcode object
+		initialize: function(o) {
 			this.attachment = false;
 
-console.log('CALLED: 20: media.model.putswf_postMedia::initialize');
-for ( var a in arguments ) {
-	console.log('CALLED: 20  arguments['+a+'] == >"'+arguments[a]+'"<');
-}
-
-			Backbone.Model.prototype.initialize( arguments );
+			if ( o !== undefined && o.shortcode !== undefined ) {
+				var that = this;
+				
+				this.initial_attrs = o;
+				
+				SWFPut_cache_shortcode_ids( o.shortcode, function(id, r, c) {
+					console.log('CALLED: 27: cache attach id '+id+' -- url '+c[id].url);
+					that.initial_attrs.id_cache = c;
+					if ( that.initial_attrs.id_array === undefined ) {
+						that.initial_attrs.id_array = [];
+					}
+					that.initial_attrs.id_array.push(id);
+				} );
+			}
+		},
+		
+		putswf_postex: function() {
+console.log('CALLED: 29: media.model.putswf_postMedia::putswf_postex');
 		},
 
 		setSource: function( attachment ) {
 console.log('CALLED: 21: media.model.putswf_postMedia::setSource');
+			if ( this.attachment === false ) {
+				console.log('FIRST setSource on ' + this.SWFPut_cltag);
+				var a = attachment.attributes;
+				for ( var k in a ) {
+					console.log('NEW setSource attachment.attributes.'+k+' has ' + a[k]);
+				}
+			} else {
+				var a = this.attachment.attributes;
+				for ( var k in a ) {
+					console.log('FOUND setSource attachment.attributes.'+k+' has ' + a[k]);
+				}
+			}
 			this.attachment = attachment;
 			this.extension = attachment.get( 'filename' ).split('.').pop();
 
@@ -513,6 +703,18 @@ console.log('CALLED: 21: media.model.putswf_postMedia::setSource');
 				this.set( this.extension, this.attachment.get( 'url' ) );
 			} else {
 				this.unset( this.extension );
+			}
+
+			try {
+				var am, multi = attachment.get( 'putswf_attach_all' );
+				
+				if ( multi && (am = multi.toArray()) && am.length > 0 ) {
+					console.log('setSource: MULTI LEN ' + am.length);
+				} else {
+					delete this.attachment.putswf_attach_all;
+				}
+			} catch ( e ) {
+				console.log('setSource: ' + e.message);
 			}
 		},
 
@@ -527,12 +729,15 @@ console.log('CALLED: 22: media.model.putswf_postMedia::changeAttachment');
 				self.unset( ext );
 			} );
 		}
+		,
+
 	}); // media.model.putswf_postMedia = Backbone.Model.extend({
 
 	// media.view.MediaFrame.Select -> media.view.MediaFrame.MediaDetails
-	media.view.MediaFrame.Putswf_mediaDetails = media.view.MediaFrame.MediaDetails.extend({ // = media.view.MediaFrame.Select.extend({
+	media.view.MediaFrame.Putswf_mediaDetails = media.view.MediaFrame.Select.extend({ //media.view.MediaFrame.MediaDetails.extend({ //
 		defaults: {
-			id:      'media',
+			id:      'putswf_media',
+			//id:      'media',
 			url:     '',
 			menu:    'media-details',
 			content: 'media-details',
@@ -540,6 +745,8 @@ console.log('CALLED: 22: media.model.putswf_postMedia::changeAttachment');
 			type:    'link',
 			priority: 121 // 120
 		},
+
+		SWFPut_cltag: 'media.view.MediaFrame.Putswf_mediaDetails',
 
 		initialize: function( options ) {
 			var controller = options.controller || false,
@@ -553,72 +760,277 @@ console.log('CALLED: 12: media.view.MediaFrame.Putswf_mediaDetails::initialize -
 
 			this.media = new media.model.putswf_postMedia( options.metadata ); //PostMedia( options.metadata );
 			this.options.selection = new media.model.Selection( this.media.attachment, { multiple: true } );// { multiple: false } ); //
-			media.view.MediaFrame.MediaDetails.prototype.initialize.apply( this, arguments );
+			media.view.MediaFrame.Select.prototype.initialize.apply( this, arguments );
+			//media.view.MediaFrame.MediaDetails.prototype.initialize.apply( this, arguments );
 		}
 		,
 
 		bindHandlers: function() {
 			var menu = this.defaults.menu;
 
-			//media.view.MediaFrame.Select.prototype.bindHandlers.apply( this, arguments );
-			media.view.MediaFrame.MediaDetails.prototype.bindHandlers.apply( this, arguments );
+			media.view.MediaFrame.Select.prototype.bindHandlers.apply( this, arguments );
+			//media.view.MediaFrame.MediaDetails.prototype.bindHandlers.apply( this, arguments );
 
-			//this.on( 'menu:create:' + menu, this.createMenu, this );
+			this.on( 'menu:create:' + menu, this.createMenu, this );
 			this.on( 'content:render:' + menu, this.renderDetailsContent, this );
-			//this.on( 'menu:render:' + menu, this.renderMenu, this );
-			//this.on( 'toolbar:render:' + menu, this.renderDetailsToolbar, this );
+			this.on( 'menu:render:' + menu, this.renderMenu, this );
+			this.on( 'toolbar:render:' + menu, this.renderDetailsToolbar, this );
 		},
 
+		// lots of following code copied right from
+		// wp-includes/js/media-audiovideo.js
 		renderDetailsContent: function() {
 			var attach = this.state().media.attachment;
 			var view = new this.DetailsView({
 				controller: this,
 				model: this.state().media,
-				attachment: this.state().media.attachment // attach //
+				attachment: attach //this.state().media.attachment // 
 			}).render();
 
 			this.content.set( view );
 console.log('CALLED: 10: media.view.MediaFrame.Putswf_mediaDetails::renderDetailsContent attachment == ' + attach);
 		}
-		//,
+		,
+		renderMenu: function( view ) {
+			var lastState = this.lastState(),
+				previous = lastState && lastState.id,
+				frame = this;
+	
+			view.set({
+				cancel: {
+					text:     this.cancelText,
+					priority: 20,
+					click:    function() {
+						if ( previous ) {
+							frame.setState( previous );
+						} else {
+							frame.close();
+						}
+					}
+				},
+				separateCancel: new media.View({
+					className: 'separator',
+					priority: 40
+				})
+			});
+	
+		},
+
+		setPrimaryButton: function(text, handler) {
+			this.toolbar.set( new media.view.Toolbar({
+				controller: this,
+				items: {
+					button: {
+						style:    'primary',
+						text:     text,
+						priority: 80,
+						click:    function() {
+							var controller = this.controller;
+							handler.call( this, controller, controller.state() );
+							// Restore and reset the default state.
+							controller.setState( controller.options.state );
+							controller.reset();
+						}
+					}
+				}
+			}) );
+		},
+
+		renderDetailsToolbar: function() {
+			this.setPrimaryButton( l10n.update, function( controller, state ) {
+				controller.close();
+				state.trigger( 'update', controller.media.toJSON() );
+			} );
+		},
+
+		renderReplaceToolbar: function() {
+			this.setPrimaryButton( l10n.replace, function( controller, state ) {
+				var attachment = state.get( 'selection' ).single();
+				controller.media.changeAttachment( attachment );
+				state.trigger( 'replace', controller.media.toJSON() );
+			} );
+		},
+
+		renderAddSourceToolbar: function() {
+			this.setPrimaryButton( this.addText, function( controller, state ) {
+				var attachment = state.get( 'selection' ).single();
+				controller.media.setSource( attachment );
+				state.trigger( 'add-source', controller.media.toJSON() );
+			} );
+		}
 
 	}); // media.view.MediaFrame.Putswf_mediaDetails = media.view.MediaFrame.MediaDetails.extend({ // = media.view.MediaFrame.Select.extend({
 
-	// NOTE on "template:" below: it is underscares compiled, and the
-	// the default compilation operators are overridden by WP in
-	// "options":
-     //19                         options = {
-     //20                                 evaluate:    /<#([\s\S]+?)#>/g,
-     //21                                 interpolate: /\{\{\{([\s\S]+?)\}\}\}/g,
-     //22                                 escape:      /\{\{([^\}]+?)\}\}(?!\})/g,
-     //23                                 variable:    'data'
-     //24                         };
-	// Lines above are from wp-includes/js/wp-util.js
-	// -- see "http://underscorejs.org/#template"
-	media.view.Putswf_videoDetails = media.view.MediaFrame.Putswf_mediaDetails.extend({
-	//media.view.Putswf_videoDetails = media.view.SWFPutDetails.extend({
+	media.view.SWFPutDetails = media.view.Settings.AttachmentDisplay.extend({
+		SWFPut_cltag: 'media.view.SWFPutDetails',
+
+		initialize: function() {
+			_.bindAll(this, 'success');
+			this.players = [];
+			this.listenTo( this.controller, 'close', media.putswf_mixin.unsetPlayers );
+			this.on( 'ready', this.setPlayer );
+			this.on( 'media:setting:remove', media.putswf_mixin.unsetPlayers, this );
+			this.on( 'media:setting:remove', this.render );
+			this.on( 'media:setting:remove', this.setPlayer );
+			this.events = _.extend( this.events, {
+				'click .remove-setting' : 'removeSetting',
+				//'change .content-track' : 'setTracks',
+				//'click .remove-track' : 'setTracks',
+				'click .add-media-source' : 'addSource'
+			} );
+
+			media.view.Settings.AttachmentDisplay.prototype.initialize.apply( this, arguments );
+		},
+
+		prepare: function() {
+			var model = this.model;
+console.log('SWFPutDetails: prepare');
+console.log('    SWFPut_cltag: ' + (model.SWFPut_cltag ? model.SWFPut_cltag : 'none found')); // 'media.model.putswf_postMedia'
+
+			return _.defaults({
+				model: model //model: this.model.toJSON()
+			}, this.options );
+		},
+
+		/**
+		 * Remove a setting's UI when the model unsets it
+		 *
+		 * @fires wp.media.view.MediaDetails#media:setting:remove
+		 *
+		 * @param {Event} e
+		 */
+		removeSetting : function(e) {
+			var wrap = $( e.currentTarget ).parent(), setting;
+			setting = wrap.find( 'input' ).data( 'setting' );
+
+			if ( setting ) {
+				this.model.unset( setting );
+				this.trigger( 'media:setting:remove', this );
+			}
+
+			wrap.remove();
+		},
+
+		/**
+		 *
+		 * @fires wp.media.view.MediaDetails#media:setting:remove
+		 */
+		setTracks : function() {
+			//var tracks = '';
+            //
+			//_.each( this.$('.content-track'), function(track) {
+			//	tracks += $( track ).val();
+			//} );
+            //
+			//this.model.set( 'content', tracks );
+			//this.trigger( 'media:setting:remove', this );
+		},
+
+		addSource : function( e ) {
+			this.controller.lastMime = $( e.currentTarget ).data( 'mime' );
+			this.controller.setState( 'add-' + this.controller.defaults.id + '-source' );
+		},
+
+		/**
+		 * @global MediaElementPlayer
+		 */
+		setPlayer : function() {
+			//if ( ! this.players.length && this.media ) {
+			//	this.players.push( new MediaElementPlayer( this.media, this.settings ) );
+			//}
+		},
+
+		/**
+		 * @abstract
+		 */
+		setMedia : function() {
+			return this;
+		},
+
+		success : function(mejs) {
+			//var autoplay = mejs.attributes.autoplay && 'false' !== mejs.attributes.autoplay;
+            //
+			//if ( 'flash' === mejs.pluginType && autoplay ) {
+			//	mejs.addEventListener( 'canplay', function() {
+			//		mejs.play();
+			//	}, false );
+			//}
+            //
+			//this.mejs = mejs;
+		},
+
+		/**
+		 * @returns {media.view.MediaDetails} Returns itself to allow chaining
+		 */
+		render: function() {
+			var self = this;
+
+			media.view.Settings.AttachmentDisplay.prototype.render.apply( this, arguments );
+			setTimeout( function() { self.resetFocus(); }, 10 );
+
+			this.settings = _.defaults( {
+				success : this.success
+			}, baseSettings );
+
+			return this.setMedia();
+		},
+
+		resetFocus: function() {
+			this.$( '.putswf_video-details-iframe' ).scrollTop( 0 );
+		}
+	}, {
+		instances : 0,
+
+		/**
+		 * When multiple players in the DOM contain the same src, things get weird.
+		 *
+		 * @param {HTMLElement} elem
+		 * @returns {HTMLElement}
+		 */
+		prepareSrc : function( elem ) {
+			var i = media.view.SWFPutDetails.instances++;
+			_.each( $( elem ).find( 'source' ), function( source ) {
+				source.src = [
+					source.src,
+					source.src.indexOf('?') > -1 ? '&' : '?',
+					'_=',
+					i
+				].join('');
+			} );
+
+			return elem;
+		}
+	});
+
+	//media.view.Putswf_videoDetails = media.view.MediaFrame.Putswf_mediaDetails.extend({
+	media.view.Putswf_videoDetails = media.view.SWFPutDetails.extend({
+		//className: 'putswf_video-details',
 		className: 'putswf_video-mediaframe-details',
 		template:  media.template('putswf_video-details'),
 
+		SWFPut_cltag: 'media.view.Putswf_videoDetails',
+
 		initialize: function() {
-			//_.bindAll(this, 'success');
-			//this.players = [];
-			//this.listenTo( this.controller, 'close', wp.media.putswf_mixin.unsetPlayers );
-			//this.on( 'ready', this.setPlayer );
+			_.bindAll(this, 'success');
+			this.players = [];
+			this.listenTo( this.controller, 'close', wp.media.putswf_mixin.unsetPlayers );
+			this.on( 'ready', this.setPlayer );
 			this.on( 'media:setting:remove', wp.media.putswf_mixin.unsetPlayers, this );
-			//this.on( 'media:setting:remove', this.render );
-			//this.on( 'media:setting:remove', this.setPlayer );
-			//this.events = _.extend( this.events, {
+			this.on( 'media:setting:remove', this.render );
+			this.on( 'media:setting:remove', this.setPlayer );
+			this.events = _.extend( this.events, {
 			//	'click .remove-setting' : 'removeSetting',
 			//	'change .content-track' : 'setTracks',
 			//	'click .remove-track' : 'setTracks',
-			//	'click .add-media-source' : 'addSource'
-			//} );
+				'click .add-media-source' : 'addSource'
+			} );
 
-			media.view.MediaFrame.Putswf_mediaDetails.prototype.initialize.apply( this, arguments );
+			//media.view.MediaFrame.Putswf_mediaDetails.prototype.initialize.apply( this, arguments );
+			media.view.SWFPutDetails.prototype.initialize.apply( this, arguments );
 		},
 
 		setMedia: function() {
+			//this.media = media.view.MediaDetails.prepareSrc( video.get(0) );
 			var v1 = this.$('.evhh5v_vidobjdiv'),
 				v2 = this.$('.wp-putswf_video-shortcode'),
 				video = v1 || v2,
@@ -663,33 +1075,35 @@ console.log('video == ' + (video == v1 ? '.evhh5v_vidobjdiv' : '.wp-putswf_video
 			priority: 60
 		},
 
+		SWFPut_cltag: 'media.controller.Putswf_videoDetails',
+
 		initialize: function( options ) {
 console.log('CONTROLLER: media.controller.Putswf_videoDetails::initialize -- ' + arguments);
 			this.media = options.media;
 			media.controller.State.prototype.initialize.apply( this, arguments );
 		}
 
-//		,
-//		setSource: function( attachment ) {
-//console.log('CONTROLLER setSource: ');
-//			this.attachment = attachment;
-//			this.extension = attachment.get( 'filename' ).split('.').pop();
-//
-//			if ( this.get( 'src' ) && this.extension === this.get( 'src' ).split('.').pop() ) {
-//				this.unset( 'src' );
-//			}
-//
-//			if ( _.contains( wp.media.view.settings.embedExts, this.extension ) ) {
-//				this.set( this.extension, this.attachment.get( 'url' ) );
-//			} else {
-//				this.unset( this.extension );
-//			}
-//		}
+		,
+		setSource: function( attachment ) {
+console.log('CONTROLLER setSource: ');
+			this.attachment = attachment;
+			this.extension = attachment.get( 'filename' ).split('.').pop();
+
+			//if ( this.get( 'src' ) && this.extension === this.get( 'src' ).split('.').pop() ) {
+			//	this.unset( 'src' );
+			//}
+            //
+			//if ( _.contains( wp.media.view.settings.embedExts, this.extension ) ) {
+			//	this.set( this.extension, this.attachment.get( 'url' ) );
+			//} else {
+			//	this.unset( this.extension );
+			//}
+		}
 
 	});
 
 	// media.view.MediaFrame.Putswf_mediaDetails
-	media.view.MediaFrame.Putswf_videoDetails = media.view.MediaFrame.MediaDetails.extend({
+	media.view.MediaFrame.Putswf_videoDetails = media.view.MediaFrame.Putswf_mediaDetails.extend({ // media.view.MediaFrame.MediaDetails.extend({
 		defaults: {
 			id:      'putswf_video',
 			url:     '',
@@ -701,16 +1115,18 @@ console.log('CONTROLLER: media.controller.Putswf_videoDetails::initialize -- ' +
 			priority: 120
 		},
 
+		SWFPut_cltag: 'media.view.MediaFrame.Putswf_videoDetails',
+
 		initialize: function( options ) {
 			this.media = options.media;
 			options.DetailsView = media.view.Putswf_videoDetails;
 			options.cancelText = 'Cancel Edit'; //l10n.putswf_videoDetailsCancel;
 			options.addText = 'Add Video'; //l10n.putswf_videoAddSourceTitle;
-			media.view.MediaFrame.MediaDetails.prototype.initialize.call( this, options );
+			media.view.MediaFrame.Putswf_mediaDetails.prototype.initialize.call( this, options );
 		},
 
 		bindHandlers: function() {
-			media.view.MediaFrame.MediaDetails.prototype.bindHandlers.apply( this, arguments );
+			media.view.MediaFrame.Putswf_mediaDetails.prototype.bindHandlers.apply( this, arguments );
 
 			this.on( 'toolbar:render:replace-putswf_video', this.renderReplaceToolbar, this );
 			this.on( 'toolbar:render:add-putswf_video-source', this.renderAddSourceToolbar, this );
@@ -789,6 +1205,9 @@ console.log('CONTROLLER: media.controller.Putswf_videoDetails::initialize -- ' +
 				// the multiple selection I haven't figured out yet
 				if ( attach_all && attach_all.multiple ) {
 					attachment.attributes.putswf_attach_all = attach_all;
+					//for ( var k in attach_all ) {
+					//	console.log('!!! '+k+' == '+attach_all[k]);
+					//}
 				} else {
 					console.log('MEDIA ADD ATTACH__ALL == '+ attach_all);
 				}
@@ -816,10 +1235,13 @@ console.log('CONTROLLER: media.controller.Putswf_videoDetails::initialize -- ' +
 		//	} );
 		//}
 		//,
+
 	});
 
 	wp.media.putswf_mixin = {
 		putswfSettings: baseSettings,
+
+		SWFPut_cltag: 'wp.media.putswf_mixin',
 
 		removeAllPlayers: function() {
 			var p;
@@ -889,6 +1311,8 @@ console.log('CONTROLLER: media.controller.Putswf_videoDetails::initialize -- ' +
 		//coerce : wp.media.coerce,
 
 		defaults : baseSettings,
+
+		SWFPut_cltag: 'wp.media.putswf_video',
 
 		_mk_shortcode : function(sc, atts, cap) {
 			var c = cap || '', s = '[' + sc,

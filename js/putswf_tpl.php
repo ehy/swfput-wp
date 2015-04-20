@@ -35,6 +35,17 @@
  *  mode, title, modal, uploader, library, multiple, and
  *  state ( == library)
  */
+// NOTE on "template:" below: it is underscares compiled, and the
+// the default compilation operators are overridden by WP in
+// "options":
+ //19                         options = {
+ //20                                 evaluate:    /<#([\s\S]+?)#>/g,
+ //21                                 interpolate: /\{\{\{([\s\S]+?)\}\}\}/g,
+ //22                                 escape:      /\{\{([^\}]+?)\}\}(?!\})/g,
+ //23                                 variable:    'data'
+ //24                         };
+// Lines above are from wp-includes/js/wp-util.js
+// -- see "http://underscorejs.org/#template"
 ?>
 <script type="text/html" id="tmpl-putswf_video-details">
 	<#
@@ -44,26 +55,39 @@
 		cont = '',
 		_putswf_mk_shortcode = wp.media.putswf_video._mk_shortcode,
 		_putswf__putfrm = function () {
-			var _tifd = '', _tif = '';
-			setTimeout( function () {
-				var h = ! data.model.height ? 360 : data.model.height;
+			var _tifd = '', _tif = '', _intvl;
 
-				_tifd = document.getElementById('putswf-dlg-content-wrapper');
-				dvif = _tifd || false;
-
-				if ( head === false ) {
+			_intvl = setInterval( function () {
+				var h, ivl = _intvl;
+				
+				// ready? or what
+				if ( cont === '' ) {
+					// TODO: wait indication
+					console.log('SWFPut markup fetch by ajax waiting');
+					return;
+				} else if ( head === false ) {
+					// TODO: better error message
+					clearInterval(ivl);
+					console.log('SWFPut markup fetch by ajax failed '+cont);
 					_tif = document.createElement('span');
 					_tif.innerHTML = cont;
 					_tifd.appendChild(_tif);
 					ifrm = false;
-					return
+					return;
 				}
 				
+				clearInterval(ivl);
+
+				h = ! data.model.height ? 360 : data.model.height;
+				_tifd = document.getElementById('putswf-dlg-content-wrapper');
+				dvif = _tifd || false;
+
 				_tif = document.createElement('iframe');
 				ifrm = _tif;
 				_tifd.appendChild(_tif);
 				_tif.setAttribute('id', 'putswf-dlg-content-iframe');
 				_tif.setAttribute('style', 'width:100%; height:'+h+'px;');
+				_tif.setAttribute('class', 'putswf_video-details-iframe');
 				_tif = (_tif.contentWindow) ? _tif.contentWindow : (_tif.contentDocument.document) ? _tif.contentDocument.document : _tif.contentDocument;
 				_tif.document.open();
 				_tif.document.write(
@@ -164,6 +188,7 @@
 				}
 			}, 50 );
 		},
+		// TODO: this proc should maybe be a method of the data model
 		_putswf_frolic_in_data = function (d) {
 			var self = this,
 			    oldatts = d.model.attributes,
@@ -212,6 +237,7 @@
 						oldatts.url = m;
 						oldatts.altvideo = '';
 					} else {
+						// Replace
 						if ( vid_rpl ) {
 							if ( t && t.toLowerCase() === 'flv' ) {
 								oldatts.url = m;
@@ -220,6 +246,7 @@
 								oldatts.altvideo = m;
 								oldatts.url = '';
 							}
+						// Add -- multiple selection
 						} else {
 							// for html5 video, shortcode attr accepts
 							// '|' separated list -- presumably the
@@ -320,25 +347,30 @@
 	</div>
 	<#
 	if ( false ) {
-		//var dat = data.model;
-		//for ( var t in dat ) {
-		//	console.log("TMPL: dat."+t+" == "+dat[t]);
-		//}
+		var dat = data.model;
+		for ( var t in dat ) {
+			console.log("TMPL: data.model."+t+" == "+dat[t]);
+		}
 		//dat = data.model.attributes;
 		//for ( var t in dat ) {
-		//	console.log("ATTR: dat."+t+" == "+dat[t]);
+		//	console.log("ATTR: dat.attributes."+t+" == "+dat[t]);
 		//}
 		//dat = data.model.attributes.shortcode;
 		//for ( var t in dat ) {
 		//	console.log("SCOD: dat."+t+" == "+dat[t]);
 		//}
 		//console.log("SCOD.string: dat.string() == " + dat.string());
-		if ( data.attachment.attributes ) {
-			var dat = data.attachment.attributes;
-			for ( var t in dat ) {
-				console.log("DATA: dat."+t+" == "+dat[t]);
-			}
-		}
+		//if ( data.attachment.attributes ) {
+		//	var dat = data.attachment.attributes;
+		//	for ( var t in dat ) {
+		//		console.log("DATA: dat."+t+" == "+dat[t]);
+		//	}
+		//}
+		
+		//dat = data;
+		//for ( var t in dat ) {
+		//	console.log("DATA: prop "+t+" is  "+ (dat[t].SWFPut_cltag ? dat[t].SWFPut_cltag : 'NO SWFPUT TAG!' ) );
+		//}
 	}
 	#>
 </script>
