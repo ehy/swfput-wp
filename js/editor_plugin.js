@@ -114,6 +114,21 @@ SWFPut_video_utility_obj_def.prototype = {
 		preload: "image"
 	},
 	
+	// for method below
+	get_new_putswf_shortcode_serial: 0,
+
+	// get an empty shortcode for new insertion,
+	// adding caption reminder with serial --
+	// serial serves to make string unique for
+	// wp.media use in a data-* attribute
+	get_new_putswf_shortcode: function() {
+		var s = '[putswf_video url="" iimage="" altvideo=""]',
+		    e = '[/putswf_video]',
+		    c = 'Edit me or delete me but please do not leave me -- '
+		        + this.get_new_putswf_shortcode_serial++;
+		return s + c + e;
+	},
+
 	// the WP media root object, 'wp'
 	_wp: wp || false,
 	
@@ -196,6 +211,70 @@ SWFPut_video_utility_obj_def.prototype = {
 var SWFPut_video_utility_obj = 
 	new SWFPut_video_utility_obj_def(wp || false);
 
+// Utility used in plugin
+function SWFPut_repl_nl(str) {
+	return str.replace(
+		/\r\n/g, '\n').replace(
+			/\r/g, '\n').replace(
+				/\n/g, '<br />');
+};
+	
+// Experimental wp mediad based presentation in/of editor thing
+if ( SWFPut_video_utility_obj._bbone_mvc_opt === true
+     && typeof wp.mce.views.register === 'function' ) {
+
+// Our button (next to "Add Media") calls this
+function SWFPut_add_button_func(btn) {
+	var ivl, ivlmax = 500, tid = btn.id,
+	    sc = SWFPut_video_utility_obj.get_new_putswf_shortcode(),
+	    dat = SWFPut_putswf_video_inst.get_mce_dat(),
+	    enc = window.encodeURIComponent( sc ),
+	    ed = dat.ed
+	    div = false;
+
+	if ( ! ed ) {
+		alert('Failed to get visual editor');
+		return false;
+	}
+
+	SWFPut_putswf_video_inst.put_at_cursor(sc);
+
+	ivl = setInterval( function () {
+		var got = false,
+		    $ = ed.$;
+		    
+		if ( div === false ) {
+		    var w = $( '.wpview-wrap' );
+
+			w.each( function(cur) {
+				var at, ret = true;;
+				// wacky: mce.dom.query.each  passing number, not obj
+				cur = w[cur];			
+				at = cur.getAttribute( 'data-wpview-text' );
+	
+				if ( at && at.indexOf(enc) >= 0 ) {
+					div = $(cur);
+					return false;
+				}
+			} );
+		}
+	
+		if ( div !== false ) {
+			var f = div.find( 'iframe' );
+			if ( f ) {
+				div.trigger( 'click' );
+				got = true;
+			}
+		}
+
+		if ( (--ivlmax <= 0) || got ) {
+			clearInterval(ivl);
+		}
+	}, 1500);
+
+	return false;
+};
+
 // get an attachment obj from attachments, or by ajax if needed
 // -- 1st arg is id, 2nd is existing obj to (re)place in table and
 // is optional
@@ -233,41 +312,7 @@ function SWFPut_cache_shortcode_ids(sc, cb) {
 			} );
 		}
 	} );
-
-	//_.each(aid, function(id) {
-	//	SWFPut_get_attachment_by_id(id);
-	//} );
-	//for ( var i = 0; i < aid.length; i++ ) {
-	//	var id = aid[i];
-	//	
-	//	SWFPut_get_attachment_by_id(id, false, function(_id, res, o){
-	//		console.log(
-	//		'CB ATTACH stat '+res.status+' for id '+_id+' -- url '+o[_id].url
-	//		);
-	//	});
-	//}
 }
-
-// Utility used in plugin
-function SWFPut_repl_nl(str) {
-	return str.replace(
-		/\r\n/g, '\n').replace(
-			/\r/g, '\n').replace(
-				/\n/g, '<br />');
-};
-	
-// Our button (next to "Add Media") calls this
-function SWFPut_add_button_func(btn) {
-	var tid = btn.id;
-
-	alert('Got click on ' + tid);
-
-	return false;
-};
-
-// Experimental wp mediad based presentation in/of editor thing
-if ( SWFPut_video_utility_obj._bbone_mvc_opt === true
-     && typeof wp.mce.views.register === 'function' ) {
 
 // MVC
 (function(wp, $, _, Backbone) {
@@ -276,7 +321,7 @@ if ( SWFPut_video_utility_obj._bbone_mvc_opt === true
 		l10n = typeof _wpMediaViewsL10n === 'undefined' ? {} : _wpMediaViewsL10n,
 	    mce			= wp.mce;
 
-	var view_def	= mce.putswfMixin = {
+	var view_def = mce.putswfMixin = {
 		View: _.extend( {}, mce.av.View, {
 			overlay: true,
 
@@ -306,38 +351,6 @@ if ( SWFPut_video_utility_obj._bbone_mvc_opt === true
 			// wp "attachment" object w/ ajax and cache the
 			// objs for later use
 			cache_shortcode_ids: SWFPut_cache_shortcode_ids,
-			//cache_shortcode_ids: function(sc) {
-			//	var aatt = [
-			//		sc.get( 'url' ),
-			//		sc.get( 'altvideo' ),
-			//		sc.get( 'iimage' )
-			//	], aid = [];
-            //
-			//	_.each(aatt, function(s) {
-			//		if ( s != undefined ) {
-			//			_.each(s.split('|'), function(t) {
-			//				var m = t.match(/^[ \t]*([0-9]+)[ \t]*$/);
-			//				if ( m && m[1] ) {
-			//					aid.push(m[1]);
-			//					//SWFPut_get_attachment_by_id(m[1]);
-			//				}
-			//			} );
-			//		}
-			//	} );
-            //
-			//	_.each(aid, function(id) {
-			//		SWFPut_get_attachment_by_id(id);
-			//	} );
-			//	//for ( var i = 0; i < aid.length; i++ ) {
-			//	//	var id = aid[i];
-			//	//	
-			//	//	SWFPut_get_attachment_by_id(id, false, function(_id, res, o){
-			//	//		console.log(
-			//	//		'CB ATTACH stat '+res.status+' for id '+_id+' -- url '+o[_id].url
-			//	//		);
-			//	//	});
-			//	//}
-			//},
 
 			// setIframes copied from mce-view.js for broken call
 			// to MutationObserver.observe() --
@@ -485,7 +498,7 @@ if ( SWFPut_video_utility_obj._bbone_mvc_opt === true
 									iframeDoc.body.className = editor.getBody().className;
 								});
 							}
-						}, 50 );
+						}, 100 );
 					});
 				} else {
 				       this.setContent( body );
@@ -620,7 +633,6 @@ if ( SWFPut_video_utility_obj._bbone_mvc_opt === true
 			var media = wp.media[ this.type ],
 				self = this,
 				frame, data, callback;
-
 			$( document ).trigger( 'media:edit' );
 
 			data = window.decodeURIComponent( $( node ).attr('data-wpview-text') );
@@ -648,6 +660,9 @@ if ( SWFPut_video_utility_obj._bbone_mvc_opt === true
 		}
 	} ) ); // mce.views.register( 'putswf_video', _.extend( {}, view_def, {
 
+	// NOTE: several of the objects below have a 'media' object
+	// usually assigned in initialize() -- but these are not necessarily
+	// the same type, much less same obj.
 
 	// MODEL: available as 'data.model' within frame content template
 	media.model.putswf_postMedia = Backbone.Model.extend({
@@ -656,41 +671,77 @@ if ( SWFPut_video_utility_obj._bbone_mvc_opt === true
 
 		// called with shortcode attributes including shortcode object
 		initialize: function(o) {
-			this.attachment = false;
+			this.attachment = this.initial_attrs = false;
 
 			if ( o !== undefined && o.shortcode !== undefined ) {
-				var that = this;
+				var that = this, sc = o.shortcode,
+				    pat = /^[ \t]*([^ \t]*(.*[^ \t])?)[ \t]*$/;
 				
 				this.initial_attrs = o;
+				this.poster  = '';
+				this.flv     = '';
+				this.html5s  = [];
 				
-				SWFPut_cache_shortcode_ids( o.shortcode, function(id, r, c) {
-					console.log('CALLED: 27: cache attach id '+id+' -- url '+c[id].url);
+				if ( sc.iimage ) {
+					var m = pat.exec(sc.iimage);
+					this.poster = (m && m[1]) ? m[1] : sc.iimage;
+				}
+				if ( sc.url ) {
+					var m = pat.exec(sc.url);
+					this.flv = (m && m[1]) ? m[1] : sc.url;
+				}
+				if ( sc.altvideo ) {
+					var t = sc.altvideo, a = t.split('|');
+					for ( var i = 0; i < a.length; i++ ) {
+						var m = pat.exec(a[i]);
+						if ( m && m[1] ) {
+							this.html5s.push(m[1]);
+						}
+					}
+				}
+				
+				SWFPut_cache_shortcode_ids( sc, function(id, r, c) {
+					var sid = '' + id;
+					//console.log('CALLED: 27: cache attach id '+id+' -- url '+c[id].url);
 					that.initial_attrs.id_cache = c;
 					if ( that.initial_attrs.id_array === undefined ) {
 						that.initial_attrs.id_array = [];
 					}
+
 					that.initial_attrs.id_array.push(id);
+
+					if ( that.poster === sid ) {
+						that.poster = c[id];
+					} else if ( that.flv === sid ) {
+						that.flv = c[id];
+					} else if ( that.html5s !== null ) {
+						for ( var i = 0; i < that.html5s.length; i++ ) {
+							if ( that.html5s[i] === sid ) {
+								that.html5s[i] = c[id];
+							}
+						}
+					}
 				} );
 			}
 		},
 		
-		putswf_postex: function() {
-console.log('CALLED: 29: media.model.putswf_postMedia::putswf_postex');
-		},
-
+		poster : null,
+		flv    : null,
+		html5s : null,
+		
 		setSource: function( attachment ) {
 console.log('CALLED: 21: media.model.putswf_postMedia::setSource');
 			if ( this.attachment === false ) {
 				console.log('FIRST setSource on ' + this.SWFPut_cltag);
 				var a = attachment.attributes;
-				for ( var k in a ) {
-					console.log('NEW setSource attachment.attributes.'+k+' has ' + a[k]);
-				}
+				//for ( var k in a ) {
+				//	console.log('NEW setSource attachment.attributes.'+k+' has ' + a[k]);
+				//}
 			} else {
 				var a = this.attachment.attributes;
-				for ( var k in a ) {
-					console.log('FOUND setSource attachment.attributes.'+k+' has ' + a[k]);
-				}
+				//for ( var k in a ) {
+				//	console.log('FOUND setSource attachment.attributes.'+k+' has ' + a[k]);
+				//}
 			}
 			this.attachment = attachment;
 			this.extension = attachment.get( 'filename' ).split('.').pop();
@@ -731,6 +782,127 @@ console.log('CALLED: 22: media.model.putswf_postMedia::changeAttachment');
 		}
 		,
 
+		// methods specific to SWFPut
+
+		cleanup_media: function() {
+			var a = [],
+			    mp4 = false, ogg = false, webm = false;
+			
+			for ( var i = 0; i < this.html5s.length; i++ ) {
+				var m = this.html5s[i];
+				
+				if ( typeof m === 'object' ) {
+					var t = m.subtype
+					        ? (m.subtype.split('-').pop())
+					        : (m.filename
+					            ? m.filename.split('.').pop()
+					            : false
+					        );
+
+					// last wins
+					switch ( t ) {
+						case 'mp4':
+						case 'm4v':
+						case 'mv4':
+							mp4 = m;
+							break;
+						case 'ogg':
+						case 'ogv':
+						case 'vorbis':
+							ogg = m;
+							break;
+						case 'webm':
+						case 'wbm':
+						case 'vp8':
+						case 'vp9':
+							webm = m;
+							break;
+					}
+				} else {
+					a.push(m);
+				}
+			}
+			
+			if ( mp4 ) {
+				a.push(mp4);
+			}
+			if ( ogg ) {
+				a.push(ogg);
+			}
+			if ( webm ) {
+				a.push(webm);
+			}
+		
+			this.html5s = a;
+		},
+		
+		// get uri related strings -- if display is true
+		// get URL if available as it's informative;
+		// else use id integers if available
+		get_poster: function( display ) {
+			display = display || false;
+			
+			if ( display && this.poster !== null ) {
+				return ( typeof this.poster === 'object' )
+				    ? this.poster.url
+				    : this.poster;
+			}
+
+			if ( this.poster !== null ) {
+				return ( typeof this.poster === 'object' )
+				    ? ('' + this.poster.id)
+				    : this.poster;
+			}
+			
+			return '';
+		},
+		
+		get_flv: function( display ) {
+			display = display || false;
+			
+			if ( display && this.flv !== null ) {
+				return ( typeof this.flv === 'object' )
+				    ? this.flv.url
+				    : this.flv;
+			}
+
+			if ( this.flv !== null ) {
+				return ( typeof this.flv === 'object' )
+				    ? ('' + this.flv.id)
+				    : this.flv;
+			}
+			
+			return '';
+		},
+		
+		get_html5s: function( display ) {
+			var s ='';
+			display = display || false;
+			
+			if ( this.html5s === null ) {
+				return s;
+			}
+
+			for ( var i = 0; i < this.html5s.length; i++ ) {
+				var cur = this.html5s[i], addl = '';
+
+				if ( s !== '' ) {
+					addl += ' | ';
+				}
+
+				addl += ( typeof cur === 'object' )
+				    ? (display ? cur.url : ('' + cur.id))
+				    : cur;
+			
+				s += addl;
+			}
+
+			return s;
+		},
+		
+		putswf_postex: function() {
+		},
+
 	}); // media.model.putswf_postMedia = Backbone.Model.extend({
 
 	// media.view.MediaFrame.Select -> media.view.MediaFrame.MediaDetails
@@ -749,14 +921,13 @@ console.log('CALLED: 22: media.model.putswf_postMedia::changeAttachment');
 		SWFPut_cltag: 'media.view.MediaFrame.Putswf_mediaDetails',
 
 		initialize: function( options ) {
-			var controller = options.controller || false,
-			    model = options.model || false,
-			    attachment = options.attachment || false;
+			//var controller = options.controller || false,
+			//    model = options.model || false,
+			//    attachment = options.attachment || false;
 			
 			this.DetailsView = options.DetailsView;
 			this.cancelText = options.cancelText;
 			this.addText = options.addText;
-console.log('CALLED: 12: media.view.MediaFrame.Putswf_mediaDetails::initialize -- ' + arguments);
 
 			this.media = new media.model.putswf_postMedia( options.metadata ); //PostMedia( options.metadata );
 			this.options.selection = new media.model.Selection( this.media.attachment, { multiple: true } );// { multiple: false } ); //
@@ -987,8 +1158,12 @@ console.log('    SWFPut_cltag: ' + (model.SWFPut_cltag ? model.SWFPut_cltag : 'n
 		 * @param {HTMLElement} elem
 		 * @returns {HTMLElement}
 		 */
+		// EH: above is orig comment from WP core
 		prepareSrc : function( elem ) {
 			var i = media.view.SWFPutDetails.instances++;
+			// EH: in SWFPut the following loop will only be effactive
+			// if sources were set in the metabox along with
+			// types -- otherwise harmless
 			_.each( $( elem ).find( 'source' ), function( source ) {
 				source.src = [
 					source.src,
@@ -1025,39 +1200,27 @@ console.log('    SWFPut_cltag: ' + (model.SWFPut_cltag ? model.SWFPut_cltag : 'n
 				'click .add-media-source' : 'addSource'
 			} );
 
-			//media.view.MediaFrame.Putswf_mediaDetails.prototype.initialize.apply( this, arguments );
+			this.init_data = (arguments && arguments[0])
+			    ? arguments[0] : false;
+			
 			media.view.SWFPutDetails.prototype.initialize.apply( this, arguments );
 		},
 
 		setMedia: function() {
-			//this.media = media.view.MediaDetails.prepareSrc( video.get(0) );
 			var v1 = this.$('.evhh5v_vidobjdiv'),
-				v2 = this.$('.wp-putswf_video-shortcode'),
+				v2 = this.$('.wp-caption'),
 				video = v1 || v2,
-				found = video.find( 'source' ) || video.find( 'canvas' );
-console.log('CALLED: 31 media.view.Putswf_videoDetails::setMedia');
-console.log('video == ' + (video == v1 ? '.evhh5v_vidobjdiv' : '.wp-putswf_video-shortcode'));
+				found = video.find( 'video' )
+				     || video.find( 'canvas' )
+				     || video.find( 'object' );
 
 			if ( found ) {
 				video.show();
+				this.media = media.view.SWFPutDetails.prepareSrc( video.get(0) );
 			} else {
 				video.hide();
 				this.media = false;
 			}
-			//if ( video.find( 'source' ).length ) {
-			//	if ( video.is(':hidden') ) {
-			//		video.show();
-			//	}
-            //
-			//	if ( ! video.hasClass('youtube-video') ) {
-			//		this.media = media.view.MediaFrame.Putswf_mediaDetails.prepareSrc( video.get(0) );
-			//	} else {
-			//		this.media = video.get(0);
-			//	}
-			//} else {
-			//	video.hide();
-			//	this.media = false;
-			//}
 
 			return this;
 		}
@@ -1078,7 +1241,7 @@ console.log('video == ' + (video == v1 ? '.evhh5v_vidobjdiv' : '.wp-putswf_video
 		SWFPut_cltag: 'media.controller.Putswf_videoDetails',
 
 		initialize: function( options ) {
-console.log('CONTROLLER: media.controller.Putswf_videoDetails::initialize -- ' + arguments);
+			// media should be a media.model.putswf_postMedia
 			this.media = options.media;
 			media.controller.State.prototype.initialize.apply( this, arguments );
 		}
@@ -1307,6 +1470,9 @@ console.log('CONTROLLER setSource: ');
 		}
 	}; // wp.media.putswf_mixin = {
 
+	// Sort of basic media type object: the MCE view object gets
+	// one of the from wp.media[ this.type ] in its edit method
+	// then calls edit on this
 	wp.media.putswf_video = {
 		//coerce : wp.media.coerce,
 
@@ -1339,6 +1505,8 @@ console.log('CONTROLLER setSource: ');
 			return atts;
 		},
 
+		// called by MCE view::edit -- the arg is
+		// an unmolested shortcode string
 		edit : function( data ) {
 			var frame,
 				shortcode = wp.shortcode.next( 'putswf_video', data ).shortcode,
@@ -1361,12 +1529,18 @@ console.log('CONTROLLER setSource: ');
 			return frame;
 		},
 
-		shortcode : function( model_atts ) {
+		// the MCE view object update callback calls this (statically,
+		// dont't use this) as in:
+		// var shortcode = wp.media[ self.type ].shortcode( selection ).string();
+		shortcode : function( model_atts ) { // arg is "selection"
 			var content, sc;
 
 			content = model_atts.content;
 			sc = model_atts.shortcode.tag;
 
+			// code elsewhere adds props to selection, so the use of
+			// _atts_filter() is required to make a working
+			// shortcode
 			return new wp.shortcode({
 				tag: sc,
 				attrs: wp.media.putswf_video._atts_filter(model_atts),

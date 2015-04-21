@@ -69,6 +69,7 @@
 					// TODO: better error message
 					clearInterval(ivl);
 					console.log('SWFPut markup fetch by ajax failed '+cont);
+					_tifd = document.getElementById('putswf-dlg-content-wrapper');
 					_tif = document.createElement('span');
 					_tif.innerHTML = cont;
 					_tifd.appendChild(_tif);
@@ -186,12 +187,13 @@
 						setTimeout( resize, i * 700 );
 					}
 				}
-			}, 50 );
+			}, 150 );
 		},
 		// TODO: this proc should maybe be a method of the data model
 		_putswf_frolic_in_data = function (d) {
-			var self = this,
-			    oldatts = d.model.attributes,
+			var self = this, tmp,
+			    model = d.model,
+			    oldatts = model.attributes,
 			    newatts = (d.attachment && d.attachment.attributes)
 			        ? d.attachment.attributes : false,
 			    sctag   = oldatts.shortcode.tag,
@@ -213,6 +215,7 @@
 				var uri =
 				    newatts.id || newatts.url || newatts.link || '';
 				oldatts.iimage = uri;
+				model.poster = newatts;
 			}
 			
 			// Media frame add/replace video tab
@@ -236,15 +239,21 @@
 					if ( ! multi && t && t.toLowerCase() === 'flv' ) {
 						oldatts.url = m;
 						oldatts.altvideo = '';
+						model.flv = newatts;
+						model.html5s = [];
 					} else {
 						// Replace
 						if ( vid_rpl ) {
 							if ( t && t.toLowerCase() === 'flv' ) {
 								oldatts.url = m;
 								oldatts.altvideo = '';
+								model.flv = newatts;
+								model.html5s = [];
 							} else {
 								oldatts.altvideo = m;
 								oldatts.url = '';
+								model.flv = '';
+								model.html5s = [newatts];
 							}
 						// Add -- multiple selection
 						} else {
@@ -269,12 +278,23 @@
 										uri: tatt.id || tatt.url,
 										flv: ( t && t.toLowerCase() === 'flv' ) === true
 									};
+									
+									if ( am[i].flv ) {
+										model.flv = tatt;
+									} else {
+										model.html5s.push(tatt);
+									}
 								}
 							} else {
 								am[0] = {
 									uri: m,
 									flv: ( t && t.toLowerCase() === 'flv' ) === true
 								};
+								if ( am[0].flv ) {
+									model.flv = newatts;
+								} else {
+									model.html5s.push(newatts);
+								}
 							}
 
 							for ( var i = 0; i < am.length; i++ ) {
@@ -296,11 +316,27 @@
 								
 								oldatts.altvideo = o + m;
 							}
+							
+							model.cleanup_media();
 						}
 					}
 				}
 			} else {
 				caption = oldatts.content;
+			}
+			
+			// TODO: remove reduncancies above made by this
+			tmp = model.get_poster();
+			if ( tmp ) {
+				oldatts.iimage = tmp;
+			}
+			tmp = model.get_flv();
+			if ( tmp ) {
+				oldatts.url = tmp;
+			}
+			tmp = model.get_html5s();
+			if ( tmp ) {
+				oldatts.altvideo = tmp;
 			}
 
 			return {
@@ -328,14 +364,14 @@
 					cont = response.body;
 				} else {
 					head = false;
-					cont = '<p>FAIL to get wp_ajax response</p>'
+					cont = 'FAIL to get wp_ajax response'
 					console.log('.DONE BAD: CONT: ' + cont);
 				}
 				_putswf__putfrm();
 			} )
 			.fail( function( response ) {
 				head = false;
-				cont = '<p>FAIL onwp_ajax request</p>'
+				cont = 'FAIL onwp_ajax request'
 				console.log('.FAIL BAD: CONT: ' + cont);
 				_putswf__putfrm();
 			} );
