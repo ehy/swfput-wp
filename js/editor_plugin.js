@@ -34,6 +34,14 @@
 // A utitlity for this code, i.e. stuff in one place
 //
 var SWFPut_video_utility_obj_def = function() {
+	// start new serial based on page load time --
+	// not critical, meant to help avoid clashes,
+	// but not under perverse conditions like rapid
+	// multiple use incremenenting to values that might
+	// be greater than initial value on next page load --
+	// under such conditions, games over anyway.
+	this.loadtime_serial = this.unixtime() & 0x0FFFFFFFFF;
+
 	// placeholder token data: regretable hack for SWFPut video
 	// plugin for the tinymce, with WordPress; this is to hold
 	// place in a <dd> element which normally holds a caption,
@@ -114,18 +122,30 @@ SWFPut_video_utility_obj_def.prototype = {
 		preload: "image"
 	},
 	
-	// for method below
-	get_new_putswf_shortcode_serial: 0,
+	// Like JS Date.now
+	date_now: function() {
+		return Date.now ? Date.now() : new Date().getTime();
+	},
+	
+	// w/ 1 sec reso. like unix epoch time (JS funcs start at epoch)
+	unixtime: function() {
+		return (this.date_now() / 1000);
+	},
+	
+	// set in ctor to epoch time in seconds
+	loadtime_serial: 0,
 
 	// get an empty shortcode for new insertion,
-	// adding caption reminder with serial --
-	// serial serves to make string unique for
+	// adding caption reminder with timestamp --
+	// timestamp serves to make string unique for
 	// wp.media use in a data-* attribute
 	get_new_putswf_shortcode: function() {
-		var s = '[putswf_video url="" iimage="" altvideo=""]',
+		var d = new Date(),
+		    s = '[putswf_video url="" iimage="" altvideo=""]',
 		    e = '[/putswf_video]',
-		    c = 'Edit me or delete me but please do not leave me -- '
-		        + this.get_new_putswf_shortcode_serial++;
+		    c = 'Edit me please! '
+		        + d.toString() + ', '
+		        + d.getTime() + 'ms';
 		return s + c + e;
 	},
 
@@ -224,7 +244,7 @@ if ( SWFPut_video_utility_obj._bbone_mvc_opt === true
      && typeof wp.mce.views.register === 'function' ) {
 
 // Our button (next to "Add Media") calls this
-function SWFPut_add_button_func(btn) {
+var SWFPut_add_button_func = function(btn) {
 	var ivl, ivlmax = 500, tid = btn.id,
 	    sc = SWFPut_video_utility_obj.get_new_putswf_shortcode(),
 	    dat = SWFPut_putswf_video_inst.get_mce_dat(),
@@ -239,7 +259,7 @@ function SWFPut_add_button_func(btn) {
 
 	SWFPut_putswf_video_inst.put_at_cursor(sc);
 
-	ivl = setInterval( function () {
+	ivl = setInterval( function() {
 		var got = false,
 		    $ = ed.$;
 		    
@@ -247,7 +267,7 @@ function SWFPut_add_button_func(btn) {
 		    var w = $( '.wpview-wrap' );
 
 			w.each( function(cur) {
-				var at, ret = true;;
+				var at;
 				// wacky: mce.dom.query.each  passing number, not obj
 				cur = w[cur];			
 				at = cur.getAttribute( 'data-wpview-text' );
@@ -278,18 +298,18 @@ function SWFPut_add_button_func(btn) {
 // get an attachment obj from attachments, or by ajax if needed
 // -- 1st arg is id, 2nd is existing obj to (re)place in table and
 // is optional
-function SWFPut_get_attachment_by_id(id, attach_put, result_cb) {
+var SWFPut_get_attachment_by_id = function(id, attach_put, result_cb) {
 	return SWFPut_video_utility_obj
 	    ? SWFPut_video_utility_obj.get_attachment_by_id(id, attach_put, result_cb || false)
 	    : false;
-}
+};
 
 // specific to putswf shortcode attr url and altvideo.
 // and iimage -- these might have a URL or WP
 // attachment ID -- in the latter case get the
 // wp "attachment" object w/ ajax and cache the
 // objs for later use
-function SWFPut_cache_shortcode_ids(sc, cb) {
+var SWFPut_cache_shortcode_ids = function(sc, cb) {
 	var aatt = [
 		sc.get( 'url' ),
 		sc.get( 'altvideo' ),
@@ -312,7 +332,7 @@ function SWFPut_cache_shortcode_ids(sc, cb) {
 			} );
 		}
 	} );
-}
+};
 
 // MVC
 (function(wp, $, _, Backbone) {
@@ -361,7 +381,8 @@ function SWFPut_cache_shortcode_ids(sc, cb) {
 				var MutationObserver = window.MutationObserver
 					|| window.WebKitMutationObserver
 					|| window.MozMutationObserver || false,
-					importStyles = true;
+					importStyles = true,
+					ivlmax = 180, ivl;
 	
 				if ( head || body.indexOf( '<script' ) !== -1 ) {
 					this.getNodes( function ( editor, node, content ) {
@@ -392,6 +413,12 @@ function SWFPut_cache_shortcode_ids(sc, cb) {
 						// Seems Firefox needs a bit of time to insert/set the view nodes, or the iframe will fail
 						// especially when switching Text => Visual.
 						setTimeout( function() {
+						ivl = setInterval( function() {
+							if ( --ivlmax <= 0 ) {
+								clearInterval(ivl);
+								return;
+							}
+							
 							iframe = dom.add( content, 'iframe', {
 								src: tinymce.Env.ie ? 'javascript:""' : '',
 								frameBorder: '0',
@@ -402,103 +429,135 @@ function SWFPut_cache_shortcode_ids(sc, cb) {
 									width: '100%',
 									display: 'block'
 								}
-							} );
+							} ) || false;
+							
+							if ( ! iframe ) {
+								return;
+							}
 	
-							iframeDoc = iframe.contentWindow.document;
-	
-							iframeDoc.open();
-							iframeDoc.write(
-								'<!DOCTYPE html>' +
-								'<html>' +
-									'<head>' +
-										'<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />' +
-										head +
-										styles +
-										'<style>' +
-											'html {' +
-												'background: transparent;' +
-												'padding: 0;' +
-												'margin: 0;' +
-											'}' +
-											'body#wpview-iframe-sandbox {' +
-												'background: transparent;' +
-												'padding: 1px 0 !important;' +
-												'margin: -1px 0 0 !important;' +
-											'}' +
-											'body#wpview-iframe-sandbox:before,' +
-											'body#wpview-iframe-sandbox:after {' +
-												'display: none;' +
-												'content: "";' +
-											'}' +
-											'.alignleft {' +
-											'display: inline;' +
-											'float: left;' +
-											'margin-right: 1.5em; }' +
-											'' +
-											'.alignright {' +
-											'display: inline;' +
-											'float: right;' +
-											'margin-left: 1.5em; }' +
-											'' +
-											'.aligncenter {' +
-											'clear: both;' +
-											'display: block;' +
-											'margin: 0 auto; }' +
-											'' +
-											'.alignright .caption {' +
-											'padding-bottom: 0;' +
-											'margin-bottom: 0; }' +
-											'' +
-											'.alignleft .caption {' +
-											'padding-bottom: 0;' +
-											'margin-bottom: 0; }' +
-											'' +
-											'.aligncenter .caption {' +
-											'padding-bottom: 0;' +
-											'margin-bottom: 0.75rem; }' +
-										'</style>' +
-									'</head>' +
-									'<body id="wpview-iframe-sandbox" class="' + bodyClasses + '">' +
-										body +
-									'</body>' +
-								'</html>'
-							);
-							iframeDoc.close();
-	
-							resize = function() {
-								// Make sure the iframe still exists.
-								iframe.contentWindow && $( iframe ).height( $( iframeDoc.body ).height() );
-							};
-	
-							try {
-								if ( MutationObserver ) {
-									//was iframeDoc.body -- not a Node iface (FFox);
-									var nod = iframeDoc;
+							// got iframe; now, use inner interval
+							// to wait for iframe.contentWindow
+							clearInterval(ivl);
+							ivlmax *= 4; // 4x freq., same dur.
+							ivl = setInterval( function() {
+								if ( --ivlmax <= 0 ) {
+									clearInterval(ivl);
+									return;
+								}
+							
+								iframeDoc =
+								    iframe.contentWindow
+								    ? (iframe.contentWindow.document || false)
+								    : false;
 
-									new MutationObserver( _.debounce( function() {
-										resize();
-									}, 100 ) )
-									.observe( nod, {
-										attributes: true,
-										childList: true,
-										subtree: true
-									} );
-								} else {
-									throw ReferenceError('MutationObserver not supported');
+								if ( ! iframeDoc ) {
+									return;
 								}
-							} catch ( exptn ) {
-								console.log('Exception: ' + exptn.message);
-								for ( i = 1; i < 6; i++ ) {
-									setTimeout( resize, i * 700 );
-								}
-							}
+		
+								iframeDoc.open();
+								iframeDoc.write(
+									'<!DOCTYPE html>' +
+									'<html>' +
+										'<head>' +
+											'<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />' +
+											head +
+											styles +
+											'<style>' +
+												'html {' +
+													'background: transparent;' +
+													'padding: 0;' +
+													'margin: 0;' +
+												'}' +
+												'body#wpview-iframe-sandbox {' +
+													'background: transparent;' +
+													'padding: 1px 0 !important;' +
+													'margin: -1px 0 0 !important;' +
+												'}' +
+												'body#wpview-iframe-sandbox:before,' +
+												'body#wpview-iframe-sandbox:after {' +
+													'display: none;' +
+													'content: "";' +
+												'}' +
+												'.alignleft {' +
+												'display: block;' +
+												'margin-left: 0;' +
+												'margin-right: auto; }' +
+												'' +
+												'.alignright {' +
+												'display: block;' +
+												'margin-right: 0;' +
+												'margin-left: auto; }' +
+												'' +
+												'.aligncenter {' +
+												'clear: both;' +
+												'display: block;' +
+												'margin: 0 auto; }' +
+												'' +
+												'.alignright .caption {' +
+												'padding-bottom: 0;' +
+												'margin-bottom: 0.7px; }' +
+												'' +
+												'.alignleft .caption {' +
+												'padding-bottom: 0;' +
+												'margin-bottom: 0.7px; }' +
+												'' +
+												'.aligncenter .caption {' +
+												'padding-bottom: 0;' +
+												'margin-bottom: 0.7px; }' +
+											'</style>' +
+										'</head>' +
+										'<body id="wpview-iframe-sandbox" class="' + bodyClasses + '">' +
+											body +
+										'</body>' +
+									'</html>'
+								);
+								iframeDoc.close();
+		
+								resize = function() {
+									var h;
+									// Make sure the iframe still exists.
+									if ( ! iframe.contentWindow ) {
+										return;
+									}
+									h = $( iframeDoc.body ).height();
+									$( iframe ).height( h );
+								};
+		
+								try {
+									if ( MutationObserver ) {
+										//was iframeDoc.body -- not a Node iface (FFox);
+										var nod = iframeDoc;
 	
-							if ( importStyles ) {
-								editor.on( 'wp-body-class-change', function() {
-									iframeDoc.body.className = editor.getBody().className;
-								});
-							}
-						}, 100 );
+										new MutationObserver( _.debounce( function() {
+											resize();
+										}, 100 ) )
+										.observe( nod, {
+											attributes: true,
+											childList: true,
+											subtree: true
+										} );
+									} else {
+										throw ReferenceError('MutationObserver no supported');
+									}
+								} catch ( exptn ) {
+									if ( exptn.message.length > 0 ) {
+										console.log('Exception: ' + exptn.message);
+									}
+									for ( i = 1; i < 36; i++ ) {
+										setTimeout( resize, 1000 );
+									}
+								}
+		
+								if ( importStyles ) {
+									editor.on( 'wp-body-class-change', function() {
+										iframeDoc.body.className = editor.getBody().className;
+									});
+								}
+								
+								clearInterval(ivl);
+							}, 250); // inner interval
+						}, 1000 ); // interval
+ 						}, 100 ); // initial timer
 					});
 				} else {
 				       this.setContent( body );
@@ -585,8 +644,10 @@ function SWFPut_cache_shortcode_ids(sc, cb) {
 						
 						if ( rem === 'remove' ) {
 							console.log('UNBIND -- STOP PLAYERS');
-							delete iframe.contentWindow;
-							delete iframe;
+							//delete iframe.contentWindow;
+							//delete iframe;
+							iframe.contentWindow = null;
+							iframe = null;
 						}
 					}
 				});

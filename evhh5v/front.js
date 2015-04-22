@@ -1327,6 +1327,7 @@ mk_volume : function(parentobj, xoff) {
 	var r  = butwidth * 0.5;  // radius
 	var rs = r - this.btnstrokewid;  // radius, for stroke
 	var rh = r - this.btnhighltwid;  // radius, for highlight
+	var cx, cy;
 
 	// relay event handler
 	var that = this;
@@ -4047,6 +4048,7 @@ evhh5v_controller.prototype = {
 			alert(ex.name + ': "' + ex.message + '"');
 		}
 	},
+	volctl_showing: false,
 	togglevolctl : function() {
 		// delay pointer/bar hiding for volume interaction
 		this.ptrtick = 0;

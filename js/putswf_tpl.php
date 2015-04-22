@@ -114,14 +114,14 @@
 									'content: "";' +
 								'}' +
 								'.alignleft {' +
-								'display: inline;' +
-								'float: left;' +
-								'margin-right: 1.5em; }' +
+								'display: block;' +
+								'margin-left: 0;' +
+								'margin-right: auto; }' +
 								'' +
 								'.alignright {' +
-								'display: inline;' +
-								'float: right;' +
-								'margin-left: 1.5em; }' +
+								'display: block;' +
+								'margin-right: 0;' +
+								'margin-left: auto; }' +
 								'' +
 								'.aligncenter {' +
 								'clear: both;' +
