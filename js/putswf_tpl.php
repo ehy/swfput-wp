@@ -402,15 +402,14 @@
 			clear: none;
 			cursor: pointer;
 			display: inline-block;
-			line-height: 0;
-			height: 16px;
+			height: 1.1rem;
 			outline: 0;
 			margin: 0.5rem 0rem;
 			padding: 0!important;
 			text-align: center;
 			vertical-align: middle;
-			width: 16px;
-			min-width: 16px;
+			width: 1.1rem;
+			min-width: 1.1rem;
 		}
 		div .putswf-dlg-content-wrapper {
 			height: auto;
@@ -430,7 +429,7 @@
 			display: inline !important;
 			margin-right: 0.rem;
 			margin-left:  0.rem;
-			width: 3.2rem;
+			width: 3.3rem;
 		}
 		div[class="dimensions"] label span {
 			display: inline;
@@ -496,39 +495,10 @@
 		<input type="checkbox" data-setting="play" />
 		<span><?php _e( 'Autoplay' ); ?></span>
 	</label>
-
 	<label class="setting checkbox-setting">
 		<input type="checkbox" data-setting="loop" />
 		<span><?php _e( 'Loop' ); ?></span>
 	</label>
 	</div>
 	</div>
-	<#
-	if ( false ) {
-		var dat = data.model;
-		for ( var t in dat ) {
-			console.log("TMPL: data.model."+t+" == "+dat[t]);
-		}
-		//dat = data.model.attributes;
-		//for ( var t in dat ) {
-		//	console.log("ATTR: dat.attributes."+t+" == "+dat[t]);
-		//}
-		//dat = data.model.attributes.shortcode;
-		//for ( var t in dat ) {
-		//	console.log("SCOD: dat."+t+" == "+dat[t]);
-		//}
-		//console.log("SCOD.string: dat.string() == " + dat.string());
-		//if ( data.attachment.attributes ) {
-		//	var dat = data.attachment.attributes;
-		//	for ( var t in dat ) {
-		//		console.log("DATA: dat."+t+" == "+dat[t]);
-		//	}
-		//}
-		
-		//dat = data;
-		//for ( var t in dat ) {
-		//	console.log("DATA: prop "+t+" is  "+ (dat[t].SWFPut_cltag ? dat[t].SWFPut_cltag : 'NO SWFPUT TAG!' ) );
-		//}
-	}
-	#>
 </script>

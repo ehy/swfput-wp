@@ -25,6 +25,11 @@
  * This is for tinymce with major version 4.x and is used
  * by SWFPut for WP 3.9.x and greater
  * 
+ * With v 2.9 (3.0) a new pretty dialog based simplified
+ * UI is implemented based on (literally) the wp.media w/
+ * Backbone and _'s that WP comments suggest was started
+ * ~ v 3.5 -- this implementation is conditional on v 4.x.
+ * 
  * wp-includes/js/tinymce/plugins/wpeditimage/editor_plugin_src.js
  * was used as a guide for this, and copy & paste code may remain.
  * As WordPress is GPL, this is cool. 
@@ -42,6 +47,7 @@ var SWFPut_video_utility_obj_def = function() {
 	// under such conditions, games over anyway.
 	this.loadtime_serial = this.unixtime() & 0x0FFFFFFFFF;
 
+	// For older tinyMCE display:
 	// placeholder token data: regretable hack for SWFPut video
 	// plugin for the tinymce, with WordPress; this is to hold
 	// place in a <dd> element which normally holds a caption,
@@ -67,26 +73,6 @@ var SWFPut_video_utility_obj_def = function() {
 		this.fpo = this._fpo;
 	}
 	
-	// help the Add button
-	var btn = document.getElementById('evhvid-putvid-input-0');
-	if ( btn != undefined ) {
-		btn.onclick = 'return false;';
-		btn.addEventListener(
-			'click',
-			function (e) {
-				// must stop event due to way WP/jquery is handling
-				// it propagated to ancestor element selected on
-				// class .insert-media, which our button must use
-				// for CSS snazziness
-				e.stopPropagation();
-				e.preventDefault();
-				btn.blur();
-				SWFPut_add_button_func(btn);
-			},
-			false
-		);
-	}
-
 	// use tinymce plugin, or new _+Backbone-based wp.media mvc code
 	this._bbone_mvc_opt =
 	    swfput_mceplug_inf._bbone_mvc_opt === 'true' ? true : false;
@@ -267,7 +253,8 @@ function SWFPut_repl_nl(str) {
 	
 // Experimental wp mediad based presentation in/of editor thing
 if ( SWFPut_video_utility_obj._bbone_mvc_opt === true
-     && typeof wp.mce.views.register === 'function' ) {
+     && typeof wp.mce.views.register === 'function'
+     && wp.mce !== undefined && wp.mce.av !== undefined ) {
 
 // Our button (next to "Add Media") calls this
 var SWFPut_add_button_func = function(btn) {
@@ -359,6 +346,29 @@ var SWFPut_cache_shortcode_ids = function(sc, cb) {
 		}
 	} );
 };
+
+// Get / help the 'Add SWFPut Video' button
+(function() {
+	var btn = document.getElementById('evhvid-putvid-input-0');
+
+	if ( btn != undefined ) {
+		btn.onclick = 'return false;';
+		btn.addEventListener(
+			'click',
+			function (e) {
+				// must stop event due to way WP/jquery is handling
+				// it propagated to ancestor element selected on
+				// class .insert-media, which our button must use
+				// for CSS snazziness
+				e.stopPropagation();
+				e.preventDefault();
+				btn.blur();
+				SWFPut_add_button_func(btn);
+			},
+			false
+		);
+	}
+}());
 
 // MVC
 (function(wp, $, _, Backbone) {
@@ -696,8 +706,7 @@ var SWFPut_cache_shortcode_ids = function(sc, cb) {
 
 	mce.views.register( 'putswf_video', _.extend( {}, view_def, {
 		state: 'putswf_video-details',
-		/*
-		*/
+
 		toView: function( content ) {
 			var match = wp.shortcode.next( this.type, content );
 

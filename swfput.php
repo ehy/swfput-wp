@@ -236,6 +236,9 @@ class SWF_put_evh {
 	// 'wpmt' for wp media template
 	const swfwpmtsname = 'putswf_tpl.php';
 	
+	// min ver for new edit interface (wp.media-like)
+	protected static $media_edit_wp_minver = 0;
+
 	// html5 video front-end js
 	const evhv5vjsdir  = 'evhh5v';
 	const evhv5vjsname = 'front.min.js';
@@ -298,6 +301,8 @@ class SWF_put_evh {
 
 		$this->in_wdg_do_shortcode = 0;
 		
+		self::$media_edit_wp_minver = (4 << 24) | (1 << 16) | (1 << 8) | 0;
+
 		if ( ($this->full_init = $init) !== true ) {
 			// must do this
 			$this->init_opts();
@@ -750,7 +755,7 @@ class SWF_put_evh {
 
 			// next actions are for new features tested w/
 			// WP 4.1.1
-			$v = (4 << 24) | (1 << 16) | (1 << 8) | 0;
+			$v = self::$media_edit_wp_minver;
 			$ok = self::wpv_min($v);
 	
 			if ( $ok && current_user_can( 'edit_posts' )
@@ -909,7 +914,7 @@ class SWF_put_evh {
 				// WP 4.1.1 -- do not even try w/ < 4.1; moreover,
 				// an option to disable this is a todo --
 				// TODO: make option for this.
-				$v = (4 << 24) | (1 << 16) | (1 << 8) | 0;
+				$v = self::$media_edit_wp_minver;
 				$ok = self::wpv_min($v);
 				$info['_bbone_mvc_opt'] = $ok ? 'true' : 'false';
 
