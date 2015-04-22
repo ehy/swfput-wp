@@ -122,6 +122,32 @@ SWFPut_video_utility_obj_def.prototype = {
 		preload: "image"
 	},
 	
+	mk_shortcode : function(sc, atts, cap) {
+		var c = cap || '', s = '[' + sc,
+		    defs = SWFPut_video_utility_obj_def.prototype.defprops;
+		for ( var t in atts ) {
+			if ( defs[ t ] === undefined ) {
+				continue;
+			}
+			
+			s += ' ' + t + '="' + atts[t] + '"';
+		}
+		return s + ']' + c + '[/' + sc + ']'
+	},
+
+	atts_filter : function(atts) {
+		var defs = SWFPut_video_utility_obj_def.prototype.defprops
+		    outp = {};
+		
+		for ( var t in atts ) {
+			if ( defs[ t ] !== undefined ) {
+				outp[t] = atts[ t ];
+			}
+		}
+		
+		return outp;
+	},
+
 	// Like JS Date.now
 	date_now: function() {
 		return Date.now ? Date.now() : new Date().getTime();
@@ -573,13 +599,21 @@ var SWFPut_cache_shortcode_ids = function(sc, cb) {
 			}
 			,
 			fetch: function () {
-				var self = this;
+				var self = this,
+				    atts = SWFPut_video_utility_obj.atts_filter(
+				        this.shortcode.attrs.named),
+				    sc =
+				        SWFPut_video_utility_obj.mk_shortcode(
+				            this.shortcode.tag,
+				            atts,
+				            this.shortcode.content),
+				    ng = this.shortcode.string();
 
 				wp.ajax.send( this.action, {
 					data: {
 						post_ID: $( '#post_ID' ).val() || 0,
 						type: this.shortcode.tag,
-						shortcode: this.shortcode.string()
+						shortcode: sc
 					}
 				} )
 				.done( function( response ) {
@@ -666,7 +700,7 @@ var SWFPut_cache_shortcode_ids = function(sc, cb) {
 		*/
 		toView: function( content ) {
 			var match = wp.shortcode.next( this.type, content );
-			
+
 			if ( ! match ) {
 				return;
 			}
@@ -704,6 +738,7 @@ var SWFPut_cache_shortcode_ids = function(sc, cb) {
 
 			callback = function( selection ) {
 				var shortcode = wp.media[ self.type ].shortcode( selection ).string();
+				//var shortcode = wp.media[ self.type ].shortcode( selection );
 				$( node ).attr( 'data-wpview-text', window.encodeURIComponent( shortcode ) );
 				wp.mce.views.refreshView( self, shortcode );
 				frame.detach();
@@ -1541,30 +1576,9 @@ console.log('CONTROLLER setSource: ');
 
 		SWFPut_cltag: 'wp.media.putswf_video',
 
-		_mk_shortcode : function(sc, atts, cap) {
-			var c = cap || '', s = '[' + sc,
-			    defs = wp.media.putswf_video.defaults;
-			for ( var t in atts ) {
-				if ( defs[ t ] === undefined ) {
-					continue;
-				}
-				
-				s += ' ' + t + '="' + atts[t] + '"';
-			}
-			return s + ']' + c + '[/' + sc + ']'
-		},
+		_mk_shortcode : SWFPut_video_utility_obj.mk_shortcode,
 
-		_atts_filter : function(atts) {
-			var defs = wp.media.putswf_video.defaults;
-			
-			for ( var t in atts ) {
-				if ( defs[ t ] === undefined ) {
-					delete atts[ t ];
-				}
-			}
-			
-			return atts;
-		},
+		_atts_filter : SWFPut_video_utility_obj.atts_filter,
 
 		// called by MCE view::edit -- the arg is
 		// an unmolested shortcode string
@@ -1594,17 +1608,19 @@ console.log('CONTROLLER setSource: ');
 		// dont't use this) as in:
 		// var shortcode = wp.media[ self.type ].shortcode( selection ).string();
 		shortcode : function( model_atts ) { // arg is "selection"
-			var content, sc;
+			var content, sc, atts;
 
-			content = model_atts.content;
 			sc = model_atts.shortcode.tag;
+			content = model_atts.content; //.substr(0);
+			atts = wp.media.putswf_video._atts_filter(model_atts);
 
 			// code elsewhere adds props to selection, so the use of
 			// _atts_filter() is required to make a working
 			// shortcode
+			//return wp.media.putswf_video._mk_shortcode( sc, atts, content );
 			return new wp.shortcode({
 				tag: sc,
-				attrs: wp.media.putswf_video._atts_filter(model_atts),
+				attrs: atts,
 				content: content
 			});
 		}

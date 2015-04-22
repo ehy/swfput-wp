@@ -197,8 +197,7 @@
 			    newatts = (d.attachment && d.attachment.attributes)
 			        ? d.attachment.attributes : false,
 			    sctag   = oldatts.shortcode.tag,
-			    caption = ( newatts && newatts.caption )
-			        ? newatts.caption : oldatts.content
+			    caption = oldatts.caption || oldatts.shortcode.content; //( newatts && newatts.caption ) ? newatts.caption : oldatts.content
 			    vid_add =
 			        ( newatts && newatts.putswf_action === 'add_video' )
 			        ? true : false,
@@ -220,11 +219,6 @@
 			
 			// Media frame add/replace video tab
 			if ( vid_op ) {
-				if ( vid_rpl ) {
-					// TEMP until cation option
-					oldatts.content = caption;
-				}
-
 				if ( newatts && (newatts.id || newatts.url) || multi ) {
 					var m = newatts.id || newatts.url,
 					    t = newatts.subtype
@@ -321,20 +315,22 @@
 						}
 					}
 				}
-			} else {
-				caption = oldatts.content;
 			}
 			
+			oldatts.content = caption;
+			oldatts.shortcode.content = caption;
+			oldatts.caption = caption;
+			
 			// TODO: remove reduncancies above made by this
-			tmp = model.get_poster();
+			tmp = model.get_poster(true);
 			if ( tmp ) {
 				oldatts.iimage = tmp;
 			}
-			tmp = model.get_flv();
+			tmp = model.get_flv(true);
 			if ( tmp ) {
 				oldatts.url = tmp;
 			}
-			tmp = model.get_html5s();
+			tmp = model.get_html5s(true);
 			if ( tmp ) {
 				oldatts.altvideo = tmp;
 			}
@@ -379,7 +375,133 @@
 		
 		_putswf_fetch();
 	#>
+	<style>
+		.putswf-dlg-content-controls .setting {
+			margin: 0.5rem 1.5rem;
+		}
+		div:not([class="dimensions"]) > label > span {
+			margin-left: 1.5rem;
+			display: block;
+		}
+		div span {
+			display: block;
+		}
+		.putswf-dlg-content-controls input {
+			display: inline;
+			margin: 0.5rem 1.5rem;
+		}
+		input ~ span {
+			display: inline !important;
+			margin-bottom: 0.5rem !important;
+			margin-left: 0.5rem !important;
+		}
+		input[type=checkbox] {
+			-webkit-appearance: checkbox;
+			box-sizing: border-box;
+			border: 1px solid #bbb;
+			clear: none;
+			cursor: pointer;
+			display: inline-block;
+			line-height: 0;
+			height: 16px;
+			outline: 0;
+			margin: 0.5rem 0rem;
+			padding: 0!important;
+			text-align: center;
+			vertical-align: middle;
+			width: 16px;
+			min-width: 16px;
+		}
+		div .putswf-dlg-content-wrapper {
+			height: auto;
+		}
+		textarea {
+			margin-left: 1.5rem;
+			overflow: auto;
+			background: none repeat scroll;
+		}
+		input[type=text], textarea {
+			width: 36rem;
+		}
+		div[class="dimensions"] {
+			margin-left: 0.rem !important;
+		}
+		div[class="dimensions"] input[type=text] {
+			display: inline !important;
+			margin-right: 0.rem;
+			margin-left:  0.rem;
+			width: 3.2rem;
+		}
+		div[class="dimensions"] label span {
+			display: inline;
+			margin-left: 0.rem ;
+		}
+		div[class="dimensions"] span {
+			display: inline;
+			margin-right: 0.rem;
+			margin-left: 0.rem ;
+		}
+		div[class="dimensions"] label {
+			display: inline;
+			margin-left: 0.rem !important;
+		}
+	</style>
+	<div class="putswf-dlg-content-outer">
 	<div id="putswf-dlg-content-wrapper">
+	</div>
+	<div class="putswf-dlg-content-controls">
+	<label class="setting">
+		<span>Caption</span>
+		<textarea rows="3" wrap="soft" placeholder="optional caption" data-setting="content" value="{{ data.model.caption || data.model.content }}" />
+	</label>
+	<label class="setting">
+		<span>Flash Video URL/ID</span>
+		<input type="text" disabled="disabled" data-setting="url" value="{{ data.model.get_flv(true) }}" />
+		<a class="remove-setting"><?php _e( 'Remove' ); ?></a>
+	</label>
+	<label class="setting">
+		<span>HTML5 Video URL/ID</span>
+		<input type="text" disabled="disabled" data-setting="altvideo" value="{{ data.model.get_html5s(true) }}" />
+		<a class="remove-setting"><?php _e( 'Remove' ); ?></a>
+	</label>
+	<div class="dimensions">
+		<label class="setting">
+			<span>Width</span>
+			<input type="text" data-setting="width" value="{{ data.model.attributes.width }}" />
+		</label>
+		<label class="setting">
+			<span>Height</span>
+			<input type="text" data-setting="height" value="{{ data.model.attributes.height }}" />
+		</label>
+	</div>
+	<div class="setting align">
+		<span>Align</span>
+		<div class="button-group button-large" data-setting="align">
+			<button class="button" value="left">Left</button>
+			<button class="button active" value="center">Center</button>
+			<button class="button" value="right">Right</button>
+			<button class="button" value="none">None</button>
+		</div>
+	</div>
+	<div class="setting preload">
+		<span><?php _e( 'Preload' ); ?></span>
+		<div class="button-group button-large" data-setting="preload">
+			<button class="button" value="auto"><?php _ex( 'Auto', 'auto preload' ); ?></button>
+			<button class="button" value="metadata"><?php _e( 'Metadata' ); ?></button>
+			<button class="button" value="none"><?php _e( 'None' ); ?></button>
+			<button class="button active" value="image">Per Poster</button>
+		</div>
+	</div>
+	<label class="setting checkbox-setting">
+		<input type="checkbox" data-setting="play" />
+		<span><?php _e( 'Autoplay' ); ?></span>
+	</label>
+
+	<label class="setting checkbox-setting">
+		<input type="checkbox" data-setting="loop" />
+		<span><?php _e( 'Loop' ); ?></span>
+	</label>
+	</div>
 	</div>
 	<#
 	if ( false ) {
