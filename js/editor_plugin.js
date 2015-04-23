@@ -715,23 +715,24 @@ var SWFPut_cache_shortcode_ids = function(sc, cb) {
 					if ( iframe && ( win = iframe.contentWindow ) && win.evhh5v_sizer_instances ) {
 						try {
 							for ( p in win.evhh5v_sizer_instances ) {
-								var v = win.evhh5v_sizer_instances[p].va_o;
+								var vi = win.evhh5v_sizer_instances[p],
+								    v = vi.va_o || false, // H5V
+								    f = vi.o    || false; // flash
 
-								if ( v ) {
-									// use 'stop()' or 'pause()'
-									// the latter is gentler
+								// use 'stop()' or 'pause()'
+								// the latter is gentler
+								if ( v && (typeof v.pause === 'function') ) {
 									v.pause();
 								}
+								if ( f && (typeof f.pause === 'function') ) {
+									f.pause();
+								}
 							}
-						} catch( er ) {
+						} catch( err ) {
 							var e = err.message;
-							console.log('SWFPut in stopPlayers: ' + e);
 						}
 						
 						if ( rem === 'remove' ) {
-							console.log('UNBIND -- STOP PLAYERS');
-							//delete iframe.contentWindow;
-							//delete iframe;
 							iframe.contentWindow = null;
 							iframe = null;
 						}
@@ -849,7 +850,7 @@ var SWFPut_cache_shortcode_ids = function(sc, cb) {
 				
 				SWFPut_cache_shortcode_ids( sc, function(id, r, c) {
 					var sid = '' + id;
-					//console.log('CALLED: 27: cache attach id '+id+' -- url '+c[id].url);
+
 					that.initial_attrs.id_cache = c;
 					if ( that.initial_attrs.id_array === undefined ) {
 						that.initial_attrs.id_array = [];
@@ -877,19 +878,6 @@ var SWFPut_cache_shortcode_ids = function(sc, cb) {
 		html5s : null,
 		
 		setSource: function( attachment ) {
-console.log('CALLED: 21: media.model.putswf_postMedia::setSource');
-			if ( this.attachment === false ) {
-				console.log('FIRST setSource on ' + this.SWFPut_cltag);
-				var a = attachment.attributes;
-				//for ( var k in a ) {
-				//	console.log('NEW setSource attachment.attributes.'+k+' has ' + a[k]);
-				//}
-			} else {
-				var a = this.attachment.attributes;
-				//for ( var k in a ) {
-				//	console.log('FOUND setSource attachment.attributes.'+k+' has ' + a[k]);
-				//}
-			}
 			this.attachment = attachment;
 			this.extension = attachment.get( 'filename' ).split('.').pop();
 
@@ -906,18 +894,14 @@ console.log('CALLED: 21: media.model.putswf_postMedia::setSource');
 			try {
 				var am, multi = attachment.get( 'putswf_attach_all' );
 				
-				if ( multi && (am = multi.toArray()) && am.length > 0 ) {
-					console.log('setSource: MULTI LEN ' + am.length);
-				} else {
+				if ( multi && multi.toArray().length < 1 ) {
 					delete this.attachment.putswf_attach_all;
 				}
 			} catch ( e ) {
-				console.log('setSource: ' + e.message);
 			}
 		},
 
 		changeAttachment: function( attachment ) {
-console.log('CALLED: 22: media.model.putswf_postMedia::changeAttachment');
 			var self = this;
 
 			this.setSource( attachment );
@@ -1106,7 +1090,6 @@ console.log('CALLED: 22: media.model.putswf_postMedia::changeAttachment');
 			}).render();
 
 			this.content.set( view );
-console.log('CALLED: 10: media.view.MediaFrame.Putswf_mediaDetails::renderDetailsContent attachment == ' + attach);
 		}
 		,
 		renderMenu: function( view ) {
@@ -1202,8 +1185,6 @@ console.log('CALLED: 10: media.view.MediaFrame.Putswf_mediaDetails::renderDetail
 
 		prepare: function() {
 			var model = this.model;
-console.log('SWFPutDetails: prepare');
-console.log('    SWFPut_cltag: ' + (model.SWFPut_cltag ? model.SWFPut_cltag : 'none found')); // 'media.model.putswf_postMedia'
 
 			return _.defaults({
 				model: model //model: this.model.toJSON()
@@ -1395,7 +1376,6 @@ console.log('    SWFPut_cltag: ' + (model.SWFPut_cltag ? model.SWFPut_cltag : 'n
 
 		,
 		setSource: function( attachment ) {
-console.log('CONTROLLER setSource: ');
 			this.attachment = attachment;
 			this.extension = attachment.get( 'filename' ).split('.').pop();
 
@@ -1515,37 +1495,12 @@ console.log('CONTROLLER setSource: ');
 				// the multiple selection I haven't figured out yet
 				if ( attach_all && attach_all.multiple ) {
 					attachment.attributes.putswf_attach_all = attach_all;
-					//for ( var k in attach_all ) {
-					//	console.log('!!! '+k+' == '+attach_all[k]);
-					//}
-				} else {
-					console.log('MEDIA ADD ATTACH__ALL == '+ attach_all);
 				}
 
 				controller.media.setSource( attachment );
 				state.trigger( 'add-source', controller.media.toJSON() );
 			} );
 		},
-		
-		//renderAddTrackToolbar: function() {
-		//	this.setPrimaryButton( 'Add Subtitles', function( controller, state ) {
-		//		var attachment = state.get( 'selection' ).single(),
-		//			content = controller.media.get( 'content' );
-        //
-		//		if ( -1 === content.indexOf( attachment.get( 'url' ) ) ) {
-		//			content += [
-		//				'<track srclang="en" label="English"kind="subtitles" src="',
-		//				attachment.get( 'url' ),
-		//				'" />'
-		//			].join('');
-        //
-		//			controller.media.set( 'content', content );
-		//		}
-		//		state.trigger( 'add-track', controller.media.toJSON() );
-		//	} );
-		//}
-		//,
-
 	});
 
 	wp.media.putswf_mixin = {
@@ -1554,14 +1509,6 @@ console.log('CONTROLLER setSource: ');
 		SWFPut_cltag: 'wp.media.putswf_mixin',
 
 		removeAllPlayers: function() {
-			var p;
-
-			//if ( window.mejs && window.mejs.players ) {
-			//	for ( p in window.mejs.players ) {
-			//		window.mejs.players[p].pause();
-			//		this.removePlayer( window.mejs.players[p] );
-			//	}
-			//}
 		},
 
 		/**
@@ -1570,35 +1517,6 @@ console.log('CONTROLLER setSource: ');
 		 *	its container and re-add it to the DOM.
 		 */
 		removePlayer: function(t) {
-			//var featureIndex, feature;
-            //
-			//if ( ! t.options ) {
-			//	return;
-			//}
-            //
-			//// invoke features cleanup
-			//for ( featureIndex in t.options.features ) {
-			//	feature = t.options.features[featureIndex];
-			//	if ( t['clean' + feature] ) {
-			//		try {
-			//			t['clean' + feature](t);
-			//		} catch (e) {}
-			//	}
-			//}
-            //
-			//if ( ! t.isDynamic ) {
-			//	t.$node.remove();
-			//}
-            //
-			//if ( 'native' !== t.media.pluginType ) {
-			//	t.media.remove();
-			//}
-            //
-			//delete window.mejs.players[t.id];
-            //
-			//t.container.remove();
-			//t.globalUnbind();
-			//delete t.node.player;
 		},
 		/**
 		 * Allows any class that has set 'player' to a MediaElementPlayer
@@ -1607,13 +1525,6 @@ console.log('CONTROLLER setSource: ');
 		 *  Examples: modal closes, shortcode properties are removed, etc.
 		 */
 		unsetPlayers : function() {
-			//if ( this.players && this.players.length ) {
-			//	_.each( this.players, function (player) {
-			//		player.pause();
-			//		wp.media.putswf_mixin.removePlayer( player );
-			//	} );
-			//	this.players = [];
-			//}
 		}
 	}; // wp.media.putswf_mixin = {
 
@@ -1680,6 +1591,7 @@ console.log('CONTROLLER setSource: ');
 }(wp, jQuery, _, Backbone));
 
 } else { // if ( typeof wp.mce.views.register
+
 // Tried and true, but uses old metabox form
 tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 	var Node  = tinymce.html.Node;

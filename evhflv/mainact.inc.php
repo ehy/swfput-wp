@@ -448,6 +448,36 @@ function cur_external_url() {
 	return external_url_args[external_url_args_cur];
 }
 
+// for external script control -- pause
+function external_pause() {
+	if ( audb && ! dopauseaud ) {
+		togglepause();
+		return true;
+	} else if ( ! dopause ) {
+		togglepause();
+		return true;
+	}
+	return false;
+}
+
+// for external script control -- play
+function external_play() {
+	if ( audb && dopauseaud ) {
+		togglepause();
+		return true;
+	} else if ( dopause ) {
+		togglepause();
+		return true;
+	}
+	return false;
+}
+
+// for external script control -- stop
+function external_stop() {
+	stop_reset();
+	return true;
+}
+
 // setup browser callbacks.
 function setup_external_cb() {
 	if ( external_cbmethods_setup !== undefined ) {
@@ -464,6 +494,9 @@ function setup_external_cb() {
 
 			xi.addCallback("get_ack", this, external_ack);
 			xi.addCallback("add_alt_url", this, external_url);
+			xi.addCallback("pause", this, external_pause);
+			xi.addCallback("play", this, external_play);
+			xi.addCallback("stop", this, external_stop);
 
 			return true;
 		}
@@ -1895,7 +1928,7 @@ function stop_reset() {
 	// progress set consistent w/ new H5V player
 	bbar.progpl._width = 1;
 
-	// set initital fram display if preload was given (and not "none")
+	// set initital frame display if preload was given (and not "none")
 	if ( loadpre ) {
 		loadonload = dopause = initpause = true;
 		startVideo();
