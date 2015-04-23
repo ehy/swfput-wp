@@ -232,7 +232,7 @@ class SWF_put_evh {
 	// swfput js shortcode editor helper name
 	const swfxpljsname = 'editor_plugin.min.js';
 	const swfxpljsname3x = 'editor_plugin3x.min.js';
-	// experimental starting wp 4.1 -- using WP media _.Backbone stuff
+	// starting wp 4.1, swfput 2.9 -- using WP media _.Backbone stuff
 	// 'wpmt' for wp media template
 	const swfwpmtsname = 'putswf_tpl.php';
 	
@@ -256,7 +256,7 @@ class SWF_put_evh {
 	const evhv5vsvg_but = 'ctrbut.svg';
 	// set to map of svg file names -> URL
 	protected $evhv5v_svgs;
-	// for mce ajax fueled display; experimental WP 4.1, swfput 2.9
+	// for mce ajax fueled display; WP 4.1, swfput 2.9
 	protected $evhv5v_data;
 	
 	// hold an instance
@@ -301,6 +301,10 @@ class SWF_put_evh {
 
 		$this->in_wdg_do_shortcode = 0;
 		
+		// for new mce editor interface -- tested 1sr w/ WP 4.1.1;
+		// moreover the WP core code is new and changing --
+		// so this is the min WP ver we'll use the new code with --
+		// Added v 2.9
 		self::$media_edit_wp_minver =
 		    (4 << 24) | (1 << 16) | (1 << 8) | 0;
 
@@ -816,34 +820,36 @@ class SWF_put_evh {
 		}
 	}
 
-	// action to add media button, like core 'Add Media'
+	// action to add media button, like core 'Add Media',
+	// for new v 2.9 wp.media based stuff
+	// Initially, lifted code from wp-admin/includes/media.php
+	// function media_buttons()
 	public static function action_media_button($editor_id = 'content') {
 		static $is1st = 0;
-		// Initially, lift code from wp-admin/includes/media.php
-		// function media_buttons()
 
-		$img = '<span class="wp-media-buttons-icon"></span> ';
+		$txt = __('Add SWFPut Video', 'swfput_l10n');
+
+		// this must be just so -- do not put text within span
+		$spn = '<span class="wp-media-buttons-icon"></span> ' . $txt;
 
 		$id_attr = ' id="evhvid-putvid-input-' . $is1st++ . '"';
-		//$id_attr .= ' onclick="SWFPut_add_button_func(this);"';
+
 		printf(
 		'<a href="%s"%s class="%s" data-editor="%s" title="%s">%s</a>',
-			'#', //'javascript:SWFPut_add_button_func(this);',
+			'#', //'SWFPut_add_button_func();', in editor_plugin.js
 			$id_attr,
 			'button insert-media add_media',
 			esc_attr($editor_id),
-			esc_attr__('Add SWFPut Video', 'swfput_l10n'),
-			$img .  __('Add SWFPut Video', 'swfput_l10n')
+			esc_attr($txt),
+			$spn
 		);
-
-		$is1st = false;
 	}
 
 	// filter for any mce plugin init settings needs (and testing)
 	public static function filter_mce_init($init_array) {
 		// FPO, presently
 		if ( false ) {
-			//$init_array['wpeditimage_disable_captions'] = true;
+			// e.g. $init_array['wpeditimage_disable_captions'] = true;
 			$init_array['keep_styles'] = true;
 		}
 		return $init_array;
@@ -911,7 +917,7 @@ class SWF_put_evh {
 		
 				$info = array('a' => ABSPATH, 'i' => $rn, 'u' => $u);
 
-				// Added 2.9: experimental tinymce display w/
+				// Added 2.9: tinymce display w/ wp.media stuff
 				// WP 4.1.1 -- do not even try w/ < 4.1; moreover,
 				// an option to disable this is a todo --
 				// TODO: make option for this.
@@ -976,7 +982,6 @@ class SWF_put_evh {
 	// register shortcode editor forms javascript
 	public static function filter_admin_print_scripts() {
 		// cap check: not sure if this is necessary here,
-		// hope it doesn't cause failures for legit users
 	    if ( $GLOBALS['editing']
 			&& (current_user_can('edit_posts')
 			||  current_user_can('edit_pages')) ) {
@@ -1104,7 +1109,7 @@ class SWF_put_evh {
 		}
 	}
 
-	// EXPERIMENTAL 4.1 --
+	// Added 2.9, needs min WP 4.1 --
 	// action hook for 'print_media_templates' --
 	// put wp media template(s) for video in editor
 	public static function put_putswf_video_editor_template () {
@@ -1116,7 +1121,7 @@ class SWF_put_evh {
 		include $tfile;
 	}
 
-	// EXPERIMENTAL 4.1 --
+	// Added 2.9, needs min WP 4.1 --
 	// copied from wp_ajax_parse_media_shortcode()
 	// in wp-admin/includes/ajax-actions.php
 	// and altered as necessary

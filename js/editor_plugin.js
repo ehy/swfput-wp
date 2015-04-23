@@ -272,7 +272,7 @@ var SWFPut_add_button_func = function(btn) {
 		return false;
 	}
 	
-	ed.selection.setContent( sc, {format : 'text'} );
+	ed.selection.setContent( sc + '&nbsp;', {format : 'text'} );
 
 	ivl = setInterval( function() {
 		var divel, // raw browser dom element vs. mce object
