@@ -301,7 +301,8 @@ class SWF_put_evh {
 
 		$this->in_wdg_do_shortcode = 0;
 		
-		self::$media_edit_wp_minver = (4 << 24) | (1 << 16) | (1 << 8) | 0;
+		self::$media_edit_wp_minver =
+		    (4 << 24) | (1 << 16) | (1 << 8) | 0;
 
 		if ( ($this->full_init = $init) !== true ) {
 			// must do this

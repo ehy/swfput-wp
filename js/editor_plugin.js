@@ -253,12 +253,14 @@ function SWFPut_repl_nl(str) {
 	
 // Experimental wp mediad based presentation in/of editor thing
 if ( SWFPut_video_utility_obj._bbone_mvc_opt === true
-     && typeof wp.mce.views.register === 'function'
-     && wp.mce !== undefined && wp.mce.av !== undefined ) {
+     && wp !== undefined && wp.mce !== undefined
+     && wp.mce.views !== undefined && wp.mce.av !== undefined
+     && wp.mce.views.register !== undefined
+     && typeof wp.mce.views.register === 'function' ) {
 
 // Our button (next to "Add Media") calls this
 var SWFPut_add_button_func = function(btn) {
-	var ivl, ivlmax = 500, tid = btn.id,
+	var ivl, ivlmax = 100, tid = btn.id,
 	    sc = SWFPut_video_utility_obj.get_new_putswf_shortcode(),
 	    dat = SWFPut_putswf_video_inst.get_mce_dat(),
 	    enc = window.encodeURIComponent( sc ),
@@ -269,11 +271,12 @@ var SWFPut_add_button_func = function(btn) {
 		alert('Failed to get visual editor');
 		return false;
 	}
-
-	SWFPut_putswf_video_inst.put_at_cursor(sc);
+	
+	ed.selection.setContent( sc, {format : 'text'} );
 
 	ivl = setInterval( function() {
-		var got = false,
+		var divel, // raw browser dom element vs. mce object
+		    got = false,
 		    $ = ed.$;
 		    
 		if ( div === false ) {
@@ -285,8 +288,9 @@ var SWFPut_add_button_func = function(btn) {
 				cur = w[cur];			
 				at = cur.getAttribute( 'data-wpview-text' );
 	
-				if ( at && at.indexOf(enc) >= 0 ) {
-					div = $(cur);
+				if ( at && at.indexOf( enc ) >= 0 ) {
+					divel = cur;    // keep raw . . .
+					div = $( cur ); // . . . and mce obj
 					return false;
 				}
 			} );
@@ -295,13 +299,15 @@ var SWFPut_add_button_func = function(btn) {
 		if ( div !== false ) {
 			var f = div.find( 'iframe' );
 			if ( f ) {
+				ed.selection.select( divel, true );
+				ed.selection.scrollIntoView( divel );
 				div.trigger( 'click' );
 				got = true;
 			}
 		}
 
 		if ( (--ivlmax <= 0) || got ) {
-			clearInterval(ivl);
+			clearInterval( ivl );
 		}
 	}, 1500);
 
@@ -514,37 +520,73 @@ var SWFPut_cache_shortcode_ids = function(sc, cb) {
 													'display: none;' +
 													'content: "";' +
 												'}' +
-												'.alignleft {' +
+												'.fix-alignleft {' +
 												'display: block;' +
-												'margin-left: 0;' +
+												'min-height: 32px;' +
+												'margin-top: 0;' +
+												'margin-bottom: 0;' +
+												'margin-left: 0px;' +
 												'margin-right: auto; }' +
 												'' +
-												'.alignright {' +
+												'.fix-alignright {' +
 												'display: block;' +
-												'margin-right: 0;' +
+												'min-height: 32px;' +
+												'margin-top: 0;' +
+												'margin-bottom: 0;' +
+												'margin-right: 0px;' +
 												'margin-left: auto; }' +
 												'' +
-												'.aligncenter {' +
+												'.fix-aligncenter {' +
 												'clear: both;' +
 												'display: block;' +
 												'margin: 0 auto; }' +
 												'' +
 												'.alignright .caption {' +
 												'padding-bottom: 0;' +
-												'margin-bottom: 0.7px; }' +
+												'margin-bottom: 0.1rem; }' +
 												'' +
 												'.alignleft .caption {' +
 												'padding-bottom: 0;' +
-												'margin-bottom: 0.7px; }' +
+												'margin-bottom: 0.1rem; }' +
 												'' +
 												'.aligncenter .caption {' +
 												'padding-bottom: 0;' +
-												'margin-bottom: 0.7px; }' +
+												'margin-bottom: 0.1rem; }' +
+												'' +
 											'</style>' +
 										'</head>' +
 										'<body id="wpview-iframe-sandbox" class="' + bodyClasses + '">' +
 											body +
 										'</body>' +
+										'<script type="text/javascript">' +
+											'( function() {' +
+												'["alignright", "aligncenter", "alignleft"].forEach( function( c, ix, ar ) {' +
+													'var nc = "fix-" + c, mxi = 100,' +
+													    'cur = document.getElementsByClassName( c ) || [];' +
+													'for ( var i = 0; i < cur.length; i++ ) {' +
+														'var e = cur[i],' +
+														    'mx = 0 + mxi,' +
+														    'iv = setInterval( function() {' +
+																'var h = e.height || e.offsetHeight;' +
+																'if ( h && h > 0 ) {' +
+																	'var cl = e.getAttribute( "class" );' +
+																	'cl = cl.replace( c, nc );' +
+																	'e.setAttribute( "class", cl );' +
+																	'h += 2; e.setAttribute( "height", h );' +
+																	'setTimeout( function() {' +
+																		'h -= 2; e.setAttribute( "height", h );' +
+																	'}, 250 );' +
+																	'clearInterval( iv );' +
+																'} else {' +
+																	'if ( --mx < 1 ) {' +
+																		'clearInterval( iv );' +
+																	'}' +
+																'}' +
+															'}, 200 );' +
+													'}' +
+												'} );' +
+											'}() );' +
+										'</script>' +
 									'</html>'
 								);
 								iframeDoc.close();
@@ -573,7 +615,7 @@ var SWFPut_cache_shortcode_ids = function(sc, cb) {
 											subtree: true
 										} );
 									} else {
-										throw ReferenceError('MutationObserver no supported');
+										throw ReferenceError('MutationObserver not supported');
 									}
 								} catch ( exptn ) {
 									if ( exptn.message.length > 0 ) {

@@ -416,6 +416,7 @@
 		}
 		textarea {
 			margin-left: 1.5rem;
+			margin-bottom: 1.5rem;
 			overflow: auto;
 			background: none repeat scroll;
 		}
@@ -455,13 +456,15 @@
 	</label>
 	<label class="setting">
 		<span>Flash Video URL/ID</span>
-		<input type="text" disabled="disabled" data-setting="url" value="{{ data.model.get_flv(true) }}" />
-		<a class="remove-setting"><?php _e( 'Remove' ); ?></a>
+		<input type="text" data-setting="url" value="{{ data.model.get_flv(true) }}" />
+		<!-- removed attr disabled="disabled" -->
+		<!-- <a class="remove-setting"><?php _e( 'Remove' ); ?></a> -->
 	</label>
 	<label class="setting">
 		<span>HTML5 Video URL/ID</span>
-		<input type="text" disabled="disabled" data-setting="altvideo" value="{{ data.model.get_html5s(true) }}" />
-		<a class="remove-setting"><?php _e( 'Remove' ); ?></a>
+		<input type="text" data-setting="altvideo" value="{{ data.model.get_html5s(true) }}" />
+		<!-- removed attr disabled="disabled" -->
+		<!-- <a class="remove-setting"><?php _e( 'Remove' ); ?></a> -->
 	</label>
 	<div class="dimensions">
 		<label class="setting">
