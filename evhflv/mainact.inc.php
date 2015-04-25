@@ -450,6 +450,10 @@ function cur_external_url() {
 
 // for external script control -- pause
 function external_pause() {
+	if ( stream == null && sound == null ) {
+		// no active stream -- do not pause or stream will be started!
+		return false;
+	}
 	if ( audb && ! dopauseaud ) {
 		togglepause();
 		return true;

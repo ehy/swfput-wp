@@ -1938,7 +1938,7 @@ class SWF_put_evh {
 		$c = '';
 		// Note '!=' -- not '!=='
 		if ( $content != null ) {
-			$c = do_shortcode($content);
+			$c = self::prep_caption(do_shortcode($content));
 			$c = '</p><p><span class="caption">'
 				. $c . '</span></p><p>';
 		}
@@ -1999,7 +1999,7 @@ class SWF_put_evh {
 		$c = '';
 		// Note '!=' -- not '!=='
 		if ( $content != null ) {
-			$c = do_shortcode($content);
+			$c = self::prep_caption(do_shortcode($content));
 			$pr->setvalue('caption', $c);
 			$c = '<p class="wp-caption-text">' . $c . '</p>';
 		}
@@ -2062,7 +2062,30 @@ class SWF_put_evh {
 		}
 		return $out;
 	}
-	
+
+	// Story: v 2.9 uses WP w.media stuff, and WP 4.2 breaks captions
+	// in the editor by stripping html elements or by replacing
+	// < and > with entities -- v 2.9 has some workarounds by has
+	// not found a way to prevent data save conversion from angles to
+	// entities -- so this is a regrettable hack to replace  the
+	// entities with angles again
+	public static function prep_caption_cback($cap) {
+		return preg_replace('/&(#822[01]|[rl]dquo);/', '"',
+			preg_replace('/&(#821[67]|[rl]squo);/', "'", $cap[0])
+		);
+	}
+	public static function prep_caption($cap) {
+		$cb = array(__CLASS__, 'prep_caption_cback');
+		// this re is imperfect but will mostly work
+		$r1 = '/(&lt;|<)[^\&>]+=[^><]*(&gt;|>)/';
+
+		return preg_replace('/&gt;/', '>',
+		  preg_replace('/&lt;/', '<',
+		    preg_replace_callback($r1, $cb, $cap)
+		  )
+		);
+	}
+
 	// get video <div>+<script> id strings
 	// $base is base od <div> id,
 	public function get_div_ids($base) {
