@@ -3,7 +3,7 @@ Contributors: EdHynan
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4Q2Y8ZUG8HXLC
 Tags: video, video player, movies, tube, flash, flash video, html5, html5 video, graphics, movie, video content, a/v content
 Requires at least: 3.0.2
-Tested up to: 4.1
+Tested up to: 4.2
 Stable tag: 2.9
 Text Domain: swfput_l10n
 License: GPLv3 or later
@@ -537,7 +537,7 @@ to leave a comment with the URLs of your using pages.
 
 = 2.1.1 =
 * Chromium 3,4 broken iframe handling will not run scripts
-	with attribute sandbox="allowScripts", so sanbox is removed.
+	with attribute sandbox="allowScripts", so sandbox is removed.
 	Do web search 'Chromium iframe scripts' to see Chromium dither.
 
 = 2.1 =

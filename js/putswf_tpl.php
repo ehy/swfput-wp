@@ -189,7 +189,8 @@
 				}
 			}, 150 );
 		},
-		// TODO: this proc should maybe be a method of the data model
+		// TODO:
+		// this proc should possibly be a method of the data model
 		_putswf_frolic_in_data = function (d) {
 			var self = this, tmp,
 			    model = d.model,
@@ -367,7 +368,7 @@
 			} )
 			.fail( function( response ) {
 				head = false;
-				cont = 'FAIL onwp_ajax request'
+				cont = 'FAIL on wp_ajax request'
 				console.log('.FAIL BAD: CONT: ' + cont);
 				_putswf__putfrm();
 			} );
@@ -452,17 +453,23 @@
 	<div class="putswf-dlg-content-controls">
 	<label class="setting">
 		<span>Caption</span>
-		<textarea rows="3" wrap="soft" placeholder="optional caption" data-setting="content" value="{{ data.model.caption || data.model.content }}" />
+		<textarea rows="3" wrap="soft" placeholder="Optional: add caption here." data-setting="content" value="{{ data.model.caption || data.model.content }}" />
 	</label>
 	<label class="setting">
-		<span>Flash Video URL/ID</span>
+		<span>Flash Video URL/ID (for FLV or MP4)</span>
 		<input type="text" data-setting="url" value="{{ data.model.get_flv(true) }}" />
 		<!-- removed attr disabled="disabled" -->
 		<!-- <a class="remove-setting"><?php _e( 'Remove' ); ?></a> -->
 	</label>
 	<label class="setting">
-		<span>HTML5 Video URL/ID</span>
+		<span>HTML5 Video URL/ID (for MP4, OGG/OGV, and WEBM)</span>
 		<input type="text" data-setting="altvideo" value="{{ data.model.get_html5s(true) }}" />
+		<!-- removed attr disabled="disabled" -->
+		<!-- <a class="remove-setting"><?php _e( 'Remove' ); ?></a> -->
+	</label>
+	<label class="setting">
+		<span>Poster URL/ID (JPEG, PNG, GIF ...)</span>
+		<input type="text" data-setting="iimage" value="{{ data.model.attributes.iimage }}" />
 		<!-- removed attr disabled="disabled" -->
 		<!-- <a class="remove-setting"><?php _e( 'Remove' ); ?></a> -->
 	</label>

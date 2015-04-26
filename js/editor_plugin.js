@@ -240,6 +240,7 @@ SWFPut_video_utility_obj_def.prototype = {
 		return false;
 	}
 };
+
 var SWFPut_video_utility_obj = 
 	new SWFPut_video_utility_obj_def(wp || false);
 
@@ -252,20 +253,10 @@ function SWFPut_repl_nl(str) {
 };
 
 
-(function(doit) {
-	if ( ! doit ) return;
-	console.log( 'T bool: ' + SWFPut_video_utility_obj._bbone_mvc_opt);
-	console.log( 'T wp: ' + wp );
-	console.log( 'T wp.mce: ' + wp.mce );
-	console.log( 'T wp.mce.views: ' + wp.mce.views );
-	console.log( 'T wp.mce.av: ' + wp.mce.av );
-	console.log( 'T wp.mce.views.register: ' + wp.mce.views.register );
-}(false));
-
-// Experimental wp mediad based presentation in/of editor thing
+// Experimental wp.media based presentation in/of editor thing
 if ( SWFPut_video_utility_obj._bbone_mvc_opt === true
      && wp !== undefined && wp.mce !== undefined
-     && wp.mce.views !== undefined // && wp.mce.av !== undefined
+     && wp.mce.views !== undefined
      && wp.mce.views.register !== undefined
      && typeof wp.mce.views.register === 'function' ) {
 
@@ -364,6 +355,109 @@ var SWFPut_cache_shortcode_ids = function(sc, cb) {
 	} );
 };
 
+// get html document for iframe: head and body params
+// are fetched by wp_ajax, returned by SWFPut plugin php;
+// styles and bodcls (bodyClasses) are WP hosekeeping.
+// this was pulled from within WP method
+var SWFPut_get_iframe_document = function(head, styles, bodcls, body) {
+	head	= head || '';
+	styles	= styles || '';
+	bodcls	= bodcls || '';
+	body	= body || '';
+
+	return (
+	'<!DOCTYPE html>' +
+	'<html>' +
+		'<head>' +
+			'<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />' +
+			head +
+			styles +
+			'<style>' +
+				'html {' +
+					'background: transparent;' +
+					'padding: 0;' +
+					'margin: 0;' +
+				'}' +
+				'body#wpview-iframe-sandbox {' +
+					'background: transparent;' +
+					'padding: 1px 0 !important;' +
+					'margin: -1px 0 0 !important;' +
+				'}' +
+				'body#wpview-iframe-sandbox:before,' +
+				'body#wpview-iframe-sandbox:after {' +
+					'display: none;' +
+					'content: "";' +
+				'}' +
+				'.fix-alignleft {' +
+				'display: block;' +
+				'min-height: 32px;' +
+				'margin-top: 0;' +
+				'margin-bottom: 0;' +
+				'margin-left: 0px;' +
+				'margin-right: auto; }' +
+				'' +
+				'.fix-alignright {' +
+				'display: block;' +
+				'min-height: 32px;' +
+				'margin-top: 0;' +
+				'margin-bottom: 0;' +
+				'margin-right: 0px;' +
+				'margin-left: auto; }' +
+				'' +
+				'.fix-aligncenter {' +
+				'clear: both;' +
+				'display: block;' +
+				'margin: 0 auto; }' +
+				'' +
+				'.alignright .caption {' +
+				'padding-bottom: 0;' +
+				'margin-bottom: 0.1rem; }' +
+				'' +
+				'.alignleft .caption {' +
+				'padding-bottom: 0;' +
+				'margin-bottom: 0.1rem; }' +
+				'' +
+				'.aligncenter .caption {' +
+				'padding-bottom: 0;' +
+				'margin-bottom: 0.1rem; }' +
+				'' +
+			'</style>' +
+		'</head>' +
+		'<body id="wpview-iframe-sandbox" class="' + bodcls + '">' +
+			body +
+		'</body>' +
+		'<script type="text/javascript">' +
+			'( function() {' +
+				'["alignright", "aligncenter", "alignleft"].forEach( function( c, ix, ar ) {' +
+					'var nc = "fix-" + c, mxi = 100,' +
+					    'cur = document.getElementsByClassName( c ) || [];' +
+					'for ( var i = 0; i < cur.length; i++ ) {' +
+						'var e = cur[i],' +
+						    'mx = 0 + mxi,' +
+						    'iv = setInterval( function() {' +
+								'var h = e.height || e.offsetHeight;' +
+								'if ( h && h > 0 ) {' +
+									'var cl = e.getAttribute( "class" );' +
+									'cl = cl.replace( c, nc );' +
+									'e.setAttribute( "class", cl );' +
+									'h += 2; e.setAttribute( "height", h );' +
+									'setTimeout( function() {' +
+										'h -= 2; e.setAttribute( "height", h );' +
+									'}, 250 );' +
+									'clearInterval( iv );' +
+								'} else {' +
+									'if ( --mx < 1 ) {' +
+										'clearInterval( iv );' +
+									'}' +
+								'}' +
+							'}, 200 );' +
+					'}' +
+				'} );' +
+			'}() );' +
+		'</script>' +
+	'</html>');
+};
+
 // Get / help the 'Add SWFPut Video' button
 (function() {
 	var btn = document.getElementById('evhvid-putvid-input-0');
@@ -401,70 +495,6 @@ var SWFPut_cache_shortcode_ids = function(sc, cb) {
 		var M = { // ...edia
 			state: [],
 		
-			///**
-			// * Update the text of a given view node.
-			// *
-			// * @param {String}	 text   The new text.
-			// * @param {tinymce.Editor} editor The TinyMCE editor instance the view node is in.
-			// * @param {HTMLElement}    node   The view node to update.
-			// */
-			//update: function( text, editor, node ) {
-			//console.log('UPDATE: text -- ' + text);
-			//	var match = M.match( text );
-            //
-			//	if ( match ) {
-			//		$( node ).data( 'rendered', false );
-			//		editor.dom.setAttrib( node, 'data-wpview-text', encodeURIComponent( text ) );
-			//		wp.mce.views.createInstance( this.type, text, match.options ).render();
-			//		editor.focus();
-            //
-			//		return true;
-			//	}
-            //
-			//	//_.find( views, function( view, type ) {
-			//	//	var match = view.prototype.match( text );
-	        //    //
-			//	//	if ( match ) {
-			//	//		$( node ).data( 'rendered', false );
-			//	//		editor.dom.setAttrib( node, 'data-wpview-text', encodeURIComponent( text ) );
-			//	//		wp.mce.views.createInstance( type, text, match.options ).render();
-			//	//		editor.focus();
-	        //    //
-			//	//		return true;
-			//	//	}
-			//	//} );
-			//},
-
-			///**
-			// * Gets all view nodes tied to this view instance.
-			// *
-			// * @param {Function} callback A callback.
-			// * @param {Boolean}  rendered Get (un)rendered view nodes. Optional.
-			// */
-			//getNodes: function( callback, rendered ) {
-			//	this.getEditors( function( editor ) {
-			//		var self = this;
-	        //
-			//		$( editor.getBody() )
-			//			.find( '[data-wpview-text="' + self.encodedText + '"]' )
-			//			.filter( function() {
-			//				var data;
-	        //
-			//				if ( rendered == null ) {
-			//					return true;
-			//				}
-	        //
-			//				data = $( this ).data( 'rendered' ) === true;
-	        //
-			//				return rendered ? data : ! data;
-			//			} )
-			//			.each( function() {
-			//				var f = $( this ).find( '.wpview-content' ).get( 0 );
-			//				callback.call( self, editor, this, f );
-			//			} );
-			//	} );
-			//},
-	
 			// setIframes copied from mce-view.js for broken call
 			// to MutationObserver.observe() --
 			// arg 1 was iframeDoc.body but body lacks interface Node
@@ -514,96 +544,7 @@ var SWFPut_cache_shortcode_ids = function(sc, cb) {
 
 						iframeDoc.open();
 						iframeDoc.write(
-							'<!DOCTYPE html>' +
-							'<html>' +
-								'<head>' +
-									'<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />' +
-									head +
-									styles +
-									'<style>' +
-										'html {' +
-											'background: transparent;' +
-											'padding: 0;' +
-											'margin: 0;' +
-										'}' +
-										'body#wpview-iframe-sandbox {' +
-											'background: transparent;' +
-											'padding: 1px 0 !important;' +
-											'margin: -1px 0 0 !important;' +
-										'}' +
-										'body#wpview-iframe-sandbox:before,' +
-										'body#wpview-iframe-sandbox:after {' +
-											'display: none;' +
-											'content: "";' +
-										'}' +
-										'.fix-alignleft {' +
-										'display: block;' +
-										'min-height: 32px;' +
-										'margin-top: 0;' +
-										'margin-bottom: 0;' +
-										'margin-left: 0px;' +
-										'margin-right: auto; }' +
-										'' +
-										'.fix-alignright {' +
-										'display: block;' +
-										'min-height: 32px;' +
-										'margin-top: 0;' +
-										'margin-bottom: 0;' +
-										'margin-right: 0px;' +
-										'margin-left: auto; }' +
-										'' +
-										'.fix-aligncenter {' +
-										'clear: both;' +
-										'display: block;' +
-										'margin: 0 auto; }' +
-										'' +
-										'.alignright .caption {' +
-										'padding-bottom: 0;' +
-										'margin-bottom: 0.1rem; }' +
-										'' +
-										'.alignleft .caption {' +
-										'padding-bottom: 0;' +
-										'margin-bottom: 0.1rem; }' +
-										'' +
-										'.aligncenter .caption {' +
-										'padding-bottom: 0;' +
-										'margin-bottom: 0.1rem; }' +
-										'' +
-									'</style>' +
-								'</head>' +
-								'<body id="wpview-iframe-sandbox" class="' + bodyClasses + '">' +
-									body +
-								'</body>' +
-								'<script type="text/javascript">' +
-									'( function() {' +
-										'["alignright", "aligncenter", "alignleft"].forEach( function( c, ix, ar ) {' +
-											'var nc = "fix-" + c, mxi = 100,' +
-											    'cur = document.getElementsByClassName( c ) || [];' +
-											'for ( var i = 0; i < cur.length; i++ ) {' +
-												'var e = cur[i],' +
-												    'mx = 0 + mxi,' +
-												    'iv = setInterval( function() {' +
-														'var h = e.height || e.offsetHeight;' +
-														'if ( h && h > 0 ) {' +
-															'var cl = e.getAttribute( "class" );' +
-															'cl = cl.replace( c, nc );' +
-															'e.setAttribute( "class", cl );' +
-															'h += 2; e.setAttribute( "height", h );' +
-															'setTimeout( function() {' +
-																'h -= 2; e.setAttribute( "height", h );' +
-															'}, 250 );' +
-															'clearInterval( iv );' +
-														'} else {' +
-															'if ( --mx < 1 ) {' +
-																'clearInterval( iv );' +
-															'}' +
-														'}' +
-													'}, 200 );' +
-											'}' +
-										'} );' +
-									'}() );' +
-								'</script>' +
-							'</html>'
+							SWFPut_get_iframe_document( head, styles, bodyClasses, body )
 						);
 						iframeDoc.close();
 
@@ -663,8 +604,8 @@ var SWFPut_cache_shortcode_ids = function(sc, cb) {
 			// but in addition whitespace differs, so naive comps will
 			// fail, and additionally in addition tinymce cannot refrain
 			// from diddling with the elements and adds attributes that
-			// cause comp fail; therefore, this squeeze func
-			squeeze_white: function(str) {
+			// cause comp fail; therefore, this string prep. function
+			marker_comp_prepare: function(str) {
 				var ostr,
 				    rx1 = /[ \t]*data-mce[^=]*="[^"]*"/g,
 				    rx2 = /[ \t]{2,}/g;
@@ -678,18 +619,17 @@ var SWFPut_cache_shortcode_ids = function(sc, cb) {
 
 			/**
 			 * Replaces all marker nodes tied to this view instance.
+			 * 
 			 * EH: override here due to naive comparision that fails
 			 * when captions have markup
 			 */
 			replaceMarkers: function() {
 				this.getMarkers( function( editor, node ) {
-					var c1 = M.squeeze_white( $( node ).html() ),
-					    c2 = M.squeeze_white( this.text );
+					var c1 = M.marker_comp_prepare( $( node ).html() ),
+					    c2 = M.marker_comp_prepare( this.text );
+
 					if ( c1 !== c2 ) {
 						editor.dom.setAttrib( node, 'data-wpview-marker', null );
-//console.log('REPLACE MARK FAIL FAIL FAIL:')	;
-//console.log('	REPLACE MARK FAIL NODE HTML: ' + c1 )	;
-//console.log('	REPLACE MARK FAIL THIS TEXT: ' + c2 )	;
 						return;
 					}
 	
@@ -709,37 +649,6 @@ var SWFPut_cache_shortcode_ids = function(sc, cb) {
 			},
 
 			/**
-			 * Sets the content for all view nodes tied to this view instance.
-			 *
-			 * @param {*}	content  The content to set.
-			 * @param {Function} callback A callback. Optional.
-			 * @param {Boolean}  rendered Only set for (un)rendered nodes. Optional.
-			 */
-			setContent: function( content, callback, rendered ) {
-				if ( _.isObject( content ) && content.body.indexOf( '<script' ) !== -1 ) {
-					this.setIframes( content.head || '', content.body, callback, rendered );
-				} else if ( _.isString( content ) && content.indexOf( '<script' ) !== -1 ) {
-					this.setIframes( '', content, callback, rendered );
-				} else {
-					this.getNodes( function( editor, node, contentNode ) {
-						content = content.body || content;
-	
-						if ( content.indexOf( '<iframe' ) !== -1 ) {
-							content += '<div class="wpview-overlay"></div>';
-						}
-
-						var cf = editor.dom.createFragment( content ),
-						    cr = content;
-//console.log('SET CONTENT: cf === "' + cf + '" -- cr === "' + cr + '"')	;
-						contentNode.innerHTML = '';
-						contentNode.appendChild( _.isString( content ) ? editor.dom.createFragment( content ) : content );
-	
-						callback && callback.call( this, editor, node, contentNode );
-					}, rendered );
-				}
-			},
-
-			/**
 			 * Tries to find a text match in a given string.
 			 *
 			 * @param {String} content The string to scan.
@@ -751,8 +660,7 @@ var SWFPut_cache_shortcode_ids = function(sc, cb) {
 			 */
 			match: function( content ) {
 				//var match = wp.shortcode.next( this.type, content );
-				var match,
-				    rx = /\[(\[?)(putswf_video)(?![\w-])([^\]\/]*(?:\/(?!\])[^\]\/]*)*?)(?:(\/)\]|\](?:([^\[]*(?:\[(?!\/\2\])[^\[]*)*)(\[\/\2\]))?)(\]?)/g,
+				var rx = /\[(\[?)(putswf_video)(?![\w-])([^\]\/]*(?:\/(?!\])[^\]\/]*)*?)(?:(\/)\]|\](?:([^\[]*(?:\[(?!\/\2\])[^\[]*)*)(\[\/\2\]))?)(\]?)/g,
 				    match = rx.exec( content );
 
 				if ( match ) {
@@ -1028,96 +936,7 @@ var SWFPut_cache_shortcode_ids = function(sc, cb) {
 			
 									iframeDoc.open();
 									iframeDoc.write(
-										'<!DOCTYPE html>' +
-										'<html>' +
-											'<head>' +
-												'<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />' +
-												head +
-												styles +
-												'<style>' +
-													'html {' +
-														'background: transparent;' +
-														'padding: 0;' +
-														'margin: 0;' +
-													'}' +
-													'body#wpview-iframe-sandbox {' +
-														'background: transparent;' +
-														'padding: 1px 0 !important;' +
-														'margin: -1px 0 0 !important;' +
-													'}' +
-													'body#wpview-iframe-sandbox:before,' +
-													'body#wpview-iframe-sandbox:after {' +
-														'display: none;' +
-														'content: "";' +
-													'}' +
-													'.fix-alignleft {' +
-													'display: block;' +
-													'min-height: 32px;' +
-													'margin-top: 0;' +
-													'margin-bottom: 0;' +
-													'margin-left: 0px;' +
-													'margin-right: auto; }' +
-													'' +
-													'.fix-alignright {' +
-													'display: block;' +
-													'min-height: 32px;' +
-													'margin-top: 0;' +
-													'margin-bottom: 0;' +
-													'margin-right: 0px;' +
-													'margin-left: auto; }' +
-													'' +
-													'.fix-aligncenter {' +
-													'clear: both;' +
-													'display: block;' +
-													'margin: 0 auto; }' +
-													'' +
-													'.alignright .caption {' +
-													'padding-bottom: 0;' +
-													'margin-bottom: 0.1rem; }' +
-													'' +
-													'.alignleft .caption {' +
-													'padding-bottom: 0;' +
-													'margin-bottom: 0.1rem; }' +
-													'' +
-													'.aligncenter .caption {' +
-													'padding-bottom: 0;' +
-													'margin-bottom: 0.1rem; }' +
-													'' +
-												'</style>' +
-											'</head>' +
-											'<body id="wpview-iframe-sandbox" class="' + bodyClasses + '">' +
-												body +
-											'</body>' +
-											'<script type="text/javascript">' +
-												'( function() {' +
-													'["alignright", "aligncenter", "alignleft"].forEach( function( c, ix, ar ) {' +
-														'var nc = "fix-" + c, mxi = 100,' +
-														    'cur = document.getElementsByClassName( c ) || [];' +
-														'for ( var i = 0; i < cur.length; i++ ) {' +
-															'var e = cur[i],' +
-															    'mx = 0 + mxi,' +
-															    'iv = setInterval( function() {' +
-																	'var h = e.height || e.offsetHeight;' +
-																	'if ( h && h > 0 ) {' +
-																		'var cl = e.getAttribute( "class" );' +
-																		'cl = cl.replace( c, nc );' +
-																		'e.setAttribute( "class", cl );' +
-																		'h += 2; e.setAttribute( "height", h );' +
-																		'setTimeout( function() {' +
-																			'h -= 2; e.setAttribute( "height", h );' +
-																		'}, 250 );' +
-																		'clearInterval( iv );' +
-																	'} else {' +
-																		'if ( --mx < 1 ) {' +
-																			'clearInterval( iv );' +
-																		'}' +
-																	'}' +
-																'}, 200 );' +
-														'}' +
-													'} );' +
-												'}() );' +
-											'</script>' +
-										'</html>'
+										SWFPut_get_iframe_document( head, styles, bodyClasses, body )
 									);
 									iframeDoc.close();
 			

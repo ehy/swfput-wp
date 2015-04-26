@@ -2063,12 +2063,14 @@ class SWF_put_evh {
 		return $out;
 	}
 
-	// Story: v 2.9 uses WP w.media stuff, and WP 4.2 breaks captions
+	// Story: v 2.9 uses WP wp.media stuff, and WP 4.2 breaks captions
 	// in the editor by stripping html elements or by replacing
-	// < and > with entities -- v 2.9 has some workarounds by has
-	// not found a way to prevent data save conversion from angles to
+	// < and > with entities -- v 2.9 has some workarounds but has
+	// not found a way to prevent data-save conversion from angles to
 	// entities -- so this is a regrettable hack to replace  the
-	// entities with angles again
+	// entities with angles again -- 1st func is callback; not anon
+	// because still want to run w/ php 5.2 -- because quotes are
+	// getting relaced w/ typographical chars too.
 	public static function prep_caption_cback($cap) {
 		return preg_replace('/&(#822[01]|[rl]dquo);/', '"',
 			preg_replace('/&(#821[67]|[rl]squo);/', "'", $cap[0])
