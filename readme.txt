@@ -272,8 +272,7 @@ to leave a comment with the URLs of your using pages.
 
 1. The SWFPut widget setup form (bottom).
 
-2. The SWFPut posts/page setup form ('meta box') with the first
-	section hidden.
+2. The SWFPut posts/page setup setup details dialog.
 
 3. The appearance of video placed by SWFPut (Twentyeleven theme
 	with dark custom colors, sidebar on left), not yet playing.
@@ -281,7 +280,17 @@ to leave a comment with the URLs of your using pages.
 == Changelog ==
 
 = 2.9 =
-* 
+* A new interface for adding and configuring videos in the
+	visual editor. The interface now shares many properties
+	with the WordPress media interface, and uses much of the
+	new and maturing core code.  Users will find video setup
+	easier, and familiar.  The origonal setup form in a
+	metabox remains available and may be considered an
+	advanced form, as it retains configuration items that
+	will not be added to the new simplified interface.
+	The new interface is only available for WordPress 4.x,
+	and support for 4.0 and 4.1 might be removed in the future
+	(users are advised to keep WordPress up to date).
 
 = 2.2.2.1 =
 * Sigh. Just added a forgotten file (from 2.2.2). The default
@@ -519,7 +528,17 @@ to leave a comment with the URLs of your using pages.
 == Upgrade Notice ==
 
 = 2.9 =
-* 
+* A new interface for adding and configuring videos in the
+	visual editor. The interface now shares many properties
+	with the WordPress media interface, and uses much of the
+	new and maturing core code.  Users will find video setup
+	easier, and familiar.  The origonal setup form in a
+	metabox remains available and may be considered an
+	advanced form, as it retains configuration items that
+	will not be added to the new simplified interface.
+	The new interface is only available for WordPress 4.x,
+	and support for 4.0 and 4.1 might be removed in the future
+	(users are advised to keep WordPress up to date).
 
 = 2.2.2.1 =
 * Sigh. Just added a forgotten file (from 2.2.2).
