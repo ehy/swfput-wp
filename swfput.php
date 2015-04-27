@@ -1127,8 +1127,13 @@ class SWF_put_evh {
 	// and altered as necessary
 	public static function parse_putswf_video_shortcode () {
 		global $post, $wp_scripts;
+		// old versions of WP possibly ~<= 3.3 have get_post()
+		// take arg by reference, so even though this pertains
+		// to code that should not execute on those versions, to
+		// make sure the code parses: use a distinct var for the arg.
+		$post_req = (int) $_POST['post_ID']; // had been in func parens
 
-		if ( ! $post = get_post( (int) $_POST['post_ID'] ) ) {
+		if ( ! $post = get_post( $post_req ) ) {
 			wp_send_json_error();
 		}
 	
