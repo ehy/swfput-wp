@@ -423,6 +423,9 @@ var SWFPut_get_iframe_document = function(head, styles, bodcls, body) {
 				'' +
 			'</style>' +
 		'</head>' +
+		'<script type="text/javascript">' +
+			'var evhh5v_sizer_maxheight_off = true;' +
+		'</script>' +
 		'<body id="wpview-iframe-sandbox" class="' + bodcls + '">' +
 			body +
 		'</body>' +
@@ -450,7 +453,7 @@ var SWFPut_get_iframe_document = function(head, styles, bodcls, body) {
 										'clearInterval( iv );' +
 									'}' +
 								'}' +
-							'}, 200 );' +
+							'}, 50 );' +
 					'}' +
 				'} );' +
 			'}() );' +

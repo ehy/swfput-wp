@@ -391,7 +391,7 @@ function evhh5v_controlbar_elements_check(parms, vidobj) {
 			var id = swfobj.id;
 			try {
 				if ( swfobj.get_ack(id) != id ) {
-					console.log('FAILED evhswf ack from "'+id+'"');
+					evhh5v_msg('FAILED evhswf ack from "'+id+'"');
 					return;
 				}
 				
@@ -400,7 +400,7 @@ function evhh5v_controlbar_elements_check(parms, vidobj) {
 					swfobj.add_alt_url(t, true);
 				}
 			} catch ( ex ) {
-				console.log('EXCEPTION calling evhswf: "'+ex.message+'"');
+				evhh5v_msg('EXCEPTION calling evhswf: "'+ex.message+'"');
 			}
 		}, false);
 
@@ -419,7 +419,7 @@ function evhh5v_controlbar_elements_check(parms, vidobj) {
 				var id = swfobj.id;
 				try {
 					if ( swfobj.get_ack(id) != id ) {
-						console.log('FAILED evhswf ack from "'+id+'"');
+						evhh5v_msg('FAILED evhswf ack from "'+id+'"');
 						return;
 					}
 					
@@ -428,7 +428,7 @@ function evhh5v_controlbar_elements_check(parms, vidobj) {
 						swfobj.add_alt_url(t, true);
 					}
 				} catch ( ex ) {
-					console.log('EXCEPTION calling evhswf: "'+ex.message+'"');
+					evhh5v_msg('EXCEPTION calling evhswf: "'+ex.message+'"');
 				}
 			}, false);
 
@@ -488,34 +488,43 @@ var evhh5v_sizer_event_relay = function (load) {
 // resize at same dimensions will not be visible (it seems OK).
 // Note that the visible resize using window only was seen with
 // android (4.?) native browser in emulator.
-if ( window.addEventListener ) {
-	var f = function (e) { evhh5v_sizer_event_relay(e.type == "load" ? true : false); };
-	document.addEventListener("load", f, true);
-	window.addEventListener("load",   f, true);
-	window.addEventListener("resize", f, true);
-} else {
-	evhh5v_video_onlddpre = document.onload;
-	evhh5v_video_onldwpre = window.onload;
-	evhh5v_video_onszwpre = window.onresize;
-	document.onload = function () {
-		if ( typeof evhh5v_video_onlddpre === 'function' ) {
-			evhh5v_video_onlddpre();
-		}
-		evhh5v_sizer_event_relay(true);
-	};
-	window.onload = function () {
-		if ( typeof evhh5v_video_onldwpre === 'function' ) {
-			evhh5v_video_onldwpre();
-		}
-		evhh5v_sizer_event_relay(true);
-	};
-	window.onresize = function () {
-		if ( typeof evhh5v_video_onszwpre === 'function' ) {
-			evhh5v_video_onszwpre();
-		}
-		evhh5v_sizer_event_relay(false);
-	};
-}
+(function() {
+	if ( window.addEventListener ) {
+		var sizer_event_time = 250,
+		    tmo = false,
+		    f = function (e) {
+				tmo = tmo || setTimeout(function() {
+					tmo = false;
+					evhh5v_sizer_event_relay(e.type === "load");
+				}, sizer_event_time);
+			};
+		document.addEventListener("load", f, true);
+		window.addEventListener("load",   f, true);
+		window.addEventListener("resize", f, true);
+	} else {
+		var onlddpre = document.onload;
+		var onldwpre = window.onload;
+		var onszwpre = window.onresize;
+		document.onload = function () {
+			if ( typeof evhh5v_video_onlddpre === 'function' ) {
+				onlddpre();
+			}
+			evhh5v_sizer_event_relay(true);
+		};
+		window.onload = function () {
+			if ( typeof evhh5v_video_onldwpre === 'function' ) {
+				onldwpre();
+			}
+			evhh5v_sizer_event_relay(true);
+		};
+		window.onresize = function () {
+			if ( typeof evhh5v_video_onszwpre === 'function' ) {
+				onszwpre();
+			}
+			evhh5v_sizer_event_relay(false);
+		};
+	}
+}()); // func
 
 // resize adjust:
 // the enclosing <div> is scaled, and so its width from
@@ -527,7 +536,8 @@ if ( window.addEventListener ) {
 // but an instance of evhh5v_builder defined above
 var evhh5v_sizer = function(dv, ob, av, ai, bld) {
 	this.ia_rat = 1;    // ratio of original user-set width / height
-	this.pad = 0;
+	this.hpad = 0;
+	this.vpad = 0;
 	this.wdiv = null;
 	this.bld = null;
 	this.inresize = 0;
@@ -545,9 +555,7 @@ var evhh5v_sizer = function(dv, ob, av, ai, bld) {
 	this.va_o = document.getElementById(av);
 	this.ia_o = document.getElementById(ai);
 
-	var p = this._style(this.d, "padding-left");
-	if ( p )
-		this.pad = Math.max(this.pad, parseInt(p));
+	this.get_pads();
 	this.wdiv = this.d.offsetWidth;
 
 	// proportional image sizing is the trickiest bit here:
@@ -578,12 +586,12 @@ evhh5v_sizer.prototype = {
 	// fact the rest of this code should not consider the difference,
 	// and behavior should be the same, provided that the wrapper
 	// works well.
-	add_ctlbar : function(bar) {
+	add_ctlbar : function (bar) {
 		if ( this.va_o instanceof evhh5v_controller ) {
 			return; // done
 		}
 		if ( ! bar ) {
-			console.log("BAD CTLBAR == " + bar);
+			evhh5v_msg("BAD CTLBAR == " + bar);
 			return;
 		}
 		this.ctlbar = bar;
@@ -593,6 +601,17 @@ evhh5v_sizer.prototype = {
 	_style : function (el, sty) {
 		return evhh5v_getstyle(el, sty);
 	},
+	get_pads : function (el) {
+		var p = this._style(this.d, "padding-left") || 0;
+		this.hpad  = parseInt(p);
+		p = this._style(this.d, "padding-right") || 0;
+		this.hpad += parseInt(p);
+
+		p = this._style(this.d, "padding-top") || 0;
+		this.vpad  = parseInt(p);
+		p = this._style(this.d, "padding-bottom") || 0;
+		this.vpad += parseInt(p);
+	},
 	handle_resize : function () {
 		if ( ! this.d || this.inresize != 0 )
 			return;
@@ -600,40 +619,73 @@ evhh5v_sizer.prototype = {
 		var dv = this.d;
 		var wo = this.wdiv;
 		var wn = dv.offsetWidth;
-		if ( wn == wo )
+
+		if ( wn == wo ) {
 			return;
+		}
+
 		this.wdiv = wn;
 
-		var p = this._style(dv, "padding-left");
-		if ( p ) {
-			this.pad = parseInt(p);
-		}
+		this.get_pads();
 
 		this.resize();
 	},
 	_int_rsz : function (o) {
-		var wd = this.wdiv;
-		if ( ! wd  )
+		var dv = this.d;
+		if ( ! dv  ) {
 			return;
-		wd -= this.pad * 2;
-
-		var wo = o.width;
-		if ( (wd - wo) == 0 )
-			return;
-
-		var r = wo / o.height;
-		wo = Math.round(wd / r);
-		o.height = wo;
-		o.width  = wd;
-		if ( o.pixelHeight !== undefined ) {
-			o.pixelHeight = wo;
-			o.pixelWidth  = wd;
 		}
+
+		var wd = this.wdiv;
+		if ( ! wd  ) {
+			return;
+		}
+
+		var np = 0;
+		var ho = o.height;
+		var wo = o.width;
+		var r  = wo / ho;
+		var vd = evhh5v_view_dims();
+		var maxh = vd.height - 16; // arbitrary pad; seems good
+
+		// give external code an opportunity to disable the
+		// viewable area adjustment here; specifically, it
+		// makes a mess in iframes with complex interactions
+		// such as with TinyMCE within WordPress admin.
+		try {
+			if ( evhh5v_sizer_maxheight_off !== undefined
+			    && evhh5v_sizer_maxheight_off ) {
+				maxh = wd / r + 1;
+			}
+		} catch (ex) {}
+
+		// the viewable area adjustment
+		if ( (wd / r) > maxh ) {
+			wd = Math.round(maxh * r);
+		}
+
+		wd = Math.min(wd, vd.width);
+		np = Math.round(Math.max((this.wdiv - wd) / 2 - 0.5, 0));
+		wo = wd;
+		ho = Math.round(wo / r);
+
+		o.height = ho;
+		o.width  = wo;
+
+		if ( o.pixelHeight !== undefined ) {
+			o.pixelHeight = ho;
+			o.pixelWidth  = wo;
+		}
+
+		np = "" + np + 'px';
+		dv.style.paddingLeft  = np;
+		dv.style.paddingRight = np;
 	},
 	_int_imgrsz : function (o) { // for img: display proportionally
 		if ( o.complete !== undefined && ! o.complete ) {
 			return;
 		}
+
 		if ( o.naturalWidth === undefined || o.naturalHeight === undefined ) {
 			// member _swfo is added by *_bld object (above), which
 			// ensures natural[WH]* are defined; if they're not,
@@ -646,13 +698,18 @@ evhh5v_sizer.prototype = {
 				return; // waiting for load: see *_bld above
 			}
 		}
+
 		if ( o._ratio_user !== undefined ) {
 			this.ia_rat = o._ratio_user;
 		}
+
 		var wd = this.wdiv;
-		if ( wd == null )
+		if ( wd == null ) {
 			return;
-		wd -= this.pad * 2;
+		}
+
+		wd -= this.hpad;
+
 		var rd = this.ia_rat;
 		var ri = o.naturalWidth / o.naturalHeight;
 		if ( rd > ri ) {
@@ -664,8 +721,10 @@ evhh5v_sizer.prototype = {
 		}
 	},
 	resize : function () {
-		if ( ! this.d )
+		if ( ! this.d ) {
 			return;
+		}
+
 		this.inresize = 1;
 		if ( this.o ) {
 			this._int_rsz(this.o);
@@ -3354,16 +3413,16 @@ evhh5v_controller.prototype = {
 		}
 		this.addEventListener(wait_ev, function(e) {
 			this.show_wait();
-			//console.log("WAIT SPINNER START: " + e.type);
+			//evhh5v_msg("WAIT SPINNER START: " + e.type);
 		}, false);
 		this.addEventListener(["seeked", "canplaythrough", "playing", "loadeddata", "ended"], function(e) {
 			this.hide_wait();
-			//console.log("WAIT SPINNER STOP: " + e.type);
+			//evhh5v_msg("WAIT SPINNER STOP: " + e.type);
 		}, false);
 		this.addEventListener(["ended"], function(e) {
 			if  ( this.evcnt !== undefined ) {
 				for ( var k in this.evcnt ) {
-					console.log("EVENT count for '"+k+"': " + this.evcnt[k]);
+					evhh5v_msg("EVENT count for '"+k+"': " + this.evcnt[k]);
 					this.evcnt[k] = 0;
 				}
 			}
@@ -3451,7 +3510,7 @@ evhh5v_controller.prototype = {
 				// Update: Chromium 24 beta and 35 unstable are
 				// generating "resize" -- why?
 				if ( false ) {
-					console.log("Got RESIZE: w == " + 
+					evhh5v_msg("Got RESIZE: w == " + 
 						this._vid.videoWidth + ", h == " +
 						this._vid.videoHeight);
 				}
@@ -3481,7 +3540,7 @@ evhh5v_controller.prototype = {
 				// probably in error. IAC, it is proving to be not only
 				// non-fatal, but unnoticeable in playback and further
 				// consequence; so, just return
-				//console.log("DBG event error : video.error === " + this._vid.error);
+				//evhh5v_msg("DBG event error : video.error === " + this._vid.error);
 				return;
 			} else if ( e.type !== "ended" ) {
 				var t = this._vid.error;
@@ -3489,10 +3548,10 @@ evhh5v_controller.prototype = {
 				// determined, so this this is guesswork subject
 				// to revision
 				if ( ! t ) {
-					//console.log("DBG error||abort: .error === "+t);
+					//evhh5v_msg("DBG error||abort: .error === "+t);
 					return;
 				}
-				//console.log("DBG error||abort: .error.code === "+t.code);
+				//evhh5v_msg("DBG error||abort: .error.code === "+t.code);
 				// use try in case MediaError constants are undefined
 				try {
 					switch ( t.code ) {
@@ -3614,7 +3673,7 @@ evhh5v_controller.prototype = {
 				case "dblclick":
 					break;
 				default:
-					console.log("GOT MOUSE EVENT: " + e.type);
+					evhh5v_msg("GOT MOUSE EVENT: " + e.type);
 			}
 		}, false);
 
@@ -4198,7 +4257,7 @@ var evhh5v_ctlvolmap = {};
 // this is how each is id'd and glued to associated objects
 function evhh5v_put_ctlbarmap(parms) {
 	if ( ! parms["parentdiv"] || ! parms["role"] ) {
-		console.log("evhh5v_put_ctlbarmap was passed a foul object: no parentdiv or role: " + parms);
+		evhh5v_msg("evhh5v_put_ctlbarmap was passed a foul object: no parentdiv or role: " + parms);
 		return; 
 	}
 	var map;
@@ -4330,3 +4389,73 @@ var evhh5v_get_flashsupport = function (el, sty) {
 	
 	return document.evhh5v_get_flashsupport_found;
 }
+
+// use window.dump() to print messages if it is a function,
+// else console.log(); console.log() is forced if 'cons' is
+// defined and true -- messages are prefixed with "EVHMSG: "
+// unsless pfx is defined in which case it is used
+var evhh5v_msg_off = false;
+var evhh5v_msg = function (msg, cons, pfx) {
+	if ( evhh5v_msg_off ) {
+		return;
+	}
+
+	var m = (pfx || "EVHMSG: ") + msg;
+	
+	if ( (cons !== undefined && cons)
+	    || typeof window.dump !== 'function' ) {
+		console.log(m);
+	} else {
+		window.dump(m + "\n");
+	}
+};
+
+// EH: following horrible hack is from comp.lang.javascript FAQ,
+// original name isDocumentElementHeightOff -- return true if
+// document.body.clientHeight/Width should be used, false if
+// document.documentElement.clientHeight/Width should be used --
+// original comment follows:
+// Used to feature test Opera returning wrong values 
+// for documentElement.clientHeight. 
+// The results of this function should be cached, 
+// so it does not need to be called more than once.
+var evhh5v_view_horrible_dim_hack_result = null;
+var evhh5v_view_horrible_dim_hack = function () { 
+	if ( evhh5v_view_horrible_dim_hack_result === null ) {
+		var d = document.documentElement;
+		if ( d && d.clientHeight === 0 ) {
+			evhh5v_view_horrible_dim_hack_result = true;
+		}
+	}
+
+	if ( evhh5v_view_horrible_dim_hack_result === null ) {
+		var d = document,
+		    div = d.createElement('div');
+		div.style.height = "9000px";
+		d.body.insertBefore(div, d.body.firstChild);
+		evhh5v_view_horrible_dim_hack_result =
+		    (d.documentElement.clientHeight > 8800);
+		d.body.removeChild(div);
+	}
+
+	return evhh5v_view_horrible_dim_hack_result;
+}
+
+// get the view (or 'viewport'), i.e. *visible*, dimensions --
+// this is a fine example of the insanity of browser incompatibilities
+var evhh5v_view_dims = function () {
+	var d = {};
+	
+	if ( typeof document.clientHeight === 'number' ) {
+		d["width"]  = document.clientWidth;
+		d["height"] = document.clientHeight;
+	} else if ( evhh5v_view_horrible_dim_hack() ) {
+		d["width"]  = document.body.clientWidth;
+		d["height"] = document.body.clientHeight;
+	} else {
+		d["width"]  = document.documentElement.clientWidth;
+		d["height"] = document.documentElement.clientHeight;
+	}
+	
+	return d;
+};
