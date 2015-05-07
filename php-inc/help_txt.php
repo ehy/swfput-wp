@@ -58,7 +58,7 @@ function swfput_get_helptext($htmllink, $pdflink)
 	This dialog provides basic setup suitable for most video.
 	<em>SWFPut</em> provides a few features not found in
 	the setup dialog (which is meant to be simple and easy).
-	Advanced setup is done with form in a "metabox" on
+	Advanced setup is done with a form in a "metabox" on
 	the editor page. You will probably not need this, but
 	if you think you might, read on. The remainder of this
 	help section concerns the metabox advanced form, but if
