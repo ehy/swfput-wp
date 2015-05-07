@@ -212,7 +212,7 @@ class SWF_put_evh {
 
 	// for a link to an html help doc
 	const helphtmlname = 'README.html';
-	const helphtml_ref = '#3.1. Form Buttons';
+	const helphtml_ref = '#3. Usage';
 	protected static $helphtml = null;
 	// for a link to an pdf help doc
 	const helppdfname = 'README.pdf';

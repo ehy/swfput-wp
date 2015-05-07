@@ -44,8 +44,8 @@ function swfput_get_helptext($htmllink, $pdflink)
 	"Add SWFPut Video" button. First, place the cursor in
 	the editor at the place for your video, then click
 	the button. A placeholder video will appear, ready to
-	setup. It should be selected by default; click it
-	if necessary.
+	setup. It should be selected by default; click
+	it to select it if necessary.
 	</p>
 	<p>
 	<strong>Editing</strong> - when a <em>SWFPut</em>

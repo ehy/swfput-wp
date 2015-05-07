@@ -17,8 +17,8 @@ What is it?
 \fBSWFPut\fP is a plugin for
 \fIWordPress\fP.
 It provides video player programs
-for the flash plugin and and the HTML video
-element,
+for the HTML video element
+and the flash plugin,
 and the means to configure
 the players with video sources and playback
 attributes.
@@ -47,13 +47,19 @@ shortcode is, or do not want to deal with them,
 that's no problem.
 (In fact, it is preferable that the shortcodes
 \fInot\fP be hand-edited, and they will not
-be discussed in detail here.) The plugin adds to
-the post/page editor interfaces a full featured
-form to setup and add, or edit, or delete
-video objects, so the user does not need
-to be troubled with shortcodes.
+be discussed in detail here.)
+The plugin adds to
+the post/page editor interfaces
+a button to insert video at the cursor,
+and an easy to use dialog-type setup interface
+similar to that used by \fIWordPress\fP
+core media, and also
+a full featured form in a \(lqmetabox\(rq
+with additional advanced settings
+to setup and add, or edit, or delete
+video objects.
 The video widget has a similar full
-featured form.
+featured form for setup.
 .PP
 Video in posts may be displayed in the
 \fIWordPress\fP visual editor, if the
@@ -144,9 +150,22 @@ The configuration page includes optional verbose
 help, and so it will not be described here.
 .PP
 In the post and page editors,
-the plugin adds an interactive
+the plugin adds a button, labelled
+\(lqAdd SWFPut Video,\(rq next to the
+\(lqAdd Media\(rq button. This will
+insert a placeholder video at the cursor
+position. When selected, a pencil button
+will appear, which invokes a graphical
+setup dialog. This dialog is expected
+to be easy and intuitive, so it is
+not elaborated on here.
+.PP
+\fBSWFPut\fP also adds
+an interactive
 form in a new metabox with the title
-\(lqSWFPut Video\(rq.
+\(lqSWFPut Video\(rq. This form has
+advanced settings not available in
+the graphical dialog.
 Directly under the title is a row of buttons.
 Under the row of buttons, the bulk of the
 form is placed in three sections entitled
@@ -259,9 +278,9 @@ field may be set, as above, with the
 difference that it searches the
 \fIWordPress\fP media database, and
 presents the suitable filenames
-with their media IDs.
+with their media ID's.
 .IP \(bu
-\fBHTML5 video URLs or media library IDs\fP:
+\fBHTML5 video URLs or media library ID's\fP:
 A series of URLs
 for the HTML5 video player.
 If more than one URL is given, they should be separated
@@ -306,7 +325,7 @@ multiple resources for the necessary
 HTML5 video formats. When the URL field content
 is appended, a `\f(CR|\fR' (pipe) character
 is used as a separator. See
-\(lqHTML5 video URLs or media library IDs\(rq
+\(lqHTML5 video URLs or media library ID's\(rq
 above.
 .IP \(bu
 \fBPlaypath (rtmp)\fP:
@@ -348,7 +367,7 @@ field may be set, as above, with the
 difference that it searches the
 \fIWordPress\fP media database, and
 presents the suitable filenames with
-their media IDs.
+their media ID's.
 .IP \(bu
 \fBUse initial image as no-video alternate\fP:
 If an initial image was given, then also use
