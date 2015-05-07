@@ -38,13 +38,41 @@ function swfput_get_helptext($htmllink, $pdflink)
 {
 	$fmt =
 	__('<p>
-	Hopefully, much of the SWFPut setup form
-	is self-explanatory.
+	<strong>Add SWFPut Video</strong> - Just above the
+	the editor toolbars, <em>WordPress</em> places the
+	"Add Media" button. Next to that, you will find the
+	"Add SWFPut Video" button. First, place the cursor in
+	the editor at the place for your video, then click
+	the button. A placeholder video will appear, ready to
+	setup. It should be selected by default; click it
+	if necessary.
+	</p>
+	<p>
+	<strong>Editing</strong> - when a <em>SWFPut</em>
+	video is selected two buttons should appear -- one button
+	looks like a pencil. and this opens a graphical editor 
+	dialog box, similar to the one used for <em>WordPress</em>
+	core media editing but with some different features.
+	</p>
+	<p>
+	This dialog provides basic setup suitable for most video.
+	<em>SWFPut</em> provides a few features not found in
+	the setup dialog (which is meant to be simple and easy).
+	Advanced setup is done with form in a "metabox" on
+	the editor page. You will probably not need this, but
+	if you think you might, read on. The remainder of this
+	help section concerns the metabox advanced form, but if
+	<em>SWFPut</em> is new to you, please start with the
+	steps described above.
+	</p>
+	<p>
 	There is more detailed documentation as HTML
 	<a href="%s" target="_blank">here (in a new tab)</a>,
 	or as a PDF file
 	<a href="%s" target="_blank">here (in a new tab)</a>.
-	</p><p>
+	</p>
+	<h3>The Metabox Form</h3>
+	<p>
 	There is one important restriction on the form\'s
 	text entry fields. The values may not have any
 	ASCII \'&quot;\' (double quote) characters. Hopefully
@@ -52,7 +80,7 @@ function swfput_get_helptext($htmllink, $pdflink)
 	</p><p>
 	The following items probably need explanation:
 	</p><p>
-	<h3>Flash or HTML5 video URLs or media library IDs</h3>
+	<h4>Flash or HTML5 video URLs or media library IDs</h4>
 	Near the top of the form, after the "Caption" field,
 	a text entry field named
 	"Flash video URL or media library ID" appears.
@@ -133,7 +161,7 @@ function swfput_get_helptext($htmllink, $pdflink)
 	but browsers might reject that
 	usage, so SWFPut will normalize the codecs argument.
 	</p><p>
-	<h3>Use initial image as no-video alternate</h3>
+	<h4>Use initial image as no-video alternate</h4>
 	This checkbox, if enabled (it is, by default) will
 	use the "initial image file" that may be specified
 	for the video player in an \'img\' element
@@ -155,7 +183,7 @@ function swfput_get_helptext($htmllink, $pdflink)
 	(top/bottom or left/right tranparent
 	areas might be one solution).
 	</p><p>
-	<h3>Mobile width</h3>
+	<h4>Mobile width</h4>
 	This input field appears just below the
 	pixel dimensions fields. If this value is
 	greater than zero, and a mobile browser is
@@ -172,7 +200,7 @@ function swfput_get_helptext($htmllink, $pdflink)
 	disables this feature, and it has no effect if
 	a mobile browser is not detected.
 	</p><p>
-	<h3>Video preload</h3>
+	<h4>Video preload</h4>
 	This "radio" type option is in the <b>Behavior</b> section
 	of the form. HTML5 video allows a "preload" attribute
 	with a value of "none" or "metadata" or "auto." This
