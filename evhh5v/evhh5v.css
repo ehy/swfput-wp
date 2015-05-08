@@ -23,6 +23,9 @@ video.evhh5v_mouseptr_hidden, canvas.evhh5v_mouseptr_hidden, div.evhh5v_mouseptr
 }
 .evhh5v_vidobjdiv {
 	display: block;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
 	margin: auto;
 	outline: 0px;
 	padding: 0px 0px;

@@ -604,7 +604,7 @@ evhh5v_sizer.prototype = {
 	get_pads : function (el) {
 		var p = this._style(this.d, "padding-left") || 0;
 		this.hpad  = parseInt(p);
-		p = this._style(this.d, "padding-right") || 0;
+		p = this._style(this.d, "paddin g-right") || 0;
 		this.hpad += parseInt(p);
 
 		p = this._style(this.d, "padding-top") || 0;
@@ -620,7 +620,9 @@ evhh5v_sizer.prototype = {
 		var wo = this.wdiv;
 		var wn = dv.offsetWidth;
 
-		if ( wn == wo ) {
+		// no longer want to return here since _int_rsz
+		// is changing padding -- leave block for temp. reference
+		if ( false && wn == wo ) {
 			return;
 		}
 
