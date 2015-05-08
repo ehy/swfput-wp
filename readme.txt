@@ -282,7 +282,7 @@ to leave a comment with the URLs of your using pages.
 == Changelog ==
 
 = 3.0 =
-* This release includes an improvment to the responsive
+* This release includes an improvement to the responsive
 	sizing of video: the height of a video is now limited
 	to fit within the visible vertical area. Previously, sizing
 	was applied to width alone. This change should be
@@ -290,11 +290,7 @@ to leave a comment with the URLs of your using pages.
 	handheld devices in landscape orientation. This change
 	applies to desktop browsers too, although it will
 	probably not be evident unless the browser window
-	is at a small size; also, when changing only the height
-	of browser windows the needed 'resize' event
-	is not delivered, some change to window width is
-	needed to trigger a size update -- so please bear this
-	in mind if testing.
+	is at a small size.
 	
 	This version has small documentation updates regarding
 	the new visual editor interface of release 2.9, and
@@ -302,7 +298,7 @@ to leave a comment with the URLs of your using pages.
 	signature changed at some point before 4.x -- this
 	would not have affected users of current WordPress,
 	but SFWPut is still supporting (i.e., working with)
-	WP as hold as 3.0.2 (hopefully for no reason, since
+	WP as old as 3.0.2 (hopefully for no reason, since
 	old versions are probably insecure and should not be
 	used).
 
@@ -555,7 +551,7 @@ to leave a comment with the URLs of your using pages.
 == Upgrade Notice ==
 
 = 3.0 =
-* This release includes an improvment to the responsive
+* This release includes an improvement to the responsive
 	sizing of video: the height of a video is now limited
 	to fit within the visible vertical area. Previously, sizing
 	was applied to width alone. This change should be
@@ -563,11 +559,7 @@ to leave a comment with the URLs of your using pages.
 	handheld devices in landscape orientation. This change
 	applies to desktop browsers too, although it will
 	probably not be evident unless the browser window
-	is at a small size; also, when changing only the height
-	of browser windows the needed 'resize' event
-	is not delivered, some change to window width is
-	needed to trigger a size update -- so please bear this
-	in mind if testing.
+	is at a small size.
 	
 	This version has small documentation updates regarding
 	the new visual editor interface of release 2.9, and
@@ -575,7 +567,7 @@ to leave a comment with the URLs of your using pages.
 	signature changed at some point before 4.x -- this
 	would not have affected users of current WordPress,
 	but SFWPut is still supporting (i.e., working with)
-	WP as hold as 3.0.2 (hopefully for no reason, since
+	WP as old as 3.0.2 (hopefully for no reason, since
 	old versions are probably insecure and should not be
 	used).
 
