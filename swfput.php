@@ -1073,12 +1073,20 @@ class SWF_put_evh {
 
 	// add link at plugins page entry for the settings page
 	public static function plugin_page_addlink($links) {
-		$opturl = '<a href="' . get_option('siteurl');
-		$opturl .= '/wp-admin/options-general.php?page=';
-		$opturl .= self::settings_page_id;
-		$opturl .= '">' . __('Settings', 'swfput_l10n') . '</a>';
-		// Add a link to this plugin's settings page
-		array_unshift($links, $opturl); 
+		// Add a link to this plugin's settings page --
+		// up to v 3.0 bug: get_option('siteurl') was used to
+		// build value with hardcoded path fragments -- N.G.,
+		// might not have been full URL w/ https, etc.,
+		// menu_page_url(), added after 3.0, fixes that.
+		$opturl = menu_page_url(self::settings_page_id, false);
+
+		if ( $opturl ) {
+			$opturl = sprintf('<a href="%s">%s</a>',
+			    $opturl,
+			    __('Settings', 'swfput_l10n')
+			);
+			array_unshift($links, $opturl); 
+		}
 		return $links; 
 	}
 
