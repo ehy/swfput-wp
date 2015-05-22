@@ -674,10 +674,13 @@ evhh5v_sizer.prototype = {
 		o.height = ho;
 		o.width  = wo;
 
-		if ( o.pixelHeight !== undefined ) {
-			o.pixelHeight = ho;
-			o.pixelWidth  = wo;
-		}
+		// in try block to suppress browser console nag
+		try {
+			if ( o.pixelHeight !== undefined ) {
+				o.pixelHeight = ho;
+				o.pixelWidth  = wo;
+			}
+		} catch ( ex ) {}
 
 		np = "" + np + 'px';
 		dv.style.paddingLeft  = np;
@@ -2713,6 +2716,8 @@ var evhh5v_controller = function(vid, ctlbar, pad) {
 	this.bar = ctlbar.evhh5v_controlbar;
 	this.pad = pad;
 	this.handlermap = {};
+
+	this._x = this._y = 0;
 
 	this.auxdiv = document.getElementById(this.ctlbar["auxdiv"]);
 	this.bardiv = document.getElementById(this.ctlbar["ctlbardiv"]);
