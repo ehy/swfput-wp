@@ -266,7 +266,7 @@ var SWFPut_add_button_func = function(btn) {
 	    sc = SWFPut_video_utility_obj.get_new_putswf_shortcode(),
 	    dat = SWFPut_putswf_video_inst.get_mce_dat(),
 	    enc = window.encodeURIComponent( sc ),
-	    ed = dat.ed
+	    ed = dat.ed,
 	    div = false;
 
 	if ( ! ed ) {
