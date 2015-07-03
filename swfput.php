@@ -231,6 +231,7 @@ class SWF_put_evh {
 	const swfxedjsname = 'formxed.min.js';
 	// swfput js shortcode editor helper name
 	const swfxpljsname = 'editor_plugin.min.js';
+	const swfxpljsname42 = 'editor_plugin42.min.js'; // wp 4.[0-2]
 	const swfxpljsname3x = 'editor_plugin3x.min.js';
 	// starting wp 4.1, swfput 2.9 -- using WP media _.Backbone stuff
 	// 'wpmt' for wp media template
