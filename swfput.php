@@ -858,11 +858,19 @@ class SWF_put_evh {
 
 	// filter to add mce plugin javascript
 	public static function add_mceplugin_js($plugin_array) {
+		// wp.mce editor js is moving target 4.[0-3]
 		// tinymce major version 4 begins in WP 3.9
 		$v = (3 << 24) | (9 << 16) | (0 << 8) | 0;
 		$shiny = self::wpv_min($v);
 		
-		$jsfile = $shiny ? self::swfxpljsname : self::swfxpljsname3x;
+		if ( $shiny ) {
+			$v = (4 << 24) | (3 << 16) | (0 << 8) | 0;
+			$shiny = self::wpv_min($v);
+		
+			$jsfile = $shiny ? self::swfxpljsname : self::swfxpljsname42;
+		} else {
+			$jsfile = self::swfxpljsname3x;
+		}
 
 		$pf = self::mk_pluginfile();
 		$pname = 'swfput_mceplugin';
