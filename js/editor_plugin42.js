@@ -122,7 +122,7 @@ SWFPut_video_utility_obj_def.prototype = {
 	},
 
 	atts_filter : function(atts) {
-		var defs = SWFPut_video_utility_obj_def.prototype.defprops
+		var defs = SWFPut_video_utility_obj_def.prototype.defprops,
 		    outp = {};
 		
 		for ( var t in atts ) {
