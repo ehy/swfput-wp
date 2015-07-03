@@ -3290,8 +3290,10 @@ evhh5v_controller.prototype = {
 		t.style.left = this.pad + "px";
 	},
 	// these are for the resizing JS that handles this; no effect
-	get pixelWidth() { return this.v.pixelWidth; }, set pixelWidth(v) { this.v.pixelWidth = v; },
-	get pixelHeight() { return this.v.pixelHeight; }, set pixelHeight(v) { this.v.pixelHeight = v; },
+	get pixelWidth() { try { return this.v.pixelWidth; } catch (e) {} return undefined; },
+	set pixelWidth(v) { this.v.pixelWidth = v; },
+	get pixelHeight() { try { return this.v.pixelHeight; } catch (e) {} return undefined; },
+	set pixelHeight(v) { this.v.pixelHeight = v; },
 
 	// size hack for going fullscreen -- it is the enclosing div that
 	// is fullscreen'd, and here we follow
