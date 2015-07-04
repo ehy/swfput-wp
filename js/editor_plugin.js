@@ -19,20 +19,14 @@
  */
 
 /**
- * TinyMCE plugin to to present the SWFPut shortcode as
- * as something nicer than the raw code in formatted editor
- * 
- * This is for tinymce with major version 4.x and is used
- * by SWFPut for WP 3.9.x and greater
+ * WP visual editor presentation of SWFPut video.
  * 
  * With v 2.9 (3.0) a new pretty dialog based simplified
  * UI is implemented based on (literally) the wp.media w/
  * Backbone and _'s that WP comments suggest was started
- * ~ v 3.5 -- this implementation is conditional on v 4.x.
+ * ~ v 3.5 -- this implementation is conditional on v >= 4.3.
  * 
- * wp-includes/js/tinymce/plugins/wpeditimage/editor_plugin_src.js
- * was used as a guide for this, and copy & paste code may remain.
- * As WordPress is GPL, this is cool. 
+ * See, in WP installation, wp-includes/js/{mce-view,media*}.js
  */
 
 //
@@ -46,36 +40,6 @@ var SWFPut_video_utility_obj_def = function() {
 	// be greater than initial value on next page load --
 	// under such conditions, games over anyway.
 	this.loadtime_serial = this.unixtime() & 0x0FFFFFFFFF;
-
-	// For older tinyMCE display:
-	// placeholder token data: regretable hack for SWFPut video
-	// plugin for the tinymce, with WordPress; this is to hold
-	// place in a <dd> element which normally holds a caption,
-	// but when there is no caption.
-	if ( this._fpo === undefined
-	  && SWFPut_putswf_video_inst !== undefined ) {
-		this.fpo = SWFPut_putswf_video_inst.fpo;
-	} else if ( this.fpo === undefined ) {
-		SWFPut_video_utility_obj_def.prototype._fpo = {};
-		var t = this._fpo;
-		t.cmt = '<!-- do not strip me -->';
-		t.ent = t.cmt;
-		t.enx = t.ent;
-		var eenc = document.createElement('div');
-		eenc.innerHTML = t.ent;
-		t.enc = eenc.textContent || eenc.innerText || t.ent;
-		t.rxs = '((' + t.cmt + ')|(' + t.enx + ')|(' + t.enc + '))';
-		t.rxx = '.*' + t.rxs + '.*';
-		t.is  = function(s, eq) {
-			return s.match(RegExp(eq ? t.rxs : t.rxx));
-		};
-		
-		this.fpo = this._fpo;
-	}
-	
-	// use tinymce plugin, or new _+Backbone-based wp.media mvc code
-	this._bbone_mvc_opt =
-	    swfput_mceplug_inf._bbone_mvc_opt === 'true' ? true : false;
 };
 SWFPut_video_utility_obj_def.prototype = {
 	defprops  : {
@@ -244,14 +208,6 @@ SWFPut_video_utility_obj_def.prototype = {
 var SWFPut_video_utility_obj = 
 	new SWFPut_video_utility_obj_def(wp || false);
 
-// Utility used in plugin
-function SWFPut_repl_nl(str) {
-	return str.replace(
-		/\r\n/g, '\n').replace(
-			/\r/g, '\n').replace(
-				/\n/g, '<br />');
-};
-
 
 //
 // Experimental wp.media based presentation in/of editor thing
@@ -259,18 +215,18 @@ function SWFPut_repl_nl(str) {
 
 // Our button (next to "Add Media") calls this
 var SWFPut_add_button_func = function(btn) {
-	var ivl, ivlmax = 100, tid = btn.id,
+	var ivl, ivlmax = 100, tid = btn.id, ed,
 	    sc = SWFPut_video_utility_obj.get_new_putswf_shortcode(),
 	    dat = SWFPut_putswf_video_inst.get_mce_dat(),
 	    enc = window.encodeURIComponent( sc ),
-	    ed = dat.ed,
 	    div = false;
 
-	if ( ! ed ) {
+	if ( ! (dat && dat.ed) ) {
 		alert('Failed to get visual editor');
 		return false;
 	}
 	
+	ed = dat.ed;
 	ed.selection.setContent( sc + '&nbsp;', {format : 'text'} );
 
 	ivl = setInterval( function() {
@@ -339,7 +295,6 @@ var SWFPut_cache_shortcode_ids = function(sc, cb) {
 			_.each(s.split('|'), function(t) {
 				var m = t.match(/^[ \t]*([0-9]+)[ \t]*$/);
 				if ( m && m[1] ) {
-					//aid.push(m[1]);
 					var res = SWFPut_get_attachment_by_id(m[1], false, _cb);
 					
 					if ( res !== null && _cb !== false ) {
