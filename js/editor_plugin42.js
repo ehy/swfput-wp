@@ -719,17 +719,6 @@ var SWFPut_get_iframe_document = function(head, styles, bodcls, body) {
 			initialize: function() {
 				var self = this;
 				
-				//console.log('SHORTCODE 1 -- ' + this.shortcode.content);
-				//if ( this.options ) {
-				//console.log('OPTIONS 1 -- NO OPTIONS' + this.options);
-				//for ( var k in this.options ) {
-				//	var o = this.options[k];
-				//	console.log('	OPT 1 "' + k + '" -- ' + o);
-				//}
-				//} else {
-				//console.log('OPTIONS 2 -- NO OPTIONS');
-				//}
-				
 				this.fetch();
 				
 				this.getEditors( function( editor ) {
