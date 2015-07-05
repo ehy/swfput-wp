@@ -1,0 +1,35 @@
+# Apache 2.2
+<IfModule !mod_authz_core.c>
+	Order Deny,Allow
+	Deny from all
+</IfModule>
+
+# Apache 2.4
+<IfModule mod_authz_core.c>
+	Require all denied
+</IfModule>
+
+<FilesMatch "\b(index|mce_ifm|mingput)\.php">
+	<IfModule !mod_authz_core.c>
+		Allow from all
+	</IfModule>
+	<IfModule mod_authz_core.c>
+		Require all granted
+	</IfModule>
+</FilesMatch>
+<FilesMatch "\b(README)\.(pdf|html|txt)$">
+	<IfModule !mod_authz_core.c>
+		Allow from all
+	</IfModule>
+	<IfModule mod_authz_core.c>
+		Require all granted
+	</IfModule>
+</FilesMatch>
+<FilesMatch "^(.+)\.(min\.js|swf|mp4|html|svg|css|png|gif)$">
+	<IfModule !mod_authz_core.c>
+		Allow from all
+	</IfModule>
+	<IfModule mod_authz_core.c>
+		Require all granted
+	</IfModule>
+</FilesMatch>

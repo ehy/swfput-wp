@@ -51,7 +51,7 @@ SSRCS = $(SDIRI)/$(MINGS) $(SDIRI)/$(MINGA) $(SDIRI)/$(MINGC)
 SDEFS = default.mp4
 SBINS = $(SDIRI)/$(MNAME).swf
 
-ALSO = Makefile COPYING version.sh
+ALSO = Makefile COPYING version.sh .htaccess
 #READS= README README.tty README.tt8 README.pdf README.html
 READS= README README.pdf README.html
 ZALL = ${SRCS} ${ALSO} ${READS} ${SDEFS} readme.txt
