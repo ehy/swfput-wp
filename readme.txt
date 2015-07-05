@@ -3,7 +3,7 @@ Contributors: EdHynan
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4Q2Y8ZUG8HXLC
 Tags: video, video player, movies, tube, flash, flash video, html5, html5 video, graphics, movie, video content, a/v content
 Requires at least: 3.0.2
-Tested up to: 4.2
+Tested up to: 4.3
 Stable tag: 3.0.1
 Text Domain: swfput_l10n
 License: GPLv3 or later
@@ -282,7 +282,10 @@ to leave a comment with the URLs of your using pages.
 == Changelog ==
 
 = 3.0.1 =
+* Fix new mce-view visual editor presentation with WP 4.3beta1.
 * Fix URL preparation bug in plugin_page_addlink().
+* Misc. code cleanups.
+* New .htaccess file.
 
 = 3.0 =
 * This release includes an improvement to the responsive
@@ -554,7 +557,10 @@ to leave a comment with the URLs of your using pages.
 == Upgrade Notice ==
 
 = 3.0.1 =
+* Fix new mce-view visual editor presentation with WP 4.3beta1.
 * Fix URL preparation bug in plugin_page_addlink().
+* Misc. code cleanups.
+* New .htaccess file.
 
 = 3.0 =
 * This release includes an improvement to the responsive
