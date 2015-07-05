@@ -9,7 +9,7 @@
 	Require all denied
 </IfModule>
 
-<FilesMatch "\b(index|mce_ifm|mingput)\.php">
+<FilesMatch "^(index|mce_ifm|mingput)\.php">
 	<IfModule !mod_authz_core.c>
 		Allow from all
 	</IfModule>
@@ -17,7 +17,7 @@
 		Require all granted
 	</IfModule>
 </FilesMatch>
-<FilesMatch "\b(README)\.(pdf|html|txt)$">
+<FilesMatch "^(README)\.(pdf|html|txt)$">
 	<IfModule !mod_authz_core.c>
 		Allow from all
 	</IfModule>
