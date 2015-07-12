@@ -198,7 +198,7 @@
 			    newatts = (d.attachment && d.attachment.attributes)
 			        ? d.attachment.attributes : false,
 			    sctag   = oldatts.shortcode.tag,
-			    caption = oldatts.caption || oldatts.shortcode.content; //( newatts && newatts.caption ) ? newatts.caption : oldatts.content
+			    caption = oldatts.content || oldatts.shortcode.content || oldatts.caption || ''; //( newatts &&  ) ? newatts.caption : oldatts.content
 			    vid_add =
 			        ( newatts && newatts.putswf_action === 'add_video' )
 			        ? true : false,
