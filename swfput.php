@@ -864,7 +864,7 @@ class SWF_put_evh {
 		$shiny = self::wpv_min($v);
 		
 		if ( $shiny ) {
-			$v = (4 << 24) | (3 << 16) | (0 << 8) | 0;
+			$v = (4 << 24) | (2 << 16) | (3 << 8) | 0;
 			$shiny = self::wpv_min($v);
 		
 			$jsfile = $shiny ? self::swfxpljsname : self::swfxpljsname42;
