@@ -282,7 +282,12 @@ to leave a comment with the URLs of your using pages.
 == Changelog ==
 
 = 3.0.2 =
-* 
+* The just released WordPress 4.2.3 security revision includes
+	a change that appeared in WP 4.3beta1.  This release of SWFPut
+	adjusts a version check so that the changes of SWFPut 3.0.1
+	take effect for WordPress 4.2.3.
+* Fixed bug in new visual editor dialog code that caused changes
+	in the caption field to be lost on switching to another tab.
 
 = 3.0.1 =
 * Fix new mce-view visual editor presentation with WP 4.3beta1.
@@ -560,7 +565,12 @@ to leave a comment with the URLs of your using pages.
 == Upgrade Notice ==
 
 = 3.0.2 =
-* 
+* The just released WordPress 4.2.3 security revision includes
+	a change that appeared in WP 4.3beta1.  This release of SWFPut
+	adjusts a version check so that the changes of SWFPut 3.0.1
+	take effect for WordPress 4.2.3.
+* Fixed bug in new visual editor dialog code that caused changes
+	in the caption field to be lost on switching to another tab.
 
 = 3.0.1 =
 * Fix new mce-view visual editor presentation with WP 4.3beta1.
