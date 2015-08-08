@@ -67,11 +67,6 @@ class SWF_put_widget_evh extends WP_Widget {
 		parent::__construct($cl, $lb, $opts, $copts);
 	}
 
-	// surely this code cannot run under PHP4, but anyway . . .
-	public function SWF_put_widget_evh() {
-		$this->__construct();
-	}
-
 	public function widget($args, $instance) {
 		$opt = $this->plinst->get_widget_plugin_option();
 		if ( $opt != 'true' ) {
