@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: video, video player, movies, tube, flash, flash video, html5, html5 video, graphics, movie, video content, a/v content
 Requires at least: 3.0.2
 Tested up to: 4.3
-Stable tag: 3.0.2.1
+Stable tag: 3.0.3
 Text Domain: swfput_l10n
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -281,8 +281,12 @@ to leave a comment with the URLs of your using pages.
 
 == Changelog ==
 
-= 3.0.2.1 =
+= 3.0.3 =
 * Make controls work in Chrome/Chromium mobile.
+
+= 3.0.2.1 =
+* Same as 3.0.3 (Seems new WP version no longer handles 4th minor
+	revision number, so 2.1 is now 3).
 
 = 3.0.2 =
 * The just released WordPress 4.2.3 security revision includes
@@ -567,8 +571,12 @@ to leave a comment with the URLs of your using pages.
 
 == Upgrade Notice ==
 
-= 3.0.2.1 =
+= 3.0.3 =
 * Make controls work in Chrome/Chromium mobile.
+
+= 3.0.2.1 =
+* Same as 3.0.3 (Seems new WP version no longer handles 4th minor
+	revision number, so 2.1 is now 3).
 
 = 3.0.2 =
 * The just released WordPress 4.2.3 security revision includes
