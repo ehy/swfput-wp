@@ -1340,8 +1340,8 @@ mk_bgrect : function(parentobj) {
 	var barheight = this.barheight;
 	
 	var bg = this.mk_rect("bgrect", "bgrect", 0, 0, barlength, barheight);
-	bg.setAttribute("onclick", "svg_click(this);");
-	bg.setAttribute("ontouchstart", "svg_click(this);");
+	bg.setAttribute(this.is_mobile() ? "ontouchstart" : "onclick",
+		"svg_click(this);return false;");
 	parentobj.appendChild(bg);
 	this.put_rszo(bg);
 	
@@ -1405,8 +1405,8 @@ mk_volume : function(parentobj, xoff) {
 
 	var btn = this.mk_button("svgbutt", "volume",
 		tx - sw / 2, ty - sw / 2, butwidth + sw, butheight + sw);
-	btn.setAttribute("onclick", "svg_click(this);");
-	btn.setAttribute("ontouchstart", "svg_click(this);");
+	btn.setAttribute(this.is_mobile() ? "ontouchstart" : "onclick",
+		"svg_click(this);return false;");
 	btn.setAttribute("onmouseover", "setvisi('volume_highlight','visible');");
 	btn.setAttribute("onmouseout", "setvisi('volume_highlight','hidden');");
 	btn.addEventListener("wheel", hdl, false);
@@ -1469,8 +1469,8 @@ mk_fullscreen : function(parentobj, xoff) {
 
 	var btn = this.mk_button("svgbutt", "fullscreen",
 		tx - sw / 2, ty - sw / 2, butwidth + sw, butheight + sw);
-	btn.setAttribute("onclick", "svg_click(this);");
-	btn.setAttribute("ontouchstart", "svg_click(this);");
+	btn.setAttribute(this.is_mobile() ? "ontouchstart" : "onclick",
+		"svg_click(this);return false;");
 	btn.setAttribute("onmouseover", "setvisi('fullscreen_highlight','visible');");
 	btn.setAttribute("onmouseout", "setvisi('fullscreen_highlight','hidden');");
 	var t = this.mk_circle("btn2", "fullscreen_base", "50%", "50%", r);
@@ -1554,8 +1554,8 @@ mk_doscale : function(parentobj, xoff) {
 
 	var btn = this.mk_button("svgbutt", "doscale",
 		tx - sw / 2, ty - sw / 2, butwidth + sw, butheight + sw);
-	btn.setAttribute("onclick", "svg_click(this);");
-	btn.setAttribute("ontouchstart", "svg_click(this);");
+	btn.setAttribute(this.is_mobile() ? "ontouchstart" : "onclick",
+		"svg_click(this);return false;");
 	btn.setAttribute("onmouseover", "setvisi('doscale_highlight','visible');");
 	btn.setAttribute("onmouseout", "setvisi('doscale_highlight','hidden');");
 	var t = this.mk_circle("btn2", "doscale_base", "50%", "50%", r);
@@ -1633,8 +1633,8 @@ mk_stop : function(parentobj, xoff) {
 	
 	var btn = this.mk_button("svgbutt", "stop",
 		tx - sw / 2, ty - sw / 2, butwidth + sw, butheight + sw);
-	btn.setAttribute("onclick", "svg_click(this);");
-	btn.setAttribute("ontouchstart", "svg_click(this);");
+	btn.setAttribute(this.is_mobile() ? "ontouchstart" : "onclick",
+		"svg_click(this);return false;");
 	btn.setAttribute("onmouseover", "setvisi('stop_highlight','visible');");
 	btn.setAttribute("onmouseout", "setvisi('stop_highlight','hidden');");
 	var t = this.mk_circle("btn2", "stop_base", "50%", "50%", r);
@@ -1827,19 +1827,10 @@ mk_inibut : function(parentobj, doc) {
 
 	var btn = this.mk_button("svgbutt", "inibut",
 		0, 0, butwidth, butheight, doc);
-	if ( this.is_mobile() ) {
-		// TODO: find some better solution here.
-		// bad hack: Chrome event falls through to bg and is handled
-		// twice, causing immediate pause -- doubling the click
-		// call compensates -- terrible
-		var hdlr = "svg_click(this);";
-		if ( /Chrom(e|ium)\//i.test(navigator["userAgent"]) ) {
-			hdlr = "svg_click(this);svg_click(this);";
-		}
-		btn.setAttribute("ontouchstart", hdlr);
-	} else {
-		btn.setAttribute("onclick", "svg_click(this);");
-	}
+
+	btn.setAttribute(this.is_mobile() ? "ontouchstart" : "onclick",
+		"svg_click(this);return false;");
+
 	if ( this.inibut_use_clearbg ) {
 		// "ico_transbg" is very transparent, but visible,
 		// "ico_clearbg" has 0 opacity, it's invisible
@@ -1978,8 +1969,8 @@ mk_playpause : function(parentobj, xoff) {
 	
 	var btn = this.mk_button("svgbutt", "playpause",
 		tx - sw / 2, ty - sw / 2, butwidth + sw, butheight + sw);
-	btn.setAttribute("onclick", "svg_click(this);");
-	btn.setAttribute("ontouchstart", "svg_click(this);");
+	btn.setAttribute(this.is_mobile() ? "ontouchstart" : "onclick",
+		"svg_click(this);return false;");
 	btn.setAttribute("onmouseover", "setvisi('playpause_highlight','visible');");
 	btn.setAttribute("onmouseout", "setvisi('playpause_highlight','hidden');");
 	var t = this.mk_circle("btn2", "playpause_base", "50%", "50%", r);
@@ -2637,8 +2628,8 @@ mk : function() {
 	unblur_fullscreen : function() {
 		var btn = this.button_fullscreen;
 		if ( ! btn ) return;
-		btn.setAttribute("onclick", "svg_click(this);");
-		btn.setAttribute("ontouchstart", "svg_click(this);");
+		btn.setAttribute(this.is_mobile() ? "ontouchstart" : "onclick",
+			"svg_click(this);return false;");
 		btn.setAttribute("onmouseover", "setvisi('fullscreen_highlight','visible');");
 		btn.setAttribute("onmouseout",  "setvisi('fullscreen_highlight','hidden');");
 		btn.style.cursor = "pointer";
@@ -2668,8 +2659,8 @@ mk : function() {
 	unblur_doscale : function() {
 		var btn = this.button_doscale;
 		if ( ! btn ) return;
-		btn.setAttribute("onclick", "svg_click(this);");
-		btn.setAttribute("ontouchstart", "svg_click(this);");
+		btn.setAttribute(this.is_mobile() ? "ontouchstart" : "onclick",
+			"svg_click(this);return false;");
 		btn.setAttribute("onmouseover", "setvisi('doscale_highlight','visible');");
 		btn.setAttribute("onmouseout",  "setvisi('doscale_highlight','hidden');");
 		btn.style.cursor = "pointer";
@@ -2700,8 +2691,8 @@ mk : function() {
 	stopbtn_enab : function() {
 		var btn = this.button_stop;
 		if ( ! btn ) return;
-		btn.setAttribute("onclick", "svg_click(this);");
-		btn.setAttribute("ontouchstart", "svg_click(this);");
+		btn.setAttribute(this.is_mobile() ? "ontouchstart" : "onclick",
+			"svg_click(this);return false;");
 		btn.setAttribute("onmouseover", "setvisi('stop_highlight','visible');");
 		btn.setAttribute("onmouseout", "setvisi('stop_highlight','hidden');");
 		btn.style.cursor = "pointer";
