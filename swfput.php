@@ -829,9 +829,10 @@ class SWF_put_evh {
 		static $is1st = 0;
 
 		$txt = __('Add SWFPut Video', 'swfput_l10n');
+		$label = self::wt($txt);
 
 		// this must be just so -- do not put text within span
-		$spn = '<span class="wp-media-buttons-icon"></span> ' . $txt;
+		$spn = '<span class="wp-media-buttons-icon"></span> ' . $label;
 
 		$id_attr = ' id="evhvid-putvid-input-' . $is1st++ . '"';
 
