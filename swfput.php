@@ -3,7 +3,7 @@
 Plugin Name: SWFPut
 Plugin URI: http://agalena.nfshost.com/b1/swfput-html5-flash-wordpress-plugin
 Description: Add Flash and HTML5 video to WordPress posts, pages, and widgets, from arbitrary URI's or media library ID's or files in your media upload directory tree (including uploads not in the WordPress media library).
-Version: 3.0.4
+Version: 3.0.5
 Author: Ed Hynan
 Author URI: http://agalena.nfshost.com/b1/
 License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
@@ -113,7 +113,7 @@ class SWF_put_evh {
 	const plugin_webpage = 'http://agalena.nfshost.com/b1/swfput-html5-flash-wordpress-plugin';
 	
 	// this version
-	const plugin_version = '3.0.4';
+	const plugin_version = '3.0.5';
 	
 	// the widget class name
 	const swfput_widget = 'SWF_put_widget_evh';
@@ -836,8 +836,7 @@ class SWF_put_evh {
 		$id_attr = ' id="evhvid-putvid-input-' . $is1st++ . '"';
 
 		printf(
-		'<a href="%s"%s class="%s" data-editor="%s" title="%s">%s</a>',
-			'#', //'SWFPut_add_button_func();', in editor_plugin.js
+		'<button %s class="%s" data-editor="%s" title="%s">%s</button>',
 			$id_attr,
 			'button insert-media add_media',
 			esc_attr($editor_id),
