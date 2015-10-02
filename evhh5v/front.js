@@ -3199,14 +3199,8 @@ evhh5v_controller.prototype = {
 			this._cnv.width = sw; this._cnv.height = sh;
 		}
 	},
-	// put a frame on the canvas . . .
-	// There are two versions of frame timer procs -- unless I
-	// decide on one and delete the other. Of course, one set must
-	// be commented at any time. One uses setInterval(), the other
-	// uses recursive setTimeout() -- so far performance diffs
-	// are infinitesimal, ephemeral, and very likely imaginary.
-	/*
-	*/
+
+	// start putting frames on the canvas at a regular interval
 	put_canvas_frame : function() {
 		if ( ! this.is_canvas || this.frame_timer || this._vid.paused || this._vid.ended ) {
 			return;
@@ -3219,12 +3213,25 @@ evhh5v_controller.prototype = {
 			    that._height || that.height);
 		}, this.canvas_frame_timeout);
 	},
+
+	// stop putting frames on the canvas at a regular interval
 	end_canvas_frame : function() {
 		if ( ! this.frame_timer ) return;
 		clearInterval(this.frame_timer);
 		this.frame_timer = false;
 	},
-	canvas_frame_timeout : 16,
+
+	// interval for putting frames on the canvas at:
+	// 30   fps is value 33.333...
+	// 33   fps is value 30.3030...
+	// 48   fps is value 20.8333...
+	// 60   fps is value 16.666...
+	// 62.5 fps is value 16
+	// . . . etc..
+	// but these will not likely be delivered on time;
+	// to tune for at least 30 fps, try something higher
+	canvas_frame_timeout : 21,
+
 	// put a *single* frame on the canvas, e.g. when trying to get
 	// poster to appear
 	put_canvas_frame_single : function() {
@@ -3233,12 +3240,16 @@ evhh5v_controller.prototype = {
 			ctx.drawImage(this._vid, this._x, this._y, this._width, this._height);
 		}
 	},
+
+	// put a *single* frame on the canvas, e.g. when trying to get
+	// poster to appear -- after some time in ms.
 	put_canvas_frame_single_timeout : function(timeout) {
 		var that = this;
 		this.canvas_frame_single_timer = setTimeout(function () {
 			that.put_canvas_frame_single();
-		}, timeout == undefined ? 50 : timeout);
+		}, timeout || 50);
 	},
+
 	setpad : function(pad) {
 		this.pad = pad;
 	},
@@ -3953,7 +3964,6 @@ evhh5v_controller.prototype = {
 		this.bar.progress_pl(t / d);
 		if ( ! this.playing ) {
 			this.put_canvas_frame_single_timeout();
-			//this.put_canvas_frame_single();
 		}
 	},
 
