@@ -3250,17 +3250,16 @@ evhh5v_controller.prototype = {
 		}, timeout || 50);
 	},
 
-	setpad : function(pad) {
-		this.pad = pad;
-	},
-	// get the control bar svg height
+	// getter: get the control bar svg height
 	get barheight() {
 		return parseInt(this.ctlbar["barheight"]);
 	},
-	// get the object in place as video
+
+	// getter: get the object in place as video
 	get v() {
 		return this.is_canvas ? this._cnv : this._vid;
 	},
+
 	// [gs]etters for width and height, allowing interface resize code
 	// to simply read and assign as it would with a browser object;
 	// note the additional objects handled on size assignment: the
@@ -3272,6 +3271,8 @@ evhh5v_controller.prototype = {
 		if ( this.in_fullscreen ) return; // special case refusal
 		this.put_width(v);
 	},
+
+	// in service of setter width(v), and callable by name
 	put_width : function(v) {
 		this.hide_volctl();
 		this.set_width = v;
@@ -3292,11 +3293,14 @@ evhh5v_controller.prototype = {
 		t.style.width = v + "px";
 		t.style.left = this.pad + "px";
 	},
+
 	get height() { return this.set_height == undefined ? this.v.height : this.set_height; },
 	set height(v) {
 		if ( this.in_fullscreen ) return; // special case refusal
 		this.put_height(v);
 	},
+
+	// in service of setter height(v), and callable by name
 	put_height : function(v) {
 		this.hide_volctl();
 		var t;
@@ -3319,7 +3323,9 @@ evhh5v_controller.prototype = {
 		t.style.top = this.bar_y + "px";
 		t.style.left = this.pad + "px";
 	},
-	// these are for the resizing JS that handles this; no effect
+
+	// these are for the resizing code that handles this; emulating
+	// properties of some native DOM objects
 	get pixelWidth() { if ( this.v.pixelWidth !== undefined ) return this.v.pixelWidth; return undefined; },
 	set pixelWidth(v) { this.v.pixelWidth = v; },
 	get pixelHeight() { if ( this.v.pixelHeight !== undefined ) return this.v.pixelHeight; return undefined; },
@@ -3334,21 +3340,15 @@ evhh5v_controller.prototype = {
 		this.put_width(w);
 	},
 
-	// event dispatcher -- we can ensure that this === this this,
-	// and the call sequence
+	// event dispatcher -- if controller is ready
 	callbk : function(evt) {
 		var that;
 		if ( (that = this.evhh5v_controller) == undefined ) {
 			return;
 		}
+
 		var ename = evt.type;
 		var map = that.handlermap;
-
-		/* debugging
-			if ( that.evcnt === undefined ) that.evcnt = {};
-			if ( that.evcnt[ename] === undefined ) that.evcnt[ename] = 0;
-			that.evcnt[ename]++;
-		*/
 
 		if ( map[ename] != undefined ) {
 			for ( var i = 0, mx = map[ename].length; i < mx; i++ ) {
@@ -3359,6 +3359,7 @@ evhh5v_controller.prototype = {
 			}
 		}
 	},
+
 	// event handler installer -- installs from current handlermap
 	// on obj arg; e.g., if stop() replaces video object
 	_obj_add_evt : function(obj, bubool) {
@@ -3401,7 +3402,8 @@ evhh5v_controller.prototype = {
 			}
 		}
 	},
-	// events
+
+	// install events handlers
 	install_handlers : function(newvid) {
 		// NOTE: it is arranged that this in handler will be this this
 		var newv = false;
@@ -3458,6 +3460,7 @@ evhh5v_controller.prototype = {
 			this.hide_wait();
 			//evhh5v_msg("WAIT SPINNER STOP: " + e.type);
 		}, false);
+
 		this.addEventListener(["ended"], function(e) {
 			if  ( this.evcnt !== undefined ) {
 				for ( var k in this.evcnt ) {
@@ -3932,8 +3935,7 @@ evhh5v_controller.prototype = {
 		}
 	},
 	set_bar_y : function(y) {
-		var t = document.getElementById(this.ctlbar["ctlbardiv"]);
-		t.style.top = y + "px";
+		this.bardiv.style.top = y + "px";
 	},
 
 	// callback for play progress bar click -- delivered from
