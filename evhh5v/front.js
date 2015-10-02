@@ -141,7 +141,7 @@ function evhh5v_controlbar_elements(parms, fixups) {
 
 	barobj.style.width = "" + ip["width"] + "px";
 	barobj.style.height = "" + ip["barheight"] + "px";
-	barobj.setAttribute("onload", "evhh5v_ctlbarload(this, '"+pdiv+"'); false;");
+	barobj.setAttribute("onload", "evhh5v_ctlbarload(this, '"+pdiv+"'); return false;");
 	barobj.setAttribute('type', "image/svg+xml");
 	barobj.setAttribute("data", url + (evhh5v_need_svg_query() ? "" : q));
 
@@ -187,7 +187,7 @@ function evhh5v_controlbar_elements(parms, fixups) {
 	p.setAttribute('value', "1st");
 	barobj.appendChild(p);
 
-	barobj.setAttribute("onload", "evhh5v_ctlbutload(this, '"+pdiv+"'); false;");
+	barobj.setAttribute("onload", "evhh5v_ctlbutload(this, '"+pdiv+"'); return false;");
 	barobj.setAttribute('type', "image/svg+xml");
 	barobj.setAttribute("data", url + (evhh5v_need_svg_query() ? "" : q));
 
@@ -226,7 +226,7 @@ function evhh5v_controlbar_elements(parms, fixups) {
 	p.setAttribute('value', "vol");
 	barobj.appendChild(p);
 
-	barobj.setAttribute("onload", "evhh5v_ctlvolload(this, '"+pdiv+"'); false;");
+	barobj.setAttribute("onload", "evhh5v_ctlvolload(this, '"+pdiv+"'); return false;");
 	barobj.setAttribute('type', "image/svg+xml");
 	barobj.setAttribute("data", url + (evhh5v_need_svg_query() ? "" : q));
 
@@ -3211,10 +3211,12 @@ evhh5v_controller.prototype = {
 		if ( ! this.is_canvas || this.frame_timer || this._vid.paused || this._vid.ended ) {
 			return;
 		}
-
+		
 		var that = this;
 		this.frame_timer = setInterval(function () {
-			that._ctx.drawImage(that._vid, that._x, that._y, that._width, that._height);
+			that._ctx.drawImage(that._vid, that._x, that._y,
+			    that._width  || that.width,
+			    that._height || that.height);
 		}, this.canvas_frame_timeout);
 	},
 	end_canvas_frame : function() {
