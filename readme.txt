@@ -283,6 +283,7 @@ to leave a comment with the URLs of your using pages.
 
 = 3.0.5 =
 * Editor button: <a> changed to <button>.
+* Cleanup minor JS warnings on web console.
 
 = 3.0.4 =
 * Further improve controls for mobile.
@@ -579,6 +580,7 @@ to leave a comment with the URLs of your using pages.
 
 = 3.0.5 =
 * Editor button: <a> changed to <button>.
+* Cleanup minor JS warnings on web console.
 
 = 3.0.4 =
 * Further improve controls for mobile.
