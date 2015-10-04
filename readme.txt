@@ -282,6 +282,7 @@ to leave a comment with the URLs of your using pages.
 == Changelog ==
 
 = 3.0.5 =
+* Fix for URLs without scheme (e.g. "//www.example.com/foo/").
 * Editor button: <a> changed to <button>.
 * Cleanup minor JS warnings on web console.
 * Misc. cleanup, source comment edits.
@@ -580,6 +581,7 @@ to leave a comment with the URLs of your using pages.
 == Upgrade Notice ==
 
 = 3.0.5 =
+* Fix for URLs without scheme (e.g. "//www.example.com/foo/").
 * Editor button: <a> changed to <button>.
 * Cleanup minor JS warnings on web console.
 * Misc. cleanup, source comment edits.

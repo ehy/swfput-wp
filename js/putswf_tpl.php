@@ -35,7 +35,7 @@
  *  mode, title, modal, uploader, library, multiple, and
  *  state ( == library)
  */
-// NOTE on "template:" below: it is underscares compiled, and the
+// NOTE on "template:" below: it is underscores compiled, and the
 // the default compilation operators are overridden by WP in
 // "options":
  //19                         options = {

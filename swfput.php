@@ -110,7 +110,7 @@ endif;
 if ( ! class_exists('SWF_put_evh') ) :
 class SWF_put_evh {
 	// web page as of release
-	const plugin_webpage = 'http://agalena.nfshost.com/b1/swfput-html5-flash-wordpress-plugin';
+	const plugin_webpage = '//agalena.nfshost.com/b1/swfput-html5-flash-wordpress-plugin';
 	
 	// this version
 	const plugin_version = '3.0.5';
@@ -2651,6 +2651,7 @@ class SWF_put_evh {
 		// the array elements in the explicit extraction below will
 		// appear as variable names later.
 		foreach(array(
+			'requirescheme',
 			'requirehost',
 			'requirepath',
 			'rejuser',
@@ -2658,32 +2659,63 @@ class SWF_put_evh {
 			'rejquery',
 			'rejfrag',
 			'rxproto',
-			'rxpath',
-			'requirehost') as $k) {
+			'rxpath') as $k) {
 			if ( isset($args[$k]) ) {
 				$$k = $args[$k];
 			}
 		}
 
+		if ( ! isset($requirescheme) ) {
+			// By default allow net relative URLs
+			// like '//www.foobar.xyz/' -- the browser
+			// should determine  the correct proto/scheme
+			// for such URLs.
+			$requirescheme = false;
+		}
+		
+		// Sigh: PHP 5.2 compatibility: parse_url() does not
+		// handle schemeless URLs like '//www.example.com/foo'
+		// interpreting them as w/o a host -- hack around --
+		if ( strspn($url, '/', 0, 3) === 2 ) {
+			// OK, got //[^/].* -- is it allowed?
+			if ( $requirescheme ) {
+				self::errlog("scheme required: ${url}");
+				return false;
+			}
+			
+			// really ugly PHP 5.2 workaround:
+			$url = 'hacktp:' . $url; // find this later on below
+		}
+
 		$ourl = '';
 		$p = '/';
 		$ua = parse_url($url);
+
 		if ( array_key_exists('path', $ua) ) {
 			$t = ltrim($ua['path'], '/');
+
 			if ( isset($rxpath) ) {
 				if ( ! preg_match($rxpath, $t) ) {
 					return false;
 				}
 			}
+
 			// no '..' in path!
 			if ( preg_match('/^(.*\/)?\.\.(\/.*)?$/', $t) ) {
 				return false;
 			}
+
 			$p .= $fesc === '' ? $t : self::upathencode($t, $fesc);
 		} else if ( isset($requirepath) && $requirepath ) {
 			return false;
 		}
+
 		if ( array_key_exists('host', $ua) ) {
+			if ( array_key_exists('scheme', $ua) &&
+			     ! strcmp($ua['scheme'], 'hacktp') ) { // aarrgghh!!
+				unset($ua['scheme']);
+			}
+
 			if ( array_key_exists('scheme', $ua) ) {
 				$t = $ua['scheme'];
 				if ( isset($rxproto) ) {
@@ -2692,9 +2724,13 @@ class SWF_put_evh {
 					}
 				}
 				$ourl = $t . '://';
-			} else if ( isset($requirehost) && $requirehost ) {
+			} else if ( $requirescheme ) {
+				self::errlog("scheme required: ${url}");
 				return false;
+			} else {
+				$ourl = '//';
 			}
+
 			if ( array_key_exists('user', $ua) ) {
 				if ( isset($rejuser) && $rejuser ) {
 					return false;
@@ -2706,6 +2742,7 @@ class SWF_put_evh {
 				}
 				$ourl .= '@';
 			}
+
 			$ourl .= $ua['host'];
 			if ( array_key_exists('port', $ua) ) {
 				if ( isset($rejport) && $rejport ) {
@@ -2718,6 +2755,7 @@ class SWF_put_evh {
 		}
 	
 		$ourl .= $p;
+
 		// A query with the media URL? It can happen
 		// for stream servers.
 		// this works, e.g. w/ ffserver ?date=...
@@ -2727,6 +2765,7 @@ class SWF_put_evh {
 			}
 			$ourl .= '?' . $ua['query'];
 		}
+
 		if ( array_key_exists('fragment', $ua) ) {
 			if ( isset($rejfrag) && $rejfrag ) {
 				return false;
@@ -2913,16 +2952,7 @@ class SWF_put_evh {
 
 		if ( $cssurl === '' )
 			$cssurl = $this->get_swf_css_url();
-		/* $achk = array(
-			'requirehost' => false, // can use orig host
-			'requirepath' => true,
-			'rejuser' => true,
-			'rejquery' => true,
-			'rejfrag' => true,
-			'rxpath' => '/.*\.css$/i',
-			'rxproto' => '/^https?$/'
-			);
-		$ut = self::check_url($cssurl, $achk); */
+
 		$ut = $this->check_expand_video_url($cssurl, false);
 		if ( ! $ut ) {
 			self::errlog('rejected URL: "' . $url . '"');
