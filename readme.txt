@@ -259,7 +259,7 @@ and basic features.
 = How do contact to the developer? =
 
 Post a comment at
-http://agalena.nfshost.com/b1/swfput-html5-flash-wordpress-plugin/
+//agalena.nfshost.com/b1/software/swfput-html5-flash-wordpress-plugin/
 or email edhynan at the email provider 'gmail' with the
 top level domain 'com', or of course go the the SWFPut
 WordPress page at https://wordpress.org/support/plugin/swfput
