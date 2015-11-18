@@ -4012,6 +4012,7 @@ evhh5v_controller.prototype = {
 		var tv = document.createElement('video');
 		var att = ["loop", "width", "height", "id", "class", "name"];
 		var poster = this._vid.getAttribute("poster");
+
 		while ( att.length ) {
 			var tn = att.shift();
 			var ta;
@@ -4027,13 +4028,24 @@ evhh5v_controller.prototype = {
 		// the poster is displayed, and hope (probably vainly) that
 		// it does not cause a net fetch due to caching, or that
 		// at least fetch will be small and quick.
-		tv.setAttribute("preload", this.gotmetadata?"metadata":"none");
+		// UPDATE Nov. 2015: the above changed -- don''t know how
+		// long ago before I noticed -- now with "metadata" poster
+		// displays but is not scaled correctly; hence the nested
+		// original ternary as fallback for 'poster ? "none"'
+		tv.setAttribute("preload", poster ? "none"
+			: (this.gotmetadata ? "metadata" : "none"));
+		//tv.setAttribute("preload", this.gotmetadata?"metadata":"none");
 
 		// copy nodes
 		while ( this._vid.hasChildNodes() ) {
 			var tn = this._vid.firstChild.cloneNode(true);
 			tv.appendChild(tn);
 			this._vid.removeChild(this._vid.firstChild);
+		}
+
+		// hook up new video; ready for play()
+		if ( ! this.is_canvas ) {
+			this._vid.parentNode.replaceChild(tv, this._vid);
 		}
 
 		// unload shotgun on old video
@@ -4045,11 +4057,6 @@ evhh5v_controller.prototype = {
 		// per spec it should, and yes, it provides a way to stop
 		// webkit from fetching the media
 		this._vid.load();
-
-		// hook up new video; ready for play()
-		if ( ! this.is_canvas ) {
-			this._vid.parentNode.replaceChild(tv, this._vid);
-		}
 		try { delete this._vid; } catch(e) {}
 
 		this._vid = tv;
@@ -4057,6 +4064,7 @@ evhh5v_controller.prototype = {
 		this.setup_aspect_factors();
 		this._obj_add_evt(this._vid);
 		this.gotmetadata = this.playing = false;
+
 		if ( poster ) {
 			this._vid.setAttribute("poster", poster);
 		}
