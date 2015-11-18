@@ -3,8 +3,8 @@ Contributors: EdHynan
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4Q2Y8ZUG8HXLC
 Tags: video, video player, movies, tube, flash, flash video, html5, html5 video, graphics, movie, video content, a/v content
 Requires at least: 3.0.2
-Tested up to: 4.3
-Stable tag: 3.0.5
+Tested up to: 4.4
+Stable tag: 3.0.6
 Text Domain: swfput_l10n
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -280,6 +280,10 @@ to leave a comment with the URLs of your using pages.
 	with dark custom colors, sidebar on left), not yet playing.
 
 == Changelog ==
+
+= 3.0.6 =
+* Poster image might have been too small after stop button
+	click; this should be OK now.
 
 = 3.0.5 =
 * Fix for URLs without scheme (e.g. "//www.example.com/foo/").
@@ -579,6 +583,10 @@ to leave a comment with the URLs of your using pages.
 * Initial release.
 
 == Upgrade Notice ==
+
+= 3.0.6 =
+* Poster image might have been too small after stop button
+	click; this should be OK now.
 
 = 3.0.5 =
 * Fix for URLs without scheme (e.g. "//www.example.com/foo/").
