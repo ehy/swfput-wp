@@ -284,6 +284,7 @@ to leave a comment with the URLs of your using pages.
 = 3.0.6 =
 * Poster image might have been too small after stop button
 	click; this should be OK now.
+* Confirmed working with WP 4.4.
 
 = 3.0.5 =
 * Fix for URLs without scheme (e.g. "//www.example.com/foo/").
@@ -587,6 +588,7 @@ to leave a comment with the URLs of your using pages.
 = 3.0.6 =
 * Poster image might have been too small after stop button
 	click; this should be OK now.
+* Confirmed working with WP 4.4.
 
 = 3.0.5 =
 * Fix for URLs without scheme (e.g. "//www.example.com/foo/").
