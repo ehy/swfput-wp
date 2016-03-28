@@ -94,11 +94,14 @@ ${PRJZIP}: ${SBINS} ${SDEFS} ${H5BIN} ${JSBIN} ${ZALL} ${INCS} ${LCFPO}
 $(SDIRI)/$(MNAME).swf: $(SDIRI)/$(MINGS) $(SDIRI)/$(MINGA)
 	$(PHPCLI) $(SDIRI)/$(MINGS) -- BH=100 > $@
 
+# Note: ruby minifier added 3-16; requires nodejs!
 ${JSBIN}: ${JSSRC}
 	O=$@; I=$${O%%.*}.js; \
 	(P=`which perl` && $$P -e 'use JavaScript::Minifier::XS qw(minify); print minify(join("",<>))' < "$$I" > "$$O" 2>/dev/null ) \
 	|| \
 	(P=`which perl` && $$P -e 'use JavaScript::Minifier qw(minify);minify(input=>*STDIN,outfile=>*STDOUT)' < "$$I" > "$$O" 2>/dev/null) \
+	|| \
+	(R=`which ruby` && $$R -e "require 'uglifier'; printf '%s', Uglifier.compile(open('""$$I""', 'r'))" > "$$O" 2>/dev/null ) \
 	|| { cp -f "$$I" "$$O" && echo UN-MINIFIED $$I to $$O; }
 
 # NOTE: The non-trivial front.js is broken by perl 'JavaScript::Packer'
