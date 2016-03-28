@@ -450,7 +450,7 @@ function evhh5v_controlbar_elements_check(parms, vidobj) {
  * cannot rely on the browser to resize video along with the other    *
  * elements -- the flash plugin in particular is not resized without  *
  * this, and the HTML5 video controller is designed to work with this *
- * rather that hook size events (i.e. it defines width & height       *
+ * rather than hook size events (i.e. it defines width & height       *
  * getter/setter properties that this uses like any property).        *
  *                                                                    *
  * this is not tied th the video controller                           *
@@ -461,7 +461,8 @@ function evhh5v_controlbar_elements_check(parms, vidobj) {
 var evhh5v_sizer_instances = [];
 var evhh5v_sizer_event_relay = function (load) {
 	for ( var i = 0; i < evhh5v_sizer_instances.length; i++ ) {
-		if ( evhh5v_ctlbarmap != undefined && evhh5v_sizer_instances[i].ctlbar == undefined ) {
+		if ( evhh5v_ctlbarmap != undefined &&
+			 evhh5v_sizer_instances[i].ctlbar == undefined ) {
 			var did = evhh5v_sizer_instances[i].d;
 			if ( did ) {
 				did = evhh5v_ctlbarmap[did.id];
@@ -488,7 +489,11 @@ var evhh5v_sizer_event_relay = function (load) {
 // resize at same dimensions will not be visible (it seems OK).
 // Note that the visible resize using window only was seen with
 // android (4.?) native browser in emulator.
-(function() {
+// NOTE: in WordPress 4.5 there is 'selective refresh' of widgets
+// in the theme preview, with events deliveray signalling a change --
+// use this function to register handlers for these events -- the
+// 'wp' param is added for this purpose.
+(function(wp) {
 	if ( window.addEventListener ) {
 		var sizer_event_time = 250,
 		    tmo = false,
@@ -524,7 +529,31 @@ var evhh5v_sizer_event_relay = function (load) {
 			evhh5v_sizer_event_relay(false);
 		};
 	}
-}()); // func
+	
+	// register 'selective refresh' events handlers
+	if ( 'undefined' !== typeof wp &&
+		 wp.customize && wp.customize.selectiveRefresh ) {
+		wp.customize.selectiveRefresh.bind('partial-content-rendered',
+			function( placement ) {
+				for ( i in placement ) {
+					var m = "'partial-content-rendered' arg[" + i +"]" +
+							" == " + placement[i]
+					evhh5v_msg(m);
+				}
+			}
+		);
+		
+		wp.customize.selectiveRefresh.bind('partial-content-moved',
+			function( placement ) {
+				for ( i in placement ) {
+					var m = "'partial-content-moved' arg[" + i +"]" +
+							" == " + placement[i]
+					evhh5v_msg(m);
+				}
+			}
+		);
+	}
+}(wp)); // func
 
 // resize adjust:
 // the enclosing <div> is scaled, and so its width from
@@ -4442,7 +4471,7 @@ var evhh5v_get_flashsupport = function (el, sty) {
 // else console.log(); console.log() is forced if 'cons' is
 // defined and true -- messages are prefixed with "EVHMSG: "
 // unsless pfx is defined in which case it is used
-var evhh5v_msg_off = true;
+var evhh5v_msg_off = false;
 var evhh5v_msg = function (msg, cons, pfx) {
 	if ( evhh5v_msg_off ) {
 		return;
