@@ -113,6 +113,8 @@ ${JSBIN}: ${JSSRC}
 #		'use JavaScript::Packer;$$p=JavaScript::Packer->init();$$o=join("",<STDIN>);$$p->minify(\$$o,{"compress"=>"clean"});print STDOUT $$o;' < "$$I" > "$$O") \
 #	|| cp -f "$$I" "$$O"
 
+
+
 ${H5BIN} : ${H5SRC}
 	exit 0
 

@@ -703,7 +703,8 @@ class SWF_put_evh {
 		$jsfn = self::settings_jsname;
 		$j = $this->settings_js;
 		$v = self::plugin_version;
-        wp_enqueue_script($jsfn, $j, false, $v);
+        //wp_enqueue_script($jsfn, $j, false, $v);
+        wp_enqueue_script($jsfn, $j, array('jquery'), $v);
 	}
 
 	// This function is placed here below the function that sets-up
@@ -1266,7 +1267,8 @@ class SWF_put_evh {
 			$t = self::evhv5vjsdir . '/' . self::evhv5vjsname;
 			$jsfile = plugins_url($t, $pf);
 			$t = self::plugin_version;
-	        wp_enqueue_script($jsfn, $jsfile, false, $t);
+	        //wp_enqueue_script($jsfn, $jsfile, false, $t);
+	        wp_enqueue_script($jsfn, $jsfile, array('jquery'), $t);
 
 			$t = self::evhv5vsvgdir;
 			$this->evhv5v_svgs = array(

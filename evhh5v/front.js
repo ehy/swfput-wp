@@ -276,7 +276,11 @@ function evhh5v_controlbar_elements_check(parms, vidobj) {
 
 		if ( nnlc == 'object' ) {
 			if ( parms.flashid !== undefined && parms.flashid === t.id ) {
-				swfobj = evhh5v_get_flashsupport() ? t : false;
+				if ( typeof(evhh5v_get_flashsupport) === 'function' ) {
+					swfobj = evhh5v_get_flashsupport() ? t : false;
+				} else {
+					swfobj = false;
+				}
 			}
 			continue;
 		}
@@ -444,6 +448,77 @@ function evhh5v_controlbar_elements_check(parms, vidobj) {
 
 /**********************************************************************\
  *                                                                    *
+ * WordPress 4.5 introduces 'selective update' in the theme preview   *
+ * and widgets are previewed, and so can be affected by the change.   *
+ *                                                                    *
+ * As of this writing, it seems that nothing special needs to be done *
+ * when the code of this file is loaded as a widget; in fact, when    *
+ * user changes a parameter, and triggers the process, the registered *
+ * event handler is called after full widget markup has already been  *
+ * fetched -- it is present in handler_arg[addedContent]              *
+ *                                                                    *
+ * What must be done is pause/stop video that user might have played  *
+ * before provoking this event.  Failing to do so leaves it running,  *
+ * maybe audibly, in the background (presumably until garbage         *
+ * collection).                                                       *
+ *                                                                    *
+\**********************************************************************/
+
+try {
+	jQuery( function() {
+		if ( 'undefined' === typeof wp || wp === null ||
+			! wp.customize || ! wp.customize.selectiveRefresh ) {
+			return;
+		}
+	
+		wp.customize.selectiveRefresh.bind('partial-content-rendered',
+			function( placement ) {
+				try {
+					var win = false;
+					
+					if ( ! win && window.evhh5v_sizer_instances ) {
+						win = window;
+					}
+					
+					if ( ! win && document.evhh5v_sizer_instances ) {
+						win = document;
+					}
+
+					if ( win )
+					for ( var p in win.evhh5v_sizer_instances ) {
+						var vi = win.evhh5v_sizer_instances[p],
+						    v = vi.va_o || false, // H5V
+						    f = vi.o    || false, // flash
+						    act;
+
+						act = 'pause';
+						if ( v && (typeof v[act] === 'function') ) {
+							v[act]();
+						}
+						if ( f && (typeof f[act] === 'function') ) {
+							f[act]();
+						}
+						//act = 'stop';
+						//if ( v && (typeof v[act] === 'function') ) {
+						//	v[act]();
+						//}
+						//if ( f && (typeof f[act] === 'function') ) {
+						//	f[act]();
+						//}
+					}
+				} catch( err ) {
+					var e = err.message;
+					console.log("evhh5v placement handler: " + e);
+				}
+			}
+		);
+	});
+} catch( err ) {
+	console.log("evhh5v front.js[jQ.f()]: " + err.message);
+}
+
+/**********************************************************************\
+ *                                                                    *
  * evhh5v_sizer, and support code: works based on browser changes to  *
  * and enclosing <div>, as happens with 'responsive' CSS and elements *
  *                                                                    *
@@ -529,31 +604,7 @@ var evhh5v_sizer_event_relay = function (load) {
 			evhh5v_sizer_event_relay(false);
 		};
 	}
-	
-	// register 'selective refresh' events handlers
-	if ( 'undefined' !== typeof wp &&
-		 wp.customize && wp.customize.selectiveRefresh ) {
-		wp.customize.selectiveRefresh.bind('partial-content-rendered',
-			function( placement ) {
-				for ( i in placement ) {
-					var m = "'partial-content-rendered' arg[" + i +"]" +
-							" == " + placement[i]
-					evhh5v_msg(m);
-				}
-			}
-		);
-		
-		wp.customize.selectiveRefresh.bind('partial-content-moved',
-			function( placement ) {
-				for ( i in placement ) {
-					var m = "'partial-content-moved' arg[" + i +"]" +
-							" == " + placement[i]
-					evhh5v_msg(m);
-				}
-			}
-		);
-	}
-}(wp)); // func
+}()); // func
 
 // resize adjust:
 // the enclosing <div> is scaled, and so its width from
@@ -2344,12 +2395,17 @@ mk : function() {
 			this.inibut.width.baseVal.SVG_LENGTHTYPE_PX),
 		this.inibut.height.baseVal.convertToSpecifiedUnits(
 			this.inibut.height.baseVal.SVG_LENGTHTYPE_PX);
+
+		var d = document.getElementById(this.b_parms["ctlbardiv"]);
+		if ( ! d ) {
+			return false;
+		}
+
 		var w = this.inibut.width.baseVal.valueInSpecifiedUnits,
 			h = this.inibut.height.baseVal.valueInSpecifiedUnits;
 
-		var d = document.getElementById(this.b_parms["ctlbardiv"]);
-		var l = (x - w / 2);
-		var t = (y - h / 2);
+		var l = (x - w / 2),
+			t = (y - h / 2);
 		d.style.left = "" + l + "px";
 		d.style.top  = "" + t + "px";
 
@@ -3308,6 +3364,10 @@ evhh5v_controller.prototype = {
 		var t;
 
 		t = document.getElementById(this.ctlbar["parent"]);
+		if ( ! t ) {
+			return
+		}
+
 		t.style.width = v + "px";
 		t = this.auxdiv;
 		t.style.width = v + "px";
@@ -3340,8 +3400,12 @@ evhh5v_controller.prototype = {
 
 		this.set_height = v;
 
-		var bh = this.barheight;
 		t = document.getElementById(this.ctlbar["parent"]);
+		if ( ! t ) {
+			return
+		}
+		
+		var bh = this.barheight;
 		t.style.height = bh + "px";
 
 		this.setup_aspect_factors(); this.put_canvas_poster();
@@ -4080,8 +4144,7 @@ evhh5v_controller.prototype = {
 		// unload shotgun on old video
 		this._vid.src = null;
 		this._vid.removeAttribute("src");
-		// spec says currentSrc readonly; ffox and webkit do not complain
-		try { this._vid.currentSrc = null; } catch(e) {}
+
 		// hopefully, w/ no source, this will stop current transfers;
 		// per spec it should, and yes, it provides a way to stop
 		// webkit from fetching the media

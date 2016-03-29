@@ -56,8 +56,12 @@ class SWF_put_widget_evh extends WP_Widget {
 		// Label shown on widgets page
 		$lb =  __('SWFPut Video Player', 'swfput_l10n');
 		// Description shown under label shown on widgets page
-		$desc = __('Flash and HTML5 video for your widget areas', 'swfput_l10n');
-		$opts = array('classname' => $cl, 'description' => $desc);
+		$desc = __('HTML5 and Flash video for your widget areas', 'swfput_l10n');
+		$opts = array(
+			'classname' => $cl,
+			'description' => $desc,
+			'customize_selective_refresh' => true
+		);
 
 		// control opts width affects the parameters form,
 		// height is ignored.  Width 400 allows long text fields
