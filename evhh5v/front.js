@@ -449,73 +449,89 @@ function evhh5v_controlbar_elements_check(parms, vidobj) {
 /**********************************************************************\
  *                                                                    *
  * WordPress 4.5 introduces 'selective update' in the theme preview   *
- * and widgets are previewed, and so can be affected by the change.   *
- *                                                                    *
- * As of this writing, it seems that nothing special needs to be done *
- * when the code of this file is loaded as a widget; in fact, when    *
- * user changes a parameter, and triggers the process, the registered *
- * event handler is called after full widget markup has already been  *
- * fetched -- it is present in handler_arg[addedContent]              *
+ * for widgets.                                                       *
  *                                                                    *
  * What must be done is pause/stop video that user might have played  *
- * before provoking this event.  Failing to do so leaves it running,  *
+ * before triggering this event.  Failing to do so leaves it running, *
  * maybe audibly, in the background (presumably until garbage         *
- * collection).                                                       *
+ * collection). Also, remove corresponding object from our data.      *
+ *                                                                    *
+ * This is done in handler registered for 'partial-content-rendered'. *
  *                                                                    *
 \**********************************************************************/
 
-try {
-	jQuery( function() {
-		if ( 'undefined' === typeof wp || wp === null ||
-			! wp.customize || ! wp.customize.selectiveRefresh ) {
-			return;
-		}
-	
-		wp.customize.selectiveRefresh.bind('partial-content-rendered',
-			function( placement ) {
-				try {
-					var win = false;
-					
-					if ( ! win && window.evhh5v_sizer_instances ) {
-						win = window;
-					}
-					
-					if ( ! win && document.evhh5v_sizer_instances ) {
-						win = document;
-					}
+jQuery( function() {
+	if ( 'undefined' === typeof wp ||
+		 ! wp.customize ||
+		 ! wp.customize.selectiveRefresh ) {
+		return;
+	}
 
-					if ( win )
-					for ( var p in win.evhh5v_sizer_instances ) {
-						var vi = win.evhh5v_sizer_instances[p],
-						    v = vi.va_o || false, // H5V
-						    f = vi.o    || false, // flash
-						    act;
-
-						act = 'pause';
-						if ( v && (typeof v[act] === 'function') ) {
-							v[act]();
-						}
-						if ( f && (typeof f[act] === 'function') ) {
-							f[act]();
-						}
-						//act = 'stop';
-						//if ( v && (typeof v[act] === 'function') ) {
-						//	v[act]();
-						//}
-						//if ( f && (typeof f[act] === 'function') ) {
-						//	f[act]();
-						//}
-					}
-				} catch( err ) {
-					var e = err.message;
-					console.log("evhh5v placement handler: " + e);
+	wp.customize.selectiveRefresh.bind('partial-content-rendered',
+		function(placement) {
+			try {
+				if ( 'undefined' === typeof placement.removedNodes ) {
+					return true;
 				}
+
+				var rmnods = placement.removedNodes;
+				if ( ! rmnods instanceof jQuery ||
+					 ! rmnods.is('.SWF_put_widget_evh') ) {
+					return true;
+				}
+
+				var els = rmnods[0].getElementsByClassName('widget');
+				if ( ! els ) {
+					return true;
+				}
+
+				var ellen = els.length;
+				if ( ellen < 1 ) {
+					return true;
+				}
+
+				var obj = false, indx;
+
+				indx = evhh5v_sizer_instances.find(function(cur) {
+					var _id = cur.div_id;
+
+					// els.length is 1; but for form and safety:
+					for ( var i = 0; i < ellen; i++ ) {
+						if ( els[i].id === _id ) {
+							obj = cur;
+							return true;
+						}
+					}
+					
+					return false;
+				});
+
+				if ( indx < 0 ) {
+					return true;
+				}
+				
+				evhh5v_sizer_instances.splice(indx, 1);
+				
+				var v = obj.va_o || false, // H5V
+				    f = obj.o    || false, // flash
+				    act;
+
+				act = 'pause';
+				if ( v && (typeof v[act] === 'function') ) {
+					v[act]();
+				}
+				if ( f && (typeof f[act] === 'function') ) {
+					f[act]();
+				}
+			} catch( err ) {
+				var e = err.message;
+				console.log("evhh5v placement handler exception: " + e);
 			}
-		);
-	});
-} catch( err ) {
-	console.log("evhh5v front.js[jQ.f()]: " + err.message);
-}
+			
+			return true;
+		}
+	);
+});
 
 /**********************************************************************\
  *                                                                    *
@@ -557,6 +573,12 @@ var evhh5v_sizer_event_relay = function (load) {
 		evhh5v_sizer_instances[i].handle_resize();
 	}
 };
+
+// add sizer object to store
+function evhh5v_add_instance(inst) {
+	evhh5v_sizer_instances.push(inst);
+};
+
 // Setup initial resize for both window and document -- with
 // window only, the change might be visible in slow environments
 // (like an emulator), while with document alone I'm not certain
@@ -568,7 +590,7 @@ var evhh5v_sizer_event_relay = function (load) {
 // in the theme preview, with events deliveray signalling a change --
 // use this function to register handlers for these events -- the
 // 'wp' param is added for this purpose.
-(function(wp) {
+(function() {
 	if ( window.addEventListener ) {
 		var sizer_event_time = 250,
 		    tmo = false,
@@ -626,10 +648,12 @@ var evhh5v_sizer = function(dv, ob, av, ai, bld) {
 	// a <div> or possibly another element with the
 	// properties we need -- if the object cannot be had from
 	// its id, then this was constructed in error
+	console.log("SIZER CTOR FINDING id " + dv);
 	this.d = document.getElementById(dv);
 	if ( ! this.d ) {
 		return;
 	}
+	this.div_id = dv;
 
 	this.o    = document.getElementById(ob);
 	this.va_o = document.getElementById(av);
@@ -653,7 +677,8 @@ var evhh5v_sizer = function(dv, ob, av, ai, bld) {
 	}
 
 	// (ugly hack to get resize event: save _adj instances)
-	evhh5v_sizer_instances.push(this);
+	console.log("SIZER CTOR ADDING id " + dv);
+	evhh5v_add_instance(this);
 };
 evhh5v_sizer.prototype = {
 	// For H5 video using non-default control bar, this interacts
