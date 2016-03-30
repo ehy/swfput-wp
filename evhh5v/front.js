@@ -460,6 +460,9 @@ function evhh5v_controlbar_elements_check(parms, vidobj) {
  *                                                                    *
 \**********************************************************************/
 
+// Must test jQuery presence: in WP editor we may be isolated in a
+// iframe, and jQuery is _not_ a prequisite.
+if ( typeof jQuery !== 'undefined' )
 jQuery( function() {
 	if ( 'undefined' === typeof wp ||
 		 ! wp.customize ||
