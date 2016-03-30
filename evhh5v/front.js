@@ -4562,7 +4562,7 @@ var evhh5v_get_flashsupport = function (el, sty) {
 // else console.log(); console.log() is forced if 'cons' is
 // defined and true -- messages are prefixed with "EVHMSG: "
 // unsless pfx is defined in which case it is used
-var evhh5v_msg_off = false;
+var evhh5v_msg_off = true;
 var evhh5v_msg = function (msg, cons, pfx) {
 	if ( evhh5v_msg_off ) {
 		return;
