@@ -651,7 +651,6 @@ var evhh5v_sizer = function(dv, ob, av, ai, bld) {
 	// a <div> or possibly another element with the
 	// properties we need -- if the object cannot be had from
 	// its id, then this was constructed in error
-	console.log("SIZER CTOR FINDING id " + dv);
 	this.d = document.getElementById(dv);
 	if ( ! this.d ) {
 		return;
@@ -680,7 +679,6 @@ var evhh5v_sizer = function(dv, ob, av, ai, bld) {
 	}
 
 	// (ugly hack to get resize event: save _adj instances)
-	console.log("SIZER CTOR ADDING id " + dv);
 	evhh5v_add_instance(this);
 };
 evhh5v_sizer.prototype = {
