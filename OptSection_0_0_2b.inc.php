@@ -37,10 +37,9 @@
  */
 class OptSection_0_0_2b {
 	// help detect class name conflicts; called by using code
-	// const evh_opt_id = 0xED00AA33; // N.G. < 5.3
-	private static $evh_opt_id = 0xED00AA33;
+	const evh_opt_id = 0xED00AA33;
 	public static function id_token () {
-		return self::$evh_opt_id;
+		return self::evh_opt_id;
 	}
 
 	public $fields;       // array of OptField_0_0_2b instances
