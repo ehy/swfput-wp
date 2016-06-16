@@ -281,6 +281,9 @@ to leave a comment with the URLs of your using pages.
 
 == Changelog ==
 
+= 3.0.8 =
+* Change default for aspect ratio auto adjust to false.
+
 = 3.0.7 =
 * Add widget support for WP 4.5 preview 'selective refresh'.
 * Confirmed working with WP 4.5.
@@ -588,6 +591,9 @@ to leave a comment with the URLs of your using pages.
 * Initial release.
 
 == Upgrade Notice ==
+
+= 3.0.8 =
+* Change default for aspect ratio auto adjust to false.
 
 = 3.0.7 =
 * Add widget support for WP 4.5 preview 'selective refresh'.
