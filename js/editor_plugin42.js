@@ -86,7 +86,7 @@ SWFPut_video_utility_obj_def.prototype = {
 		height: "180",
 		mobiwidth: "0",
 		audio: "false",       
-		aspectautoadj: "true",
+		aspectautoadj: "false",
 		displayaspect: "0",   
 		pixelaspect: "0",     
 		volume: "50",         
