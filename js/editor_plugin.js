@@ -562,8 +562,9 @@ var SWFPut_get_iframe_document = function(head, styles, bodcls, body) {
 			    rx1 = /[ \t]*data-mce[^=]*="[^"]*"/g,
 			    rx2 = /[ \t]{2,}/g;
 
-			if ( ostr = str.substr(0).replace( rx1, '' ) ) {
-				ostr = ostr.replace( rx2, ' ' );
+			ostr = str.substr(0).replace(rx1, '');
+			if ( ostr ) {
+				ostr = ostr.replace(rx2, ' ');
 			}
 
 			return ostr || str;
