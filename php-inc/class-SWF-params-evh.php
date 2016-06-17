@@ -41,7 +41,7 @@ class SWF_params_evh {
 		'height' => '180',
 		'mobiwidth' => '0',        // width if ( wp_is_mobile() )
 		'audio' => 'false',        // source is audio; (mp3 is detected)
-		'aspectautoadj' => 'false', // adj. common sizes, e.g. 720x480
+		'aspectautoadj' => 'false',// adj. common sizes, e.g. 720x480
 		'displayaspect' => '0',    // needed if pixels are not square
 		'pixelaspect' => '0',      // use if display aspect unknown
 		'volume' => '50',          // if host has no saved setting
