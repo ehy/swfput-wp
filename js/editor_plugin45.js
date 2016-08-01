@@ -24,7 +24,7 @@
  * With v 2.9 (3.0) a new pretty dialog based simplified
  * UI is implemented based on (literally) the wp.media w/
  * Backbone and _'s that WP comments suggest was started
- * ~ v 3.5 -- this implementation is conditional on v >= 4.6.
+ * ~ v 3.5 -- this implementation is conditional on v >= 4.3.
  * 
  * See, in WP installation, wp-includes/js/{mce-view,media*}.js
  */
@@ -456,7 +456,7 @@ var SWFPut_get_iframe_document = function(head, styles, bodcls, body) {
 			var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver,
 				self = this;
 
-			this.getNodes( function( editor, node ) {
+			this.getNodes( function( editor, node, contentNode ) {
 				var dom = editor.dom,
 					styles = '',
 					bodyClasses = editor.getBody().className || '',
@@ -475,9 +475,9 @@ var SWFPut_get_iframe_document = function(head, styles, bodcls, body) {
 				setTimeout( function() {
 					var iframe, iframeDoc, observer, i;
 
-					node.innerHTML = '';
+					contentNode.innerHTML = '';
 
-					iframe = dom.add( node, 'iframe', {
+					iframe = dom.add( contentNode, 'iframe', {
 						/* jshint scripturl: true */
 						src: tinymce.Env.ie ? 'javascript:""' : '',
 						frameBorder: '0',
@@ -490,9 +490,7 @@ var SWFPut_get_iframe_document = function(head, styles, bodcls, body) {
 						}
 					} );
 
-					//dom.add( node, 'div', { 'class': 'wpview-overlay' } );
-					dom.add( node, 'span', { 'class': 'mce-shim' } );
-					dom.add( node, 'span', { 'class': 'wpview-end' } );
+					dom.add( contentNode, 'div', { 'class': 'wpview-overlay' } );
 
 					iframeDoc = iframe.contentWindow.document;
 
@@ -529,12 +527,9 @@ var SWFPut_get_iframe_document = function(head, styles, bodcls, body) {
 							subtree: true
 						} );
 
-						// DELETE false block
-						if ( false ) {
 						$( node ).one( 'wp-mce-view-unbind', function() {
 							observer.disconnect();
 						} );
-						}
 					} else {
 						for ( i = 1; i < 6; i++ ) {
 							setTimeout( resize, i * 700 );
@@ -547,14 +542,11 @@ var SWFPut_get_iframe_document = function(head, styles, bodcls, body) {
 
 					editor.on( 'wp-body-class-change', classChange );
 
-					// DELETE false block
-					if ( false ) {
 					$( node ).one( 'wp-mce-view-unbind', function() {
 						editor.off( 'wp-body-class-change', classChange );
 					} );
-					}
 
-					callback && callback.call( self, editor, node );
+					callback && callback.call( self, editor, node, contentNode );
 				}, 50 );
 			}, rendered );
 		},
@@ -596,7 +588,7 @@ var SWFPut_get_iframe_document = function(head, styles, bodcls, body) {
 
 				editor.dom.replace(
 					editor.dom.createFragment(
-						'<div class="wpview wpview-wrap" data-wpview-text="' + this.encodedText + '" data-wpview-type="' + this.type + '" contenteditable="false">' +
+						'<div class="wpview-wrap" data-wpview-text="' + this.encodedText + '" data-wpview-type="' + this.type + '">' +
 							'<p class="wpview-selection-before">\u00a0</p>' +
 							'<div class="wpview-body" contenteditable="false">' +
 								'<div class="wpview-content wpview-type-' + this.type + '"></div>' +

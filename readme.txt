@@ -1,9 +1,9 @@
 === SWFPut - SWFlash Put ===
 Contributors: EdHynan
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4Q2Y8ZUG8HXLC
-Tags: video, video player, flash, flash video, html5 video, graphics, video content
+Tags: video, video player, flash video, html5 video, graphics, video content
 Requires at least: 3.0.2
-Tested up to: 4.5
+Tested up to: 4.6
 Stable tag: 3.0.8
 Text Domain: swfput_l10n
 License: GPLv3 or later
@@ -282,6 +282,7 @@ to leave a comment with the URLs of your using pages.
 == Changelog ==
 
 = 3.0.8 =
+* Fix new mce-view visual editor presentation with WP 4.6.
 * Change default for aspect ratio auto adjust to false.
 
 = 3.0.7 =
@@ -593,6 +594,7 @@ to leave a comment with the URLs of your using pages.
 == Upgrade Notice ==
 
 = 3.0.8 =
+* Fix new mce-view visual editor presentation with WP 4.6.
 * Change default for aspect ratio auto adjust to false.
 
 = 3.0.7 =

@@ -230,12 +230,15 @@ class SWF_put_evh {
 	// swfput js shortcode editor helper name
 	const swfxedjsname = 'formxed.min.js';
 	// swfput js shortcode editor helper name
-	const swfxpljsname = 'editor_plugin.min.js';
+	const swfxpljsname   = 'editor_plugin.min.js';
 	const swfxpljsname42 = 'editor_plugin42.min.js'; // wp 4.[0-2]
+	const swfxpljsname45 = 'editor_plugin45.min.js'; // wp 4.[3-5]
 	const swfxpljsname3x = 'editor_plugin3x.min.js';
 	// starting wp 4.1, swfput 2.9 -- using WP media _.Backbone stuff
 	// 'wpmt' for wp media template
 	const swfwpmtsname = 'putswf_tpl.php';
+	// editor plugin name
+	const swfedplgname = 'swfput_mceplugin';
 	
 	// min ver for new edit interface (wp.media-like)
 	protected static $media_edit_wp_minver = 0;
@@ -859,24 +862,20 @@ class SWF_put_evh {
 
 	// filter to add mce plugin javascript
 	public static function add_mceplugin_js($plugin_array) {
-		// wp.mce editor js is moving target 4.[0-3]
-		// tinymce major version 4 begins in WP 3.9
-		$v = (3 << 24) | (9 << 16) | (0 << 8) | 0;
-		$shiny = self::wpv_min($v);
-		
-		if ( $shiny ) {
-			$v = (4 << 24) | (2 << 16) | (3 << 8) | 0;
-			$shiny = self::wpv_min($v);
-		
-			$jsfile = $shiny ? self::swfxpljsname : self::swfxpljsname42;
+		// wp.mce editor js is a moving target 4.[0-6]
+		if ( self::wpv_min((4 << 24) | (6 << 16) | (0 << 8)) ) {
+			$jsfile = self::swfxpljsname;
+		} else if ( self::wpv_min((4 << 24) | (2 << 16) | (3 << 8)) ) {
+			$jsfile = self::swfxpljsname45;
+		} else if ( self::wpv_min((3 << 24) | (9 << 16) | (0 << 8)) ) {
+			$jsfile = self::swfxpljsname42;
 		} else {
 			$jsfile = self::swfxpljsname3x;
 		}
-
-		$pf = self::mk_pluginfile();
-		$pname = 'swfput_mceplugin';
+		
+		$pname = self::swfedplgname;
 		$t = self::settings_jsdir . '/' . $jsfile;
-		$jsfile = plugins_url($t, $pf);
+		$jsfile = plugins_url($t, self::mk_pluginfile());
 		$plugin_array[$pname] = $jsfile;
 		return $plugin_array;
 	}

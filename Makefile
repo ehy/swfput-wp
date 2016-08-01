@@ -45,10 +45,28 @@ POTSRCS = ${PRJSTEM}.php ${INCS} mce_ifm.php
 
 DOCSD = docs
 JSDIR = js
-JSBIN = $(JSDIR)/editor_plugin.min.js $(JSDIR)/editor_plugin42.min.js $(JSDIR)/editor_plugin3x.min.js $(JSDIR)/formxed.min.js $(JSDIR)/screens.min.js $(H5DIR)/front.min.js
-JSSRC = $(JSDIR)/editor_plugin.js $(JSDIR)/editor_plugin42.js $(JSDIR)/editor_plugin3x.js $(JSDIR)/formxed.js $(JSDIR)/screens.js $(H5DIR)/front.js
+JSBIN = $(JSDIR)/editor_plugin.min.js \
+	$(JSDIR)/editor_plugin45.min.js \
+	$(JSDIR)/editor_plugin42.min.js \
+	$(JSDIR)/editor_plugin3x.min.js \
+	$(JSDIR)/formxed.min.js \
+	$(JSDIR)/screens.min.js \
+	$(H5DIR)/front.min.js
+JSSRC = $(JSDIR)/editor_plugin.js \
+	$(JSDIR)/editor_plugin45.js \
+	$(JSDIR)/editor_plugin42.js \
+	$(JSDIR)/editor_plugin3x.js \
+	$(JSDIR)/formxed.js \
+	$(JSDIR)/screens.js \
+	$(H5DIR)/front.js
+
 H5DIR = evhh5v
-H5BIN = $(H5DIR)/evhh5v.css $(H5DIR)/ctlbar.svg $(H5DIR)/ctlvol.svg $(H5DIR)/ctrbut.svg $(JSDIR)/front.min.js
+H5BIN = $(H5DIR)/evhh5v.css \
+	$(H5DIR)/ctlbar.svg \
+	$(H5DIR)/ctlvol.svg \
+	$(H5DIR)/ctrbut.svg \
+	$(JSDIR)/front.min.js
+
 LCDIR = locale
 LCDOM = $(PRJSTEM)_l10n
 LCPOT = $(LCDIR)/$(LCDOM).pot
