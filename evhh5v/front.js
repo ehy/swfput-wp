@@ -493,21 +493,29 @@ jQuery( function() {
 					return true;
 				}
 
-				var obj = false, indx;
+				var obj = false,
+					indx = -1,
+					imax = evhh5v_sizer_instances.length;
 
-				indx = evhh5v_sizer_instances.find(function(cur) {
-					var _id = cur.div_id;
+				for ( var ix = 0; ix < imax; ix++ ) {
+					var cur = evhh5v_sizer_instances[ix],
+						_id = cur.div_id,
+						br = false;
 
 					// els.length is 1; but for form and safety:
 					for ( var i = 0; i < ellen; i++ ) {
 						if ( els[i].id === _id ) {
 							obj = cur;
-							return true;
+							indx = ix;
+							br = true;
+							break;
 						}
 					}
 					
-					return false;
-				});
+					if ( br ) {
+						break;
+					}
+				}
 
 				if ( indx < 0 ) {
 					return true;

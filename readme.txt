@@ -283,6 +283,7 @@ to leave a comment with the URLs of your using pages.
 
 = 3.0.8 =
 * Fix new mce-view visual editor presentation with WP 4.6.
+* Widget support for WP 4.5 preview 'selective refresh' bug fix: stop play.
 * Change default for aspect ratio auto adjust to false.
 
 = 3.0.7 =
@@ -595,6 +596,7 @@ to leave a comment with the URLs of your using pages.
 
 = 3.0.8 =
 * Fix new mce-view visual editor presentation with WP 4.6.
+* Widget support for WP 4.5 preview 'selective refresh' bug fix: stop play.
 * Change default for aspect ratio auto adjust to false.
 
 = 3.0.7 =
