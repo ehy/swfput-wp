@@ -1,0 +1,8 @@
+This software is licensed under the GNU GENERAL PUBLIC LICENSE
+version 3 or greater.
+
+This source code package should include the following file:
+
+  COPYING     [GNU GENERAL PUBLIC LICENSE version 3]
+
+See that file for the terms of the license.
