@@ -2,8 +2,8 @@
 Contributors: EdHynan
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4Q2Y8ZUG8HXLC
 Tags: video, video player, flash video, html5 video, graphics, video content
-Requires at least: 3.0.2
-Tested up to: 4.8
+Requires at least: 4.3
+Tested up to: 4.9
 Stable tag: 3.0.9
 Text Domain: swfput_l10n
 License: GPLv3 or later
