@@ -143,7 +143,7 @@ function evhh5v_controlbar_elements(parms, fixups) {
 	barobj.style.height = "" + ip["barheight"] + "px";
 	barobj.setAttribute("onload", "evhh5v_ctlbarload(this, '"+pdiv+"'); return false;");
 	barobj.setAttribute('type', "image/svg+xml");
-	barobj.setAttribute("data", url + (evhh5v_need_svg_query() ? "" : q));
+	barobj.setAttribute("data", url + (evhh5v_need_svg_query() ? q : ""));
 
 	p = document.createElement('p');
 	p.innerHTML = ip["altmsg"];
@@ -189,7 +189,7 @@ function evhh5v_controlbar_elements(parms, fixups) {
 
 	barobj.setAttribute("onload", "evhh5v_ctlbutload(this, '"+pdiv+"'); return false;");
 	barobj.setAttribute('type', "image/svg+xml");
-	barobj.setAttribute("data", url + (evhh5v_need_svg_query() ? "" : q));
+	barobj.setAttribute("data", url + (evhh5v_need_svg_query() ? q : ""));
 
 	butdiv.appendChild(barobj);
 
@@ -228,7 +228,7 @@ function evhh5v_controlbar_elements(parms, fixups) {
 
 	barobj.setAttribute("onload", "evhh5v_ctlvolload(this, '"+pdiv+"'); return false;");
 	barobj.setAttribute('type', "image/svg+xml");
-	barobj.setAttribute("data", url + (evhh5v_need_svg_query() ? "" : q));
+	barobj.setAttribute("data", url + (evhh5v_need_svg_query() ? q : ""));
 
 	voldiv.appendChild(barobj);
 
@@ -4472,6 +4472,50 @@ function evhh5v_ctlvolload(obj, divid) {
  *                                                                    *
 \**********************************************************************/
 
+// try to detect browser by feature
+function evhh5v_get_detect_type() {
+	if ( document.evhh5v_detected_us_type !== undefined ) {
+		return document.evhh5v_detected_us_type;
+	}
+
+	var b = 'unknown';
+
+	//
+	// the following tests have been lifted from:
+	// https://www.opentechguides.com/how-to/article/javascript/99/browser-detect.html
+	//
+	// ffox
+	if ( typeof InstallTrigger !== 'undefined' ) {
+		b = 'firefox';
+	}
+	// chrom*
+	else if ( window.chrome && window.chrome.webstore ) {
+		b = 'chromium';
+	}
+	// Opera > 8.0
+	else if ( (window.opr && opr.addons) || window.opera
+		|| (navigator.userAgent.indexOf(' OPR/') >= 0) ) {
+		b = 'opera';
+	}
+	// Safari
+	else if ( Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor')
+		> 0 ) {
+		b = 'safari';
+	}
+	// MSIE (incl. trident)
+	else if ( (/*@cc_on!@*/false) || (document.documentMode) ) {
+		b = 'msie';
+	}
+	// MS edge
+	else if ( !(document.documentMode) && window.StyleMedia ) {
+		b = 'edge';
+	}
+
+	document.evhh5v_detected_us_type = b;
+
+	return document.evhh5v_detected_us_type;
+};
+
 // preferably do not add query string to svg url where
 // it is known to be not needed (actually, I know only
 // that MSIE *does* need it, but it is safer to be certain
@@ -4482,10 +4526,23 @@ function evhh5v_need_svg_query() {
 	if ( document.evhh5v_need_svg_query_bool !== undefined ) {
 		return document.evhh5v_need_svg_query_bool;
 	}
-	document.evhh5v_need_svg_query_bool = ( !
-	/(FireFox|WebKit|KHTML|Chrom[ie]|Safari|OPR\/|Opera)/i.test(navigator["userAgent"])
-	) == false;
-	
+
+	var b = true, t = evhh5v_get_detect_type();
+
+	if ( t === 'firefox' ) {
+		b = false;
+	} else if ( t === 'chromium' ) {
+		b = false;
+	} else if ( t === 'opera' ) {
+		b = false;
+	} else if ( t == 'safari' ) {
+		// need safari to test with!
+		//b = false;
+		b = true;
+	}
+
+	document.evhh5v_need_svg_query_bool = b;
+
 	return document.evhh5v_need_svg_query_bool;
 };
 

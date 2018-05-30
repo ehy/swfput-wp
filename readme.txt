@@ -162,6 +162,18 @@ flash video player in more detail.
 
 == Frequently Asked Questions ==
 
+= What are the privacy implications of using SWFPut =
+
+None. SWFPut does no tracking at all. No information
+of any sort is gathered or stored or forwarded to another
+site, or any such thing.  There is no contact made with
+any other site(1).  These statements apply both to the
+WordPress user, and to site visitors.
+
+(1) The user can provide a media URL from a 3rd party site
+which a visitor's browser will load; this 'contact' of
+another site is entirely up to the WordPress user or administrator.
+
 = I installed SWFPut, now what? =
 
 First, note that in the editor page for posts/pages,
@@ -280,6 +292,9 @@ to leave a comment with the URLs of your using pages.
 	with dark custom colors, sidebar on left), not yet playing.
 
 == Changelog ==
+
+= 3.0.9 =
+* Fix for MS Edge browser.
 
 = 3.0.8 =
 * Fix new mce-view visual editor presentation with WP 4.6.
@@ -593,6 +608,9 @@ to leave a comment with the URLs of your using pages.
 * Initial release.
 
 == Upgrade Notice ==
+
+= 3.0.9 =
+* Fix for MS Edge browser.
 
 = 3.0.8 =
 * Fix new mce-view visual editor presentation with WP 4.6.
