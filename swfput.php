@@ -1015,10 +1015,17 @@ class SWF_put_evh {
 
 		self::unregi_widget();
 
-		$aa = array(__CLASS__, 'validate_opts');
-		unregister_setting(self::opt_group, // option group
-			self::opt_group, // opt name; using group passes all to cb
-			$aa);
+		// message in error log states that 3rd arg to uregister_setting
+		// is deprecated, and validator passed to register setting will
+		// be used: this as of WP 4.7.0
+		if ( wpv_min('4.7.0') ) {
+			unregister_setting(self::opt_group, // group
+				self::opt_group); // using group: all
+		} else {
+			$aa = array(__CLASS__, 'validate_opts');
+			unregister_setting(self::opt_group,
+				self::opt_group, $aa);
+		}
 	}
 
 	// activate setup
