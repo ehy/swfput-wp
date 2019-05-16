@@ -159,7 +159,7 @@ class SWF_params_evh {
 			case 'volume':
 			case 'barheight':
 				if ( $k === 'barheight' && $t === 'default' ) {
-					continue;
+					continue 2;
 				}
 				if ( $fuzz === true && preg_match('/^\+?[0-9]+/',$t) ) {
 					$t = sprintf('%u', absint($t));

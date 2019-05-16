@@ -113,7 +113,7 @@ class SWF_put_evh {
 	const plugin_webpage = '//agalena.nfshost.com/b1/software/swfput-html5-flash-wordpress-plugin/';
 	
 	// this version
-	const plugin_version = '3.0.9';
+	const plugin_version = '3.1.0';
 	
 	// the widget class name
 	const swfput_widget = 'SWF_put_widget_evh';
@@ -1018,7 +1018,7 @@ class SWF_put_evh {
 		// message in error log states that 3rd arg to uregister_setting
 		// is deprecated, and validator passed to register setting will
 		// be used: this as of WP 4.7.0
-		if ( wpv_min('4.7.0') ) {
+		if ( self::wpv_min('4.7.0') ) {
 			unregister_setting(self::opt_group, // group
 				self::opt_group); // using group: all
 		} else {

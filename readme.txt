@@ -3,8 +3,8 @@ Contributors: EdHynan
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4Q2Y8ZUG8HXLC
 Tags: video, video player, flash video, html5 video, graphics, video content
 Requires at least: 4.3
-Tested up to: 4.9
-Stable tag: 3.0.9
+Tested up to: 5.2
+Stable tag: 3.1.0
 Text Domain: swfput_l10n
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -292,6 +292,12 @@ to leave a comment with the URLs of your using pages.
 	with dark custom colors, sidebar on left), not yet playing.
 
 == Changelog ==
+
+= 3.1.0 =
+* Fix 'continue' statement with a 'switch' enclosed in a loop.
+	The statement was missing a level argument, e.g. 'continue 2'.
+	This bug had no effect, as the end of the switch block is
+	followed immediately by the end of the loop block.
 
 = 3.0.9 =
 * Fix for MS Edge browser.
@@ -608,6 +614,15 @@ to leave a comment with the URLs of your using pages.
 * Initial release.
 
 == Upgrade Notice ==
+
+= 3.1.0 =
+* Fix 'continue' statement with a 'switch' enclosed in a loop.
+	The statement was missing a level argument, e.g. 'continue 2'.
+	This bug had no effect, as the end of the switch block is
+	followed immediately by the end of the loop block.  PHP 7.x
+	now prints a warning (visible on page), triggering the bug fix.
+* Note that adding new video now requires the 'Classic Editor Plugin'
+	(since the WP move to Gutenberg).
 
 = 3.0.9 =
 * Fix for MS Edge browser.
